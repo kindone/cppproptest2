@@ -157,9 +157,10 @@ TEST(Stream, take)
     EXPECT_EQ(values[1], 200);
 }
 
+// around 30ms with N=12
 TEST(Stream, performance)
 {
-    const int N = 10;
+    const int N = 12;
     auto stream = Stream<int>::one(100);
     for(int i = 0; i < N; i++)
         stream = stream->concat(stream);
@@ -169,5 +170,6 @@ TEST(Stream, performance)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 1024);
+    EXPECT_EQ(values.size(), 4096);
+    EXPECT_EQ(values[4095], 100);
 }

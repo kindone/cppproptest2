@@ -83,12 +83,16 @@ struct PROPTEST_API Any {
 
     template <typename T>
     const T& getRef() const {
-        if(!ptr)
-            throw invalid_cast_error("cannot getRef from an empty Any");
-         if(ptr->type() != typeid(T)) {
-            throw invalid_cast_error("cannot getRef from " + string(ptr->type().name()) + " to " + string(typeid(T).name()));
+        if constexpr(is_same_v<decay_t<T>, Any>)
+            return *this;
+        else {
+            if(!ptr)
+                throw invalid_cast_error("cannot getRef from an empty Any");
+            if(ptr->type() != typeid(T)) {
+                throw invalid_cast_error("cannot getRef from " + string(ptr->type().name()) + " to " + string(typeid(T).name()));
+            }
+            return ptr->getRef<T>();
         }
-        return ptr->getRef<T>();
     }
 
     const type_info& type() const;

@@ -91,6 +91,18 @@ TEST(Function, copy_and_reset_original)
     EXPECT_EQ(function4(1,2), 3);
 }
 
+TEST(Function, Any_as_parameter)
+{
+    auto lambda = [](Any a, Any b) -> int { return a.getRef<int>() + b.getRef<int>(); };
+    Function<int(Any,Any)> function = make_function(lambda);
+    Function<int(Any,Any)> function2(function);
+    EXPECT_EQ(function2(1,2), 3);
+    // shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(make_function(lambda));
+    // Function<int(Any,Any)> function4(*function3);
+    // function3.reset();
+    // EXPECT_EQ(function4(Any(1),Any(2)), 3);
+}
+
 TEST(AnyFunctionHolderHelper, basic)
 {
     struct F1 : public util::AnyFunctionHolderHelper_t<make_index_sequence<1>>::type {

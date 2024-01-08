@@ -341,6 +341,15 @@ TEST(Any, complex)
     ASSERT_EQ(ref[0], "hello");
 }
 
+TEST(Any, Any)
+{
+    vector<string> vec = {"hello", "world"};
+    Any any0 = vec;
+    ASSERT_EQ(any0.type(), typeid(vector<string>));
+    Any any(Any{any0});
+    ASSERT_EQ(any.type(), typeid(vector<string>));
+}
+
 TEST(Any, reassignment_empty)
 {
     Any any, empty;
