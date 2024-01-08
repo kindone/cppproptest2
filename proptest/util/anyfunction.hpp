@@ -12,9 +12,6 @@
 
 namespace proptest {
 
-template<typename... Args>
-concept AllAny = (is_same_v<Args, Any> && ...);
-
 struct AnyFunctionHolder {
     AnyFunctionHolder() = default;
     // delete copy constructor
@@ -32,7 +29,12 @@ struct AnyFunctionHolder {
     }
 };
 
+namespace util {
 
+template<typename... Args>
+concept AllAny = (is_same_v<Args, Any> && ...);
+
+// abstract
 template<typename... ARGS>
         requires (AllAny<ARGS...>)
 struct AnyFunctionHolderHelper : public AnyFunctionHolder {
@@ -48,8 +50,10 @@ struct AnyFunctionHolderHelper_t<index_sequence<Is...>> {
     using type = AnyFunctionHolderHelper<decltype((void)Is, Any{})...>;
 };
 
+} // namespace util
+
 template <size_t N>
-struct AnyFunctionNHolder : public AnyFunctionHolderHelper_t<make_index_sequence<N>>::type {
+struct AnyFunctionNHolder : public util::AnyFunctionHolderHelper_t<make_index_sequence<N>>::type {
     virtual ~AnyFunctionNHolder() {}
 };
 
@@ -57,6 +61,8 @@ template <typename F>
   requires (is_function_v<F>)
 struct FunctionNHolder;
 
+
+// abstract
 template <typename RET, typename...ARGS>
 struct FunctionNHolder<RET(ARGS...)> : public AnyFunctionNHolder<sizeof...(ARGS)> {
     virtual ~FunctionNHolder() {}
@@ -94,7 +100,7 @@ struct Function<RET(ARGS...)> {
     Function(const Function& other) : holder(other.holder) {}
 
     template<typename Callable>
-        requires (invocable<Callable, ARGS...>)
+        requires (invocable<Callable, ARGS...> && !same_as<decay_t<Callable>, Function>)
     Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImpl<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {}
 
     RET operator()(ARGS... arg) const {

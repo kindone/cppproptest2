@@ -45,7 +45,41 @@ TEST(Function, make_function)
     EXPECT_EQ(function(1,2), 3);
 }
 
-TEST(Function, copy)
+TEST(Function, assign_functor)
+{
+    struct Functor {
+        int operator()(int a, int b) { return a+b; }
+    };
+
+    Functor functor;
+    Function<int(int,int)> function = functor;
+    EXPECT_EQ(function(1,2), 3);
+}
+
+int func(int a, int b) { return a+b; }
+
+TEST(Function, assign_function)
+{
+    Function<int(int,int)> function = func;
+    EXPECT_EQ(function(1,2), 3);
+}
+
+TEST(Function, assign_function_pointer)
+{
+    int (*fptr)(int a, int b) = func;
+    Function<int(int,int)> function = fptr;
+    EXPECT_EQ(function(1,2), 3);
+}
+
+TEST(Function, assign_FunctionNHolderImpl)
+{
+    auto lambda = [](int a, int b) { return a+b; };
+    FunctionNHolderImpl<decltype(lambda),int,int,int> functionNHolderImpl(util::forward<decltype(lambda)>(lambda));
+    Function<int(int,int)> function = functionNHolderImpl;
+    EXPECT_EQ(function(1,2), 3);
+}
+
+TEST(Function, copy_and_reset_original)
 {
     auto lambda = [](int a, int b) { return a+b; };
     Function<int(int,int)> function = make_function(lambda);
@@ -59,7 +93,7 @@ TEST(Function, copy)
 
 TEST(AnyFunctionHolderHelper, basic)
 {
-    struct F1 : public AnyFunctionHolderHelper_t<make_index_sequence<1>>::type {
+    struct F1 : public util::AnyFunctionHolderHelper_t<make_index_sequence<1>>::type {
         Any invoke(Any arg) const override {
             return Any(arg.getRef<int>()+1);
         }
@@ -69,7 +103,7 @@ TEST(AnyFunctionHolderHelper, basic)
     ASSERT_EQ(F1::N, 1);
     EXPECT_EQ(f1.invoke(Any(1)).getRef<int>(), 2);
 
-    struct F2 : public AnyFunctionHolderHelper_t<make_index_sequence<2>>::type {
+    struct F2 : public util::AnyFunctionHolderHelper_t<make_index_sequence<2>>::type {
         Any invoke(Any arg1, Any arg2) const override {
             return Any(arg1.getRef<int>()+arg2.getRef<int>());
         }
@@ -104,7 +138,7 @@ TEST(AnyFunctionHolder, basic)
     EXPECT_EQ(anyFunction->call<int>(1,2), 3);
 }
 
-TEST(AnyFunction, from_function)
+TEST(AnyFunction, from_Function)
 {
     auto lambda = [](int a, int b) { return a+b; };
     Function<int(int,int)> function = make_function(lambda);
