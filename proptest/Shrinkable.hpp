@@ -35,7 +35,7 @@ struct Shrinkable
     Any getAny() const { return value; }
 
     template <typename U>
-    Shrinkable<U> map(Function<U(const T&)> transformer) const
+    Shrinkable<U> map(Function<U(const T&)> transformer) const;
 
     template <typename U>
     Shrinkable<U> flatMap(Function<Shrinkable<U>(const T&)> transformer);
