@@ -97,10 +97,31 @@ TEST(Function, Any_as_parameter)
     Function<int(Any,Any)> function = make_function(lambda);
     Function<int(Any,Any)> function2(function);
     EXPECT_EQ(function2(1,2), 3);
-    // shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(make_function(lambda));
-    // Function<int(Any,Any)> function4(*function3);
-    // function3.reset();
-    // EXPECT_EQ(function4(Any(1),Any(2)), 3);
+    shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(make_function(lambda));
+    Function<int(Any,Any)> function4(*function3);
+    function3.reset();
+    EXPECT_EQ(function4(Any(1),Any(2)), 3);
+}
+
+TEST(Function, from_AnyFunction)
+{
+    auto lambda = [](int a, int b) { return a+b; };
+    AnyFunction anyFunction = make_any_function(lambda);
+    Function<int(int,int)> function = anyFunction;
+    EXPECT_EQ(function(1,2), 3);
+    EXPECT_EQ(function(1,2), 3);
+}
+
+TEST(Function, from_incompatible_AnyFunction)
+{
+    auto lambda = [](int a, int b) { return a+b; };
+    AnyFunction anyFunction = make_any_function(lambda);
+    Function<int(int,int,int)> function = anyFunction;
+    EXPECT_THROW(function(1,2,3), invalid_argument);
+    Function<int(int,string)> function2 = anyFunction;
+    EXPECT_THROW(function2(1,"2"), invalid_cast_error);
+    Function<int(int,double)> function3 = anyFunction;
+    EXPECT_THROW(function3(1, 2.0), invalid_cast_error);
 }
 
 TEST(AnyFunctionHolderHelper, basic)

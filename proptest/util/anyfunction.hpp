@@ -12,6 +12,10 @@
 
 namespace proptest {
 
+// forward declaration
+struct AnyFunction;
+
+
 struct AnyFunctionHolder {
     AnyFunctionHolder() = default;
     // delete copy constructor
@@ -98,6 +102,7 @@ struct Function<RET(ARGS...)> {
     Function() = delete;
     explicit Function(shared_ptr<AnyFunctionHolder> h) : holder(h) {}
     Function(const Function& other) : holder(other.holder) {}
+    Function(const AnyFunction& otherAnyFunction);
 
     template<typename Callable>
         requires (invocable<Callable, ARGS...> && !same_as<decay_t<Callable>, Function>)
@@ -128,6 +133,9 @@ struct AnyFunction {
 
     shared_ptr<AnyFunctionHolder> holder;
 };
+
+template <typename RET, typename...ARGS>
+Function<RET(ARGS...)>::Function(const AnyFunction& otherAnyFunction) : holder(otherAnyFunction.holder) {}
 
 
 template <typename Callable>

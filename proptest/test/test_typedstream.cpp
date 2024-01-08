@@ -173,3 +173,16 @@ TEST(TypedStream, performance)
     EXPECT_EQ(values.size(), 4096);
     EXPECT_EQ(values[4095], 100);
 }
+
+TEST(UntypedStream, basic)
+{
+    UntypedStream untypedStream(Any(100), make_any_function([]() -> TypedStream<int> { return TypedStream<int>::empty(); }));
+}
+
+TEST(UntypedStream, from_TypedStream)
+{
+    auto stream = TypedStream<int>::empty(); // empty stream
+    EXPECT_EQ(stream.isEmpty(), true);
+    UntypedStream untypedStream = stream;
+    EXPECT_EQ(untypedStream.isEmpty(), true);
+}

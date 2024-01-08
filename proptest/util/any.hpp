@@ -87,9 +87,9 @@ struct PROPTEST_API Any {
             return *this;
         else {
             if(!ptr)
-                throw invalid_cast_error("cannot getRef from an empty Any");
+                throw invalid_cast_error("no value in an empty Any");
             if(ptr->type() != typeid(T)) {
-                throw invalid_cast_error("cannot getRef from " + string(ptr->type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error("cannot convert from " + string(ptr->type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
         }

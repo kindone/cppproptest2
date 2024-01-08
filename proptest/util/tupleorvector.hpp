@@ -14,7 +14,7 @@ namespace util {
 template<typename... ARGS, size_t... Is>
 tuple<ARGS...> vectorToTupleImpl(const vector<Any>& vec, index_sequence<Is...>) {
     if (vec.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("Vector size does not match the number of tuple elements");
+        throw std::invalid_argument("vector size does not match the number of tuple elements");
     }
     return util::make_tuple(vec[Is].getRef<ARGS>()...);
 }
@@ -25,9 +25,10 @@ tuple<ARGS...> vectorToTuple(const vector<Any>& v) {
 }
 
 template <typename Callable, typename... ARGS, size_t... Is>
+    requires (invocable<Callable, ARGS...>)
 decltype(auto) invokeWithVectorImpl(const Callable&& callable, const vector<Any>& vec, index_sequence<Is...>) {
     if (vec.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("Vector size does not match the number of arguments");
+        throw std::invalid_argument("number of arguments does not match the number of function parameters");
     }
     return callable(vec[Is].getRef<decay_t<ARGS>>()...);
 }

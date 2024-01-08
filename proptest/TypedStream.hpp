@@ -8,16 +8,18 @@
 
 namespace proptest {
 
-template <typename T> struct TypedIterator;
 template <typename T> struct TypedStream;
+template <typename T> struct TypedIterator;
+struct UntypedStream;
+struct UntypedIterator;
 
 template <typename T>
 struct TypedIterator
 {
     TypedIterator(const TypedStream<T>& stream) : stream(stream) {}
 
-    virtual ~TypedIterator() {}
-    virtual bool hasNext() {
+    ~TypedIterator() {}
+    bool hasNext() {
         return !stream.isEmpty();
     }
     T next() {
@@ -114,5 +116,83 @@ public:
         return TypedStream(Any(value1), [value2Any]() -> TypedStream { return TypedStream::one(value2Any.getRef<T>()); });
     }
 };
+
+
+struct UntypedStream {
+    template <typename T>
+    UntypedStream(const TypedStream<T>& otherStream) : stream(otherStream.template transform<Any>([](const T& t) { return Any(t); })) {}
+    UntypedStream(const TypedStream<Any>& otherStream) : stream(otherStream) {}
+    UntypedStream(const Any& value, const AnyFunction& callable) : stream(value, callable) {}
+
+    bool isEmpty() const {
+        return stream.isEmpty();
+    }
+
+    template <typename T>
+    const T& getHeadRef() const {
+        return stream.getHeadRef().getRef<T>();
+    }
+
+    // const Any& getHeadRef() const {
+    //     return stream.getHeadRef<Any>();
+    // }
+
+    UntypedStream getTail() const {
+        return stream.getTail();
+    }
+
+    UntypedIterator iterator() const;
+private:
+    TypedStream<Any> stream;
+};
+
+UntypedIterator UntypedStream::iterator() const {
+    return UntypedIterator{stream};
+}
+
+struct UntypedIterator
+{
+    UntypedIterator(const TypedStream<Any>& stream);
+
+    ~UntypedIterator() {}
+    bool hasNext();
+
+    template <typename T>
+    T next() {
+        if(!hasNext())
+            throw runtime_error("no more elements in stream");
+
+        T value = stream.getHeadRef<T>();
+        stream = stream.getTail();
+        return value;
+    }
+
+    Any nextAny();
+
+    UntypedStream stream;
+};
+
+UntypedIterator::UntypedIterator(const TypedStream<Any>& stream) : stream(stream) {}
+
+
+bool UntypedIterator::hasNext() {
+    return !stream.isEmpty();
+}
+
+Any UntypedIterator::nextAny() {
+    if(!hasNext())
+        throw runtime_error("no more elements in stream");
+
+    Any value = stream.getHeadRef();
+    stream = stream.getTail();
+    return value;
+}
+
+
+
+
+
+
+
 
 } // namespace proptest
