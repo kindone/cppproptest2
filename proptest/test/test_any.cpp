@@ -78,6 +78,23 @@ TEST(AssumptionStdAny, copyable)
     ASSERT_EQ(util::any_cast<Copyable>(any).numCopied, 2);
 }
 
+TEST(AssumptionStdAny, ptr)
+{
+    int a = 100;
+    util::any any = &a;
+    ASSERT_EQ(any.type(), typeid(int*));
+    ASSERT_EQ(*util::any_cast<int*>(any), 100);
+}
+
+TEST(AssumptionStdAny, reference)
+{
+    int a = 100;
+    int& b = a;
+    util::any any = b;
+    ASSERT_EQ(any.type(), typeid(int&));
+    ASSERT_EQ(util::any_cast<int&>(any), 100);
+}
+
 TEST(AssumptionContainerInit, Copyable)
 {
     struct Container {
@@ -233,6 +250,48 @@ TEST(AnyVal, copied_when_assigned)
     ASSERT_EQ(val2.getRef<Copyable>().numCopied, 2);
 
     ASSERT_EQ(val.getRef<Copyable>().numCopied, 1);
+}
+
+TEST(AnyVal, ptr)
+{
+    Copyable copyable(100);
+    Copyable* copyablePtr = &copyable;
+    AnyVal<Copyable*> val = util::make_anyval<Copyable*>(copyablePtr);
+    ASSERT_EQ(val.type(), typeid(Copyable*));
+    ASSERT_EQ(val.getRef<Copyable*>()->value, 100);
+    ASSERT_EQ(val.getRef<Copyable*>()->numCopied, 0);
+
+    AnyVal<Copyable*> val2 = val;
+    ASSERT_EQ(val2.type(), typeid(Copyable*));
+    ASSERT_EQ(val2.getRef<Copyable*>()->value, 100);
+    ASSERT_EQ(val2.getRef<Copyable*>()->numCopied, 0);
+
+    ASSERT_EQ(val.getRef<Copyable*>()->numCopied, 0);
+
+    copyable.value = 200;
+    ASSERT_EQ(val.getRef<Copyable*>()->value, 200);
+    ASSERT_EQ(val2.getRef<Copyable*>()->value, 200);
+}
+
+TEST(AnyVal, reference)
+{
+    Copyable copyable(100);
+    Copyable& copyableRef = copyable;
+    AnyVal<Copyable&> val = util::make_anyval<Copyable&>(copyableRef);
+    ASSERT_EQ(val.type(), typeid(Copyable&));
+    ASSERT_EQ(val.getRef<Copyable&>().value, 100);
+    ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
+
+    AnyVal<Copyable&> val2 = val;
+    ASSERT_EQ(val2.type(), typeid(Copyable&));
+    ASSERT_EQ(val2.getRef<Copyable&>().value, 100);
+    ASSERT_EQ(val2.getRef<Copyable&>().numCopied, 0);
+    ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
+
+    copyable.value = 200;
+
+    ASSERT_EQ(val.getRef<Copyable&>().value, 200);
+    ASSERT_EQ(val2.getRef<Copyable&>().value, 200);
 }
 
 TEST(AnyRef, not_copied_when_assigned)

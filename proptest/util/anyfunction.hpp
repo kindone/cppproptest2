@@ -2,6 +2,7 @@
 
 #include "proptest/std/lang.hpp"
 #include "proptest/std/vector.hpp"
+#include "proptest/std/initializer_list.hpp"
 #include "proptest/std/exception.hpp"
 #include "proptest/std/tuple.hpp"
 #include "proptest/std/functional.hpp"
@@ -23,13 +24,26 @@ struct AnyFunctionHolder {
 
     virtual ~AnyFunctionHolder() {}
 
-    virtual Any apply(const vector<Any>&) const {
+    virtual Any apply(const initializer_list<Any>&) const {
         throw runtime_error("Not implemented");
     };
 
     template <typename RET, typename... ARGS>
+        requires(!same_as<RET, void>)
     RET call(ARGS... arg) const {
-        return apply({Any(arg)...}).template getRef<decay_t<RET>>();
+        if constexpr(same_as<RET,void>) {
+            apply({Any(arg)...});
+            return;
+        }
+        else
+            return apply({Any(arg)...}).template getRef<decay_t<RET>>();
+    }
+
+    template <typename RET, typename... ARGS>
+        requires(same_as<RET, void>)
+    void call(ARGS... arg) const {
+        apply({Any(arg)...});
+        return;
     }
 };
 
@@ -74,7 +88,10 @@ struct FunctionNHolder<RET(ARGS...)> : public AnyFunctionNHolder<sizeof...(ARGS)
     virtual RET operator()(ARGS... arg) const = 0;
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const override {
-        return Any(operator()(arg.template getRef<decay_t<ARGS>>()...));
+        if constexpr(same_as<RET, void>)
+            return Any();
+        else
+            return Any(operator()(arg.template getRef<decay_t<ARGS>>()...));
     }
 };
 
@@ -86,8 +103,13 @@ struct FunctionNHolderImpl : public FunctionNHolder<RET(ARGS...)> {
         return callable(arg...);
     }
 
-    Any apply(const vector<Any>& args) const override {
-        return util::invokeWithVector<Callable, ARGS...>(util::forward<const Callable>(callable), args);
+    Any apply(const initializer_list<Any>& args) const override {
+        if constexpr(same_as<RET, void>) {
+            util::invokeWithInitializerList<Callable, ARGS...>(util::forward<const Callable>(callable), args);
+            return Any();
+        }
+        else
+            return util::invokeWithInitializerList<Callable, ARGS...>(util::forward<const Callable>(callable), args);
     }
 
     Callable callable;
@@ -109,7 +131,12 @@ struct Function<RET(ARGS...)> {
     Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImpl<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {}
 
     RET operator()(ARGS... arg) const {
-        return holder->apply({Any(arg)...}).template getRef<RET>();
+        if constexpr(same_as<RET, void>) {
+            holder->apply({Any(arg)...});
+            return;
+        }
+        else
+            return holder->apply({Any(arg)...}).template getRef<RET>();
     }
 
     shared_ptr<AnyFunctionHolder> holder;
@@ -122,9 +149,9 @@ struct AnyFunction {
     template <typename RET, typename... ARGS>
     AnyFunction(const Function<RET(ARGS...)>& f) : holder(f.holder) {}
 
-    Any apply(const vector<Any>& args) {
+    Any apply(const initializer_list<Any>& args) {
         return holder->apply(args);
-    };
+    }
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) const {

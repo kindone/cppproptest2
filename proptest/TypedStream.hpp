@@ -133,22 +133,17 @@ struct UntypedStream {
         return stream.getHeadRef().getRef<T>();
     }
 
-    // const Any& getHeadRef() const {
-    //     return stream.getHeadRef<Any>();
-    // }
+    const Any& getHeadRef() const {
+        return stream.getHeadRef();
+    }
 
     UntypedStream getTail() const {
         return stream.getTail();
     }
 
-    UntypedIterator iterator() const;
 private:
     TypedStream<Any> stream;
 };
-
-UntypedIterator UntypedStream::iterator() const {
-    return UntypedIterator{stream};
-}
 
 struct UntypedIterator
 {

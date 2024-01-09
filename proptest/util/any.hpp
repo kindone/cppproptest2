@@ -15,12 +15,20 @@ struct PROPTEST_API AnyHolder {
 
     template <typename T>
     const T& getRef() const {
-        return *static_cast<const T*>(rawPtr());
+        if constexpr(is_lvalue_reference_v<T>) {
+            return *const_cast<decay_t<T>*>(static_cast<const decay_t<T>*>(rawPtr()));
+        }
+        else
+            return *static_cast<const T*>(rawPtr());
     }
 
 protected:
     // for cast()
     virtual const void* rawPtr() const = 0;
+};
+
+template <typename T> concept equality_check_available = requires(T a, T b) {
+    a == b;
 };
 
 template <typename T>
@@ -32,6 +40,14 @@ struct PROPTEST_API AnyVal : AnyHolder {
 
     const void* rawPtr() const override {
         return &value;
+    }
+
+    bool operator==(const T& other) {
+        if constexpr(equality_check_available<T>) {
+            return value == other;
+        }
+        else
+            return false;
     }
 
     T value;
@@ -50,6 +66,14 @@ struct PROPTEST_API AnyRef : AnyHolder {
 
     const void* rawPtr() const override {
         return ptr.get();
+    }
+
+    bool operator==(const T& other) {
+        if constexpr(equality_check_available<T>) {
+            return static_pointer_cast<T>(ptr)->operator==(*static_pointer_cast<T>(other.ptr));
+        }
+        else
+            return false;
     }
 
 private:
@@ -80,6 +104,8 @@ struct PROPTEST_API Any {
     }
 
     Any& operator=(const Any& other);
+
+    bool operator==(const Any& other);
 
     template <typename T>
     const T& getRef() const {

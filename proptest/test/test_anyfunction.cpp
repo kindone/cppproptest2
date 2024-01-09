@@ -16,6 +16,27 @@ TEST(FunctionNHolderImpl, basic)
     EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 3);
 }
 
+TEST(FunctionNHolderImpl, ptr_args)
+{
+    auto lambda = [](int* a, int b) { return *a+b; };
+    FunctionNHolderImpl<decltype(lambda),int,int*,int> holder(util::forward<decltype(lambda)>(lambda));
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(holder(&x,y), 3);
+    EXPECT_EQ(holder.apply({Any(&x),Any(y)}).getRef<int>(), 3);
+}
+
+TEST(FunctionNHolderImpl, reference_args)
+{
+    // does not compile, due to the nature of Any
+    auto lambda = [](int& a, int b) { return a+b; };
+    FunctionNHolderImpl<decltype(lambda),int,int&,int> holder(util::forward<decltype(lambda)>(lambda));
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(holder(x,y), 3);
+    // EXPECT_EQ(holder.apply({Any(&x),Any(y)}).getRef<int>(), 3);
+}
+
 TEST(FunctionNHolder, ptr)
 {
     auto lambda = [](int a, int b) { return a+b; };
@@ -91,6 +112,22 @@ TEST(Function, copy_and_reset_original)
     EXPECT_EQ(function4(1,2), 3);
 }
 
+TEST(Function, void_return)
+{
+    auto lambda = [](int a, int b) { return; };
+    Function<void(int,int)> function = make_function(lambda);
+    function(1,2);
+}
+
+TEST(Function, noncopyable_args)
+{
+    // struct NonCopyable {
+    //     NonCopyable(const NonCopyable&) = delete;
+    // };
+    // auto lambda = [](NonCopyable a, NonCopyable b) { return 0; };
+    // Function<int(NonCopyable,NonCopyable)> function = make_function(lambda);
+}
+
 TEST(Function, Any_as_parameter)
 {
     auto lambda = [](Any a, Any b) -> int { return a.getRef<int>() + b.getRef<int>(); };
@@ -155,7 +192,7 @@ TEST(AnyFunctionNHolder, basic)
         util::forward<decltype(lambda)>(lambda));
     // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
     EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
-    EXPECT_EQ(anyFunctionN->apply(vector<Any>{Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->call<int>(1,2), 3);
 }
 
@@ -167,8 +204,20 @@ TEST(AnyFunctionHolder, basic)
     unique_ptr<AnyFunctionHolder> anyFunction = util::move(functionN);
     // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
     // EXPECT_EQ((*anyFunction)(Any(1),Any(2)).getRef<int>(), 3); -- compile error
-    EXPECT_EQ(anyFunction->apply(vector<Any>{Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunction->apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction->call<int>(1,2), 3);
+}
+
+TEST(AnyFunctionHolder, void)
+{
+    auto lambda = [](int a, int b) { return; };
+    unique_ptr<FunctionNHolder<void(int, int)>> functionN = util::make_unique<FunctionNHolderImpl<decltype(lambda),void,int,int>>(
+        util::forward<decltype(lambda)>(lambda));
+    unique_ptr<AnyFunctionHolder> anyFunction = util::move(functionN);
+    // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
+    // EXPECT_EQ((*anyFunction)(Any(1),Any(2)).getRef<int>(), 3); -- compile error
+    anyFunction->apply({Any(1),Any(2)});
+    anyFunction->call<void>(1,2);
 }
 
 TEST(AnyFunction, from_Function)
@@ -176,7 +225,7 @@ TEST(AnyFunction, from_Function)
     auto lambda = [](int a, int b) { return a+b; };
     Function<int(int,int)> function = make_function(lambda);
     AnyFunction anyFunction = function;
-    EXPECT_EQ(anyFunction.apply(vector<Any>{Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunction.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction.call<int>(1,2), 3);
 }
 
@@ -184,7 +233,7 @@ TEST(AnyFunction, make_any_function)
 {
     auto lambda = [](int a, int b) { return a+b; };
     AnyFunction anyFunction = make_any_function(lambda);
-    EXPECT_EQ(anyFunction.apply(vector<Any>{Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunction.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction.call<int>(1,2), 3);
 }
 
@@ -193,6 +242,6 @@ TEST(AnyFunction, copy)
     auto lambda = [](int a, int b) { return a+b; };
     AnyFunction anyFunction = make_any_function(lambda);
     AnyFunction anyFunction2 = anyFunction;
-    EXPECT_EQ(anyFunction2.apply(vector<Any>{Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunction2.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction2.call<int>(1,2), 3);
 }

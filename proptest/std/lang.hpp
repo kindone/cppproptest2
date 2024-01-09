@@ -9,6 +9,7 @@ using std::make_index_sequence;
 namespace util {
 using std::forward;
 using std::move;
+
 } // namespace util
 
 } // namespace proptest
