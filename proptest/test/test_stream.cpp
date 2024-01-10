@@ -79,7 +79,7 @@ TEST(Stream, transform)
 {
     auto stream = Stream<int>::two(100, 200);
 
-    auto stream2 = stream->transform<string>(make_function([](const int& value) { return to_string(value); }));
+    auto stream2 = stream->transform<string>(util::make_function([](const int& value) { return to_string(value); }));
 
     vector<string> values;
     for(Iterator<string> itr = stream2->iterator(); itr.hasNext(); ) {
@@ -94,7 +94,7 @@ TEST(Stream, transform)
 TEST(Stream, filter)
 {
     auto stream = Stream<int>::two(100, 200);
-    auto stream2 = stream->filter(make_function([](const int& value) { return value > 100; }));
+    auto stream2 = stream->filter(util::make_function([](const int& value) { return value > 100; }));
 
     vector<int> values;
     for(Iterator<int> itr = stream2->iterator(); itr.hasNext(); ) {
@@ -105,7 +105,7 @@ TEST(Stream, filter)
     EXPECT_EQ(values[0], 200);
 
     values.clear();
-    auto stream3 = stream->filter(make_function([](const int& value) { return value < 200; }));
+    auto stream3 = stream->filter(util::make_function([](const int& value) { return value < 200; }));
 
     for(Iterator<int> itr = stream3->iterator(); itr.hasNext(); ) {
         int value = itr.next();

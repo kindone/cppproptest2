@@ -6,6 +6,8 @@ using namespace proptest;
 
 const Any Any::empty;
 
+Any::Any(const Any& other) : ptr(other.ptr) {}
+
 const type_info& Any::type() const {
     if(!ptr) {
         throw runtime_error("empty ptr");
@@ -24,3 +26,13 @@ Any& Any::operator=(const Any& other) {
     ptr = other.ptr;
     return *this;
 }
+
+// bool Any::operator==(const Any& other) {
+//     if(isEmpty() || other.isEmpty())
+//         return isEmpty() && other.isEmpty();
+
+//     if(type() != other.type())
+//         return false;
+
+//     return *ptr == *other.ptr;
+// }

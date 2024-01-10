@@ -16,7 +16,8 @@ struct PROPTEST_API AnyHolder {
     template <typename T>
     const T& getRef() const {
         if constexpr(is_lvalue_reference_v<T>) {
-            return *const_cast<decay_t<T>*>(static_cast<const decay_t<T>*>(rawPtr()));
+            using RawT = decay_t<T>;
+            return *const_cast<RawT*>(static_cast<const RawT*>(rawPtr()));
         }
         else
             return *static_cast<const T*>(rawPtr());
@@ -55,7 +56,7 @@ struct PROPTEST_API AnyVal : AnyHolder {
 
 template <typename T>
 struct PROPTEST_API AnyLValRef : AnyHolder {
-    const type_info& type() const override { return typeid(T&); }
+    const type_info& type() const override { return typeid(T); }
 
     AnyLValRef(const T& val) : value(val) {
     }
@@ -68,7 +69,7 @@ struct PROPTEST_API AnyLValRef : AnyHolder {
         return &value == &other;
     }
 
-    T& value;
+    const T& value;
 };
 
 
@@ -103,14 +104,23 @@ struct PROPTEST_API Any {
 
     Any() = default;
 
+    Any(const Any& other);
+
     template <typename T>
     Any(const T& t) {
-        if constexpr (is_fundamental_v<T>) {
+        if constexpr(is_lvalue_reference_v<T>) {
+            ptr = util::make_shared<AnyLValRef<decay_t<T>>>(t);
+        }
+        else if constexpr (is_fundamental_v<T>) {
             ptr = util::make_shared<AnyVal<T>>(t);
         }
         else {
             ptr = util::make_shared<AnyRef<T>>(util::make_shared<T>(t));
         }
+    }
+
+    template <typename T>
+    Any(const shared_ptr<AnyLValRef<T>>& holderPtr) : ptr(holderPtr){
     }
 
     template <typename T>
@@ -123,7 +133,7 @@ struct PROPTEST_API Any {
 
     Any& operator=(const Any& other);
 
-    bool operator==(const Any& other);
+    // bool operator==(const Any& other);
 
     template <typename T>
     const T& getRef() const {
@@ -132,8 +142,8 @@ struct PROPTEST_API Any {
         else {
             if(!ptr)
                 throw invalid_cast_error("no value in an empty Any");
-            if(ptr->type() != typeid(T)) {
-                throw invalid_cast_error("cannot convert from " + string(ptr->type().name()) + " to " + string(typeid(T).name()));
+            if(type() != typeid(T)) {
+                throw invalid_cast_error("cannot convert from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
         }
@@ -159,10 +169,15 @@ template <typename T, typename... Args>
 Any make_any(Args&&... args)
 {
     if constexpr(is_lvalue_reference_v<T>) {
-        return Any{util::make_shared<AnyLValRef<T>>(args...)};
+        static_assert(sizeof...(Args) == 1, "an l-value reference must be provided as argument");
+        return Any{util::make_shared<AnyLValRef<decay_t<T>>>(args...)};
     }
     else if constexpr (is_fundamental_v<T>) {
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
+    }
+    else if constexpr (is_same_v<Any, T>) {
+        static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
+        return Any{args...};
     }
     else {
         return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(args...)));

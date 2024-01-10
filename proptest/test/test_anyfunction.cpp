@@ -60,7 +60,7 @@ TEST(Function, lambda)
     EXPECT_EQ(function(1,2), 3);
 }
 
-TEST(Function, ptr_args)
+TEST(Function, ptr_args_mutable)
 {
     auto lambda = [](int* a, int b) { return *a+b; };
     Function<int(int*,int)> function(lambda);
@@ -69,7 +69,7 @@ TEST(Function, ptr_args)
     EXPECT_EQ(function(&x,y), 3);
 }
 
-TEST(Function, reference_args)
+TEST(Function, reference_args_mutable)
 {
     auto lambda = [](int& a, int b) { a = a + b; return a + b; };
     Function<int(int&,int)> function(lambda);
@@ -84,7 +84,7 @@ TEST(Function, reference_args)
 TEST(Function, make_function)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    Function<int(int,int)> function = make_function(lambda);
+    Function<int(int,int)> function = util::make_function(lambda);
     EXPECT_EQ(function(1,2), 3);
 }
 
@@ -125,10 +125,10 @@ TEST(Function, assign_FunctionNHolderImpl)
 TEST(Function, copy_and_reset_original)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    Function<int(int,int)> function = make_function(lambda);
+    Function<int(int,int)> function = util::make_function(lambda);
     Function<int(int,int)> function2(function);
     EXPECT_EQ(function2(1,2), 3);
-    shared_ptr<Function<int(int,int)>> function3 = util::make_shared<Function<int(int,int)>>(make_function(lambda));
+    shared_ptr<Function<int(int,int)>> function3 = util::make_shared<Function<int(int,int)>>(util::make_function(lambda));
     Function<int(int,int)> function4(*function3);
     function3.reset();
     EXPECT_EQ(function4(1,2), 3);
@@ -137,26 +137,28 @@ TEST(Function, copy_and_reset_original)
 TEST(Function, void_return)
 {
     auto lambda = [](int a, int b) { return; };
-    Function<void(int,int)> function = make_function(lambda);
+    Function<void(int,int)> function = util::make_function(lambda);
     function(1,2);
 }
 
 TEST(Function, noncopyable_args)
 {
-    // struct NonCopyable {
-    //     NonCopyable(const NonCopyable&) = delete;
-    // };
-    // auto lambda = [](NonCopyable a, NonCopyable b) { return 0; };
-    // Function<int(NonCopyable,NonCopyable)> function = make_function(lambda);
+    struct NonCopyable {
+        NonCopyable() = default;
+        NonCopyable(const NonCopyable&) = delete;
+    };
+    auto lambda = [](const NonCopyable& a, const NonCopyable& b) { return 0; };
+    Function<int(const NonCopyable&, const NonCopyable&)> function = util::make_function(lambda);
+    function(NonCopyable(), NonCopyable());
 }
 
 TEST(Function, Any_as_parameter)
 {
     auto lambda = [](Any a, Any b) -> int { return a.getRef<int>() + b.getRef<int>(); };
-    Function<int(Any,Any)> function = make_function(lambda);
+    Function<int(Any,Any)> function = util::make_function(lambda);
     Function<int(Any,Any)> function2(function);
     EXPECT_EQ(function2(1,2), 3);
-    shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(make_function(lambda));
+    shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(util::make_function(lambda));
     Function<int(Any,Any)> function4(*function3);
     function3.reset();
     EXPECT_EQ(function4(Any(1),Any(2)), 3);
@@ -165,7 +167,7 @@ TEST(Function, Any_as_parameter)
 TEST(Function, from_AnyFunction)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    AnyFunction anyFunction = make_any_function(lambda);
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
     Function<int(int,int)> function = anyFunction;
     EXPECT_EQ(function(1,2), 3);
     EXPECT_EQ(function(1,2), 3);
@@ -174,7 +176,7 @@ TEST(Function, from_AnyFunction)
 TEST(Function, from_incompatible_AnyFunction)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    AnyFunction anyFunction = make_any_function(lambda);
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
     Function<int(int,int,int)> function = anyFunction;
     EXPECT_THROW(function(1,2,3), invalid_argument);
     Function<int(int,string)> function2 = anyFunction;
@@ -203,7 +205,6 @@ TEST(AnyFunctionHolderHelper, basic)
 
     F2 f2;
     ASSERT_EQ(F2::N, 2);
-    // EXPECT_EQ(f2(1,3), 4); -- compile error
     EXPECT_EQ(f2.invoke(Any(1), Any(3)).getRef<int>(), 4);
 }
 
@@ -212,32 +213,27 @@ TEST(AnyFunctionNHolder, basic)
     auto lambda = [](int a, int b) { return a+b; };
     unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderImpl<decltype(lambda),int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
-    // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
     EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->call<int>(1,2), 3);
 }
 
-TEST(AnyFunctionHolder, basic)
+TEST(FunctionHolder, basic)
 {
     auto lambda = [](int a, int b) { return a+b; };
     unique_ptr<FunctionNHolder<int(int, int)>> functionN = util::make_unique<FunctionNHolderImpl<decltype(lambda),int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
-    unique_ptr<AnyFunctionHolder> anyFunction = util::move(functionN);
-    // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
-    // EXPECT_EQ((*anyFunction)(Any(1),Any(2)).getRef<int>(), 3); -- compile error
+    unique_ptr<FunctionHolder> anyFunction = util::move(functionN);
     EXPECT_EQ(anyFunction->apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction->call<int>(1,2), 3);
 }
 
-TEST(AnyFunctionHolder, void)
+TEST(FunctionHolder, void)
 {
     auto lambda = [](int a, int b) { return; };
     unique_ptr<FunctionNHolder<void(int, int)>> functionN = util::make_unique<FunctionNHolderImpl<decltype(lambda),void,int,int>>(
         util::forward<decltype(lambda)>(lambda));
-    unique_ptr<AnyFunctionHolder> anyFunction = util::move(functionN);
-    // EXPECT_EQ((*lambda0)(1,2), 3); -- compile error
-    // EXPECT_EQ((*anyFunction)(Any(1),Any(2)).getRef<int>(), 3); -- compile error
+    unique_ptr<FunctionHolder> anyFunction = util::move(functionN);
     anyFunction->apply({Any(1),Any(2)});
     anyFunction->call<void>(1,2);
 }
@@ -245,24 +241,58 @@ TEST(AnyFunctionHolder, void)
 TEST(AnyFunction, from_Function)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    Function<int(int,int)> function = make_function(lambda);
+    Function<int(int,int)> function = util::make_function(lambda);
     AnyFunction anyFunction = function;
     EXPECT_EQ(anyFunction.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction.call<int>(1,2), 3);
 }
 
-TEST(AnyFunction, make_any_function)
+TEST(AnyFunction, make_anyfunction_primitives)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    AnyFunction anyFunction = make_any_function(lambda);
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
     EXPECT_EQ(anyFunction.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction.call<int>(1,2), 3);
+}
+
+TEST(AnyFunction, make_anyfunction_ptr)
+{
+    auto lambda = [](int *a, int *b) { return *a+*b; };
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(anyFunction.call<int>(&x,&y), 3);
+    EXPECT_EQ(anyFunction.apply({Any(&x),Any(&y)}).getRef<int>(), 3);
+}
+
+TEST(AnyFunction, make_anyfunction_ptr_mutable)
+{
+    auto lambda = [](int *a, int *b) { return *a = *a+*b; return *a; };
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(anyFunction.call<int>(&x,&y), 3);
+    EXPECT_EQ(x, 3);
+    EXPECT_EQ(anyFunction.apply({Any(&x),Any(&y)}).getRef<int>(), 5);
+    EXPECT_EQ(x, 5);
+}
+
+TEST(AnyFunction, make_anyfunction_reference_mutable)
+{
+    auto lambda = [](int &a, int &b) { return a = a+b; return a; };
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ((anyFunction.call<int, int&, int&>(x,y)), 3); // need & in the call type params
+    EXPECT_EQ(x, 3);
+    EXPECT_EQ(anyFunction.apply({util::make_any<int&>(x), util::make_any<int&>(y)}).getRef<int>(), 5);
+    EXPECT_EQ(x, 5);
 }
 
 TEST(AnyFunction, copy)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    AnyFunction anyFunction = make_any_function(lambda);
+    AnyFunction anyFunction = util::make_anyfunction(lambda);
     AnyFunction anyFunction2 = anyFunction;
     EXPECT_EQ(anyFunction2.apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunction2.call<int>(1,2), 3);

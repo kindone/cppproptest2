@@ -15,19 +15,18 @@ namespace proptest {
 struct AnyFunction;
 
 
-struct AnyFunctionHolder {
-    AnyFunctionHolder() = default;
+struct FunctionHolder {
+    FunctionHolder() = default;
     // delete copy constructor
-    AnyFunctionHolder(const AnyFunctionHolder&) = delete;
+    FunctionHolder(const FunctionHolder&) = delete;
 
-    virtual ~AnyFunctionHolder() {}
+    virtual ~FunctionHolder() {}
 
     virtual Any apply(const initializer_list<Any>&) const {
         throw runtime_error("Not implemented");
     };
 
     template <typename RET, typename... ARGS>
-        requires(!same_as<RET, void>)
     RET call(ARGS... arg) const {
         if constexpr(same_as<RET,void>) {
             apply({Any(arg)...});
@@ -35,13 +34,6 @@ struct AnyFunctionHolder {
         }
         else
             return apply({Any(arg)...}).template getRef<decay_t<RET>>();
-    }
-
-    template <typename RET, typename... ARGS>
-        requires(same_as<RET, void>)
-    void call(ARGS... arg) const {
-        apply({Any(arg)...});
-        return;
     }
 };
 
@@ -70,7 +62,7 @@ decltype(auto) invokeWithInitializerList(const Callable&& callable, const initia
 // abstract
 template<typename... ARGS>
         requires (AllAny<ARGS...>)
-struct AnyFunctionHolderHelper : public AnyFunctionHolder {
+struct AnyFunctionHolderHelper : public FunctionHolder {
     static constexpr int N = sizeof...(ARGS);
     virtual Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const = 0;
 };
@@ -137,7 +129,7 @@ struct Function;
 template <typename RET, typename...ARGS>
 struct Function<RET(ARGS...)> {
     Function() = delete;
-    explicit Function(shared_ptr<AnyFunctionHolder> h) : holder(h) {}
+    explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {}
     Function(const Function& other) : holder(other.holder) {}
     Function(const AnyFunction& otherAnyFunction);
 
@@ -154,12 +146,12 @@ struct Function<RET(ARGS...)> {
             return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
     }
 
-    shared_ptr<AnyFunctionHolder> holder;
+    shared_ptr<FunctionHolder> holder;
 };
 
 struct AnyFunction {
     AnyFunction() = delete;
-    explicit AnyFunction(shared_ptr<AnyFunctionHolder> h) : holder(h) {}
+    explicit AnyFunction(shared_ptr<FunctionHolder> h) : holder(h) {}
 
     template <typename RET, typename... ARGS>
     AnyFunction(const Function<RET(ARGS...)>& f) : holder(f.holder) {}
@@ -170,27 +162,30 @@ struct AnyFunction {
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) const {
-        return holder->apply({Any(arg)...}).template getRef<RET>();
+        return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
     }
 
-    shared_ptr<AnyFunctionHolder> holder;
+    shared_ptr<FunctionHolder> holder;
 };
 
 template <typename RET, typename...ARGS>
 Function<RET(ARGS...)>::Function(const AnyFunction& otherAnyFunction) : holder(otherAnyFunction.holder) {}
 
+namespace util {
 
 template <typename Callable>
 decltype(auto) make_function(Callable&& c) {
     using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderImpl, Callable>;
     using FunctionType = typename function_traits<Callable>::template function_type_with_signature<Function>;
-    return FunctionType{static_pointer_cast<AnyFunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
+    return FunctionType{static_pointer_cast<FunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
 }
 
 template <typename Callable>
-AnyFunction make_any_function(Callable&& c) {
+AnyFunction make_anyfunction(Callable&& c) {
     using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderImpl, Callable>;
-    return AnyFunction{static_pointer_cast<AnyFunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
+    return AnyFunction{static_pointer_cast<FunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
 }
+
+} // namespace util
 
 } // namespace proptest

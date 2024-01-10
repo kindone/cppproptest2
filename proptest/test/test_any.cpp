@@ -252,7 +252,7 @@ TEST(AnyVal, copied_when_assigned)
     ASSERT_EQ(val.getRef<Copyable>().numCopied, 1);
 }
 
-TEST(AnyVal, ptr)
+TEST(AnyVal, ptr_mutation)
 {
     Copyable copyable(100);
     Copyable* copyablePtr = &copyable;
@@ -273,7 +273,7 @@ TEST(AnyVal, ptr)
     ASSERT_EQ(val2.getRef<Copyable*>()->value, 200);
 }
 
-TEST(AnyVal, reference)
+TEST(AnyVal, reference_mutation)
 {
     Copyable copyable(100);
     Copyable& copyableRef = copyable;
@@ -380,6 +380,28 @@ TEST(Any, primitive)
     Any any = 1;
     ASSERT_EQ(any.type(), typeid(int));
     ASSERT_EQ(any.getRef<int>(), 1);
+}
+
+TEST(Any, ptr)
+{
+    int a = 1;
+    Any any = &a;
+    ASSERT_EQ(any.type(), typeid(int*));
+    ASSERT_EQ(*any.getRef<int*>(), 1);
+    // mutate a
+    a = 2;
+    ASSERT_EQ(*any.getRef<int*>(), 2);
+}
+
+TEST(Any, reference)
+{
+    int a = 1;
+    Any any = util::make_any<int&>(a);
+    ASSERT_EQ(any.type(), typeid(int&));
+    ASSERT_EQ(any.getRef<int&>(), 1);
+    // mutate a
+    a = 2;
+    ASSERT_EQ(any.getRef<int&>(), 2);
 }
 
 TEST(Any, class)

@@ -79,7 +79,7 @@ TEST(TypedStream, transform)
 {
     auto stream = TypedStream<int>::two(100, 200);
 
-    auto stream2 = stream.transform<string>(make_function([](const int& value) { return to_string(value); }));
+    auto stream2 = stream.transform<string>(util::make_function([](const int& value) { return to_string(value); }));
 
     vector<string> values;
     for(TypedIterator<string> itr = stream2.iterator(); itr.hasNext(); ) {
@@ -94,7 +94,7 @@ TEST(TypedStream, transform)
 TEST(TypedStream, filter)
 {
     auto stream = TypedStream<int>::two(100, 200);
-    auto stream2 = stream.filter(make_function([](const int& value) { return value > 100; }));
+    auto stream2 = stream.filter(util::make_function([](const int& value) { return value > 100; }));
 
     vector<int> values;
     for(TypedIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
@@ -105,7 +105,7 @@ TEST(TypedStream, filter)
     EXPECT_EQ(values[0], 200);
 
     values.clear();
-    auto stream3 = stream.filter(make_function([](const int& value) { return value < 200; }));
+    auto stream3 = stream.filter(util::make_function([](const int& value) { return value < 200; }));
 
     for(TypedIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
         int value = itr.next();
@@ -176,7 +176,7 @@ TEST(TypedStream, performance)
 
 TEST(UntypedStream, basic)
 {
-    UntypedStream untypedStream(Any(100), make_any_function([]() -> TypedStream<int> { return TypedStream<int>::empty(); }));
+    UntypedStream untypedStream(Any(100), util::make_anyfunction([]() -> TypedStream<int> { return TypedStream<int>::empty(); }));
 }
 
 TEST(UntypedStream, from_TypedStream)
