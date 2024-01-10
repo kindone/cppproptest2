@@ -62,23 +62,23 @@ decltype(auto) invokeWithInitializerList(const Callable&& callable, const initia
 // abstract
 template<typename... ARGS>
         requires (AllAny<ARGS...>)
-struct AnyFunctionHolderHelper : public FunctionHolder {
+struct FunctionHolderHelper : public FunctionHolder {
     static constexpr int N = sizeof...(ARGS);
     virtual Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const = 0;
 };
 
 template <typename T>
-struct AnyFunctionHolderHelper_t;
+struct FunctionHolderHelper_t;
 
 template <size_t... Is>
-struct AnyFunctionHolderHelper_t<index_sequence<Is...>> {
-    using type = AnyFunctionHolderHelper<decltype((void)Is, Any{})...>;
+struct FunctionHolderHelper_t<index_sequence<Is...>> {
+    using type = FunctionHolderHelper<decltype((void)Is, Any{})...>;
 };
 
 } // namespace util
 
 template <size_t N>
-struct AnyFunctionNHolder : public util::AnyFunctionHolderHelper_t<make_index_sequence<N>>::type {
+struct AnyFunctionNHolder : public util::FunctionHolderHelper_t<make_index_sequence<N>>::type {
     virtual ~AnyFunctionNHolder() {}
 };
 

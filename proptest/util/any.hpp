@@ -168,16 +168,16 @@ AnyVal<T> make_anyval(T value)
 template <typename T, typename... Args>
 Any make_any(Args&&... args)
 {
-    if constexpr(is_lvalue_reference_v<T>) {
+    if constexpr (is_same_v<Any, decay_t<T>>) {
+        static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
+        return Any{args...};
+    }
+    else if constexpr(is_lvalue_reference_v<T>) {
         static_assert(sizeof...(Args) == 1, "an l-value reference must be provided as argument");
         return Any{util::make_shared<AnyLValRef<decay_t<T>>>(args...)};
     }
     else if constexpr (is_fundamental_v<T>) {
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
-    }
-    else if constexpr (is_same_v<Any, T>) {
-        static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
-        return Any{args...};
     }
     else {
         return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(args...)));

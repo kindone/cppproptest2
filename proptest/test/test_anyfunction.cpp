@@ -164,6 +164,18 @@ TEST(Function, Any_as_parameter)
     EXPECT_EQ(function4(Any(1),Any(2)), 3);
 }
 
+TEST(Function, Any_reference_as_parameter)
+{
+    auto lambda = [](const Any& a, const Any& b) -> int { return a.getRef<int>() + b.getRef<int>(); };
+    Function<int(const Any&,const Any&)> function = util::make_function(lambda);
+    Function<int(const Any&,const Any&)> function2(function);
+    // EXPECT_EQ(function2(1,2), 3);
+    shared_ptr<Function<int(const Any&,const Any&)>> function3 = util::make_shared<Function<int(const Any&,const Any&)>>(util::make_function(lambda));
+    Function<int(const Any&,const Any&)> function4(*function3);
+    function3.reset();
+    EXPECT_EQ(function4(Any(1),Any(2)), 3);
+}
+
 TEST(Function, from_AnyFunction)
 {
     auto lambda = [](int a, int b) { return a+b; };
@@ -187,7 +199,7 @@ TEST(Function, from_incompatible_AnyFunction)
 
 TEST(AnyFunctionHolderHelper, basic)
 {
-    struct F1 : public util::AnyFunctionHolderHelper_t<make_index_sequence<1>>::type {
+    struct F1 : public util::FunctionHolderHelper_t<make_index_sequence<1>>::type {
         Any invoke(Any arg) const override {
             return Any(arg.getRef<int>()+1);
         }
@@ -197,7 +209,7 @@ TEST(AnyFunctionHolderHelper, basic)
     ASSERT_EQ(F1::N, 1);
     EXPECT_EQ(f1.invoke(Any(1)).getRef<int>(), 2);
 
-    struct F2 : public util::AnyFunctionHolderHelper_t<make_index_sequence<2>>::type {
+    struct F2 : public util::FunctionHolderHelper_t<make_index_sequence<2>>::type {
         Any invoke(Any arg1, Any arg2) const override {
             return Any(arg1.getRef<int>()+arg2.getRef<int>());
         }

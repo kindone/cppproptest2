@@ -141,6 +141,22 @@ struct UntypedStream {
         return stream.getTail();
     }
 
+    UntypedStream transform(Function<Any(const Any&)> transformer) const {
+        return stream.transform(transformer);
+    }
+
+    UntypedStream filter(Function<bool(const Any&)> criteria) const {
+        return stream.filter(criteria);
+    }
+
+    UntypedStream concat(const UntypedStream& other) const {
+        return stream.concat(other.stream);
+    }
+
+    UntypedStream take(int n) const {
+        return stream.take(n);
+    }
+
 private:
     TypedStream<Any> stream;
 };
@@ -148,6 +164,7 @@ private:
 struct UntypedIterator
 {
     UntypedIterator(const TypedStream<Any>& stream);
+    UntypedIterator(const UntypedStream& stream);
 
     ~UntypedIterator() {}
     bool hasNext();
@@ -168,6 +185,7 @@ struct UntypedIterator
 };
 
 UntypedIterator::UntypedIterator(const TypedStream<Any>& stream) : stream(stream) {}
+UntypedIterator::UntypedIterator(const UntypedStream& stream) : stream(stream) {}
 
 
 bool UntypedIterator::hasNext() {
@@ -182,12 +200,5 @@ Any UntypedIterator::nextAny() {
     stream = stream.getTail();
     return value;
 }
-
-
-
-
-
-
-
 
 } // namespace proptest
