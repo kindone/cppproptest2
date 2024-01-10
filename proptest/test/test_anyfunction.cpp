@@ -28,13 +28,14 @@ TEST(FunctionNHolderImpl, ptr_args)
 
 TEST(FunctionNHolderImpl, reference_args)
 {
-    // does not compile, due to the nature of Any
-    auto lambda = [](int& a, int b) { return a+b; };
+    auto lambda = [](int& a, int b) { a += b; return a; };
     FunctionNHolderImpl<decltype(lambda),int,int&,int> holder(util::forward<decltype(lambda)>(lambda));
     int x = 1;
     int y = 2;
     EXPECT_EQ(holder(x,y), 3);
-    // EXPECT_EQ(holder.apply({Any(&x),Any(y)}).getRef<int>(), 3);
+    EXPECT_EQ(x, 3);
+    EXPECT_EQ(holder.apply({Any(x),Any(y)}).getRef<int>(), 5);
+    EXPECT_EQ(x, 3); // x does not change
 }
 
 TEST(FunctionNHolder, ptr)
@@ -46,7 +47,7 @@ TEST(FunctionNHolder, ptr)
     EXPECT_EQ(lambda0->invoke(Any(1),Any(2)).getRef<int>(), 3);
 }
 
-TEST(Function, construct)
+TEST(Function, lambda)
 {
     auto lambda0 = []() { return 1; };
     Function<int()> function0(lambda0);
@@ -57,6 +58,27 @@ TEST(Function, construct)
 
     Function<int(int,int)> function2([](int a, int b) { return a+b; });
     EXPECT_EQ(function(1,2), 3);
+}
+
+TEST(Function, ptr_args)
+{
+    auto lambda = [](int* a, int b) { return *a+b; };
+    Function<int(int*,int)> function(lambda);
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(function(&x,y), 3);
+}
+
+TEST(Function, reference_args)
+{
+    auto lambda = [](int& a, int b) { a = a + b; return a + b; };
+    Function<int(int&,int)> function(lambda);
+    int x = 1;
+    int y = 2;
+    EXPECT_EQ(function(x,y), 5);
+    EXPECT_EQ(x, 3);
+    EXPECT_EQ(function(x,y), 7);
+    EXPECT_EQ(x, 5);
 }
 
 TEST(Function, make_function)

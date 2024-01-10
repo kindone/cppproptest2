@@ -1,13 +1,11 @@
 #pragma once
 
 #include "proptest/std/lang.hpp"
-#include "proptest/std/vector.hpp"
 #include "proptest/std/initializer_list.hpp"
 #include "proptest/std/exception.hpp"
-#include "proptest/std/tuple.hpp"
 #include "proptest/std/functional.hpp"
+#include "proptest/std/concepts.hpp"
 #include "proptest/util/any.hpp"
-#include "proptest/util/tupleorvector.hpp"
 #include "proptest/util/function_traits.hpp"
 #include "proptest/typefwd.hpp"
 
@@ -52,6 +50,23 @@ namespace util {
 template<typename... Args>
 concept AllAny = (is_same_v<Args, Any> && ...);
 
+
+template <typename Callable, typename... ARGS, size_t... Is>
+    requires (invocable<Callable, ARGS...>)
+decltype(auto) invokeWithInitializerListImpl(const Callable&& callable, const initializer_list<Any>& list, index_sequence<Is...>) {
+    if (list.size() != sizeof...(ARGS)) {
+        throw std::invalid_argument("number of arguments does not match the number of function parameters");
+    }
+    auto it = list.begin();
+    return callable((*(it + Is)).getRef<ARGS>()...);
+}
+
+template<typename Callable, typename... ARGS>
+    requires (invocable<Callable, ARGS...>)
+decltype(auto) invokeWithInitializerList(const Callable&& callable, const initializer_list<Any>& list) {
+    return invokeWithInitializerListImpl<Callable, ARGS...>(util::forward<const Callable>(callable), list, std::index_sequence_for<ARGS...>{});
+}
+
 // abstract
 template<typename... ARGS>
         requires (AllAny<ARGS...>)
@@ -91,7 +106,7 @@ struct FunctionNHolder<RET(ARGS...)> : public AnyFunctionNHolder<sizeof...(ARGS)
         if constexpr(same_as<RET, void>)
             return Any();
         else
-            return Any(operator()(arg.template getRef<decay_t<ARGS>>()...));
+            return Any(operator()(arg.template getRef<ARGS>()...));
     }
 };
 
@@ -132,11 +147,11 @@ struct Function<RET(ARGS...)> {
 
     RET operator()(ARGS... arg) const {
         if constexpr(same_as<RET, void>) {
-            holder->apply({Any(arg)...});
+            holder->apply({util::make_any<ARGS>(arg)...});
             return;
         }
         else
-            return holder->apply({Any(arg)...}).template getRef<RET>();
+            return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
     }
 
     shared_ptr<AnyFunctionHolder> holder;

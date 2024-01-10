@@ -25,34 +25,19 @@ tuple<ARGS...> vectorToTuple(const vector<Any>& v) {
     return vectorToTupleImpl<ARGS...>(v, std::index_sequence_for<ARGS...>{});
 }
 
-template <typename Callable, typename... ARGS, size_t... Is>
-    requires (invocable<Callable, ARGS...>)
-decltype(auto) invokeWithVectorImpl(const Callable&& callable, const vector<Any>& vec, index_sequence<Is...>) {
-    if (vec.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("number of arguments does not match the number of function parameters");
-    }
-    return callable(vec[Is].getRef<decay_t<ARGS>>()...);
-}
+// template <typename Callable, typename... ARGS, size_t... Is>
+//     requires (invocable<Callable, ARGS...>)
+// decltype(auto) invokeWithVectorImpl(const Callable&& callable, const vector<Any>& vec, index_sequence<Is...>) {
+//     if (vec.size() != sizeof...(ARGS)) {
+//         throw std::invalid_argument("number of arguments does not match the number of function parameters");
+//     }
+//     return callable(vec[Is].getRef<decay_t<ARGS>>()...);
+// }
 
-template<typename Callable, typename... ARGS>
-decltype(auto) invokeWithVector(const Callable&& callable, const vector<Any>& vec) {
-    return invokeWithVectorImpl<Callable, ARGS...>(util::forward<const Callable>(callable), vec, std::index_sequence_for<ARGS...>{});
-}
-
-template <typename Callable, typename... ARGS, size_t... Is>
-    requires (invocable<Callable, ARGS...>)
-decltype(auto) invokeWithInitializerListImpl(const Callable&& callable, const initializer_list<Any>& list, index_sequence<Is...>) {
-    if (list.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("number of arguments does not match the number of function parameters");
-    }
-    auto it = list.begin();
-    return callable((*(it + Is)).getRef<decay_t<ARGS>>()...);
-}
-
-template<typename Callable, typename... ARGS>
-decltype(auto) invokeWithInitializerList(const Callable&& callable, const initializer_list<Any>& list) {
-    return invokeWithInitializerListImpl<Callable, ARGS...>(util::forward<const Callable>(callable), list, std::index_sequence_for<ARGS...>{});
-}
+// template<typename Callable, typename... ARGS>
+// decltype(auto) invokeWithVector(const Callable&& callable, const vector<Any>& vec) {
+//     return invokeWithVectorImpl<Callable, ARGS...>(util::forward<const Callable>(callable), vec, std::index_sequence_for<ARGS...>{});
+// }
 
 } // namespace util
 

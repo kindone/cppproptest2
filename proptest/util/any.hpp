@@ -53,6 +53,24 @@ struct PROPTEST_API AnyVal : AnyHolder {
     T value;
 };
 
+template <typename T>
+struct PROPTEST_API AnyLValRef : AnyHolder {
+    const type_info& type() const override { return typeid(T&); }
+
+    AnyLValRef(const T& val) : value(val) {
+    }
+
+    const void* rawPtr() const override {
+        return &value;
+    }
+
+    bool operator==(const T& other) {
+        return &value == &other;
+    }
+
+    T& value;
+};
+
 
 template <typename T>
 struct PROPTEST_API AnyRef : AnyHolder {
@@ -140,7 +158,10 @@ AnyVal<T> make_anyval(T value)
 template <typename T, typename... Args>
 Any make_any(Args&&... args)
 {
-    if constexpr (is_fundamental_v<T>) {
+    if constexpr(is_lvalue_reference_v<T>) {
+        return Any{util::make_shared<AnyLValRef<T>>(args...)};
+    }
+    else if constexpr (is_fundamental_v<T>) {
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
     }
     else {
