@@ -375,6 +375,19 @@ TEST(AnyHolder, string_performance)
     }
 }
 
+TEST(Any, empty)
+{
+    Any any;
+    ASSERT_EQ(any.isEmpty(), true);
+    Any any2 = any;
+    ASSERT_EQ(any2.isEmpty(), true);
+    auto lambda = [any]() { return any; };
+    ASSERT_EQ(lambda().isEmpty(), true);
+    const Any& any3 = any;
+    auto lambda2 = [any3]() -> const Any& { return any3; };
+    ASSERT_EQ(lambda2().isEmpty(), true);
+}
+
 TEST(Any, primitive)
 {
     Any any = 1;

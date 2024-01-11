@@ -1,3 +1,5 @@
+#pragma once
+
 #include "proptest/api.hpp"
 #include "proptest/std/lang.hpp"
 #include "proptest/util/std.hpp"

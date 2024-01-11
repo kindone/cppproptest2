@@ -5,7 +5,18 @@
 
 using namespace proptest;
 
-TEST(FunctionNHolderImpl, basic)
+TEST(FunctionNHolderImpl, fptr)
+{
+    auto lambda0 = +[]() { return 1; };
+    FunctionNHolderImpl<decltype(lambda0),int> holder0(util::forward<decltype(lambda0)>(lambda0));
+    EXPECT_EQ(holder0(), 1);
+    auto lambda = +[](int a, int b) { return a+b; };
+    FunctionNHolderImpl<decltype(lambda),int,int,int> holder(util::forward<decltype(lambda)>(lambda));
+    EXPECT_EQ(holder(1,2), 3);
+    EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 3);
+}
+
+TEST(FunctionNHolderImpl, lambda)
 {
     auto lambda0 = []() { return 1; };
     FunctionNHolderImpl<decltype(lambda0),int> holder0(util::forward<decltype(lambda0)>(lambda0));
@@ -45,6 +56,19 @@ TEST(FunctionNHolder, ptr)
         util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ((*lambda0)(1,2), 3);
     EXPECT_EQ(lambda0->invoke(Any(1),Any(2)).getRef<int>(), 3);
+}
+
+TEST(Function, fptr)
+{
+    auto lambda0 = +[]() { return 1; };
+    Function<int()> function0(lambda0);
+    EXPECT_EQ(function0(), 1);
+    auto lambda = +[](int a, int b) { return a+b; };
+    Function<int(int,int)> function(lambda);
+    EXPECT_EQ(function(1,2), 3);
+
+    Function<int(int,int)> function2([](int a, int b) { return a+b; });
+    EXPECT_EQ(function(1,2), 3);
 }
 
 TEST(Function, lambda)
@@ -218,6 +242,16 @@ TEST(AnyFunctionHolderHelper, basic)
     F2 f2;
     ASSERT_EQ(F2::N, 2);
     EXPECT_EQ(f2.invoke(Any(1), Any(3)).getRef<int>(), 4);
+}
+
+TEST(AnyFunctionNHolder, fptr)
+{
+    auto lambda = +[](int a, int b) { return a+b; };
+    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderImpl<decltype(lambda),int,int,int>>(
+        util::forward<decltype(lambda)>(lambda));
+    EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
+    EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
+    EXPECT_EQ(anyFunctionN->call<int>(1,2), 3);
 }
 
 TEST(AnyFunctionNHolder, basic)

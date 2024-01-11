@@ -1,4 +1,6 @@
 #include "proptest/Shrinkable.hpp"
+#include "proptest/shrinker/integral.hpp"
+#include "proptest/std/io.hpp"
 #include "gtest/gtest.h"
 
 using namespace proptest;
@@ -49,4 +51,14 @@ TEST(Shrinkable, flatMap)
     EXPECT_EQ(shr.get(), 100);
     auto shr2 = shr.flatMap<int>([](const int& val) { return make_shrinkable<int>(val + 1); });
     EXPECT_EQ(101, shr2.get());
+}
+
+TEST(Shrinker, integral)
+{
+    auto shr = util::binarySearchShrinkable(8);
+    auto shrinks = shr.getShrinks();
+    for(auto itr = shrinks.iterator(); itr.hasNext();)
+    {
+        cout << itr.next().get() << endl;
+    }
 }

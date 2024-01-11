@@ -1,4 +1,8 @@
+#pragma once
+
 #include "proptest/Shrinkable.hpp"
+#include "proptest/TypedStream.hpp"
+#include "proptest/util/anyfunction.hpp"
 
 namespace proptest {
 namespace util {
@@ -17,7 +21,7 @@ Shrinkable<int64_t> binarySearchShrinkable(int64_t value)
         } else if (min + 2 >= max) {
             return stream_t::one(make_shrinkable<int64_t>(mid));
         } else
-            return stream_t(make_shrinkable<int64_t>(mid).with([=]() { return genpos(min, mid); }),
+            return stream_t(make_shrinkable<int64_t>(mid).with([=]() -> stream_t { return genpos(min, mid); }),
                             [=]() { return genpos(mid, max); });
     };
 
@@ -69,7 +73,7 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
         } else if (min + 2 >= max) {
             return stream_t::one(make_shrinkable<uint64_t>(mid));
         } else
-            return stream_t::one(make_shrinkable<uint64_t>(mid).with([=]() { return genneg(mid, max); }),
+            return stream_t(make_shrinkable<uint64_t>(mid).with([=]() { return genneg(mid, max); }),
                             [=]() { return genneg(min, mid); });
     };
 
@@ -77,9 +81,9 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)
-            return stream_t::one(make_shrinkable<uint64_t>(0)).concat(genpos(0, value));
+            return stream_t::one(make_shrinkable<uint64_t>(0U)).concat(genpos(0, value));
         else
-            return stream_t::one(make_shrinkable<uint64_t>(0)).concat(genneg(value, 0));
+            return stream_t::one(make_shrinkable<uint64_t>(0U)).concat(genneg(value, 0));
     });
 }
 

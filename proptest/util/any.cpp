@@ -16,7 +16,10 @@ const type_info& Any::type() const {
 }
 
 bool Any::isEmpty() const {
+    if((ptr.get() == nullptr) != !static_cast<bool>(ptr))
+        throw runtime_error("somehow nullptr comparison misbehaves");
     return !static_cast<bool>(ptr);
+    //return ptr.get() == nullptr;
 }
 
 Any& Any::operator=(const Any& other) {

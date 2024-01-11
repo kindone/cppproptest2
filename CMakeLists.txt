@@ -52,6 +52,7 @@ TARGET_LINK_LIBRARIES(proptest
 
 ### tests
 SET(proptest_testsources
+    proptest/test/test_lazy.cpp
     proptest/test/test_typelist.cpp
     proptest/test/test_function_traits.cpp
     proptest/test/test_any.cpp

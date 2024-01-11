@@ -72,6 +72,10 @@
         "mutex": "cpp",
         "functional": "cpp",
         "condition_variable": "cpp",
-        "thread": "cpp"
+        "thread": "cpp",
+        "deque": "cpp",
+        "forward_list": "cpp",
+        "iterator": "cpp",
+        "unordered_set": "cpp"
     }
 }
