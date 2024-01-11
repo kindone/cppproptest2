@@ -28,6 +28,7 @@ include_directories(.)
 ### library
 SET(proptest_sources
     proptest/util/any.cpp
+    proptest/TypedStream.cpp
 )
 
 ADD_LIBRARY(proptest
@@ -56,7 +57,6 @@ SET(proptest_testsources
     proptest/test/test_any.cpp
     proptest/test/test_anyfunction.cpp
     proptest/test/test_tupleorvector.cpp
-    proptest/test/test_stream.cpp
     proptest/test/test_typedstream.cpp
     proptest/test/test_shrinkable.cpp
 )

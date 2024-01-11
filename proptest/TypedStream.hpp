@@ -37,7 +37,8 @@ struct TypedIterator
 template <typename T>
 struct TypedStream
 {
-    TypedStream(const Any& value, const Function<TypedStream()>& callable) : head(value), tailGen(callable) {}
+    TypedStream(const Any& _head) : head(_head), tailGen([]() -> TypedStream { return TypedStream::empty(); }) {}
+    TypedStream(const Any& _head, const Function<TypedStream()>& _tailGen) : head(_head), tailGen(_tailGen) {}
 
     TypedStream(const TypedStream<T>& other) : head(other.head), tailGen(other.tailGen) {}
 
@@ -183,22 +184,5 @@ struct UntypedIterator
 
     UntypedStream stream;
 };
-
-UntypedIterator::UntypedIterator(const TypedStream<Any>& stream) : stream(stream) {}
-UntypedIterator::UntypedIterator(const UntypedStream& stream) : stream(stream) {}
-
-
-bool UntypedIterator::hasNext() {
-    return !stream.isEmpty();
-}
-
-Any UntypedIterator::nextAny() {
-    if(!hasNext())
-        throw runtime_error("no more elements in stream");
-
-    Any value = stream.getHeadRef();
-    stream = stream.getTail();
-    return value;
-}
 
 } // namespace proptest
