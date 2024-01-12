@@ -1,15 +1,13 @@
 #pragma once
 #include "proptest/std/io.hpp"
-#include "proptest/typefwd.hpp
+#include "proptest/typefwd.hpp"
 #include "proptest/Shrinkable.hpp"
+#include "proptest/util/unicode.hpp"
+#include "proptest/util/utf8string.hpp"
+#include "proptest/util/utf16string.hpp"
+#include "proptest/util/utf8string.hpp"
 
 namespace proptest {
-
-class string;
-template <typename T> struct Shrinkable;
-// template <typename T1, typename T2> pair;
-// template <typename T1, typename T2> pair;
-
 
 ostream& show(ostream& os, const char*);
 ostream& show(ostream& os, const char*, size_t len);

@@ -28,6 +28,8 @@ include_directories(.)
 ### library
 SET(proptest_sources
     proptest/util/any.cpp
+    proptest/util/misc.cpp
+    proptest/util/unicode.cpp
     proptest/TypedStream.cpp
 )
 

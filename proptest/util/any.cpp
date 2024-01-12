@@ -1,6 +1,6 @@
+#include "proptest/util/any.hpp"
 #include "proptest/std/exception.hpp"
 #include "proptest/std/string.hpp"
-#include "proptest/util/any.hpp"
 
 using namespace proptest;
 

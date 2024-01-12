@@ -3,6 +3,7 @@
 
 namespace proptest {
 
+using std::basic_string;
 using std::string;
 using std::to_string;
 
