@@ -24,6 +24,30 @@ TEST(Lazy, copy)
     EXPECT_EQ(*z, 5);
 }
 
+TEST(Lazy, arrow)
+{
+    struct Cat {
+        int age;
+    };
+    Lazy<Cat> x(Cat{5});
+    auto y = x;
+    EXPECT_EQ(y->age, 5);
+    auto z = y;
+    EXPECT_EQ(z->age, 5);
+}
+
+TEST(Lazy, arrow_function)
+{
+    struct Cat {
+        int age;
+    };
+    Lazy<Cat> x([]() { return Cat{5}; });
+    auto y = x;
+    EXPECT_EQ(y->age, 5);
+    auto z = y;
+    EXPECT_EQ(z->age, 5);
+}
+
 TEST(Lazy, reassign)
 {
     Lazy<int> x([]() { return 5; });

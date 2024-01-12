@@ -1,7 +1,7 @@
-#include "../api.hpp"
-#include "utf16string.hpp"
-#include "unicode.hpp"
-#include "std.hpp"
+#include "proptest/util/utf16string.hpp"
+#include "proptest/util/unicode.hpp"
+#include "proptest/util/misc.hpp"
+#include "proptest/std/exception.hpp"
 
 namespace proptest {
 

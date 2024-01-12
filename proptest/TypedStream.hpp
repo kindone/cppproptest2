@@ -10,6 +10,10 @@
 
 namespace proptest {
 
+template<typename T, typename... ARGS>
+    concept AllT = (is_same_v<ARGS, T> && ...);
+
+
 template <typename T> struct TypedStream;
 template <typename T> struct TypedIterator;
 struct UntypedStream;
@@ -107,16 +111,41 @@ private:
 public:
 
     static TypedStream empty() {
-        return TypedStream(Any::empty, []() -> TypedStream { return TypedStream::empty(); });
+        return TypedStream(Any::empty);
     }
 
     static TypedStream one(const T& value) {
-        return TypedStream<T>(Any(value), []() -> TypedStream { return TypedStream::empty(); });
+        return TypedStream<T>(Any(value));
     }
 
     static TypedStream<T> two(const T& value1, const T& value2) {
         Any value2Any(value2);
         return TypedStream(Any(value1), [value2Any]() -> TypedStream { return TypedStream::one(value2Any.getRef<T>()); });
+    }
+
+    template <typename...ARGS>
+        requires (AllT<T, ARGS...>)
+    static TypedStream<T> of(ARGS&&...args) {
+        return values({args...});
+    }
+
+    static TypedStream<T> values(initializer_list<T> list) {
+        if(list.size() == 0)
+            return empty();
+        else if(list.size() == 1)
+            return one(*list.begin());
+
+        auto vec = make_shared<vector<T>>(list);
+        return TypedStream(Any(vec->front()), [vec]() -> TypedStream { return values(vec, 1);});
+    }
+
+private:
+    static TypedStream<T> values(shared_ptr<vector<T>> vec, size_t beginIdx) {
+        if(vec->size() == beginIdx)
+            return empty();
+        else if(vec->size() == beginIdx+1)
+            return one((*vec)[beginIdx]);
+        return TypedStream(Any((*vec)[beginIdx]), [vec, beginIdx]() -> TypedStream { return values(vec, beginIdx+1);});
     }
 };
 

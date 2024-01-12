@@ -78,7 +78,8 @@
         "iterator": "cpp",
         "unordered_set": "cpp",
         "fstream": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "memory_resource": "cpp"
     },
     "files.exclude": {
         "BUILD/": true

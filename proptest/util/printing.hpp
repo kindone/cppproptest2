@@ -6,16 +6,23 @@
 #include "proptest/util/utf8string.hpp"
 #include "proptest/util/utf16string.hpp"
 #include "proptest/util/utf8string.hpp"
+#include "proptest/util/cesu8string.hpp"
+#include "proptest/std/pair.hpp"
+#include "proptest/std/tuple.hpp"
+#include "proptest/std/vector.hpp"
+#include "proptest/std/list.hpp"
+#include "proptest/std/set.hpp"
+#include "proptest/std/map.hpp"
 
 namespace proptest {
 
 ostream& show(ostream& os, const char*);
 ostream& show(ostream& os, const char*, size_t len);
 ostream& show(ostream& os, const string&);
-// ostream& show(ostream& os, const UTF8String&);
-// ostream& show(ostream& os, const CESU8String&);
-// ostream& show(ostream& os, const UTF16BEString&);
-// ostream& show(ostream& os, const UTF16LEString&);
+ostream& show(ostream& os, const UTF8String&);
+ostream& show(ostream& os, const CESU8String&);
+ostream& show(ostream& os, const UTF16BEString&);
+ostream& show(ostream& os, const UTF16LEString&);
 ostream& show(ostream& os, const bool&);
 ostream& show(ostream& os, const char&);
 ostream& show(ostream& os, const int8_t&);

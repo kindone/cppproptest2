@@ -23,7 +23,7 @@ struct Lazy {
     }
 
     const T* operator->() const {
-        return &*value;
+        return &getRef();
     }
 
 private:

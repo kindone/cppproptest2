@@ -20,7 +20,8 @@ struct Shrinkable
     using type = T;
     using Stream = TypedStream<Shrinkable<T>>;
 
-    Shrinkable(Any _value) : value(_value), shrinks(Stream::empty()) {}
+    Shrinkable(const T& _value) : Shrinkable(Any(_value)) {}
+    explicit Shrinkable(Any _value) : value(_value), shrinks(Stream::empty()) {}
 
     Shrinkable& operator=(const Shrinkable& other) {
         value = other.value;
@@ -41,7 +42,7 @@ struct Shrinkable
     const T& getRef() const { return value.getRef<T>(); }
     Any getAny() const { return value; }
 
-    Stream getShrinks() { return *shrinks; }
+    Stream getShrinks() const { return *shrinks; }
 
     template <typename U>
     Shrinkable<U> map(Function<U(const T&)> transformer) const {
@@ -58,7 +59,7 @@ struct Shrinkable
     }
 
     template <typename U>
-    Shrinkable<U> mapShrinkable(Function<Shrinkable<U>(const Shrinkable<T>&)> transformer) const;
+    Shrinkable<U> mapShrinkable(Function<Shrinkable<U>(const Shrinkable&)> transformer) const;
 
     // provide filtered generation, shrinking
     Shrinkable<T> filter(Function<bool(const T&)> criteria) const {
@@ -66,20 +67,42 @@ struct Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument("cannot apply criteria");
         else
-            return with(shrinks->filter([criteria](const Shrinkable<T>& shr) -> bool {
+            return with(shrinks->filter([criteria](const Shrinkable& shr) -> bool {
                 return criteria(shr.getRef());
+            }).template transform<Shrinkable<T>>([criteria](const Shrinkable& shr) {
+                return shr.filter(criteria);
             }));
     }
 
     // provide filtered generation, shrinking
-    Shrinkable<T> filter(Function<bool(const T&)> criteria, int tolerance) {
+    Shrinkable<T> filter(Function<bool(const T&)> criteria, int tolerance) const {
+
+        static Function<Stream(const Stream&,Function<bool(const T&)>, int)> filterStream = [](const Stream& stream, Function<bool(const T&)> _criteria, int _tolerance) {
+            if(stream.isEmpty())
+                return Stream::empty();
+            else {
+                for(auto itr = stream.iterator(); itr.hasNext();) {
+                    auto shr = itr.next();
+                    auto tail = itr.stream;
+                    if(_criteria(shr.getRef())) {
+                        return Stream{shr, [tail, _criteria, _tolerance]() { return filterStream(tail, _criteria, _tolerance);}};
+                    }
+                    // extract from shr's children
+                    else {
+                        return filterStream(shr.getShrinks().take(_tolerance).concat(tail), _criteria, _tolerance);
+                    }
+                }
+                return Stream::empty();
+            }
+        };
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
             throw invalid_argument("cannot apply criteria");
-        else
-            return with(shrinks->take(tolerance).filter([criteria, tolerance](const Shrinkable<T>& shr) -> bool {
-                return criteria(shr.getRef());
-            }, tolerance));
+        else {
+            return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
+                return shr.filter(criteria, tolerance);
+            }));
+        }
     }
 
     // concat: continues with then after horizontal dead end
@@ -133,6 +156,9 @@ public:
 
     template <typename U, typename... Args>
     friend Shrinkable<U> make_shrinkable(Args&&... args);
+
+    template <typename U>
+    friend struct Shrinkable;
 };
 
 template <typename T, typename... Args>

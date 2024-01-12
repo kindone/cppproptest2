@@ -1,7 +1,7 @@
-#include "../api.hpp"
-#include "cesu8string.hpp"
-#include "unicode.hpp"
-#include "../util/std.hpp"
+#include "proptest/util/cesu8string.hpp"
+#include "proptest/util/unicode.hpp"
+#include "proptest/util/misc.hpp"
+#include "proptest/std/exception.hpp"
 
 namespace proptest {
 

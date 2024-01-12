@@ -1,7 +1,9 @@
 #pragma once
 #include "proptest/api.hpp"
 #include "proptest/typefwd.hpp"
+#include "proptest/std/io.hpp"
 #include "proptest/std/string.hpp"
+#include "proptest/std/vector.hpp"
 
 namespace proptest {
 

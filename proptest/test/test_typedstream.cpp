@@ -2,9 +2,48 @@
 #include "proptest/std/memory.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/std/string.hpp"
+#include "proptest/util/printing.hpp"
 #include "gtest/gtest.h"
 
 using namespace proptest;
+
+template <typename T>
+void outStream(ostream& ostr, const TypedStream<T>& stream) {
+    ostr << "[";
+    for (auto itr = stream.iterator(); itr.hasNext();) {
+        stream << proptest::Show<T>(itr.next());
+        if(itr.hasNext())
+            ostr << ", ";
+    }
+    ostr << "]";
+}
+
+template <typename T>
+void outUntypedStream(ostream& ostr, const UntypedStream& stream) {
+    ostr << "[";
+    for (auto itr = UntypedIterator(stream); itr.hasNext();) {
+        ostr << proptest::Show<T>(itr.next<T>());
+        if(itr.hasNext())
+            ostr << ", ";
+    }
+    ostr << "]";
+}
+
+template <typename T>
+string serializeStream(const TypedStream<T>& stream)
+{
+    stringstream ostr;
+    outStream(ostr, stream);
+    return ostr.str();
+}
+
+template <typename T>
+string serializeUntypedStream(const UntypedStream& stream)
+{
+    stringstream ostr;
+    outUntypedStream<T>(ostr, stream);
+    return ostr.str();
+}
 
 TEST(TypedStream, empty)
 {
@@ -46,6 +85,30 @@ TEST(TypedStream, two)
     ASSERT_EQ(itr.hasNext(), false);
 }
 
+TEST(TypedStream, values)
+{
+    auto stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    vector<int> values;
+    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+        int value = itr.next();
+        values.push_back(value);
+    }
+    EXPECT_EQ(values.size(), 8);
+    EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
+}
+
+TEST(TypedStream, values2)
+{
+    auto stream = TypedStream<int>::values({1,2,3,4,5,6,7,8});
+    vector<int> values;
+    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+        int value = itr.next();
+        values.push_back(value);
+    }
+    EXPECT_EQ(values.size(), 8);
+    EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
+}
+
 TEST(TypedStream, iterator)
 {
     auto stream = TypedStream<int>::two(100, 200);
@@ -57,8 +120,7 @@ TEST(TypedStream, iterator)
         values.push_back(value);
     }
     EXPECT_EQ(values.size(), 2);
-    EXPECT_EQ(values[0], 100);
-    EXPECT_EQ(values[1], 200);
+    EXPECT_EQ(values, vector<int>({100, 200}));
 }
 
 TEST(TypedStream, string)
@@ -74,6 +136,7 @@ TEST(TypedStream, string)
     EXPECT_EQ(values.size(), 2);
     EXPECT_EQ(values[0], "hello");
     EXPECT_EQ(values[1], "world");
+    EXPECT_EQ(values, vector<string>({"hello", "world"}));
 }
 
 TEST(TypedStream, transform)
@@ -205,42 +268,20 @@ TEST(UntypedStream, iterator)
 
 TEST(UntypedStream, transform)
 {
-    UntypedStream untypedStream = TypedStream<int>::two(100, 200);
-
-    auto stream2 = untypedStream.transform(util::make_function([](const Any& value) -> Any { return to_string(value.getRef<int>()); }));
-
-    vector<string> values;
-    for(UntypedIterator itr(stream2); itr.hasNext(); ) {
-        string value = itr.next<string>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 2);
-    EXPECT_EQ(values[0], "100");
-    EXPECT_EQ(values[1], "200");
+    UntypedStream stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream2 = stream.transform(util::make_function([](const Any& value) -> Any { return to_string(value.getRef<int>()); }));
+    EXPECT_EQ(serializeUntypedStream<int>(stream), "[1, 2, 3, 4, 5, 6, 7, 8]");
+    EXPECT_EQ(serializeUntypedStream<string>(stream2), "[\"1\" (31), \"2\" (32), \"3\" (33), \"4\" (34), \"5\" (35), \"6\" (36), \"7\" (37), \"8\" (38)]");
 }
 
 TEST(UntypedStream, filter)
 {
-    UntypedStream untypedStream = TypedStream<int>::two(100, 200);
-    auto stream2 = untypedStream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() > 100; }));
+    UntypedStream stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream2 = stream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() > 3; }));
+    EXPECT_EQ(serializeUntypedStream<int>(stream2), "[4, 5, 6, 7, 8]");
 
-    vector<int> values;
-    for(UntypedIterator itr(stream2); itr.hasNext(); ) {
-        int value = itr.next<int>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 1);
-    EXPECT_EQ(values[0], 200);
-
-    values.clear();
-    auto stream3 = untypedStream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() < 200; }));
-
-    for(UntypedIterator itr(stream3); itr.hasNext(); ) {
-        int value = itr.next<int>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 1);
-    EXPECT_EQ(values[0], 100);
+    auto stream3 = stream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() < 4; }));
+    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[1, 2, 3]");
 }
 
 TEST(UntypedStream, concat)
@@ -248,41 +289,20 @@ TEST(UntypedStream, concat)
     UntypedStream untypedStream = TypedStream<int>::two(100, 200);
     auto stream2 = TypedStream<int>::two(300, 400);
     auto stream3 = untypedStream.concat(stream2);
-
-    vector<int> values;
-    for(UntypedIterator itr(stream3); itr.hasNext(); ) {
-        int value = itr.next<int>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 4);
-    EXPECT_EQ(values[0], 100);
-    EXPECT_EQ(values[1], 200);
-    EXPECT_EQ(values[2], 300);
-    EXPECT_EQ(values[3], 400);
+    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[100, 200, 300, 400]");
 }
 
 TEST(UntypedStream, take)
 {
-    UntypedStream untypedStream = TypedStream<int>::two(100, 200);
+    UntypedStream untypedStream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
     auto stream2 = untypedStream.take(1);
+    EXPECT_EQ(serializeUntypedStream<int>(stream2), "[1]");
 
-    vector<int> values;
-    for(UntypedIterator itr(stream2); itr.hasNext(); ) {
-        int value = itr.next<int>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 1);
-    EXPECT_EQ(values[0], 100);
+    auto stream3 = untypedStream.take(3);
+    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[1, 2, 3]");
 
-    auto stream3 = untypedStream.take(3); // taking exceeding size is ok
-    values.clear();
-    for(UntypedIterator itr(stream3); itr.hasNext(); ) {
-        int value = itr.next<int>();
-        values.push_back(value);
-    }
-    EXPECT_EQ(values.size(), 2);
-    EXPECT_EQ(values[0], 100);
-    EXPECT_EQ(values[1], 200);
+    auto stream4 = untypedStream.take(10); // taking exceeding size is ok
+    EXPECT_EQ(serializeUntypedStream<int>(stream4), "[1, 2, 3, 4, 5, 6, 7, 8]");
 }
 
 TEST(UntypedStream, performance)
