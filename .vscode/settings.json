@@ -79,7 +79,11 @@
         "unordered_set": "cpp",
         "fstream": "cpp",
         "version": "cpp",
-        "memory_resource": "cpp"
+        "memory_resource": "cpp",
+        "complex": "cpp",
+        "__memory": "cpp",
+        "utility": "cpp",
+        "stack": "cpp"
     },
     "files.exclude": {
         "BUILD/": true

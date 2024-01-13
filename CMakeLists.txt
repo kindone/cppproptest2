@@ -34,6 +34,9 @@ SET(proptest_sources
     proptest/util/utf16string.cpp
     proptest/util/cesu8string.cpp
     proptest/util/printing.cpp
+    proptest/shrinker/integral.cpp
+    proptest/shrinker/bool.cpp
+    proptest/shrinker/floating.cpp
     proptest/TypedStream.cpp
 )
 
@@ -66,6 +69,7 @@ SET(proptest_testsources
     proptest/test/test_tupleorvector.cpp
     proptest/test/test_typedstream.cpp
     proptest/test/test_shrinkable.cpp
+    proptest/test/test_shrinker.cpp
 )
 
 

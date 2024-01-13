@@ -77,7 +77,7 @@ struct Shrinkable
     // provide filtered generation, shrinking
     Shrinkable<T> filter(Function<bool(const T&)> criteria, int tolerance) const {
 
-        static Function<Stream(const Stream&,Function<bool(const T&)>, int)> filterStream = [](const Stream& stream, Function<bool(const T&)> _criteria, int _tolerance) {
+        static Function<Stream(const Stream&,Function<bool(const T&)>, int)> filterStream = +[](const Stream& stream, Function<bool(const T&)> _criteria, int _tolerance) {
             if(stream.isEmpty())
                 return Stream::empty();
             else {
@@ -98,11 +98,10 @@ struct Shrinkable
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
             throw invalid_argument("cannot apply criteria");
-        else {
-            return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
-                return shr.filter(criteria, tolerance);
-            }));
-        }
+
+        return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
+            return shr.filter(criteria, tolerance);
+        }));
     }
 
     // concat: continues with then after horizontal dead end
@@ -116,14 +115,14 @@ struct Shrinkable
     // concat: extend shrinks stream with function taking parent as argument
     Shrinkable<T> concat(Function<Stream(const Shrinkable<T>&)> then) const {
         auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
-            return shr.concat(then(shr));
+            return shr.concat(then);
         });
         return with(shrinksWithThen.concat(then(*this)));
     }
 
     // andThen: continues with then after vertical dead end
     Shrinkable<T> andThenStatic(const Stream& then) const {
-        if(shrinks.isEmpty())
+        if(shrinks->isEmpty())
             return with(then);
         else
             return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
@@ -132,11 +131,11 @@ struct Shrinkable
     }
 
     Shrinkable<T> andThen(Function<Stream(const Shrinkable<T>&)> then) const {
-        if(shrinks.isEmpty())
+        if(shrinks->isEmpty())
             return with(then(*this));
         else
             return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
-                return shr.andThen(then(shr));
+                return shr.andThen(then);
             }));
     }
 

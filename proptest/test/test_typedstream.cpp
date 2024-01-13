@@ -295,6 +295,8 @@ TEST(UntypedStream, concat)
 TEST(UntypedStream, take)
 {
     UntypedStream untypedStream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream1 = untypedStream.take(0);
+    EXPECT_EQ(serializeUntypedStream<int>(stream1), "[]");
     auto stream2 = untypedStream.take(1);
     EXPECT_EQ(serializeUntypedStream<int>(stream2), "[1]");
 

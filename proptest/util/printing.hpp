@@ -172,7 +172,7 @@ struct ToStreamEach<0, Tuple>
 template <typename ARG1, typename ARG2>
 ostream& show(ostream& os, const pair<ARG1, ARG2>& pair)
 {
-    os << "( " << Show<ARG1>(pair.first) << ", " << Show<ARG2>(pair.second) << " )";
+    os << "(" << Show<ARG1>(pair.first) << ", " << Show<ARG2>(pair.second) << ")";
     return os;
 }
 
