@@ -455,6 +455,15 @@ TEST(Any, reassignment_empty)
     ASSERT_EQ(any.isEmpty(), true);
 }
 
+TEST(Any, getMutableRef)
+{
+    Any any = 1;
+    ASSERT_EQ(any.type(), typeid(int));
+    ASSERT_EQ(any.getRef<int>(), 1);
+    any.getMutableRef<int>() = 2;
+    ASSERT_EQ(any.getRef<int>(), 2);
+}
+
 TEST(Any, reassignment_with_other_type_throws_error)
 {
     Any any = string("hello");

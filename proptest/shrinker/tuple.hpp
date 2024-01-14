@@ -33,7 +33,7 @@ private:
     }
 
     template <size_t N>
-    static function<stream_t(const shrinkable_t&)> genStream()
+    static Function<stream_t(const shrinkable_t&)> genStream()
     {
         using e_shrinkable_t = typename tuple_element<N, tuple_t>::type;
         using element_t = typename e_shrinkable_t::type;

@@ -27,9 +27,9 @@ double composeFloat<double>(double value, int exp);
 }  // namespace util
 
 template <typename FLOATTYPE>
-TypedStream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
+Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
 {
-    using Stream = TypedStream<Shrinkable<FLOATTYPE>>;
+    using Stream = Stream<Shrinkable<FLOATTYPE>>;
     int exp = 0;
     if (value == 0.0f) {
         return Stream::empty();
@@ -89,6 +89,9 @@ template <typename FLOATTYPE>
 Shrinkable<FLOATTYPE> shrinkFloat(FLOATTYPE value) {
     return make_shrinkable<FLOATTYPE>(value).with(floatShrinks(value));
 }
+
+extern template Shrinkable<float> shrinkFloat<float>(float);
+extern template Shrinkable<double> shrinkFloat<double>(double);
 
 
 } // namespace proptest

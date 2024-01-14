@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/Shrinkable.hpp"
+#include "proptest/AnyShrinkable.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/std/io.hpp"
 
@@ -80,5 +81,21 @@ proptest::string serializeShrinkable(const proptest::Shrinkable<T>& shr)
 {
     proptest::stringstream stream;
     outShrinkable(stream, shr);
+    return stream.str();
+}
+
+template <typename T>
+proptest::string serializeShrinkableAny(const proptest::ShrinkableAny& shr)
+{
+    proptest::stringstream stream;
+    outShrinkable<T>(stream, shr.map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
+    return stream.str();
+}
+
+template <typename T>
+proptest::string serializeAnyShrinkable(const proptest::AnyShrinkable& shr)
+{
+    proptest::stringstream stream;
+    outShrinkable<T>(stream, shr.getShrinkableAny().map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
     return stream.str();
 }

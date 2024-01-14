@@ -1,4 +1,4 @@
-#include "proptest/TypedStream.hpp"
+#include "proptest/Stream.hpp"
 #include "proptest/std/memory.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/std/string.hpp"
@@ -8,7 +8,7 @@
 using namespace proptest;
 
 template <typename T>
-void outStream(ostream& ostr, const TypedStream<T>& stream) {
+void outStream(ostream& ostr, const Stream<T>& stream) {
     ostr << "[";
     for (auto itr = stream.iterator(); itr.hasNext();) {
         stream << proptest::Show<T>(itr.next());
@@ -19,9 +19,9 @@ void outStream(ostream& ostr, const TypedStream<T>& stream) {
 }
 
 template <typename T>
-void outUntypedStream(ostream& ostr, const UntypedStream& stream) {
+void outAnyStream(ostream& ostr, const AnyStream& stream) {
     ostr << "[";
-    for (auto itr = UntypedIterator(stream); itr.hasNext();) {
+    for (auto itr = AnyStreamIterator(stream); itr.hasNext();) {
         ostr << proptest::Show<T>(itr.next<T>());
         if(itr.hasNext())
             ostr << ", ";
@@ -30,7 +30,7 @@ void outUntypedStream(ostream& ostr, const UntypedStream& stream) {
 }
 
 template <typename T>
-string serializeStream(const TypedStream<T>& stream)
+string serializeStream(const Stream<T>& stream)
 {
     stringstream ostr;
     outStream(ostr, stream);
@@ -38,25 +38,25 @@ string serializeStream(const TypedStream<T>& stream)
 }
 
 template <typename T>
-string serializeUntypedStream(const UntypedStream& stream)
+string serializeAnyStream(const AnyStream& stream)
 {
     stringstream ostr;
-    outUntypedStream<T>(ostr, stream);
+    outAnyStream<T>(ostr, stream);
     return ostr.str();
 }
 
-TEST(TypedStream, empty)
+TEST(Stream, empty)
 {
-    auto stream = TypedStream<int>::empty(); // empty stream
+    auto stream = Stream<int>::empty(); // empty stream
     EXPECT_EQ(stream.isEmpty(), true);
 }
 
-TEST(TypedStream, one)
+TEST(Stream, one)
 {
-    auto stream = TypedStream<int>::one(100);
+    auto stream = Stream<int>::one(100);
     EXPECT_EQ(stream.isEmpty(), false);
 
-    TypedIterator<int> itr = stream.iterator();
+    StreamIterator<int> itr = stream.iterator();
     ASSERT_EQ(itr.hasNext(), true);
 
     auto value = itr.next();
@@ -64,16 +64,16 @@ TEST(TypedStream, one)
     ASSERT_EQ(itr.hasNext(), false);
 
     // copy
-    TypedStream<int> streamCopy = stream;
+    Stream<int> streamCopy = stream;
     EXPECT_EQ(streamCopy.isEmpty(), false);
 }
 
-TEST(TypedStream, two)
+TEST(Stream, two)
 {
-    auto stream = TypedStream<int>::two(100, 200);
+    auto stream = Stream<int>::two(100, 200);
     EXPECT_EQ(stream.isEmpty(), false);
 
-    TypedIterator<int> itr = stream.iterator();
+    StreamIterator<int> itr = stream.iterator();
     ASSERT_EQ(itr.hasNext(), true);
 
     int value = itr.next();
@@ -85,11 +85,11 @@ TEST(TypedStream, two)
     ASSERT_EQ(itr.hasNext(), false);
 }
 
-TEST(TypedStream, values)
+TEST(Stream, values)
 {
-    auto stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream = Stream<int>::of(1,2,3,4,5,6,7,8);
     vector<int> values;
-    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -97,11 +97,11 @@ TEST(TypedStream, values)
     EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
 }
 
-TEST(TypedStream, values2)
+TEST(Stream, values2)
 {
-    auto stream = TypedStream<int>::values({1,2,3,4,5,6,7,8});
+    auto stream = Stream<int>::values({1,2,3,4,5,6,7,8});
     vector<int> values;
-    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -109,13 +109,13 @@ TEST(TypedStream, values2)
     EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
 }
 
-TEST(TypedStream, iterator)
+TEST(Stream, iterator)
 {
-    auto stream = TypedStream<int>::two(100, 200);
+    auto stream = Stream<int>::two(100, 200);
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<int> values;
-    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -123,13 +123,13 @@ TEST(TypedStream, iterator)
     EXPECT_EQ(values, vector<int>({100, 200}));
 }
 
-TEST(TypedStream, string)
+TEST(Stream, string)
 {
-    auto stream = TypedStream<string>::two("hello", "world");
+    auto stream = Stream<string>::two("hello", "world");
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<string> values;
-    for(TypedIterator<string> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<string> itr = stream.iterator(); itr.hasNext(); ) {
         string value = itr.next();
         values.push_back(value);
     }
@@ -139,14 +139,14 @@ TEST(TypedStream, string)
     EXPECT_EQ(values, vector<string>({"hello", "world"}));
 }
 
-TEST(TypedStream, transform)
+TEST(Stream, transform)
 {
-    auto stream = TypedStream<int>::two(100, 200);
+    auto stream = Stream<int>::two(100, 200);
 
     auto stream2 = stream.transform<string>(util::make_function([](const int& value) { return to_string(value); }));
 
     vector<string> values;
-    for(TypedIterator<string> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<string> itr = stream2.iterator(); itr.hasNext(); ) {
         string value = itr.next();
         values.push_back(value);
     }
@@ -155,13 +155,13 @@ TEST(TypedStream, transform)
     EXPECT_EQ(values[1], "200");
 }
 
-TEST(TypedStream, filter)
+TEST(Stream, filter)
 {
-    auto stream = TypedStream<int>::two(100, 200);
+    auto stream = Stream<int>::two(100, 200);
     auto stream2 = stream.filter(util::make_function([](const int& value) { return value > 100; }));
 
     vector<int> values;
-    for(TypedIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -171,7 +171,7 @@ TEST(TypedStream, filter)
     values.clear();
     auto stream3 = stream.filter(util::make_function([](const int& value) { return value < 200; }));
 
-    for(TypedIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -179,14 +179,14 @@ TEST(TypedStream, filter)
     EXPECT_EQ(values[0], 100);
 }
 
-TEST(TypedStream, concat)
+TEST(Stream, concat)
 {
-    auto stream = TypedStream<int>::two(100, 200);
-    auto stream2 = TypedStream<int>::two(300, 400);
+    auto stream = Stream<int>::two(100, 200);
+    auto stream2 = Stream<int>::two(300, 400);
     auto stream3 = stream.concat(stream2);
 
     vector<int> values;
-    for(TypedIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -197,13 +197,13 @@ TEST(TypedStream, concat)
     EXPECT_EQ(values[3], 400);
 }
 
-TEST(TypedStream, take)
+TEST(Stream, take)
 {
-    auto stream = TypedStream<int>::two(100, 200);
+    auto stream = Stream<int>::two(100, 200);
     auto stream2 = stream.take(1);
 
     vector<int> values;
-    for(TypedIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -212,7 +212,7 @@ TEST(TypedStream, take)
 
     auto stream3 = stream.take(3); // taking exceeding size is ok
     values.clear();
-    for(TypedIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -222,15 +222,15 @@ TEST(TypedStream, take)
 }
 
 // around 30ms with N=12
-TEST(TypedStream, performance)
+TEST(Stream, performance)
 {
     const int N = 12;
-    auto stream = TypedStream<int>::one(100);
+    auto stream = Stream<int>::one(100);
     for(int i = 0; i < N; i++)
         stream = stream.concat(stream);
 
     vector<int> values;
-    for(TypedIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -238,26 +238,26 @@ TEST(TypedStream, performance)
     EXPECT_EQ(values[4095], 100);
 }
 
-TEST(UntypedStream, basic)
+TEST(AnyStream, basic)
 {
-    UntypedStream untypedStream(Any(100), util::make_anyfunction([]() -> TypedStream<int> { return TypedStream<int>::empty(); }));
+    AnyStream anyStream(Any(100), util::make_anyfunction([]() -> Stream<int> { return Stream<int>::empty(); }));
 }
 
-TEST(UntypedStream, from_TypedStream)
+TEST(AnyStream, from_TypedStream)
 {
-    auto stream = TypedStream<int>::empty(); // empty stream
+    auto stream = Stream<int>::empty(); // empty stream
     EXPECT_EQ(stream.isEmpty(), true);
-    UntypedStream untypedStream = stream;
-    EXPECT_EQ(untypedStream.isEmpty(), true);
+    AnyStream anyStream = stream;
+    EXPECT_EQ(anyStream.isEmpty(), true);
 }
 
-TEST(UntypedStream, iterator)
+TEST(AnyStream, iterator)
 {
-    UntypedStream untypedStream = TypedStream<int>::two(100, 200);
-    EXPECT_EQ(untypedStream.isEmpty(), false);
+    AnyStream anyStream = Stream<int>::two(100, 200);
+    EXPECT_EQ(anyStream.isEmpty(), false);
 
     vector<int> values;
-    for(UntypedIterator itr(untypedStream); itr.hasNext(); ) {
+    for(AnyStreamIterator itr(anyStream); itr.hasNext(); ) {
         int value = itr.next<int>();
         values.push_back(value);
     }
@@ -266,56 +266,56 @@ TEST(UntypedStream, iterator)
     EXPECT_EQ(values[1], 200);
 }
 
-TEST(UntypedStream, transform)
+TEST(AnyStream, transform)
 {
-    UntypedStream stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    AnyStream stream = Stream<int>::of(1,2,3,4,5,6,7,8);
     auto stream2 = stream.transform(util::make_function([](const Any& value) -> Any { return to_string(value.getRef<int>()); }));
-    EXPECT_EQ(serializeUntypedStream<int>(stream), "[1, 2, 3, 4, 5, 6, 7, 8]");
-    EXPECT_EQ(serializeUntypedStream<string>(stream2), "[\"1\" (31), \"2\" (32), \"3\" (33), \"4\" (34), \"5\" (35), \"6\" (36), \"7\" (37), \"8\" (38)]");
+    EXPECT_EQ(serializeAnyStream<int>(stream), "[1, 2, 3, 4, 5, 6, 7, 8]");
+    EXPECT_EQ(serializeAnyStream<string>(stream2), "[\"1\" (31), \"2\" (32), \"3\" (33), \"4\" (34), \"5\" (35), \"6\" (36), \"7\" (37), \"8\" (38)]");
 }
 
-TEST(UntypedStream, filter)
+TEST(AnyStream, filter)
 {
-    UntypedStream stream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
+    AnyStream stream = Stream<int>::of(1,2,3,4,5,6,7,8);
     auto stream2 = stream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() > 3; }));
-    EXPECT_EQ(serializeUntypedStream<int>(stream2), "[4, 5, 6, 7, 8]");
+    EXPECT_EQ(serializeAnyStream<int>(stream2), "[4, 5, 6, 7, 8]");
 
     auto stream3 = stream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() < 4; }));
-    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[1, 2, 3]");
+    EXPECT_EQ(serializeAnyStream<int>(stream3), "[1, 2, 3]");
 }
 
-TEST(UntypedStream, concat)
+TEST(AnyStream, concat)
 {
-    UntypedStream untypedStream = TypedStream<int>::two(100, 200);
-    auto stream2 = TypedStream<int>::two(300, 400);
-    auto stream3 = untypedStream.concat(stream2);
-    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[100, 200, 300, 400]");
+    AnyStream anyStream = Stream<int>::two(100, 200);
+    auto stream2 = Stream<int>::two(300, 400);
+    auto stream3 = anyStream.concat(stream2);
+    EXPECT_EQ(serializeAnyStream<int>(stream3), "[100, 200, 300, 400]");
 }
 
-TEST(UntypedStream, take)
+TEST(AnyStream, take)
 {
-    UntypedStream untypedStream = TypedStream<int>::of(1,2,3,4,5,6,7,8);
-    auto stream1 = untypedStream.take(0);
-    EXPECT_EQ(serializeUntypedStream<int>(stream1), "[]");
-    auto stream2 = untypedStream.take(1);
-    EXPECT_EQ(serializeUntypedStream<int>(stream2), "[1]");
+    AnyStream anyStream = Stream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream1 = anyStream.take(0);
+    EXPECT_EQ(serializeAnyStream<int>(stream1), "[]");
+    auto stream2 = anyStream.take(1);
+    EXPECT_EQ(serializeAnyStream<int>(stream2), "[1]");
 
-    auto stream3 = untypedStream.take(3);
-    EXPECT_EQ(serializeUntypedStream<int>(stream3), "[1, 2, 3]");
+    auto stream3 = anyStream.take(3);
+    EXPECT_EQ(serializeAnyStream<int>(stream3), "[1, 2, 3]");
 
-    auto stream4 = untypedStream.take(10); // taking exceeding size is ok
-    EXPECT_EQ(serializeUntypedStream<int>(stream4), "[1, 2, 3, 4, 5, 6, 7, 8]");
+    auto stream4 = anyStream.take(10); // taking exceeding size is ok
+    EXPECT_EQ(serializeAnyStream<int>(stream4), "[1, 2, 3, 4, 5, 6, 7, 8]");
 }
 
-TEST(UntypedStream, performance)
+TEST(AnyStream, performance)
 {
     const int N = 12;
-    auto stream = TypedStream<int>::one(100);
+    auto stream = Stream<int>::one(100);
     for(int i = 0; i < N; i++)
         stream = stream.concat(stream);
 
     vector<int> values;
-    for(UntypedIterator itr(stream); itr.hasNext(); ) {
+    for(AnyStreamIterator itr(stream); itr.hasNext(); ) {
         int value = itr.next<int>();
         values.push_back(value);
     }

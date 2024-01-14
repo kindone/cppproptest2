@@ -5,7 +5,7 @@
 #include "proptest/util/any.hpp"
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/util/lazy.hpp"
-#include "proptest/TypedStream.hpp"
+#include "proptest/Stream.hpp"
 
 namespace proptest {
 
@@ -18,28 +18,46 @@ template <typename T>
 struct Shrinkable
 {
     using type = T;
-    using Stream = TypedStream<Shrinkable<T>>;
+    using Stream = Stream<Shrinkable<T>>;
 
+    // for Shrinkable<Any> a.k.a. ShrinkableAny
+    template <typename U>
+        requires (is_same_v<T, Any>)
+    Shrinkable(const Shrinkable<U>& otherShr) : Shrinkable(otherShr.template map<Any>([](const U& u) -> Any {
+        return Any(u);
+    })) {}
+
+    template <typename U=T>
+        requires (!is_same_v<U, Any>)
     Shrinkable(const T& _value) : Shrinkable(Any(_value)) {}
+
     explicit Shrinkable(Any _value) : value(_value), shrinks(Stream::empty()) {}
 
-    Shrinkable& operator=(const Shrinkable& other) {
-        value = other.value;
-        shrinks = other.shrinks;
-        return *this;
+    Shrinkable clear() const {
+        return Shrinkable{value};
     }
 
     Shrinkable with(const Stream& otherShrinks) const {
+        if constexpr(is_same_v<T, Any>) {
+            if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
+                throw invalid_argument("cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        }
         return Shrinkable(value, otherShrinks);
     }
 
     Shrinkable with(Function<Stream()> otherStream) const {
+        if constexpr(is_same_v<T, Any>) {
+            auto otherShrinks = otherStream();
+            if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
+                throw invalid_argument("cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        }
         return Shrinkable(value, Lazy<Stream>(otherStream));
     }
 
     // operator T() const { return get(); }
     T get() const { return value.getRef<T>(); }
     const T& getRef() const { return value.getRef<T>(); }
+    T& getMutableRef() { return value.getMutableRef<T>(); }
     Any getAny() const { return value; }
 
     Stream getShrinks() const { return *shrinks; }
@@ -146,25 +164,34 @@ struct Shrinkable
     }
 
 private:
-    Shrinkable(Any _value, const Lazy<Stream>& _shrinks) : value(_value), shrinks(_shrinks) {}
+    Shrinkable(Any _value, const Lazy<Stream>& _shrinks) : value(_value), shrinks(_shrinks) {
+        if constexpr(is_same_v<T, Any>) {
+            if(!_shrinks->isEmpty() && _shrinks->getHeadRef().getRef().type() != value.type())
+                throw invalid_argument("cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        }
+    }
 
     Any value;
     Lazy<Stream> shrinks;
 
 public:
 
-    template <typename U, typename... Args>
-    friend Shrinkable<U> make_shrinkable(Args&&... args);
+    template <typename U, typename... ARGS>
+    friend Shrinkable<U> make_shrinkable(ARGS&&... args);
 
     template <typename U>
     friend struct Shrinkable;
 };
 
-template <typename T, typename... Args>
-Shrinkable<T> make_shrinkable(Args&&... args)
+template <typename T, typename... ARGS>
+Shrinkable<T> make_shrinkable(ARGS&&... args)
 {
-    return Shrinkable<T>{util::make_any<T>(util::forward<Args>(args)...)};
+    return Shrinkable<T>{util::make_any<T>(util::forward<ARGS>(args)...)};
 }
 
+using ShrinkableAny = Shrinkable<Any>;
+
+// explicit instantiation of Shrinkable<Any>
+extern template struct Shrinkable<Any>;
 
 } // namespace proptest

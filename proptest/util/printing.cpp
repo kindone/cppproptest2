@@ -23,29 +23,29 @@ PROPTEST_API ostream& show(ostream& os, const string& str)
     return os;
 }
 
-// PROPTEST_API ostream& show(ostream& os, const UTF8String& str)
-// {
-//     os << "\"" << util::DecodeUTF8(str) << "\" (" << util::StringAsHex(str) << ")";
-//     return os;
-// }
+PROPTEST_API ostream& show(ostream& os, const UTF8String& str)
+{
+    os << "\"" << util::DecodeUTF8(str) << "\" (" << util::StringAsHex(str) << ")";
+    return os;
+}
 
-// PROPTEST_API ostream& show(ostream& os, const UTF16BEString& str)
-// {
-//     os << "\"" << util::DecodeUTF16BE(str) << "\" (" << util::StringAsHex(str) << ")";
-//     return os;
-// }
+PROPTEST_API ostream& show(ostream& os, const UTF16BEString& str)
+{
+    os << "\"" << util::DecodeUTF16BE(str) << "\" (" << util::StringAsHex(str) << ")";
+    return os;
+}
 
-// PROPTEST_API ostream& show(ostream& os, const UTF16LEString& str)
-// {
-//     os << "\"" << util::DecodeUTF16LE(str) << "\" (" << util::StringAsHex(str) << ")";
-//     return os;
-// }
+PROPTEST_API ostream& show(ostream& os, const UTF16LEString& str)
+{
+    os << "\"" << util::DecodeUTF16LE(str) << "\" (" << util::StringAsHex(str) << ")";
+    return os;
+}
 
-// PROPTEST_API ostream& show(ostream& os, const CESU8String& str)
-// {
-//     os << "\"" << util::DecodeCESU8(str) << "\" (" << util::StringAsHex(str) << ")";
-//     return os;
-// }
+PROPTEST_API ostream& show(ostream& os, const CESU8String& str)
+{
+    os << "\"" << util::DecodeCESU8(str) << "\" (" << util::StringAsHex(str) << ")";
+    return os;
+}
 
 PROPTEST_API ostream& show(ostream& os, const bool& val)
 {

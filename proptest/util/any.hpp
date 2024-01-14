@@ -23,6 +23,17 @@ struct PROPTEST_API AnyHolder {
             return *static_cast<const T*>(rawPtr());
     }
 
+    template <typename T>
+    T& getMutableRef() const {
+        if constexpr(is_lvalue_reference_v<T>) {
+            using RawT = decay_t<T>;
+            return *const_cast<RawT*>(static_cast<const RawT*>(rawPtr()));
+        }
+        else
+            return *const_cast<T*>(static_cast<const T*>(rawPtr()));
+    }
+
+
 protected:
     // for cast()
     virtual const void* rawPtr() const = 0;
@@ -143,9 +154,23 @@ struct PROPTEST_API Any {
             if(!ptr)
                 throw invalid_cast_error("no value in an empty Any");
             if(type() != typeid(T)) {
-                throw invalid_cast_error("cannot convert from " + string(type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
+        }
+    }
+
+    template <typename T>
+    T& getMutableRef() {
+        if constexpr(is_same_v<decay_t<T>, Any>)
+            return *this;
+        else {
+            if(!ptr)
+                throw invalid_cast_error("no value in an empty Any");
+            if(type() != typeid(T)) {
+                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
+            }
+            return ptr->getMutableRef<T>();
         }
     }
 
@@ -193,5 +218,7 @@ shared_ptr<Any> make_shared_any(const shared_ptr<T>& ptr)
 
 }
 
+template <typename T>
+using AnyT = Any;
 
 }  // namespace proptest

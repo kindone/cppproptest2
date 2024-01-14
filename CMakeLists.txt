@@ -37,7 +37,11 @@ SET(proptest_sources
     proptest/shrinker/integral.cpp
     proptest/shrinker/bool.cpp
     proptest/shrinker/floating.cpp
-    proptest/TypedStream.cpp
+    proptest/shrinker/pair.cpp
+    proptest/shrinker/listlike.cpp
+    proptest/shrinker/string.cpp
+    proptest/Stream.cpp
+    proptest/ShrinkableAny.cpp
 )
 
 ADD_LIBRARY(proptest
@@ -67,9 +71,10 @@ SET(proptest_testsources
     proptest/test/test_any.cpp
     proptest/test/test_anyfunction.cpp
     proptest/test/test_tupleorvector.cpp
-    proptest/test/test_typedstream.cpp
+    proptest/test/test_stream.cpp
     proptest/test/test_shrinkable.cpp
     proptest/test/test_shrinker.cpp
+    proptest/test/test_anyshrinkable.cpp
 )
 
 
