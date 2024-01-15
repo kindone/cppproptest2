@@ -5,16 +5,18 @@ namespace proptest {
 
 Shrinkable<string> shrinkString(const string& str, size_t minSize) {
     size_t size = str.size();
+
+    // "abc" -> ["", "a", "ab"]
     auto shrinkRear =
-        shrinkIntegral<uint64_t>(size - minSize).map<string>([str, minSize](const uint64_t& size) {
-            return str.substr(0, size + minSize);
+        shrinkIntegral<uint64_t>(size - minSize).map<string>([str, minSize](const uint64_t& theSize) {
+            return str.substr(0, theSize + minSize);
         });
 
     // shrink front
-    return shrinkRear.concat([minSize](const Shrinkable<string>& shr) {
+    return shrinkRear.concat([minSize = minSize + 1](const Shrinkable<string>& shr) {
         auto& str = shr.getRef();
         size_t maxSizeCopy = str.size();
-        if (str.size() <= minSize+1)
+        if (str.size() <= minSize)
             return Stream<Shrinkable<string>>::empty();
         auto newShrinkable = shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
                                  .map<string>([str, minSize, maxSizeCopy](const uint64_t& value) {

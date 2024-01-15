@@ -15,10 +15,10 @@ Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, s
                     return StringLike(str.substr(0, bytePositions[_size + minSize]));
             });
 
-    return shrinkRear.concat([minSize, bytePositions](const Shrinkable<StringLike>& shr) {
+    return shrinkRear.concat([minSize = minSize + 1, bytePositions](const Shrinkable<StringLike>& shr) {
         auto& str = shr.getRef();
         size_t maxSizeCopy = str.charsize();
-        if (maxSizeCopy == minSize)
+        if (maxSizeCopy <= minSize)
             return Stream<Shrinkable<StringLike>>::empty();
         auto newShrinkable =
             shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
