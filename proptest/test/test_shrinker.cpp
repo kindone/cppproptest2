@@ -180,6 +180,7 @@ TEST(StringShrinker, basic)
     EXPECT_EQ(serializeShrinkable(shr), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"bc\" (62 63)}, {value: \"c\" (63)}]}");
 }
 
+// membershipwise + elementwise
 TEST(shrinkContainer, string)
 {
     auto fwd_converter = [](const string& str) -> vector<Shrinkable<uint32_t>> {
@@ -206,9 +207,10 @@ TEST(shrinkContainer, string)
     EXPECT_EQ(serializeShrinkable(shr3), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"c\" (63)}, {value: \"ac\" (61 63)}, {value: \"bc\" (62 63)}]}");
 }
 
+// same as StringShrinker, but with UTF8String/UTF16String
 TEST(StringLikeShrinker, basic)
 {
     vector<int> bytePositions({0,1,2,3}); // need 4 for 3 chars
     auto shr = shrinkStringLike<UTF8String>("abc", 0, 3, bytePositions);
-    EXPECT_EQ(serializeShrinkable(shr), "{value: \"abc\" (97, 98, 99), shrinks: [{value: \"\" ( )}, {value: \"a\" (97)}, {value: \"b\" (98)}, {value: \"c\" (99)}]}");
+    EXPECT_EQ(serializeShrinkable(shr), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"bc\" (62 63)}, {value: \"c\" (63)}]}");
 }
