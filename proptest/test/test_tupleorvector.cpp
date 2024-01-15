@@ -5,7 +5,7 @@
 
 using namespace proptest;
 
-TEST(TupleOrVector, tuple_homogeneous)
+TEST(TupleOrVectorHolder, tuple_homogeneous)
 {
     tuple<int, int, int> t(1, 2, 3);
     TupleHolder<int, int, int> holder(t);
@@ -23,7 +23,7 @@ TEST(TupleOrVector, tuple_homogeneous)
     EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<double>(), invalid_cast_error);
 }
 
-TEST(TupleOrVector, tuple_heterogeneous)
+TEST(TupleOrVectorHolder, tuple_heterogeneous)
 {
     tuple<int, double, string> t(1, 2.0, "3");
     TupleHolder<int, double, string> holder(t);
@@ -41,7 +41,7 @@ TEST(TupleOrVector, tuple_heterogeneous)
     EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<int>(), invalid_cast_error);
 }
 
-TEST(TupleOrVector, vector)
+TEST(TupleOrVectorHolder, vector)
 {
     tuple<int, int, int> t(1, 2, 3);
     vector<int> vec{1, 2, 3};
@@ -57,4 +57,38 @@ TEST(TupleOrVector, vector)
     EXPECT_EQ(t2, t);
 
     EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<double>(), invalid_cast_error);
+}
+
+TEST(TupleOrVector, tuple_homogeneous)
+{
+    tuple<int, int, int> t(1, 2, 3);
+    TupleOrVector any(t);
+    EXPECT_EQ((any.toTuple<int, int, int>()), t);
+    EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
+    EXPECT_EQ(any.toAnyVector()[1].getRef<int>(), 2);
+    EXPECT_EQ(any.toAnyVector()[2].getRef<int>(), 3);
+    EXPECT_THROW(any.toAnyVector()[3].getRef<double>(), invalid_cast_error);
+}
+
+TEST(TupleOrVector, tuple_heterogeneous)
+{
+    tuple<int, double, string> t(1, 2.0, "3");
+    TupleOrVector any(t);
+    EXPECT_EQ((any.toTuple<int, double, string>()), t);
+    EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
+    EXPECT_EQ(any.toAnyVector()[1].getRef<double>(), 2.0);
+    EXPECT_EQ(any.toAnyVector()[2].getRef<string>(), "3");
+    EXPECT_THROW(any.toAnyVector()[3].getRef<int>(), invalid_cast_error);
+}
+
+TEST(TupleOrVector, vector)
+{
+    tuple<int, int, int> t(1, 2, 3);
+    vector<int> vec{1, 2, 3};
+    TupleOrVector any(vec);
+    EXPECT_EQ((any.toTuple<int, int, int>()), t);
+    EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
+    EXPECT_EQ(any.toAnyVector()[1].getRef<int>(), 2);
+    EXPECT_EQ(any.toAnyVector()[2].getRef<int>(), 3);
+    EXPECT_THROW(any.toAnyVector()[3].getRef<double>(), invalid_cast_error);
 }

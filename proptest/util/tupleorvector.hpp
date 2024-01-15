@@ -80,4 +80,41 @@ struct TupleHolder : public TupleOrVectorHolder {
     TUP value;
 };
 
+struct TupleOrVector {
+    template <typename... ARGS>
+        requires (sizeof...(ARGS) > 1)
+    TupleOrVector(ARGS&&... args) : holder(util::make_shared<TupleHolder<ARGS...>>(util::forward<ARGS>(args)...)) {}
+
+    template <typename T>
+    TupleOrVector(vector<T>&& vec) : holder(util::make_shared<VectorHolder<T>>(util::move(vec))) {}
+
+    template <typename T>
+    TupleOrVector(const vector<T>& vec) : holder(util::make_shared<VectorHolder<T>>(vec)) {}
+
+    template <typename... ARGS>
+    TupleOrVector(tuple<ARGS...>&& tup) : holder(util::make_shared<TupleHolder<ARGS...>>(util::move(tup))) {}
+
+    template <typename... ARGS>
+    TupleOrVector(const tuple<ARGS...>& tup) : holder(util::make_shared<TupleHolder<ARGS...>>(tup)) {}
+
+    template <typename... ARGS>
+    tuple<ARGS...> toTuple() const {
+        return holder->toTuple<ARGS...>();
+    }
+
+    template <typename T>
+    vector<T> toVector() const {
+        vector<T> vec;
+        for (const auto& elem : holder->toAnyVector())
+            vec.push_back(elem.getRef<T>());
+        return vec;
+    }
+
+    vector<Any> toAnyVector() const {
+        return holder->toAnyVector();
+    }
+
+    shared_ptr<TupleOrVectorHolder> holder;
+};
+
 } // namespace proptest

@@ -5,9 +5,9 @@
 namespace proptest {
 
 template <typename StringLike>
-Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, size_t size, const vector<int>& bytePositions) {
+Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, size_t charsize, const vector<int>& bytePositions) {
     auto shrinkRear =
-        shrinkIntegral<uint64_t>(size - minSize)
+        shrinkIntegral<uint64_t>(charsize - minSize)
             .template map<StringLike>([str, minSize, bytePositions](const uint64_t& _size) -> StringLike {
                 if (bytePositions.empty())
                     return StringLike();

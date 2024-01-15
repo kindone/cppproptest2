@@ -6,6 +6,7 @@
 #include "proptest/shrinker/set.hpp"
 #include "proptest/shrinker/string.hpp"
 #include "proptest/shrinker/stringlike.hpp"
+#include "proptest/shrinker/tuple.hpp"
 #include "proptest/util/utf8string.hpp"
 #include "gtest/gtest.h"
 #include "proptest/test/testutil.hpp"
@@ -213,4 +214,13 @@ TEST(StringLikeShrinker, basic)
     vector<int> bytePositions({0,1,2,3}); // need 4 for 3 chars
     auto shr = shrinkStringLike<UTF8String>("abc", 0, 3, bytePositions);
     EXPECT_EQ(serializeShrinkable(shr), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"bc\" (62 63)}, {value: \"c\" (63)}]}");
+}
+
+TEST(TupleShrinker, basic)
+{
+    // auto shr1 = shrinkIntegral(2);
+    // auto shr2 = shrinkString("ab", 0);
+    // auto shr3 = shrinkBool(true);
+    // auto shr = shrinkTuple(Shrinkable(util::make_tuple(shr1, shr2, shr3)));
+    // EXPECT_EQ(serializeShrinkable(shr), "{value: (2, \"ab\" (61 62), true), shrinks: [{value: (0, \"ab\" (61 62), true)}, {value: (1, \"ab\" (61 62), true)}, {value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}, {value: (2, \"b\" (62), true), shrinks: [{value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}]}, {value: (2, \"ab\" (61 62), false)}]}");
 }

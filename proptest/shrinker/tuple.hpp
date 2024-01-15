@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Shrinkable.hpp"
-#include "../util/tuple.hpp"
+#include "proptest/Shrinkable.hpp"
+#include "proptest/util/tuple.hpp"
 
 namespace proptest {
 
@@ -13,23 +13,18 @@ class TupleShrinker {
     using out_tuple_t = tuple<ARGS...>;
     using tuple_t = tuple<Shrinkable<ARGS>...>;
     using shrinkable_t = Shrinkable<tuple_t>;
-    using stream_t = Stream;
+    using stream_t = Stream<shrinkable_t>;
 
     static constexpr auto Size = sizeof...(ARGS);
 
 private:
     template <size_t N>
-        requires (N < sizeof...(ARGS))
     static shrinkable_t ConcatHelper(const shrinkable_t& aggr)
     {
-        return ConcatHelper<N + 1>(aggr.concat(genStream<N>()));
-    }
-
-    template <size_t N>
-        requires (N >= sizeof...(ARGS))
-    static shrinkable_t ConcatHelper(const shrinkable_t& aggr)
-    {
-        return aggr;
+        if constexpr (N >= sizeof...(ARGS))
+            return aggr;
+        else
+            return ConcatHelper<N + 1>(aggr.concat(genStream<N>()));
     }
 
     template <size_t N>
@@ -75,6 +70,10 @@ public:
 template <typename... ARGS>
 Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
+    // auto tupOrVectorShr = shrinkable.map<TupleOrVector>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+    //     return TupleOrVector(tuple);
+    // });
+    // tupleOrVectorShr.
     return util::TupleShrinker<ARGS...>::shrink(shrinkable);
 }
 
