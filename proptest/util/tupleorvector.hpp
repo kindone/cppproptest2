@@ -25,6 +25,15 @@ tuple<ARGS...> vectorToTuple(const vector<Any>& v) {
     return vectorToTupleImpl<ARGS...>(v, std::index_sequence_for<ARGS...>{});
 }
 
+template <typename... ARGS>
+vector<Any> tupleToAnyVector(const tuple<ARGS...>& tup) {
+    vector<Any> anyVector;
+    util::For([&] (auto index_sequence) {
+        anyVector.push_back(Any(proptest::get<index_sequence.value>(tup)));
+    }, make_index_sequence<sizeof...(ARGS)>{});
+    return anyVector;
+}
+
 } // namespace util
 
 

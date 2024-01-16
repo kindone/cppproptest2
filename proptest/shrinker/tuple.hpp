@@ -70,11 +70,35 @@ public:
 template <typename... ARGS>
 Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
-    // auto tupOrVectorShr = shrinkable.map<TupleOrVector>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
-    //     return TupleOrVector(tuple);
-    // });
+    auto vectorAnyShr = shrinkable.map<vector<Any>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+        vector<ShrinkableAny> anyVector;
+        util::For([&] (auto index_sequence) {
+            anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tup)));
+        }, make_index_sequence<sizeof...(ARGS)>{});
+        return anyVector;
+    });
+
+    constexpr size_t Size = sizeof...(ARGS);
+
+    for(size_t N = 0; N < Size; N++) {
+        vectorAnyShr = vectorAnyShr.concat([N](const Shrinkable<vector<ShrinkableAny>>& parent) -> Stream<Shrinkable<vector<ShrinkableAny>>> {
+            // create a copy
+            vector<ShrinkableAny> parentCopy = parent.getRef();
+
+            ShrinkableAny elem = parentCopy[N];
+            // rebuild full vector from an element
+            // {0,2,3} to {[x,x,x,0], ...,[x,x,x,3]}
+            // make sure {1} shrinked from 2 is also transformed to [x,x,x,1]
+            shrinkable_t tupWithElems = elem.template flatMap<ShrinkableAny>([parentCopy](const ShrinkableAny& val) {
+                parentCopy[N] = make_shrinkable<element_t>(val);
+                return make_shrinkable<vector<ShrinkableAny>(parentCopy);
+            });
+            return tupWithElems.shrinks();
+        })
+    }
+
     // tupleOrVectorShr.
-    return util::TupleShrinker<ARGS...>::shrink(shrinkable);
+    // return util::TupleShrinker<ARGS...>::shrink(shrinkable);
 }
 
 } // namespace proptest

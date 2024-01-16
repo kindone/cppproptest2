@@ -5,6 +5,45 @@
 
 using namespace proptest;
 
+TEST(vectorToTuple, basic)
+{
+    vector<Any> vec{1, 2, 3};
+    tuple<int, int, int> t(1, 2, 3);
+    EXPECT_EQ((util::vectorToTuple<int, int, int>(vec)), t);
+}
+
+TEST(vectorToTuple, invalid)
+{
+    vector<Any> vec{1, 2, 3};
+    EXPECT_THROW((util::vectorToTuple<int, int, int, int>(vec)), invalid_argument);
+}
+
+TEST(tupleToVector, basic)
+{
+    tuple<int, int, int> t(1, 2, 3);
+    vector<Any> vec{1, 2, 3};
+    EXPECT_EQ((util::vectorToTuple<int, int, int>(util::tupleToAnyVector<int, int, int>(t))), t);
+}
+
+TEST(Map, basic)
+{
+    auto t = util::Map([](auto index) { return index.value; }, make_index_sequence<3>{});
+    EXPECT_EQ(t, util::make_tuple(0, 1, 2));
+}
+
+TEST(Map, hetero)
+{
+    auto t = util::Map([](auto index) { 
+        if constexpr (index.value == 0)
+            return 0;
+        else if constexpr (index.value == 1)
+            return 1.0;
+        else
+            return string("2");
+    }, make_index_sequence<3>{});
+    EXPECT_EQ(t, util::make_tuple(0, 1.0, "2"));
+}
+
 TEST(TupleOrVectorHolder, tuple_homogeneous)
 {
     tuple<int, int, int> t(1, 2, 3);

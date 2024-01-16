@@ -6,7 +6,7 @@
 #include "proptest/shrinker/set.hpp"
 #include "proptest/shrinker/string.hpp"
 #include "proptest/shrinker/stringlike.hpp"
-#include "proptest/shrinker/tuple.hpp"
+// #include "proptest/shrinker/tuple.hpp"
 #include "proptest/util/utf8string.hpp"
 #include "gtest/gtest.h"
 #include "proptest/test/testutil.hpp"
