@@ -30,6 +30,13 @@ Any& Any::operator=(const Any& other) {
     return *this;
 }
 
+Any::Any(const shared_ptr<AnyHolder>& holderPtr) : ptr(holderPtr) { }
+
+Any Any::clone() const
+{
+    return Any(ptr->clone());
+}
+
 // bool Any::operator==(const Any& other) {
 //     if(isEmpty() || other.isEmpty())
 //         return isEmpty() && other.isEmpty();

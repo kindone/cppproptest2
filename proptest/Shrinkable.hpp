@@ -60,6 +60,10 @@ struct Shrinkable
     T& getMutableRef() { return value.getMutableRef<T>(); }
     Any getAny() const { return value; }
 
+    Shrinkable clone() const {
+        return Shrinkable(value.clone(), shrinks);
+    }
+
     Stream getShrinks() const { return *shrinks; }
 
     template <typename U>

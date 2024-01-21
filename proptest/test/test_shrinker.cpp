@@ -6,7 +6,7 @@
 #include "proptest/shrinker/set.hpp"
 #include "proptest/shrinker/string.hpp"
 #include "proptest/shrinker/stringlike.hpp"
-// #include "proptest/shrinker/tuple.hpp"
+#include "proptest/shrinker/tuple.hpp"
 #include "proptest/util/utf8string.hpp"
 #include "gtest/gtest.h"
 #include "proptest/test/testutil.hpp"
@@ -218,9 +218,9 @@ TEST(StringLikeShrinker, basic)
 
 TEST(TupleShrinker, basic)
 {
-    // auto shr1 = shrinkIntegral(2);
-    // auto shr2 = shrinkString("ab", 0);
-    // auto shr3 = shrinkBool(true);
-    // auto shr = shrinkTuple(Shrinkable(util::make_tuple(shr1, shr2, shr3)));
-    // EXPECT_EQ(serializeShrinkable(shr), "{value: (2, \"ab\" (61 62), true), shrinks: [{value: (0, \"ab\" (61 62), true)}, {value: (1, \"ab\" (61 62), true)}, {value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}, {value: (2, \"b\" (62), true), shrinks: [{value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}]}, {value: (2, \"ab\" (61 62), false)}]}");
+    auto shr1 = shrinkIntegral(2);
+    auto shr2 = shrinkString("ab", 0);
+    auto shr3 = shrinkBool(true);
+    auto shr = shrinkTuple(Shrinkable(util::make_tuple(shr1, shr2, shr3)));
+    EXPECT_EQ(serializeShrinkable(shr), "{value: (2, \"ab\" (61 62), true), shrinks: [{value: (0, \"ab\" (61 62), true)}, {value: (1, \"ab\" (61 62), true)}, {value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}, {value: (2, \"b\" (62), true), shrinks: [{value: (2, \"\" (), true)}, {value: (2, \"a\" (61), true), shrinks: [{value: (2, \"\" (), true)}]}]}, {value: (2, \"ab\" (61 62), false)}]}");
 }

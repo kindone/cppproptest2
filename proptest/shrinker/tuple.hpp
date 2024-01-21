@@ -2,6 +2,7 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/util/tuple.hpp"
+#include "proptest/util/tupleorvector.hpp"
 
 namespace proptest {
 
@@ -70,10 +71,10 @@ public:
 template <typename... ARGS>
 Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
-    auto vectorAnyShr = shrinkable.map<vector<Any>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
         vector<ShrinkableAny> anyVector;
         util::For([&] (auto index_sequence) {
-            anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tup)));
+            anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tuple)));
         }, make_index_sequence<sizeof...(ARGS)>{});
         return anyVector;
     });
@@ -82,20 +83,33 @@ Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>..
 
     for(size_t N = 0; N < Size; N++) {
         vectorAnyShr = vectorAnyShr.concat([N](const Shrinkable<vector<ShrinkableAny>>& parent) -> Stream<Shrinkable<vector<ShrinkableAny>>> {
-            // create a copy
-            vector<ShrinkableAny> parentCopy = parent.getRef();
+            const ShrinkableAny& elem = parent.getRef()[N];
+            // need a mutable clone
+            const auto& parentVec = parent.getRef();
+            shared_ptr<vector<ShrinkableAny>> parentCopy = util::make_shared<vector<ShrinkableAny>>();
+            parentCopy->reserve(parent.getRef().size());
+            for(auto& shrAny : parentVec)
+                parentCopy->push_back(shrAny.clone());
 
-            ShrinkableAny elem = parentCopy[N];
             // rebuild full vector from an element
             // {0,2,3} to {[x,x,x,0], ...,[x,x,x,3]}
-            // make sure {1} shrinked from 2 is also transformed to [x,x,x,1]
-            shrinkable_t tupWithElems = elem.template flatMap<ShrinkableAny>([parentCopy](const ShrinkableAny& val) {
-                parentCopy[N] = make_shrinkable<element_t>(val);
-                return make_shrinkable<vector<ShrinkableAny>(parentCopy);
+            // make sure {1} shrunk from 2 is also transformed to [x,x,x,1]
+            Shrinkable<vector<ShrinkableAny>> vecWithElems = elem.template flatMap<vector<ShrinkableAny>>([N,parentCopy](const Any& val) {
+                // create a copy
+                (*parentCopy)[N] = make_shrinkable<Any>(val); // replace parent copy with val at tuple position N
+                return make_shrinkable<vector<ShrinkableAny>>(*parentCopy);
             });
-            return tupWithElems.shrinks();
-        })
+            return vecWithElems.getShrinks();
+        });
     }
+
+    return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableAny>& shrAnyVec) {
+        vector<Any> anyVec;
+        anyVec.reserve(shrAnyVec.size());
+        for(auto& shrAny : shrAnyVec)
+            anyVec.push_back(shrAny.getAny());
+        return util::vectorToTuple<ARGS...>(anyVec);
+    });
 
     // tupleOrVectorShr.
     // return util::TupleShrinker<ARGS...>::shrink(shrinkable);

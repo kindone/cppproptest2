@@ -4,6 +4,8 @@
 #include "proptest/typefwd.hpp"
 #include "proptest/std/memory.hpp"
 #include "proptest/std/type.hpp"
+#include "proptest/std/concepts.hpp"
+#include "proptest/std/string.hpp"
 #include "proptest/std/exception.hpp"
 
 namespace proptest
@@ -33,6 +35,7 @@ struct PROPTEST_API AnyHolder {
             return *const_cast<T*>(static_cast<const T*>(rawPtr()));
     }
 
+    virtual shared_ptr<AnyHolder> clone() const = 0;
 
 protected:
     // for cast()
@@ -62,6 +65,10 @@ struct PROPTEST_API AnyVal : AnyHolder {
             return false;
     }
 
+    virtual shared_ptr<AnyHolder> clone() const override {
+        return util::make_shared<AnyVal<T>>(value);
+    }
+
     T value;
 };
 
@@ -78,6 +85,10 @@ struct PROPTEST_API AnyLValRef : AnyHolder {
 
     bool operator==(const T& other) {
         return &value == &other;
+    }
+
+    virtual shared_ptr<AnyHolder> clone() const override {
+        return util::make_shared<AnyLValRef<T>>(value); // note: inherently, lvalue reference is not a copy
     }
 
     const T& value;
@@ -104,6 +115,13 @@ struct PROPTEST_API AnyRef : AnyHolder {
         }
         else
             return false;
+    }
+
+    virtual shared_ptr<AnyHolder> clone() const override {
+        if constexpr(copy_constructible<T>)
+            return util::make_shared<AnyRef<T>>(*static_pointer_cast<T>(ptr));
+        else
+            throw runtime_error("cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
     }
 
 private:
@@ -141,6 +159,10 @@ struct PROPTEST_API Any {
     template <typename T>
     Any(const shared_ptr<AnyVal<T>>& holderPtr) : ptr(holderPtr){
     }
+
+    Any(const shared_ptr<AnyHolder>& holderPtr);
+
+    Any clone() const;
 
     Any& operator=(const Any& other);
 
