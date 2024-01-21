@@ -43,6 +43,7 @@ SET(proptest_sources
     proptest/shrinker/tuple.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
+    proptest/Random.cpp
 )
 
 ADD_LIBRARY(proptest
