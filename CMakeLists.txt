@@ -8,7 +8,7 @@ PROJECT("cppproptest"  VERSION 1.0)
 SET(CMAKE_CXX_FLAGS_RELEASE "")
 SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 SET(CMAKE_CXX_STANDARD 20)
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
 
 # add_subdirectory("proptest")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,6 +40,7 @@ SET(proptest_sources
     proptest/shrinker/pair.cpp
     proptest/shrinker/listlike.cpp
     proptest/shrinker/string.cpp
+    proptest/shrinker/tuple.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
 )
@@ -74,6 +75,7 @@ SET(proptest_testsources
     proptest/test/test_stream.cpp
     proptest/test/test_shrinkable.cpp
     proptest/test/test_shrinker.cpp
+    proptest/test/test_shrinker2.cpp
     proptest/test/test_anyshrinkable.cpp
 )
 

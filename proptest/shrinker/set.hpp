@@ -19,7 +19,8 @@ namespace proptest {
 
 template <typename T>
 Shrinkable<set<T>> shrinkSet(const Shrinkable<set<Shrinkable<T>>>& shrinkableSet, size_t minSize) {
-    return shrinkContainer<set, T>(shrinkableSet, minSize);
+    // elementwise shrink may result in duplicates removed automatically, which would be inefficient (TODO: unless there is only one element?)
+    return shrinkContainer<set, T>(shrinkableSet, minSize, /*elementwise*/false, /*membershipwise*/true);
 }
 
 }
