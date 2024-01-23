@@ -78,6 +78,7 @@ SET(proptest_testsources
     proptest/test/test_shrinker.cpp
     proptest/test/test_shrinker2.cpp
     proptest/test/test_anyshrinkable.cpp
+    proptest/test/test_random.cpp
 )
 
 
