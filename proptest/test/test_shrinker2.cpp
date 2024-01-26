@@ -7,7 +7,7 @@
 #include "proptest/shrinker/string.hpp"
 #include "proptest/shrinker/stringlike.hpp"
 #include "proptest/util/utf8string.hpp"
-#include "gtest/gtest.h"
+#include "proptest/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;

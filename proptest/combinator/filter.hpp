@@ -2,6 +2,7 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/Generator.hpp"
 
 /**
  * @file filter.hpp
@@ -33,16 +34,14 @@ Generator<T> filter(GEN&& gen, Criteria&& criteria)
     static_assert(is_convertible_v<Criteria&&, Function<bool(T&)>>, "criteria must be a callable of T& -> bool");
     static_assert(is_convertible_v<GEN&&, Function<Shrinkable<T>(Random&)>>,
                   "Gen must be a GenFunction<T> or a callable of Random& -> Shrinkable<T>");
-    auto genPtr = util::make_shared<GenFunction<T>>(util::forward<GEN>(gen));
-    Function<bool(const Any&)> criteriaAny = [criteria](const Any& a) {
-        return criteria(a.cast<T>());
-    };
-    return Generator<T>([genPtr, criteriaAny](Random& rand) {
+    Function<Shrinkable<T>(Random&)> genFunc = gen;
+    Function<bool(const T&)> criteriaFunc = criteria;
+    return Generator<T>([genFunc, criteriaFunc](Random& rand) {
         // TODO: add some configurable termination criteria (e.g. maximum no. of attempts)
         while (true) {
-            Shrinkable<T> shrinkable = (*genPtr)(rand);
-            if (criteriaAny(shrinkable.getRef())) {
-                return shrinkable.filter(criteriaAny, 1);  // 1: tolerance
+            Shrinkable<T> shrinkable = genFunc(rand);
+            if (criteriaFunc(shrinkable.getRef())) {
+                return shrinkable.filter(criteriaFunc, 1);  // 1: tolerance
             }
         }
     });

@@ -3,7 +3,7 @@
 #include "proptest/std/lang.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/vector.hpp"
-#include "gtest/gtest.h"
+#include "proptest/gtest.hpp"
 
 using namespace proptest;
 

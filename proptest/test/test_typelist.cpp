@@ -1,6 +1,6 @@
 #include "proptest/util/function_traits.hpp"
 #include "proptest/std/type.hpp"
-#include "gtest/gtest.h"
+#include "proptest/gtest.hpp"
 
 using namespace proptest;
 

@@ -1,7 +1,7 @@
 #include "proptest/util/tupleorvector.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/exception.hpp"
-#include "gtest/gtest.h"
+#include "proptest/gtest.hpp"
 
 using namespace proptest;
 
@@ -33,7 +33,7 @@ TEST(Map, basic)
 
 TEST(Map, hetero)
 {
-    auto t = util::Map([](auto index) { 
+    auto t = util::Map([](auto index) {
         if constexpr (index.value == 0)
             return 0;
         else if constexpr (index.value == 1)
@@ -59,7 +59,7 @@ TEST(TupleOrVectorHolder, tuple_homogeneous)
     auto t2 = anyHolder->toTuple<int, int, int>();
     EXPECT_EQ(t2, t);
 
-    EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<double>(), invalid_cast_error);
+    EXPECT_THROW(anyHolder->toAnyVector()[2].getRef<double>(), invalid_cast_error);
 }
 
 TEST(TupleOrVectorHolder, tuple_heterogeneous)
@@ -77,7 +77,7 @@ TEST(TupleOrVectorHolder, tuple_heterogeneous)
     auto t2 = anyHolder->toTuple<int, double, string>();
     EXPECT_EQ(t2, t);
 
-    EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<int>(), invalid_cast_error);
+    EXPECT_THROW(anyHolder->toAnyVector()[2].getRef<int>(), invalid_cast_error);
 }
 
 TEST(TupleOrVectorHolder, vector)
@@ -95,7 +95,7 @@ TEST(TupleOrVectorHolder, vector)
     auto t2 = anyHolder->toTuple<int, int, int>();
     EXPECT_EQ(t2, t);
 
-    EXPECT_THROW(anyHolder->toAnyVector()[3].getRef<double>(), invalid_cast_error);
+    EXPECT_THROW(anyHolder->toAnyVector()[2].getRef<double>(), invalid_cast_error);
 }
 
 TEST(TupleOrVector, tuple_homogeneous)
@@ -106,7 +106,7 @@ TEST(TupleOrVector, tuple_homogeneous)
     EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
     EXPECT_EQ(any.toAnyVector()[1].getRef<int>(), 2);
     EXPECT_EQ(any.toAnyVector()[2].getRef<int>(), 3);
-    EXPECT_THROW(any.toAnyVector()[3].getRef<double>(), invalid_cast_error);
+    EXPECT_THROW(any.toAnyVector()[2].getRef<double>(), invalid_cast_error);
 }
 
 TEST(TupleOrVector, tuple_heterogeneous)
@@ -117,7 +117,7 @@ TEST(TupleOrVector, tuple_heterogeneous)
     EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
     EXPECT_EQ(any.toAnyVector()[1].getRef<double>(), 2.0);
     EXPECT_EQ(any.toAnyVector()[2].getRef<string>(), "3");
-    EXPECT_THROW(any.toAnyVector()[3].getRef<int>(), invalid_cast_error);
+    EXPECT_THROW(any.toAnyVector()[2].getRef<int>(), invalid_cast_error);
 }
 
 TEST(TupleOrVector, vector)
@@ -129,5 +129,5 @@ TEST(TupleOrVector, vector)
     EXPECT_EQ(any.toAnyVector()[0].getRef<int>(), 1);
     EXPECT_EQ(any.toAnyVector()[1].getRef<int>(), 2);
     EXPECT_EQ(any.toAnyVector()[2].getRef<int>(), 3);
-    EXPECT_THROW(any.toAnyVector()[3].getRef<double>(), invalid_cast_error);
+    EXPECT_THROW(any.toAnyVector()[2].getRef<double>(), invalid_cast_error);
 }

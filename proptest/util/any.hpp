@@ -49,6 +49,7 @@ template <typename T> concept equality_check_available = requires(T a, T b) {
 template <typename T>
 struct PROPTEST_API AnyVal : AnyHolder {
     const type_info& type() const override { return typeid(T); }
+    virtual ~AnyVal() {}
 
     AnyVal(const T& val) : value(val) {
     }
@@ -75,6 +76,7 @@ struct PROPTEST_API AnyVal : AnyHolder {
 template <typename T>
 struct PROPTEST_API AnyLValRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
+    virtual ~AnyLValRef() {}
 
     AnyLValRef(const T& val) : value(val) {
     }
@@ -98,6 +100,7 @@ struct PROPTEST_API AnyLValRef : AnyHolder {
 template <typename T>
 struct PROPTEST_API AnyRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
+    virtual ~AnyRef() {}
 
     AnyRef(const T& t) : ptr(static_pointer_cast<void>(util::make_shared<T>(t))) {
     }
@@ -132,6 +135,7 @@ struct PROPTEST_API Any {
     static const Any empty;
 
     Any() = default;
+    virtual ~Any() {}
 
     Any(const Any& other);
 

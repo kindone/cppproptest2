@@ -24,14 +24,11 @@ struct Generator;
  * @param transformer transformation function T& -> U
  */
 template <typename T, typename U>
-Generator<U> transform(GenFunction<T> gen, Function<U(T&)> transformer)
+Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(const T&)> transformer)
 {
-    auto genPtr = util::make_shared<decltype(gen)>(gen);
-    auto transformerAny = [transformer](const Any& a) { return Any(transformer(a.cast<T>())); };
-    // return generator(util::TransformFunctor2<T, U>(genPtr, transformerPtr));
-    return generator([genPtr, transformerAny](Random& rand) {
-        Shrinkable<T> shrinkable = (*genPtr)(rand);
-        return shrinkable.template map<U>(transformerAny);
+    return generator([gen, transformer](Random& rand) -> Shrinkable<U>{
+        Shrinkable<T> shrinkable = gen(rand);
+        return shrinkable.template map<U>(transformer);
     });
 }
 

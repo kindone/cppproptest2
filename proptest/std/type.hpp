@@ -23,9 +23,11 @@ using std::is_fundamental_v;
 using std::is_lvalue_reference;
 using std::is_lvalue_reference_v;
 using std::is_pointer;
+using std::is_const_v;
 using std::is_function_v;
 using std::is_same;
 using std::is_same_v;
+using std::is_base_of_v;
 using std::is_signed;
 
 using std::enable_if;
