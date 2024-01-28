@@ -173,13 +173,13 @@ struct PROPTEST_API Any {
     // bool operator==(const Any& other);
 
     template <typename T>
-    const T& getRef() const {
+    const T& getRef(bool skipCheck = false) const {
         if constexpr(is_same_v<decay_t<T>, Any>)
             return *this;
         else {
             if(!ptr)
                 throw invalid_cast_error("no value in an empty Any");
-            if(type() != typeid(T)) {
+            if(!skipCheck && type() != typeid(T)) {
                 throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
@@ -187,13 +187,13 @@ struct PROPTEST_API Any {
     }
 
     template <typename T>
-    T& getMutableRef() {
+    T& getMutableRef(bool skipCheck = false) {
         if constexpr(is_same_v<decay_t<T>, Any>)
             return *this;
         else {
             if(!ptr)
                 throw invalid_cast_error("no value in an empty Any");
-            if(type() != typeid(T)) {
+            if(!skipCheck && type() != typeid(T)) {
                 throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getMutableRef<T>();

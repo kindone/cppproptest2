@@ -41,7 +41,7 @@ TEST(Generator, gen2gen)
 {
     Random rand(getCurrentTime());
     Generator<int> gen = just<int>(1339);
-    Function<GenFunction<int>(const int&)> gen2gen = [](const int& i) -> GenFunction<int> // without this signature, it will fail
+    Function<GenFunction<int>(const int&)> gen2gen = [](const int& i) -> Generator<int> // without this signature, it will fail
     {
         return just<int>(i + 1);
     };

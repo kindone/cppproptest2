@@ -8,10 +8,10 @@ using namespace proptest;
 TEST(FunctionNHolderConst, fptr)
 {
     auto lambda0 = +[]() { return 1; };
-    FunctionNHolderConst<decltype(lambda0),int> holder0(util::forward<decltype(lambda0)>(lambda0));
+    FunctionNHolderConst<decltype(lambda0),int,int> holder0(util::forward<decltype(lambda0)>(lambda0));
     EXPECT_EQ(holder0(), 1);
     auto lambda = +[](int a, int b) { return a+b; };
-    FunctionNHolderConst<decltype(lambda),int,int,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),int,int,int,int> holder(util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ(holder(1,2), 3);
     EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 3);
 }
@@ -19,10 +19,10 @@ TEST(FunctionNHolderConst, fptr)
 TEST(FunctionNHolderConst, fptr_void)
 {
     auto lambda0 = +[]() { return; };
-    FunctionNHolderConst<decltype(lambda0),void> holder0(util::forward<decltype(lambda0)>(lambda0));
+    FunctionNHolderConst<decltype(lambda0),void,void> holder0(util::forward<decltype(lambda0)>(lambda0));
     holder0();
     auto lambda = +[](int a, int b) { return; };
-    FunctionNHolderConst<decltype(lambda),void,int,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),void,void,int,int> holder(util::forward<decltype(lambda)>(lambda));
     holder(1,2);
     holder.apply({Any(1),Any(2)});
 }
@@ -34,7 +34,7 @@ TEST(FunctionNHolderConst, functor)
     };
 
     Functor functor;
-    FunctionNHolderMutable<Functor,int,int,int> holder(functor);
+    FunctionNHolderMutable<Functor,int,int,int,int> holder(functor);
     EXPECT_EQ(holder(1,2), 3);
     EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 3);
 }
@@ -42,10 +42,10 @@ TEST(FunctionNHolderConst, functor)
 TEST(FunctionNHolderConst, lambda)
 {
     auto lambda0 = []() { return 1; };
-    FunctionNHolderConst<decltype(lambda0),int> holder0(util::forward<decltype(lambda0)>(lambda0));
+    FunctionNHolderConst<decltype(lambda0),int,int> holder0(util::forward<decltype(lambda0)>(lambda0));
     EXPECT_EQ(holder0(), 1);
     auto lambda = [](int a, int b) { return a+b; };
-    FunctionNHolderConst<decltype(lambda),int,int,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),int,int,int,int> holder(util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ(holder(1,2), 3);
     EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 3);
 }
@@ -57,7 +57,7 @@ TEST(FunctionNHolderConst, lambda_with_capture)
         return lambda;
     };
     auto lambda = factory(1);
-    FunctionNHolderConst<decltype(lambda),int,int,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),int,int,int,int> holder(util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ(holder(1,2), 4);
     EXPECT_EQ(holder.apply({Any(1),Any(2)}).getRef<int>(), 4);
 }
@@ -65,7 +65,7 @@ TEST(FunctionNHolderConst, lambda_with_capture)
 TEST(FunctionNHolderConst, ptr_args)
 {
     auto lambda = [](int* a, int b) { return *a+b; };
-    FunctionNHolderConst<decltype(lambda),int,int*,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),int,int,int*,int> holder(util::forward<decltype(lambda)>(lambda));
     int x = 1;
     int y = 2;
     EXPECT_EQ(holder(&x,y), 3);
@@ -75,7 +75,7 @@ TEST(FunctionNHolderConst, ptr_args)
 TEST(FunctionNHolderConst, reference_args)
 {
     auto lambda = [](int& a, int b) { a += b; return a; };
-    FunctionNHolderConst<decltype(lambda),int,int&,int> holder(util::forward<decltype(lambda)>(lambda));
+    FunctionNHolderConst<decltype(lambda),int,int,int&,int> holder(util::forward<decltype(lambda)>(lambda));
     int x = 1;
     int y = 2;
     EXPECT_EQ(holder(x,y), 3);
@@ -87,7 +87,7 @@ TEST(FunctionNHolderConst, reference_args)
 TEST(FunctionNHolder, ptr)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    unique_ptr<FunctionNHolder<int(int,int)>> lambda0 = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int>>(
+    unique_ptr<FunctionNHolder<int,int(int,int)>> lambda0 = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ((*lambda0)(1,2), 3);
     EXPECT_EQ(lambda0->invoke(Any(1),Any(2)).getRef<int>(), 3);
@@ -176,7 +176,7 @@ TEST(Function, assign_function_pointer)
 TEST(Function, assign_FunctionNHolderImpl)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    shared_ptr<FunctionHolder> functionNHolderImpl = util::make_shared<FunctionNHolderConst<decltype(lambda),int,int,int>>(util::forward<decltype(lambda)>(lambda));
+    shared_ptr<FunctionHolder> functionNHolderImpl = util::make_shared<FunctionNHolderConst<decltype(lambda),int,int,int,int>>(util::forward<decltype(lambda)>(lambda));
     Function<int(int,int)> function(functionNHolderImpl);
     EXPECT_EQ(function(1,2), 3);
 }
@@ -274,7 +274,7 @@ TEST(Function, in_capture)
 
     auto factory2 = [](int a) {
         auto lambda = [a](int b) -> int { return a+b; };
-        return FunctionNHolderConst<decltype(lambda),int,int>(util::forward<decltype(lambda)>(lambda));
+        return FunctionNHolderConst<decltype(lambda),int,int,int>(util::forward<decltype(lambda)>(lambda));
     };
     auto functionx = factory2(1);
     EXPECT_EQ(functionx(2), 3);
@@ -330,7 +330,7 @@ TEST(AnyFunctionHolderHelper, basic)
 TEST(AnyFunctionNHolder, fptr)
 {
     auto lambda = +[](int a, int b) { return a+b; };
-    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int>>(
+    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
@@ -344,7 +344,7 @@ TEST(AnyFunctionNHolder, functor)
     };
 
     Functor functor;
-    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<Functor,int,int,int>>(functor);
+    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<Functor,int,int,int,int>>(functor);
     EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->call<int>(1,2), 3);
@@ -353,7 +353,7 @@ TEST(AnyFunctionNHolder, functor)
 TEST(AnyFunctionNHolder, basic)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int>>(
+    unique_ptr<AnyFunctionNHolder<2>> anyFunctionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
     EXPECT_EQ(anyFunctionN->invoke(Any(1),Any(2)).getRef<int>(), 3);
     EXPECT_EQ(anyFunctionN->apply({Any(1),Any(2)}).getRef<int>(), 3);
@@ -363,7 +363,7 @@ TEST(AnyFunctionNHolder, basic)
 TEST(FunctionHolder, basic)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    unique_ptr<FunctionNHolder<int(int, int)>> functionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int>>(
+    unique_ptr<FunctionNHolder<int,int(int, int)>> functionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),int,int,int,int>>(
         util::forward<decltype(lambda)>(lambda));
     unique_ptr<FunctionHolder> anyFunction = util::move(functionN);
     EXPECT_EQ(anyFunction->apply({Any(1),Any(2)}).getRef<int>(), 3);
@@ -373,7 +373,7 @@ TEST(FunctionHolder, basic)
 TEST(FunctionHolder, void)
 {
     auto lambda = [](int a, int b) { return; };
-    unique_ptr<FunctionNHolder<void(int, int)>> functionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),void,int,int>>(
+    unique_ptr<FunctionNHolder<void,void(int, int)>> functionN = util::make_unique<FunctionNHolderMutable<decltype(lambda),void,void,int,int>>(
         util::forward<decltype(lambda)>(lambda));
     unique_ptr<FunctionHolder> anyFunction = util::move(functionN);
     anyFunction->apply({Any(1),Any(2)});

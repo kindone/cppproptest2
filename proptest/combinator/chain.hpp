@@ -143,20 +143,12 @@ decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen)
 {
     using CHAIN = typename function_traits<GEN1>::return_type::type;  // T from shrinkable<T>(Random&)
     using RetType = typename function_traits<GEN2GEN>::return_type;
-    GenFunction<CHAIN> funcGen1 = gen1;
     static_assert(GenLike<RetType>, "gen2gen a callable of T -> Shrinkable<U>");
     using U = typename invoke_result_t<RetType, Random&>::type;  // U from shrinkable<U>(Random&)
 
-    if constexpr(is_same_v<RetType, GenFunction<U>>) {
-        Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = gen2gen;
-        return util::chainImpl(funcGen1, funcGen2Gen);
-    }
-    else {
-        Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = [gen2gen](const CHAIN& chain) -> GenFunction<U> {
-            return gen2gen(chain);
-        };
-        return util::chainImpl(funcGen1, funcGen2Gen);
-    }
+    GenFunction<CHAIN> funcGen1 = gen1;
+    Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = gen2gen;
+    return util::chainImpl(funcGen1, funcGen2Gen);
 }
 
 }  // namespace proptest

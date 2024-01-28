@@ -161,7 +161,7 @@ TEST(Derive, basic)
 TEST(Chain, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = chain(interval<int>(0, 8), [](const int& i) -> GenFunction<int> { return interval(0, i); });
+    auto gen = chain(interval<int>(0, 8), [](const int& i) -> Generator<int> { return interval(0, i); });
 
     for(int i = 0; i < 20; i++)
     {
