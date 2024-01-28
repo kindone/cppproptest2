@@ -1,7 +1,7 @@
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/std/memory.hpp"
 #include "proptest/std/io.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 

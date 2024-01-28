@@ -1,12 +1,92 @@
+#include "proptest/combinator/just.hpp"
+#include "proptest/combinator/reference.hpp"
 #include "proptest/combinator/filter.hpp"
 #include "proptest/combinator/transform.hpp"
+#include "proptest/combinator/derive.hpp"
+#include "proptest/combinator/oneof.hpp"
+#include "proptest/combinator/elementof.hpp"
+#include "proptest/combinator/chain.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/Random.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;
+
+
+TEST(Just, lvalue)
+{
+    int a = 1339;
+    Random rand(getCurrentTime());
+    auto gen = just<int>(a);
+    auto result = gen(rand);
+    EXPECT_EQ(result.get(), 1339);
+}
+
+TEST(Just, rvalue)
+{
+    Random rand(getCurrentTime());
+    auto gen = just<int>(1339);
+    auto result = gen(rand);
+    EXPECT_EQ(result.get(), 1339);
+}
+
+TEST(Just, Any)
+{
+    Random rand(getCurrentTime());
+    auto gen = just<Any>(Any(1339));
+    auto result = gen(rand);
+    EXPECT_EQ(result.get().getRef<int>(), 1339);
+}
+
+TEST(OneOf, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = oneOf<int>(just<int>(1339), just<int>(42));
+    auto result = gen(rand);
+    EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
+}
+
+TEST(OneOf, weighted)
+{
+    Random rand(getCurrentTime());
+    auto gen = unionOf<int>(weightedGen(just<int>(1339), 0.9), weightedGen(just<int>(42), 0.1));
+    int num1339 = 0, num42 = 0;
+    for(int i = 0; i < 1000; i++) {
+        auto result = gen(rand);
+        if(result.get() == 1339)
+            num1339++;
+        else if(result.get() == 42)
+            num42++;
+        EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
+    }
+    EXPECT_GT(num1339, num42);
+}
+
+TEST(ElementOf, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = elementOf<int>(1339, 42);
+    auto result = gen(rand);
+    EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
+}
+
+TEST(ElementOf, weighted)
+{
+    Random rand(getCurrentTime());
+    auto gen = elementOf<int>(weightedVal(1339, 0.9), weightedVal(42, 0.1));
+    int num1339 = 0, num42 = 0;
+    for(int i = 0; i < 1000; i++) {
+        auto result = gen(rand);
+        if(result.get() == 1339)
+            num1339++;
+        else if(result.get() == 42)
+            num42++;
+        EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
+    }
+    EXPECT_GT(num1339, num42);
+}
 
 TEST(Filter, basic)
 {
@@ -60,5 +140,35 @@ TEST(FilterTransform, basic)
         auto result = transformed(rand);
         EXPECT_EQ(result.get(), "8");
         EXPECT_EQ(serializeShrinkable(result), "{value: \"8\" (38)}"); // shrinks are also filtered
+    }
+}
+
+TEST(Derive, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = just<int>(8);
+    auto derived = derive<int, int>(gen, [](const int& i) { return interval(0, i); });
+
+    for(int i = 0; i < 20; i++)
+    {
+        // TODO
+        auto result = derived(rand);
+        if(result.get() == 8)
+            EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
+    }
+}
+
+TEST(Chain, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = chain(interval<int>(0, 8), [](const int& i) -> GenFunction<int> { return interval(0, i); });
+
+    for(int i = 0; i < 20; i++)
+    {
+        // TODO
+        [[maybe_unused]] auto result = gen(rand);
+        // if(get<0>(result.get()) == 8) {
+        //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
+        // }
     }
 }

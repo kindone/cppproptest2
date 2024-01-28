@@ -2,6 +2,8 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/Generator.hpp"
+#include "proptest/std/pair.hpp"
 
 /**
  * @file derive.hpp
@@ -34,42 +36,33 @@ struct Generator;
  * @endcode
  */
 template <typename T, typename U>
-Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
+Generator<U> derive(GenFunction<T> gen1, Function<Generator<U>(const T&)> gen2gen)
 {
-    auto gen1Ptr = util::make_shared<decltype(gen1)>(gen1);
-    Function<Generator<U>(const T&)> gen2generator = [gen2gen](const T& t) {
-        // generate U
-        auto gen2 = (*gen2genPtr)(t);
-        Shrinkable<U> shrinkableU = gen2(rand);
-        return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, shrinkableU));
-    };
-
-    Function<Shrinkable<U>(Random&)> genU = [gen1Ptr, gen2generator](Random& rand) {
+    Function<Shrinkable<U>(Random&)> genU = [gen1, gen2gen](Random& rand) {
         // generate T
-        Shrinkable<T> shrinkableT = (*gen1Ptr)(rand);
+        Shrinkable<T> shrinkableT = gen1(rand);
         using Intermediate = pair<T, Shrinkable<U>>;
-
         // shrink strategy 1: expand Shrinkable<T>
         Shrinkable<pair<T, Shrinkable<U>>> intermediate =
-            shrinkableT.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2generator](const T& t) {
+            shrinkableT.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2gen](const T& t) mutable {
                 // generate U
-                auto gen2 = gen2generator(t);
+                auto gen2 = gen2gen(t);
                 Shrinkable<U> shrinkableU = gen2(rand);
                 return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, shrinkableU));
             });
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                Intermediate& interpair = interShr.getRef();
-                T& t = interpair.first;
-                Shrinkable<U>& shrinkableU = interpair.second;
+                const Intermediate& interpair = interShr.getRef();
+                const T& t = interpair.first;
+                const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate>([t](const U& u) mutable {
                         return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, make_shrinkable<U>(u)));
                     });
-                return newShrinkableU.shrinks();
+                return newShrinkableU.getShrinks();
             });
 
         // reformat pair<T, Shrinkable<U>> to U
@@ -77,7 +70,7 @@ Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
             +[](const Intermediate& interpair) -> Shrinkable<U> { return interpair.second; });
     };
 
-    return generator(genU);
+    return Generator<U>(genU);
 }
 
 }  // namespace proptest

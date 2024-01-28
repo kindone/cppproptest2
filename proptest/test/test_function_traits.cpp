@@ -1,5 +1,5 @@
 #include "proptest/util/function_traits.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 

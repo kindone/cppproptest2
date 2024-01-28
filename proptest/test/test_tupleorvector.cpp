@@ -1,7 +1,7 @@
 #include "proptest/util/tupleorvector.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/exception.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 

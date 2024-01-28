@@ -1,5 +1,5 @@
 #include "proptest/util/lazy.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 

@@ -1,7 +1,7 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/shrinker/integral.hpp"
 #include "proptest/std/io.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;

@@ -1,5 +1,5 @@
 #include "proptest/AnyShrinkable.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;

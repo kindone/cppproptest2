@@ -4,7 +4,7 @@
 #include "proptest/shrinker/pair.hpp"
 #include "proptest/shrinker/tuple.hpp"
 #include "proptest/shrinker/string.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;

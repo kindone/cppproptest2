@@ -2,6 +2,8 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/Generator.hpp"
+#include "proptest/std/tuple.hpp"
 
 /**
  * @file chain.hpp
@@ -22,36 +24,34 @@ using Chain = tuple<Ts...>;
 namespace util {
 
 template <typename U, typename T>
-Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
+Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
 {
-    auto gen1Ptr = util::make_shared<decltype(gen1)>(gen1);
-    Function<GenFunction<U>(const T&)> gen2genFunc = [gen2gen](const T& t) { return gen2gen(const_cast<T&>(t)); };
-    return generator([gen1Ptr, gen2genFunc](Random& rand) {
+    return generator([gen1, gen2gen](Random& rand) {
         // generate T
-        Shrinkable<T> shrinkableTs = (*gen1Ptr)(rand);
+        Shrinkable<T> shrinkableTs = gen1(rand);
         using Intermediate = pair<T, Shrinkable<U>>;
 
         // shrink strategy 1: expand Shrinkable<T>
         Shrinkable<pair<T, Shrinkable<U>>> intermediate =
-            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2genFunc](const T& t) {
+            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2gen](const T& t) mutable {
                 // generate U
-                auto gen2 = gen2genFunc(t);
+                auto gen2 = gen2gen(t);
                 Shrinkable<U> shrinkableU = gen2(rand);
                 return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, shrinkableU));
             });
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                Intermediate& interpair = interShr.getRef();
-                T& t = interpair.first;
-                Shrinkable<U>& shrinkableU = interpair.second;
+                const Intermediate& interpair = interShr.getRef();
+                const T& t = interpair.first;
+                const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate>([t](const U& u) mutable {
                         return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, make_shrinkable<U>(u)));
                     });
-                return newShrinkableU.shrinks();
+                return newShrinkableU.getShrinks();
             });
 
         // reformat pair<T, Shrinkable<U>> to Chain<T, U>
@@ -89,7 +89,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
                 Intermediate& interpair = interShr.getRef();
                 Chain<T0, T1, Ts...>& ts = interpair.first;
@@ -115,6 +115,13 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
 }  // namespace util
 
+
+template <typename F, typename GEN, typename T = typename invoke_result_t<GEN, Random&>::type>
+concept GenLikeGen = GenLike<GEN> && requires(F f, T& t) {
+    { f(t) }
+    -> GenLike;
+};
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for chaining two generators to generate a tuple of values, where the second generator
@@ -125,20 +132,31 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
  *     GenFunction<tuple<T,U>> tupleGen = chain(intGen, [](int& intVal) {
  *         auto stringGen = Arbi<string>();
  *         stringGen.setMaxSize(intVal); // string size is dependent to intVal generated from intGen
- *         return intVal;
+ *         return stringGen;
  *     });
  *     // chain(gen, ...) is equivalent to gen.tupleWith(...), if gen is of Arbitrary or Generator type
  * @endcode
  */
 template <typename GEN1, typename GEN2GEN>
-    requires GenFunctionLike<GEN1, typename invoke_result_t<GEN1, Random&>::type> && GenFunctionLikeGen<GEN2GEN, typename invoke_result_t<GEN1, Random&>::type>
+    requires GenLike<GEN1> && GenLikeGen<GEN2GEN, GEN1>
 decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen)
 {
-    using CHAIN = typename function_traits<GEN1>::return_type::type;  // get the T from shrinkable<T>(Random&)
+    using CHAIN = typename function_traits<GEN1>::return_type::type;  // T from shrinkable<T>(Random&)
     using RetType = typename function_traits<GEN2GEN>::return_type;
     GenFunction<CHAIN> funcGen1 = gen1;
-    Function<RetType(CHAIN&)> funcGen2Gen = gen2gen;
-    return util::chainImpl(funcGen1, funcGen2Gen);
+    static_assert(GenLike<RetType>, "gen2gen a callable of T -> Shrinkable<U>");
+    using U = typename invoke_result_t<RetType, Random&>::type;  // U from shrinkable<U>(Random&)
+
+    if constexpr(is_same_v<RetType, GenFunction<U>>) {
+        Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = gen2gen;
+        return util::chainImpl(funcGen1, funcGen2Gen);
+    }
+    else {
+        Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = [gen2gen](const CHAIN& chain) -> GenFunction<U> {
+            return gen2gen(chain);
+        };
+        return util::chainImpl(funcGen1, funcGen2Gen);
+    }
 }
 
 }  // namespace proptest

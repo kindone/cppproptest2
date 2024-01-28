@@ -200,8 +200,8 @@ struct FunctionNHolderImplMutable : public FunctionNHolder<RET(ARGS...)> {
     explicit FunctionNHolderImplMutable(const Callable& c) : callable(c) {
         // proptest::cout << "FunctionNHolderImplMutable constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << this << ", sizeof: " << sizeof(FunctionNHolderImplMutable) << proptest::endl;
     }
-    // FunctionNHolderImplMutable(const FunctionNHolderImplMutable&) = delete;
-    // FunctionNHolderImplMutable(FunctionNHolderImplMutable&&) = delete;
+    FunctionNHolderImplMutable(const FunctionNHolderImplMutable&) = delete;
+    FunctionNHolderImplMutable(FunctionNHolderImplMutable&&) = delete;
 
     ~FunctionNHolderImplMutable() {
         // proptest::cout << "FunctionNHolderImplMutable destructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() <<  proptest::endl;
@@ -227,6 +227,9 @@ struct FunctionNHolderImplMutable : public FunctionNHolder<RET(ARGS...)> {
     Callable callable;
 };
 
+template <typename Callable, typename RET, typename...ARGS>
+concept isCallableOf = (invocable<Callable, ARGS...> && is_same_v<RET, invoke_result_t<Callable, ARGS...>>);
+
 template <typename F>
 //   requires (is_function_v<F>)
 struct Function;
@@ -247,14 +250,16 @@ struct Function<RET(ARGS...)> {
     }
 
     template<typename Callable>
-        requires (invocable<Callable, ARGS...> && !is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable>)
+        requires (!is_base_of_v<AnyFunction, decay_t<Callable>> && !is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable>)
     Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImplConst<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
+        static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" <<  proptest::endl;
     }
 
     template<typename Callable>
-        requires (invocable<Callable, ARGS...> && !is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable>)
+        requires (!is_base_of_v<AnyFunction, decay_t<Callable>>  && !is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable>)
     Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImplMutable<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
+        static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
 

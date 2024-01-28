@@ -7,24 +7,33 @@
 
 namespace proptest {
 
-template <typename F, typename T, typename S = T>
-concept GenFunctionLike = requires(F f, Random& rand) {
+template <typename F, typename...ARGS, typename RET = typename invoke_result_t<F, Random&>::type>
+concept FunctionLike = requires(F f, ARGS... args) {
+    { f(args...) }
+    -> same_as<RET>;
+};
+
+template <typename F, typename T = typename invoke_result_t<F, Random&>::type, typename S = T>
+concept GenLike = requires(F f, Random& rand) {
     { f(rand) }
     -> same_as<Shrinkable<S>>;
 };
 
 template <typename F, typename T>
-concept GenFunction = GenFunctionLike<F, T, T>;
+concept Gen = GenLike<F, T, T>;
 
 template <typename T>
-class PROPTEST_API GenBase
+using GenFunction = Function<Shrinkable<T>(Random&)>;
+
+template <typename T>
+class PROPTEST_API GeneratorBase
 {
 public:
     virtual Shrinkable<T> operator()(Random& rand) const = 0;
 };
 
 template <typename T>
-class PROPTEST_API Generator : public GenBase<T>
+class PROPTEST_API Generator : public GeneratorBase<T>
 {
 public:
     Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}

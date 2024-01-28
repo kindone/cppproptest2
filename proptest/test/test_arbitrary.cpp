@@ -1,7 +1,7 @@
 #include "proptest/Arbitrary.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/Random.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 

@@ -1,5 +1,5 @@
 #include "proptest/Random.hpp"
-#include "proptest/gtest.hpp"
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 
