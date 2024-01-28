@@ -161,10 +161,10 @@ struct FunctionNHolder<RET(ARGS...)> : public AnyFunctionNHolder<sizeof...(ARGS)
 };
 
 template <typename Callable, typename RET, typename...ARGS>
-struct FunctionNHolderImplConst : public FunctionNHolder<RET(ARGS...) const> {
-    explicit FunctionNHolderImplConst(const Callable& c) : callable(c) {}
-    FunctionNHolderImplConst(const FunctionNHolderImplConst&) = delete;
-    FunctionNHolderImplConst(FunctionNHolderImplConst&&) = delete;
+struct FunctionNHolderConst : public FunctionNHolder<RET(ARGS...) const> {
+    explicit FunctionNHolderConst(const Callable& c) : callable(c) {}
+    FunctionNHolderConst(const FunctionNHolderConst&) = delete;
+    FunctionNHolderConst(FunctionNHolderConst&&) = delete;
 
     RET operator ()(ARGS... arg) const override {
         return callable(arg...);
@@ -196,15 +196,15 @@ struct FunctionNHolderImplConst : public FunctionNHolder<RET(ARGS...) const> {
 };
 
 template <typename Callable, typename RET, typename...ARGS>
-struct FunctionNHolderImplMutable : public FunctionNHolder<RET(ARGS...)> {
-    explicit FunctionNHolderImplMutable(const Callable& c) : callable(c) {
-        // proptest::cout << "FunctionNHolderImplMutable constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << this << ", sizeof: " << sizeof(FunctionNHolderImplMutable) << proptest::endl;
+struct FunctionNHolderMutable : public FunctionNHolder<RET(ARGS...)> {
+    explicit FunctionNHolderMutable(const Callable& c) : callable(c) {
+        // proptest::cout << "FunctionNHolderMutable constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << this << ", sizeof: " << sizeof(FunctionNHolderMutable) << proptest::endl;
     }
-    FunctionNHolderImplMutable(const FunctionNHolderImplMutable&) = delete;
-    FunctionNHolderImplMutable(FunctionNHolderImplMutable&&) = delete;
+    FunctionNHolderMutable(const FunctionNHolderMutable&) = delete;
+    FunctionNHolderMutable(FunctionNHolderMutable&&) = delete;
 
-    ~FunctionNHolderImplMutable() {
-        // proptest::cout << "FunctionNHolderImplMutable destructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() <<  proptest::endl;
+    ~FunctionNHolderMutable() {
+        // proptest::cout << "FunctionNHolderMutable destructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() <<  proptest::endl;
     }
 
     RET operator ()(ARGS... arg) override {
@@ -212,7 +212,7 @@ struct FunctionNHolderImplMutable : public FunctionNHolder<RET(ARGS...)> {
     }
 
     RET operator ()(ARGS... arg) const override {
-        throw runtime_error("FunctionNHolderImplMutable::operator() const not implemented");
+        throw runtime_error("FunctionNHolderMutable::operator() const not implemented");
     }
 
     Any apply(const initializer_list<Any>& args) override {
@@ -251,14 +251,14 @@ struct Function<RET(ARGS...)> {
 
     template<typename Callable>
         requires (!is_base_of_v<AnyFunction, decay_t<Callable>> && !is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable>)
-    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImplConst<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
+    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderConst<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" <<  proptest::endl;
     }
 
     template<typename Callable>
         requires (!is_base_of_v<AnyFunction, decay_t<Callable>>  && !is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable>)
-    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderImplMutable<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
+    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderMutable<decay_t<Callable>, RET, ARGS...>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
@@ -315,14 +315,14 @@ namespace util {
 
 template <typename Callable>
 decltype(auto) make_function(Callable&& c) {
-    using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderImplConst, Callable>;
+    using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderConst, Callable>;
     using FunctionType = typename function_traits<Callable>::template function_type_with_signature<Function>;
     return FunctionType{static_pointer_cast<FunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
 }
 
 template <typename Callable>
 AnyFunction make_anyfunction(Callable&& c) {
-    using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderImplConst, Callable>;
+    using HolderType = typename function_traits<Callable>::template template_type_with_self_ret_and_args<FunctionNHolderConst, Callable>;
     return AnyFunction{static_pointer_cast<FunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
 }
 
