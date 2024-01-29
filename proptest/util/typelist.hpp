@@ -27,4 +27,16 @@ struct TypeList<First, Ts...>
 
 } // namespace util
 
+template <template <typename...> typename TEMPLATE, typename...ARGS>
+TEMPLATE<ARGS...> TypeListToType(util::TypeList<ARGS...> list)
+{
+    return declval<TEMPLATE<ARGS...>>();
+}
+
+template <template <typename...> typename TEMPLATE, typename TYPELIST>
+struct TypeListToTemplateTypeHelper
+{
+    using type = decltype(TypeListToType<TEMPLATE>(declval<TYPELIST>()));
+};
+
 } // namespace proptest

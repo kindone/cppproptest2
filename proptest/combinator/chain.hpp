@@ -13,11 +13,6 @@
 
 namespace proptest {
 
-template <typename GEN>
-decltype(auto) generator(GEN&& gen);
-template <typename T>
-struct Generator;
-
 template <class... Ts>
 using Chain = tuple<Ts...>;
 
@@ -137,8 +132,7 @@ concept GenLikeGen = GenLike<GEN> && requires(F f, T& t) {
  *     // chain(gen, ...) is equivalent to gen.tupleWith(...), if gen is of Arbitrary or Generator type
  * @endcode
  */
-template <typename GEN1, typename GEN2GEN>
-    requires GenLike<GEN1> && GenLikeGen<GEN2GEN, GEN1>
+template <GenLike GEN1, GenLikeGen<GEN1> GEN2GEN>
 decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen)
 {
     using CHAIN = typename function_traits<GEN1>::return_type::type;  // T from shrinkable<T>(Random&)

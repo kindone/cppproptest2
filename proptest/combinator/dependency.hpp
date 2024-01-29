@@ -12,12 +12,6 @@
 
 namespace proptest {
 
-template <typename GEN>
-decltype(auto) generator(GEN&& gen);
-template <typename T>
-struct Generator;
-
-
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating values with dependencies or relation to a base generator

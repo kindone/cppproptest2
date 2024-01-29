@@ -50,3 +50,17 @@ TEST(Generator, gen2gen)
     Generator<int> gen2 = gen2gen(1339);
     EXPECT_EQ(gen2(rand).get(), 1340);
 }
+
+TEST(AnyGenerator, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = interval<int>(0, 10);
+    AnyGenerator anyGen = gen;
+    auto anyShr = anyGen(rand).get();
+    EXPECT_TRUE(anyShr.getRef<int>() >= 0);
+    EXPECT_TRUE(anyShr.getRef<int>() <= 10);
+
+    auto shr = anyGen.generate<int>(rand);
+    EXPECT_TRUE(shr.getRef() >= 0);
+    EXPECT_TRUE(shr.getRef() <= 10);
+}

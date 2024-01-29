@@ -4,19 +4,6 @@
 
 namespace proptest {
 
-template <template <typename...> typename TEMPLATE, typename...ARGS>
-TEMPLATE<ARGS...> TypeListToType(util::TypeList<ARGS...> list)
-{
-    return declval<TEMPLATE<ARGS...>>();
-}
-
-template <template <typename...> typename TEMPLATE, typename TYPELIST>
-struct TypeListToTemplateTypeHelper
-{
-    using type = decltype(TypeListToType<TEMPLATE>(declval<TYPELIST>()));
-};
-
-
 template <template <typename...> typename TEMPLATE, typename RET, typename...ARGS>
 TEMPLATE<RET(ARGS...)> TypeListToFunctionType(util::TypeList<ARGS...> list)
 {

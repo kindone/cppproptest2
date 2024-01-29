@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/Shrinkable.hpp"
+#include "proptest/std/type.hpp"
 
 namespace proptest {
 namespace util {
@@ -11,7 +12,7 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value);
 }  // namespace util
 
 template <typename T>
-    requires std::is_integral<T>::value
+    requires is_integral_v<T>
 PROPTEST_API Shrinkable<T> shrinkIntegral(T value)
 {
     if constexpr(is_same_v<T, int64_t>)

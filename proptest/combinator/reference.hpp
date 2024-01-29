@@ -21,8 +21,7 @@ namespace proptest {
  *
  * @endcode
  */
-template <typename GEN>
-    requires (GenLike<GEN>)
+template <GenLike GEN>
 auto reference(GEN&& gen) -> Generator<typename invoke_result_t<GEN, Random&>::type>
 {
     return generator([&gen](Random& rand) { return util::forward<GEN>(gen)(rand); });

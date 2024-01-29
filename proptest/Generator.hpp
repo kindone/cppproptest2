@@ -47,11 +47,38 @@ public:
  * @ingroup Generators
  * @brief Helper function to create \ref Generator<T> from generator functions to provide utility methods.
  */
-template <typename GEN>
+template <GenLike GEN>
 decltype(auto) generator(GEN&& gen)
 {
     using RetType = typename function_traits<GEN>::return_type::type;  // cast Shrinkable<T>(Random&) -> T
     return Generator<RetType>(util::forward<GEN>(gen));
 }
+
+template <GenLike GEN>
+decltype(auto) callableToGenFunction(GEN&& gen)
+{
+    using retType = decltype(gen(declval<Random&>()));
+    return static_cast<Function<retType(Random&)>>(gen);
+}
+
+struct AnyGenerator
+{
+    template <typename T>
+    AnyGenerator(const Generator<T>& gen) : anyGen(gen)
+    {
+    }
+
+    ShrinkableAny operator()(Random& rand) {
+        return anyGen(rand);
+    }
+
+    template <typename T>
+    Shrinkable<T> generate(Random& rand) {
+        return anyGen(rand).getRef().getRef<T>();
+    }
+
+private:
+    Function<ShrinkableAny(Random&)> anyGen;
+};
 
 }  // namespace proptest

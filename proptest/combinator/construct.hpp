@@ -57,7 +57,7 @@ struct ConstructFunctor {
 }  // namespace util
 
 template <class CLASS, typename... ARGTYPES>
-class Construct : public GenBase<CLASS> {
+class Construct : public GeneratorBase<CLASS> {
 public:
     using ArgumentList = util::TypeList<ARGTYPES...>;
     using GenTuple = tuple<GenFunction<remove_reference_t<ARGTYPES>>...>;
@@ -170,14 +170,19 @@ decltype(auto) construct()
 }
 
 // some explicits
-template <typename CLASS, typename... ARGTYPES, typename EXPGEN0, typename... EXPGENS>
+template <typename CLASS, typename... ARGTYPES, GenLike EXPGEN0, GenLike... EXPGENS>
 Construct<CLASS, ARGTYPES...> construct(EXPGEN0&& gen0, EXPGENS&&... gens)
 {
     constexpr auto ExplicitSize = sizeof...(EXPGENS) + 1;
     constexpr auto ImplicitSize = sizeof...(ARGTYPES) - ExplicitSize;
     using ArgsAsTuple = tuple<decay_t<ARGTYPES>...>;
+    using explictTypes = tuple<invoke_result_t<EXPGEN0, Random&>::type, invoke_result_t<EXPGENS, Random&>::type...>;
 
-    auto explicits = util::make_tuple(util::genToFunc(gen0), util::genToFunc(gens)...);
+    vector<AnyGenerator> explicitVec = {AnyGenerator(util::forward<EXPGEN0>(gen0)),
+                                        AnyGenerator(util::forward<EXPGENS>(gens))...};
+    vector<AnyGenerator> implicitVec = {AnyGenerator(Arbi<ARGS>())...};
+
+    auto explicits = util::make_tuple(util::callableToGenFunction(gen0), util::callableToGenFunction(gens)...);
     auto implicits =
         util::createGenHelperListed<ArgsAsTuple>(util::addOffset<ExplicitSize>(make_index_sequence<ImplicitSize>{}));
 

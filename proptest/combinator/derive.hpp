@@ -13,12 +13,6 @@
 
 namespace proptest {
 
-template <typename GEN>
-decltype(auto) generator(GEN&& gen);
-template <typename T>
-struct Generator;
-
-
 // returns a shrinkable pair of <T,U> where U depends on T
 /**
  * @ingroup Combinators

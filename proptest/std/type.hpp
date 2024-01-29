@@ -29,6 +29,7 @@ using std::is_function_v;
 using std::is_same;
 using std::is_same_v;
 using std::is_base_of_v;
+using std::is_integral_v;
 using std::is_signed;
 
 using std::enable_if;
