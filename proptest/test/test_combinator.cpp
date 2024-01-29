@@ -3,6 +3,7 @@
 #include "proptest/combinator/filter.hpp"
 #include "proptest/combinator/transform.hpp"
 #include "proptest/combinator/derive.hpp"
+#include "proptest/combinator/dependency.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/elementof.hpp"
 #include "proptest/combinator/chain.hpp"
@@ -155,6 +156,21 @@ TEST(Derive, basic)
         auto result = derived(rand);
         if(result.get() == 8)
             EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
+    }
+}
+
+TEST(Dependency, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = just<int>(8);
+    auto derived = dependency<int, int>(gen, [](const int& i) { return interval(0, i); });
+
+    for(int i = 0; i < 20; i++)
+    {
+        // TODO
+        [[maybe_unused]] auto result = derived(rand);
+        // if(result.get() == 8)
+        //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
     }
 }
 
