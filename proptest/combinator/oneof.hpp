@@ -20,7 +20,7 @@ template <typename T>
 util::Weighted<T> weightedGen(GenFunction<T> gen, double weight);
 
 template <typename GEN>
-    requires GenLike<GEN, typename invoke_result_t<GEN, Random&>::type>
+    requires GenLike<GEN>
 auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_result_t<GEN, Random&>::type>;
 
 namespace util {
@@ -114,7 +114,7 @@ util::Weighted<T> weightedGen(GenFunction<T> gen, double weight)
  * @tparam GEN (optional) generator (function of Random& -> Shrinkable<T>)
  */
 template <typename GEN>
-    requires GenLike<GEN, typename invoke_result_t<GEN, Random&>::type>
+    requires GenLike<GEN>
 auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_result_t<GEN, Random&>::type>
 {
     using T = typename invoke_result_t<GEN, Random&>::type;

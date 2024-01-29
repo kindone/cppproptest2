@@ -1,5 +1,10 @@
 #pragma once
 #include "proptest/Generator.hpp"
+#include "proptest/combinator/filter.hpp"
+#include "proptest/combinator/transform.hpp"
+#include "proptest/combinator/derive.hpp"
+#include "proptest/combinator/dependency.hpp"
+#include "proptest/combinator/chain.hpp"
 #include "proptest/std/concepts.hpp"
 
 /**
