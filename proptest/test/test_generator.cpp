@@ -51,7 +51,7 @@ TEST(Generator, gen2gen)
     EXPECT_EQ(gen2(rand).get(), 1340);
 }
 
-TEST(Generator, monad)
+TEST(Generator, monadic)
 {
     Random rand(getCurrentTime());
     Generator<int> gen = interval<int>(0, 10);
@@ -59,12 +59,17 @@ TEST(Generator, monad)
         return to_string(n);
     });
 
-    auto gen3 = gen2.filter([](string str) {
+    auto gen3 = gen2.filter([](const string& str) { // reference must be const
         return str.size() > 1;
     });
 
     auto shr = gen3(rand);
     EXPECT_EQ(shr.getRef(), "10");
+}
+
+TEST(Generator, monadic2)
+{
+
 }
 
 TEST(AnyGenerator, basic)

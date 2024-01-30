@@ -30,7 +30,7 @@ Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(co
 
         // shrink strategy 1: expand Shrinkable<T>
         Shrinkable<pair<T, Shrinkable<U>>> intermediate =
-            shrinkableT.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2gen](const T& t) mutable {
+            shrinkableT.template flatMap<pair<T, Shrinkable<U>>>([&rand, gen2gen](const T& t) mutable {
                 // generate U
                 auto gen2 = gen2gen(t);
                 Shrinkable<U> shrinkableU = gen2(rand);

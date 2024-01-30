@@ -70,50 +70,6 @@ public:
 
     Shrinkable<CLASS> operator()(Random& rand) override { return constructAccordingly(generateArgs(rand)); }
 
-    template <typename U>
-    Generator<U> map(function<U(CLASS&)> mapper)
-    {
-        auto thisPtr = clone();
-        return Generator<U>(
-            proptest::transform<CLASS, U>(util::ConstructFunctor<CLASS, ARGTYPES...>(thisPtr), mapper));
-    }
-
-    template <typename Criteria>
-    Generator<CLASS> filter(Criteria&& criteria)
-    {
-        auto thisPtr = clone();
-        return Generator<CLASS>(proptest::filter<CLASS>(util::ConstructFunctor<CLASS, ARGTYPES...>(thisPtr),
-                                                        util::forward<Criteria>(criteria)));
-    }
-
-    template <typename U>
-    Generator<pair<CLASS, U>> pairWith(function<GenFunction<U>(const CLASS&)> genFactory)
-    {
-        auto thisPtr = clone();
-        return proptest::dependency<CLASS, U>(util::ConstructFunctor<CLASS, ARGTYPES...>(thisPtr),
-                                              genFactory);
-    }
-
-    template <typename U>
-    decltype(auto) tupleWith(function<GenFunction<U>(CLASS&)> genFactory)
-    {
-        auto thisPtr = clone();
-        return proptest::chain(util::ConstructFunctor<CLASS, ARGTYPES...>(thisPtr), genFactory);
-    }
-
-    template <typename U>
-    Generator<U> flatmap(function<U(CLASS&)> genFactory)
-    {
-        auto thisPtr = clone();
-        return Generator<U>(
-            proptest::derive<CLASS, U>(util::ConstructFunctor<CLASS, ARGTYPES...>(thisPtr), genFactory));
-    }
-
-    shared_ptr<Construct<CLASS, ARGTYPES...>> clone()
-    {
-        return util::make_shared<Construct<CLASS, ARGTYPES...>>(*dynamic_cast<Construct<CLASS, ARGTYPES...>*>(this));
-    }
-
 private:
     template <size_t... index>
     decltype(auto) generateArgsHelper(Random& rand, index_sequence<index...>)

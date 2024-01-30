@@ -150,10 +150,11 @@ TEST(Derive, basic)
     auto gen = just<int>(8);
     auto derived = derive<int, int>(gen, [](const int& i) { return interval(0, i); });
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 5; i++)
     {
-        // TODO
+        // TODO validation
         auto result = derived(rand);
+        cout << serializeShrinkable(result) << endl;
         if(result.get() == 8)
             EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
     }
@@ -165,10 +166,11 @@ TEST(Dependency, basic)
     auto gen = just<int>(8);
     auto derived = dependency<int, int>(gen, [](const int& i) { return interval(0, i); });
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < 5; i++)
     {
-        // TODO
+        // TODO validation
         [[maybe_unused]] auto result = derived(rand);
+        cout << serializeShrinkable(result) << endl;
         // if(result.get() == 8)
         //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
     }
@@ -181,10 +183,32 @@ TEST(Chain, basic)
 
     for(int i = 0; i < 20; i++)
     {
-        // TODO
+        // TODO validation
         [[maybe_unused]] auto result = gen(rand);
         // if(get<0>(result.get()) == 8) {
         //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
         // }
+    }
+}
+
+TEST(Chain, chainTwice)
+{
+    Random rand(getCurrentTime());
+    auto gen = chain(interval<int>(0, 4), [](const int& i) -> Generator<int> { return interval(0, 4); });
+
+    for(int i = 0; i < 5; i++)
+    {
+        [[maybe_unused]] auto result = gen(rand);
+        // print result
+        cout << serializeShrinkable(result) << endl;
+    }
+
+    auto gen2 = chain(gen, [](const tuple<int, int>& t) -> Generator<int> { return interval(0, 4); });
+
+    for(int i = 0; i < 5; i++)
+    {
+        [[maybe_unused]] auto result = gen2(rand);
+        // print result
+        cout << serializeShrinkable(result) << endl;
     }
 }

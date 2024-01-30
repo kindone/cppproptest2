@@ -62,7 +62,7 @@ template <typename T>
 struct PROPTEST_API Generator : public GeneratorBase<T>
 {
 public:
-    Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}
+    Generator(Function<Shrinkable<T>(Random&)> _func) : func(_func) {}
 
     Shrinkable<T> operator()(Random& rand) const override { return this->func(rand); }
 

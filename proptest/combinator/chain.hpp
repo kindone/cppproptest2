@@ -28,7 +28,7 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
 
         // shrink strategy 1: expand Shrinkable<T>
         Shrinkable<pair<T, Shrinkable<U>>> intermediate =
-            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>>([rand, gen2gen](const T& t) mutable {
+            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>>([&rand, gen2gen](const T& t) mutable {
                 // generate U
                 auto gen2 = gen2gen(t);
                 Shrinkable<U> shrinkableU = gen2(rand);
@@ -61,7 +61,7 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
 
 template <typename U, typename T0, typename T1, typename... Ts>
 Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> gen1,
-                                             Function<GenFunction<U>(Chain<T0, T1, Ts...>&)> gen2gen)
+                                             Function<GenFunction<U>(const Chain<T0, T1, Ts...>&)> gen2gen)
 {
     auto gen1Ptr = util::make_shared<decltype(gen1)>(gen1);
     Function<GenFunction<U>(const Chain<T0, T1, Ts...>&)> gen2genFunc =
@@ -86,15 +86,13 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                Intermediate& interpair = interShr.getRef();
-                Chain<T0, T1, Ts...>& ts = interpair.first;
-                Shrinkable<U>& shrinkableU = interpair.second;
+                const Shrinkable<U>& shrinkableU = interShr.getRef().second;
                 Shrinkable<Intermediate> newShrinkableU =
-                    shrinkableU.template flatMap<Intermediate>([ts](const U& u) mutable {
+                    shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {
                         return make_shrinkable<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>>(
-                            util::make_pair(ts, make_shrinkable<U>(u)));
+                            util::make_pair(interShr.getRef().first, make_shrinkable<U>(u)));
                     });
-                return newShrinkableU.shrinks();
+                return newShrinkableU.getShrinks();
             });
 
         // reformat pair<Chain<T0, T1, Ts...>, Shrinkable<U>> to Chain<T0, T1, Ts..., U>
