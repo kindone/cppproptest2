@@ -200,6 +200,11 @@ struct PROPTEST_API Any {
         }
     }
 
+    template <typename T>
+    T getValue() const {
+        return getRef<T>();
+    }
+
     const type_info& type() const;
 
     bool isEmpty() const;

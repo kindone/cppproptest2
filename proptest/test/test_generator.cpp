@@ -51,6 +51,22 @@ TEST(Generator, gen2gen)
     EXPECT_EQ(gen2(rand).get(), 1340);
 }
 
+TEST(Generator, monad)
+{
+    Random rand(getCurrentTime());
+    Generator<int> gen = interval<int>(0, 10);
+    auto gen2 = gen.map<string>([](int n) { // value passing callable is acceptable
+        return to_string(n);
+    });
+
+    auto gen3 = gen2.filter([](string str) {
+        return str.size() > 1;
+    });
+
+    auto shr = gen3(rand);
+    EXPECT_EQ(shr.getRef(), "10");
+}
+
 TEST(AnyGenerator, basic)
 {
     Random rand(getCurrentTime());

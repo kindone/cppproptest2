@@ -4,6 +4,8 @@
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/std/pair.hpp"
+#include "proptest/std/tuple.hpp"
 
 namespace proptest {
 
@@ -25,21 +27,46 @@ concept Gen = GenLike<F, T, T>;
 template <typename T>
 using GenFunction = Function<Shrinkable<T>(Random&)>;
 
+// forward-declarations
+template <typename T> struct Generator;
+
 template <typename T>
-class PROPTEST_API GeneratorBase
+struct PROPTEST_API GeneratorBase
 {
 public:
     virtual Shrinkable<T> operator()(Random& rand) const = 0;
+
+    template <typename U>
+    Generator<U> map(Function<U(const T&)> mapper);
+
+    template <typename Criteria>
+    Generator<T> filter(Criteria&& criteria);
+
+    template <typename U>
+    Generator<pair<T, U>> pairWith(Function<GenFunction<U>(const T&)> genFactory);
+
+    template <typename U>
+    decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
+
+    template <typename U>
+    Generator<U> flatmap(Function<U(T&)> genFactory);
+
+    GenFunction<T> asGenFunction() {
+        return [this](Random& rand) -> Shrinkable<T> {
+            return this->operator()(rand);
+        };
+    }
 };
 
 template <typename T>
-class PROPTEST_API Generator : public GeneratorBase<T>
+struct PROPTEST_API Generator : public GeneratorBase<T>
 {
 public:
     Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}
 
     Shrinkable<T> operator()(Random& rand) const override { return this->func(rand); }
 
+private:
     Function<Shrinkable<T>(Random&)> func;
 };
 
@@ -55,7 +82,7 @@ decltype(auto) generator(GEN&& gen)
 }
 
 template <GenLike GEN>
-decltype(auto) callableToGenFunction(GEN&& gen)
+decltype(auto) asGenFunction(GEN&& gen)
 {
     using retType = decltype(gen(declval<Random&>()));
     return static_cast<Function<retType(Random&)>>(gen);
@@ -68,9 +95,7 @@ struct AnyGenerator
     {
     }
 
-    ShrinkableAny operator()(Random& rand) {
-        return anyGen(rand);
-    }
+    ShrinkableAny operator()(Random& rand);
 
     template <typename T>
     Shrinkable<T> generate(Random& rand) {
@@ -81,4 +106,9 @@ private:
     Function<ShrinkableAny(Random&)> anyGen;
 };
 
+extern template struct Function<ShrinkableAny(Random&)>;
+
 }  // namespace proptest
+
+
+#include "proptest/GeneratorImpl.hpp"

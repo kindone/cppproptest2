@@ -6,6 +6,7 @@ namespace proptest {
 
 using std::decay_t;
 using std::is_trivial;
+using std::remove_const_t;
 using std::remove_reference;
 using std::remove_reference_t;
 using std::type_info;

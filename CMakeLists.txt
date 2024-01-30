@@ -45,6 +45,7 @@ SET(proptest_sources
     proptest/shrinker/tuple.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
+    proptest/Generator.cpp
     proptest/Random.cpp
     proptest/generator/integral.cpp
 )
@@ -74,6 +75,7 @@ SET(proptest_testsources
     proptest/test/test_typelist.cpp
     proptest/test/test_function_traits.cpp
     proptest/test/test_any.cpp
+    proptest/test/test_function.cpp
     proptest/test/test_anyfunction.cpp
     proptest/test/test_tupleorvector.cpp
     proptest/test/test_stream.cpp

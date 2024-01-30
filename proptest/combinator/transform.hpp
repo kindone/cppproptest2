@@ -2,6 +2,7 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/std/type.hpp"
 
 /**
  * @file transform.hpp

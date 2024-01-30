@@ -182,7 +182,7 @@ Construct<CLASS, ARGTYPES...> construct(EXPGEN0&& gen0, EXPGENS&&... gens)
                                         AnyGenerator(util::forward<EXPGENS>(gens))...};
     vector<AnyGenerator> implicitVec = {AnyGenerator(Arbi<ARGS>())...};
 
-    auto explicits = util::make_tuple(util::callableToGenFunction(gen0), util::callableToGenFunction(gens)...);
+    auto explicits = util::make_tuple(util::asGenFunction(gen0), util::asGenFunction(gens)...);
     auto implicits =
         util::createGenHelperListed<ArgsAsTuple>(util::addOffset<ExplicitSize>(make_index_sequence<ImplicitSize>{}));
 
