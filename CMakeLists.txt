@@ -43,11 +43,12 @@ SET(proptest_sources
     proptest/shrinker/listlike.cpp
     proptest/shrinker/string.cpp
     proptest/shrinker/tuple.cpp
+    proptest/generator/integral.cpp
+    proptest/generator/bool.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
     proptest/Generator.cpp
     proptest/Random.cpp
-    proptest/generator/integral.cpp
 )
 
 ADD_LIBRARY(proptest

@@ -6,9 +6,8 @@
 namespace proptest {
 
 template <typename T>
-class PROPTEST_API ArbitraryBase
+class PROPTEST_API ArbitraryBase : public GeneratorBase<T>
 {
-    virtual Shrinkable<T> operator()(Random& rand) = 0;
 };
 
 
@@ -19,8 +18,6 @@ class PROPTEST_API ArbitraryBase
 template <typename T>
 class PROPTEST_API Arbi : public ArbitraryBase<T>
 {
-public:
-    virtual Shrinkable<T> operator()(Random& rand) = 0; // Need to be strictly specialized
 };
 
 template <typename T>
