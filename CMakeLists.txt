@@ -9,7 +9,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "")
 SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 SET(CMAKE_CXX_STANDARD 20)
 SET(CLANG_DEBUG_OPTIONS, "-g -O1 -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
 
 # add_subdirectory("proptest")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -45,6 +45,11 @@ SET(proptest_sources
     proptest/shrinker/tuple.cpp
     proptest/generator/integral.cpp
     proptest/generator/bool.cpp
+    proptest/generator/unicode.cpp
+    proptest/generator/string.cpp
+    proptest/generator/utf8string.cpp
+    proptest/generator/utf16string.cpp
+    proptest/generator/cesu8string.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
     proptest/Generator.cpp

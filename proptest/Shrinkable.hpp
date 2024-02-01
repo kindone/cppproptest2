@@ -199,3 +199,26 @@ using ShrinkableAny = Shrinkable<Any>;
 extern template struct Shrinkable<Any>;
 
 } // namespace proptest
+
+// compare function
+namespace std {
+
+template <typename T>
+class less<proptest::Shrinkable<T>> {
+public:
+    constexpr bool operator()(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs) const
+    {
+        return lhs.getRef() < rhs.getRef();
+    }
+};
+
+template <typename T, typename U>
+class less<proptest::Shrinkable<pair<T, U>>> {
+public:
+    constexpr bool operator()(const proptest::Shrinkable<pair<T,U>>& lhs, const proptest::Shrinkable<pair<T,U>>& rhs) const
+    {
+        return lhs.getRef().first < rhs.getRef().first;
+    }
+};
+
+}  // namespace std

@@ -7,32 +7,12 @@ namespace proptest {
 
 size_t UTF16BEString::charsize() const
 {
-    int size = util::UTF16BECharSize(*this);
-    if (size < 0) {
-        stringstream str;
-        str << "Not a valid UTF-16 BE string: ";
-        for (size_t i = 0; i < this->size(); i++) {
-            str << setfill('0') << setw(2) << util::hex << static_cast<int>((*this)[i]) << " ";
-        }
-        throw runtime_error(str.str());
-    }
-
-    return static_cast<size_t>(size);
+    return util::UTF16BECharSize(*this);
 }
 
 size_t UTF16LEString::charsize() const
 {
-    int size = util::UTF16LECharSize(*this);
-    if (size < 0) {
-        stringstream str;
-        str << "Not a valid UTF-16 LE string: ";
-        for (size_t i = 0; i < this->size(); i++) {
-            str << setfill('0') << setw(2) << util::hex << static_cast<int>((*this)[i]) << " ";
-        }
-        throw runtime_error(str.str());
-    }
-
-    return static_cast<size_t>(size);
+    return util::UTF16LECharSize(*this);
 }
 
 namespace util {
@@ -278,39 +258,51 @@ void encodeUTF16LE(uint32_t code, vector<uint8_t>& chars)
     }
 }
 
-int UTF16BECharSize(const string& str)
+size_t UTF16BECharSize(const string& str)
 {
     vector<uint8_t> chars(str.size());
     for (size_t i = 0; i < str.size(); i++) {
         chars[i] = str[i];
     }
-    int numChars = 0;
+    size_t numChars = 0;
     if (isValidUTF16BE(chars, numChars)) {
         return numChars;
-    } else
-        return -1;
+    } else {
+        stringstream stream;
+        stream << "Not a valid UTF-16 BE string: ";
+        for (size_t i = 0; i < str.size(); i++) {
+            stream << setfill('0') << setw(2) << util::hex << static_cast<int>(str[i]) << " ";
+        }
+        throw runtime_error(stream.str());
+    }
 }
 
-int UTF16LECharSize(const string& str)
+size_t UTF16LECharSize(const string& str)
 {
     vector<uint8_t> chars(str.size());
     for (size_t i = 0; i < str.size(); i++) {
         chars[i] = str[i];
     }
-    int numChars = 0;
+    size_t numChars = 0;
     if (isValidUTF16LE(chars, numChars)) {
         return numChars;
-    } else
-        return -1;
+    } else {
+        stringstream stream;
+        stream << "Not a valid UTF-16 LE string: ";
+        for (size_t i = 0; i < str.size(); i++) {
+            stream << setfill('0') << setw(2) << util::hex << static_cast<int>(str[i]) << " ";
+        }
+        throw runtime_error(stream.str());
+    }
 }
 
 bool isValidUTF16BE(vector<uint8_t>& chars)
 {
-    int numChars = 0;
+    size_t numChars = 0;
     return isValidUTF16BE(chars, numChars);
 }
 
-bool isValidUTF16BE(vector<uint8_t>& chars, int& numChars)
+bool isValidUTF16BE(vector<uint8_t>& chars, size_t& numChars)
 {
     numChars = 0;
     for (size_t i = 0; i < chars.size(); i++, numChars++) {
@@ -332,11 +324,11 @@ bool isValidUTF16BE(vector<uint8_t>& chars, int& numChars)
 
 bool isValidUTF16LE(vector<uint8_t>& chars)
 {
-    int numChars = 0;
+    size_t numChars = 0;
     return isValidUTF16LE(chars, numChars);
 }
 
-bool isValidUTF16LE(vector<uint8_t>& chars, int& numChars)
+bool isValidUTF16LE(vector<uint8_t>& chars, size_t& numChars)
 {
     numChars = 0;
     for (size_t i = 0; i < chars.size(); i++, numChars++) {

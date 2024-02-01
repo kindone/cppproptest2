@@ -51,8 +51,10 @@ template <>
 class PROPTEST_API Arbi<int8_t> final : public ArbiBase<int8_t> {
 public:
     virtual Shrinkable<int8_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<int8_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr int8_t boundaryValues[] = {INT8_MIN,     0,   INT8_MAX, -1,   1,    -2,   2,   INT8_MIN + 1,
                                                 INT8_MAX - 1, ' ', '"',      '\'', '\t', '\n', '\r'};
+
 };
 
 /**
@@ -63,6 +65,7 @@ template <>
 class PROPTEST_API Arbi<int16_t> final : public ArbiBase<int16_t> {
 public:
     Shrinkable<int16_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<int16_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr int16_t boundaryValues[] = {0,
                                                  -1,
                                                  1,
@@ -92,6 +95,7 @@ struct PROPTEST_API Arbi<int32_t> final : public ArbiBase<int32_t>
 {
 public:
     Shrinkable<int32_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<int32_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr int32_t boundaryValues[] = {0,
                                                  -1,
                                                  1,
@@ -130,6 +134,7 @@ struct PROPTEST_API Arbi<int64_t> final : public ArbiBase<int64_t>
 {
 public:
     Shrinkable<int64_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<int64_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr int64_t boundaryValues[] = {0,
                                                  -1,
                                                  1,
@@ -176,6 +181,7 @@ template <>
 class PROPTEST_API Arbi<char> final : public ArbiBase<char> {
 public:
     Shrinkable<char> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<char>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr char boundaryValues[] = {0};
 };
 
@@ -187,6 +193,7 @@ template <>
 class PROPTEST_API Arbi<uint8_t> final : public ArbiBase<uint8_t> {
 public:
     Shrinkable<uint8_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<uint8_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr uint8_t boundaryValues[] = {
         0, 1, 2, UINT8_MAX, UINT8_MAX - 1, INT8_MAX, INT8_MAX - 1, INT8_MAX + 1, ' ', '"', '\'', '\t', '\n', '\r'};
 };
@@ -199,6 +206,7 @@ template <>
 class PROPTEST_API Arbi<uint16_t> final : public ArbiBase<uint16_t> {
 public:
     Shrinkable<uint16_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<uint16_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr uint16_t boundaryValues[] = {0,
                                                   1,
                                                   2,
@@ -224,6 +232,7 @@ struct PROPTEST_API Arbi<uint32_t> final : public ArbiBase<uint32_t>
 {
 public:
     Shrinkable<uint32_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<uint32_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr uint32_t boundaryValues[] = {0,
                                                   1,
                                                   2,
@@ -255,6 +264,7 @@ struct PROPTEST_API Arbi<uint64_t> : public ArbiBase<uint64_t>
 {
 public:
     Shrinkable<uint64_t> operator()(Random& rand) const override;
+    shared_ptr<GeneratorBase<uint64_t>> clone() const override { return util::make_shared<Arbi>(); }
     static constexpr uint64_t boundaryValues[] = {0,
                                                   1,
                                                   2,

@@ -4,6 +4,64 @@
 #include "proptest/AnyShrinkable.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/std/io.hpp"
+#include "proptest/test/gtest.hpp"
+#include "proptest/util/utf8string.hpp"
+#include "proptest/util/cesu8string.hpp"
+#include "proptest/util/utf16string.hpp"
+
+template <typename T>
+struct NumericTest : public testing::Test
+{
+    using NumericType = T;
+};
+
+template <typename T>
+struct SignedNumericTest : public testing::Test
+{
+    using NumericType = T;
+};
+
+template <typename T>
+struct IntegralTest : public testing::Test
+{
+    using NumericType = T;
+};
+
+template <typename T>
+struct SignedIntegralTest : public testing::Test
+{
+    using NumericType = T;
+};
+
+template <typename T>
+struct UnsignedIntegralTest : public testing::Test
+{
+    using NumericType = T;
+};
+
+template <typename T>
+struct StringLikeTest : public testing::Test
+{
+    using StringType = T;
+};
+
+using NumericTypes =
+    testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>;
+using SignedNumericTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, float, double>;
+using IntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t>;
+using SignedIntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t>;
+using UnsignedIntegralTypes = testing::Types<uint8_t, uint16_t, uint32_t, uint64_t>;
+using FloatingTypes = testing::Types<float, double>;
+using StringLikeTypes = testing::Types<proptest::UTF8String, proptest::CESU8String, proptest::UTF16BEString, proptest::UTF16LEString>;
+
+TYPED_TEST_SUITE(NumericTest, NumericTypes);
+TYPED_TEST_SUITE(SignedNumericTest, SignedNumericTypes);
+TYPED_TEST_SUITE(IntegralTest, IntegralTypes);
+TYPED_TEST_SUITE(SignedIntegralTest, SignedIntegralTypes);
+TYPED_TEST_SUITE(UnsignedIntegralTest, UnsignedIntegralTypes);
+TYPED_TEST_SUITE(FloatingTest, FloatingTypes);
+TYPED_TEST_SUITE(StringLikeTest, StringLikeTypes);
+
 
 template <typename T>
 void printShrinkable(const proptest::Shrinkable<T>& shrinkable, int level) {

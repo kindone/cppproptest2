@@ -7,6 +7,18 @@
 
 namespace proptest {
 
+
+template <typename Key, typename Value>
+Shrinkable<map<Key, Value>> shrinkMap(const vector<Shrinkable<pair<Key,Value>>>& pairShrVec, size_t minSize) {
+    Shrinkable<vector<pair<Key,Value>>> pairShrVecShr = shrinkContainer<vector, pair<Key,Value>>(make_shrinkable<vector<Shrinkable<pair<Key,Value>>>>(pairShrVec), minSize, /*elementwise*/true, /*membershipwise*/true);
+    return pairShrVecShr.template map<map<Key, Value>>([](const vector<pair<Key, Value>>& vec) -> map<Key, Value> {
+        map<Key, Value> m;
+        for(auto& pair : vec)
+            m.insert(pair);
+        return m;
+    });
+}
+
 template <typename Key, typename Value>
 Shrinkable<map<Key, Value>> shrinkMap(const shared_ptr<vector<Shrinkable<Key>>> keyShrVec, const shared_ptr<vector<Shrinkable<Value>>>& valShrVec, size_t minSize) {
     // 1. for each valShr in valShrVec, map it to pairShr with keyShr (assuming keyShr has no shrinks) and put into a new vector, get vector<pair<Shrinkable<Key>, Shrinkable<Value>>>
@@ -21,13 +33,7 @@ Shrinkable<map<Key, Value>> shrinkMap(const shared_ptr<vector<Shrinkable<Key>>> 
         pairShrVec.push_back(pairShr);
     }
 
-    Shrinkable<vector<pair<Key,Value>>> pairShrVecShr = shrinkContainer<vector, pair<Key, Value>>(make_shrinkable<decltype(pairShrVec)>(pairShrVec), minSize, /*elementwise*/true, /*membershipwise*/true);
-    return pairShrVecShr.template map<map<Key, Value>>([](const vector<pair<Key, Value>>& vec) -> map<Key, Value> {
-        map<Key, Value> m;
-        for(auto& pair : vec)
-            m.insert(pair);
-        return m;
-    });
+    return shrinkMap(pairShrVec, minSize);
 }
 
 } // namespace proptes

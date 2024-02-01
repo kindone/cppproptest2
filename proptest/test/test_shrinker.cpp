@@ -9,51 +9,6 @@
 
 using namespace proptest;
 
-template <typename T>
-struct NumericTest : public testing::Test
-{
-    using NumericType = T;
-};
-
-template <typename T>
-struct SignedNumericTest : public testing::Test
-{
-    using NumericType = T;
-};
-
-template <typename T>
-struct IntegralTest : public testing::Test
-{
-    using NumericType = T;
-};
-
-template <typename T>
-struct SignedIntegralTest : public testing::Test
-{
-    using NumericType = T;
-};
-
-template <typename T>
-struct UnsignedIntegralTest : public testing::Test
-{
-    using NumericType = T;
-};
-
-using NumericTypes =
-    testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>;
-using SignedNumericTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, float, double>;
-using IntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t>;
-using SignedIntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t>;
-using UnsignedIntegralTypes = testing::Types<uint8_t, uint16_t, uint32_t, uint64_t>;
-using FloatingTypes = testing::Types<float, double>;
-
-TYPED_TEST_SUITE(NumericTest, NumericTypes);
-TYPED_TEST_SUITE(SignedNumericTest, SignedNumericTypes);
-TYPED_TEST_SUITE(IntegralTest, IntegralTypes);
-TYPED_TEST_SUITE(SignedIntegralTest, SignedIntegralTypes);
-TYPED_TEST_SUITE(UnsignedIntegralTest, UnsignedIntegralTypes);
-TYPED_TEST_SUITE(FloatingTest, FloatingTypes);
-
 TYPED_TEST(IntegralTest, shrinkIntegral_signed)
 {
     auto shr = shrinkIntegral<TypeParam>(8);

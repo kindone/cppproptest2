@@ -36,8 +36,8 @@ struct PROPTEST_API DecodeCESU8
 };
 
 PROPTEST_API bool isValidCESU8(vector<uint8_t>& chars);
-PROPTEST_API bool isValidCESU8(vector<uint8_t>& chars, int& numChars);
-PROPTEST_API int CESU8CharSize(const string& str);
+PROPTEST_API bool isValidCESU8(vector<uint8_t>& chars, size_t& numChars);
+PROPTEST_API size_t CESU8CharSize(const string& str);
 }  // namespace util
 
 }  // namespace proptest

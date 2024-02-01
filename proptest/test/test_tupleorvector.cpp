@@ -27,20 +27,20 @@ TEST(tupleToVector, basic)
 
 TEST(Map, basic)
 {
-    auto t = util::Map([](auto index) { return index.value; }, make_index_sequence<3>{});
+    auto t = util::Map<3>([](auto index) { return index.value; });
     EXPECT_EQ(t, util::make_tuple(0, 1, 2));
 }
 
 TEST(Map, hetero)
 {
-    auto t = util::Map([](auto index) {
+    auto t = util::Map<3>([](auto index) {
         if constexpr (index.value == 0)
             return 0;
         else if constexpr (index.value == 1)
             return 1.0;
         else
             return string("2");
-    }, make_index_sequence<3>{});
+    });
     EXPECT_EQ(t, util::make_tuple(0, 1.0, "2"));
 }
 

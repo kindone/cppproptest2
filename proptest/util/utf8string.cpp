@@ -7,11 +7,7 @@ namespace proptest {
 
 size_t UTF8String::charsize() const
 {
-    int size = util::UTF8CharSize(*this);
-    if (size < 0)
-        throw runtime_error("Not a valid UTF-8 string");
-
-    return static_cast<size_t>(size);
+    return util::UTF8CharSize(*this);
 }
 
 namespace util {
@@ -334,26 +330,26 @@ void encodeUTF8(uint32_t code, vector<uint8_t>& chars)
     }
 }
 
-int UTF8CharSize(const string& str)
+size_t UTF8CharSize(const string& str)
 {
     vector<uint8_t> chars(str.size());
     for (size_t i = 0; i < str.size(); i++) {
         chars[i] = str[i];
     }
-    int numChars = 0;
+    size_t numChars = 0;
     if (isValidUTF8(chars, numChars)) {
         return numChars;
     } else
-        return -1;
+        throw runtime_error("Not a valid CESU-8 string");
 }
 
 bool isValidUTF8(vector<uint8_t>& chars)
 {
-    int numChars = 0;
+    size_t numChars = 0;
     return isValidUTF8(chars, numChars);
 }
 
-bool isValidUTF8(vector<uint8_t>& chars, int& numChars)
+bool isValidUTF8(vector<uint8_t>& chars, size_t& numChars)
 {
     numChars = 0;
     for (size_t i = 0; i < chars.size(); i++, numChars++) {

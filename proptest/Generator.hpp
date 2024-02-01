@@ -51,9 +51,12 @@ public:
     template <typename U>
     Generator<U> flatmap(Function<U(T&)> genFactory);
 
+    virtual shared_ptr<GeneratorBase> clone() const = 0;
+
     GenFunction<T> asGenFunction() {
-        return [this](Random& rand) -> Shrinkable<T> {
-            return this->operator()(rand);
+        auto thisClone = clone();
+        return [thisClone](Random& rand) -> Shrinkable<T> {
+            return thisClone->operator()(rand);
         };
     }
 };
@@ -65,6 +68,10 @@ public:
     Generator(Function<Shrinkable<T>(Random&)> _func) : func(_func) {}
 
     Shrinkable<T> operator()(Random& rand) const override { return this->func(rand); }
+
+    shared_ptr<GeneratorBase<T>> clone() const override {
+        return util::make_shared<Generator>(func);
+    }
 
 private:
     Function<Shrinkable<T>(Random&)> func;

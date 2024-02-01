@@ -7,11 +7,7 @@ namespace proptest {
 
 size_t CESU8String::charsize() const
 {
-    int size = util::CESU8CharSize(*this);
-    if (size < 0)
-        throw runtime_error("Not a valid CESU-8 string");
-
-    return static_cast<size_t>(size);
+    return util::CESU8CharSize(*this);
 }
 
 namespace util {
@@ -347,26 +343,23 @@ void encodeCESU8(uint32_t code, vector<uint8_t>& chars)
     }
 }
 
-int CESU8CharSize(const string& str)
+size_t CESU8CharSize(const string& str)
 {
-    vector<uint8_t> chars(str.size());
-    for (size_t i = 0; i < str.size(); i++) {
-        chars[i] = str[i];
-    }
-    int numChars = 0;
+    vector<uint8_t> chars(str.begin(), str.end());
+    size_t numChars = 0;
     if (isValidCESU8(chars, numChars)) {
         return numChars;
     } else
-        return -1;
+        throw runtime_error("Not a valid CESU-8 string");
 }
 
 bool isValidCESU8(vector<uint8_t>& chars)
 {
-    int numChars = 0;
+    size_t numChars = 0;
     return isValidCESU8(chars, numChars);
 }
 
-bool isValidCESU8(vector<uint8_t>& chars, int& numChars)
+bool isValidCESU8(vector<uint8_t>& chars, size_t& numChars)
 {
     numChars = 0;
     for (size_t i = 0; i < chars.size(); i++, numChars++) {

@@ -135,7 +135,7 @@ public:
         else if(list.size() == 1)
             return one(*list.begin());
 
-        auto vec = make_shared<vector<T>>(list);
+        auto vec = util::make_shared<vector<T>>(list);
         return Stream(Any(vec->front()), [vec]() -> Stream { return values(vec, 1);});
     }
 

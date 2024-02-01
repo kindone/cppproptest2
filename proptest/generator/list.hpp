@@ -25,15 +25,15 @@ public:
     static size_t defaultMinSize;
     static size_t defaultMaxSize;
 
-    Arbi() : ArbiContainer<List>(defaultMinSize, defaultMaxSize), elemGen(Arbi<T>()) {}
+    Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<list<T>>(_minSize, _maxSize), elemGen(Arbi<T>()) {}
 
-    Arbi(Arbi<T>& _elemGen)
-        : ArbiContainer<List>(defaultMinSize, defaultMaxSize),
-          elemGen([_elemGen](Random& rand) mutable -> Shrinkable<T> { return _elemGen(rand); })
+    Arbi(GenFunction<T> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<list<T>>(_minSize, _maxSize), elemGen(_elemGen) {}
+
+    Arbi setElemGen(GenFunction<T> _elemGen)
     {
+        elemGen = _elemGen;
+        return *this;
     }
-
-    Arbi(GenFunction<T> _elemGen) : ArbiContainer<List>(defaultMinSize, defaultMaxSize), elemGen(_elemGen) {}
 
     Shrinkable<list<T>> operator()(Random& rand) const override
     {
@@ -46,6 +46,11 @@ public:
         return shrinkListLike<list, T>(shrinkVec, minSize);
     }
 
+    shared_ptr<GeneratorBase<list<T>>> clone() const override {
+        return util::make_shared<Arbi>(elemGen, minSize, maxSize);
+    }
+
+private:
     GenFunction<T> elemGen;
 };
 

@@ -37,8 +37,8 @@ struct PROPTEST_API DecodeUTF8
 PROPTEST_API ostream& decodeUTF8(ostream& os, vector<uint8_t>& chars);
 
 PROPTEST_API bool isValidUTF8(vector<uint8_t>& chars);
-PROPTEST_API bool isValidUTF8(vector<uint8_t>& chars, int& numChars);
-PROPTEST_API int UTF8CharSize(const string& str);
+PROPTEST_API bool isValidUTF8(vector<uint8_t>& chars, size_t& numChars);
+PROPTEST_API size_t UTF8CharSize(const string& str);
 
 }  // namespace util
 

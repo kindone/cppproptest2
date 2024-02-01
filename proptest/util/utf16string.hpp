@@ -49,8 +49,8 @@ struct PROPTEST_API DecodeUTF16BE
 };
 
 PROPTEST_API bool isValidUTF16BE(vector<uint8_t>& chars);
-PROPTEST_API bool isValidUTF16BE(vector<uint8_t>& chars, int& numChars);
-PROPTEST_API int UTF16BECharSize(const string& str);
+PROPTEST_API bool isValidUTF16BE(vector<uint8_t>& chars, size_t& numChars);
+PROPTEST_API size_t UTF16BECharSize(const string& str);
 
 PROPTEST_API ostream& decodeUTF16LE(ostream& os, vector<uint8_t>& chars);
 PROPTEST_API ostream& decodeUTF16LE(ostream& os, const string& str);
@@ -70,8 +70,8 @@ struct PROPTEST_API DecodeUTF16LE
 };
 
 PROPTEST_API bool isValidUTF16LE(vector<uint8_t>& chars);
-PROPTEST_API bool isValidUTF16LE(vector<uint8_t>& chars, int& numChars);
-PROPTEST_API int UTF16LECharSize(const string& str);
+PROPTEST_API bool isValidUTF16LE(vector<uint8_t>& chars, size_t& numChars);
+PROPTEST_API size_t UTF16LECharSize(const string& str);
 }  // namespace util
 
 }  // namespace proptest
