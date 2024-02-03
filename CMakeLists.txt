@@ -50,6 +50,7 @@ SET(proptest_sources
     proptest/generator/utf8string.cpp
     proptest/generator/utf16string.cpp
     proptest/generator/cesu8string.cpp
+    proptest/combinator/intervals.cpp
     proptest/Stream.cpp
     proptest/ShrinkableAny.cpp
     proptest/Generator.cpp

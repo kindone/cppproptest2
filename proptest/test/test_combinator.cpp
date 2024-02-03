@@ -7,6 +7,7 @@
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/elementof.hpp"
 #include "proptest/combinator/chain.hpp"
+#include "proptest/combinator/intervals.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/Random.hpp"
@@ -210,5 +211,18 @@ TEST(Chain, chainTwice)
         [[maybe_unused]] auto result = gen2(rand);
         // print result
         cout << serializeShrinkable(result) << endl;
+    }
+}
+
+TEST(Intervals, basic)
+{
+    Random rand(getCurrentTime());
+    auto gen = intervals({Interval(0, 2), Interval(12, 22)});
+
+    for(int i = 0; i < 20; i++)
+    {
+        auto result = gen(rand);
+        EXPECT_TRUE(result.get() >= 0 && result.get() <= 22);
+        EXPECT_TRUE(!(result.get() > 2 && result.get() < 12));
     }
 }

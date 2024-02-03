@@ -40,7 +40,9 @@ public:
     Arbi() : arg1Gen(Arbi<ARG1>()), arg2Gen(Arbi<ARG2>()) {}
     Arbi(GenFunction<ARG1> _arg1Gen, GenFunction<ARG2> _arg2Gen) : arg1Gen(_arg1Gen), arg2Gen(_arg2Gen) {}
 
-    Shrinkable<pair<ARG1, ARG2>> operator()(Random& rand) const override { return pairOf(arg1Gen, arg2Gen)(rand); }
+    Shrinkable<pair<ARG1, ARG2>> operator()(Random& rand) const override {
+        return shrinkPair(arg1Gen(rand), arg2Gen(rand));
+    }
 
     shared_ptr<GeneratorBase<Pair>> clone() const override {
         return util::make_shared<Arbi>(arg1Gen, arg2Gen);
