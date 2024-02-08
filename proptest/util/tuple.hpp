@@ -17,15 +17,24 @@ void For(F func, index_sequence<Is...>)
     (func(std::integral_constant<size_t, Is>{}), ...);
 }
 
+template <size_t N, class F>
+// func is a template lambda that takes (auto index_sequence) as an argument
+void For(F&& func)
+{
+    For(util::forward<F>(func), make_index_sequence<N>{});
+}
+
+
 /* Example:
     util::Map([&] (auto index_sequence) {
         return x; // where x is the desired tuple element
     }, make_index_sequence<N>{}); // N is the number of elements for the tuple
 
+    or util::Map<N>(callable);
   Result: tuple of xs
 */
 template <class F, size_t... Is>
-// func is a template lambda that takes (auto index_sequence) as an argument
+// F is a template lambda that takes (auto index_sequence) as an argument
 decltype(auto) Map(F func, index_sequence<Is...>)
 {
     return util::make_tuple(func(std::integral_constant<size_t, Is>{})...);
@@ -36,6 +45,28 @@ decltype(auto) Map(F&& func)
 {
     return Map(util::forward<F>(func), make_index_sequence<N>{});
 }
+
+/* Example:
+    util::Call(callable, [&] (auto index_sequence) {
+        return x; // where x is the desired tuple element
+    }, make_index_sequence<N>{}); // N is the number of elements for the tuple
+
+  Result: instead of creating results as tuple, pass into callable as arguments
+*/
+template <class Func, class ArgFunc, size_t... Is>
+// ArgFunc is a template lambda that takes (auto index_sequence) as an argument
+decltype(auto) Call(Func&& func, ArgFunc&& argFunc, index_sequence<Is...>)
+{
+    return func(argFunc(std::integral_constant<size_t, Is>{})...);
+}
+
+template <size_t N, class Func, class ArgFunc>
+decltype(auto) Call(Func&& func, ArgFunc&& argFunc)
+{
+    return Call(util::forward<Func>(func), util::forward<ArgFunc>(argFunc), make_index_sequence<N>{});
+}
+
+
 
 } // namespace util
 

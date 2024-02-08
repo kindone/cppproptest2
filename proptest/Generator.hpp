@@ -9,7 +9,7 @@
 
 namespace proptest {
 
-template <typename F, typename...ARGS, typename RET = typename invoke_result_t<F, Random&>::type>
+template <typename F, typename RET = typename invoke_result_t<F, Random&>::type, typename...ARGS>
 concept FunctionLike = requires(F f, ARGS... args) {
     { f(args...) }
     -> same_as<RET>;

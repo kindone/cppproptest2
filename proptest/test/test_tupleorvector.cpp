@@ -1,6 +1,7 @@
 #include "proptest/util/tupleorvector.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/exception.hpp"
+#include "proptest/std/functional.hpp"
 #include "proptest/test/gtest.hpp"
 
 using namespace proptest;
@@ -34,6 +35,22 @@ TEST(Map, basic)
 TEST(Map, hetero)
 {
     auto t = util::Map<3>([](auto index) {
+        if constexpr (index.value == 0)
+            return 0;
+        else if constexpr (index.value == 1)
+            return 1.0;
+        else
+            return string("2");
+    });
+    EXPECT_EQ(t, util::make_tuple(0, 1.0, "2"));
+}
+
+TEST(Call, hetero)
+{
+    function<tuple<int, double, string>(int, double, string)> makeTuple = [](int a, double b, string c) {
+        return util::make_tuple(a, b, c);
+    };
+    auto t = util::Call<3>(makeTuple, [](auto index) {
         if constexpr (index.value == 0)
             return 0;
         else if constexpr (index.value == 1)
