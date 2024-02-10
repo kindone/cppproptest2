@@ -14,53 +14,6 @@
 
 namespace proptest {
 
-namespace util {
-
-struct Matrix
-{
-    template <size_t N, typename Lists>
-    static decltype(auto) pickN(Lists&& lists, vector<int>& indices)
-    {
-        auto& vec = get<N>(lists);
-        auto& index = indices[N];
-        return vec[index];
-    }
-
-    template <size_t... index, typename Lists>
-    static decltype(auto) pickEach(Lists&& lists, vector<int>& indices, index_sequence<index...>)
-    {
-        return util::make_tuple(pickN<index>(util::forward<Lists>(lists), indices)...);
-    }
-
-    template <size_t N, typename Lists>
-    static bool progressN(bool& incremented, Lists&& lists, vector<int>& indices)
-    {
-        auto& list = get<N>(lists);
-        // already incremented
-        if (incremented)
-            return incremented;
-        else if (indices[N] < static_cast<int>(list.size() - 1)) {
-            indices[N]++;
-            incremented = true;
-        } else {
-            incremented = false;
-            indices[N] = 0;
-        }
-        return incremented;
-    }
-
-    template <size_t... index, typename Lists>
-    static bool progress(Lists&& lists, vector<int>& indices, index_sequence<index...>)
-    {
-        constexpr auto Size = tuple_size<Lists>::value;
-        bool incremented = false;
-        [[maybe_unused]] std::initializer_list<int> runEach{
-            (progressN<Size - index - 1>(incremented, util::forward<Lists>(lists), indices), 0)...};
-        return incremented;
-    }
-};
-}  // namespace util
-
 /**
  * @brief Holder class for properties
  * @details When a property is defined using `proptest::property` or `proptest::forAll`, a `Property` object is created

@@ -94,7 +94,7 @@ SET(proptest_testsources
     proptest/test/test_arbitrary.cpp
     proptest/test/test_generator.cpp
     proptest/test/test_combinator.cpp
-    proptest/test/test_matrix.cpp
+    proptest/test/test_invoke.cpp
 )
 
 
