@@ -44,6 +44,7 @@ SET(proptest_sources
     proptest/shrinker/string.cpp
     proptest/shrinker/tuple.cpp
     proptest/generator/integral.cpp
+    proptest/generator/floating.cpp
     proptest/generator/bool.cpp
     proptest/generator/unicode.cpp
     proptest/generator/string.cpp

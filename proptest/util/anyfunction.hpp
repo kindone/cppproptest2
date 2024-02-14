@@ -228,7 +228,7 @@ struct FunctionNHolderMutable : public FunctionNHolder<TARGET_RET, RET(ARGS...)>
 };
 
 template <typename Callable, typename RET, typename...ARGS>
-concept isCallableOf = (invocable<Callable, ARGS...> && is_constructible_v<RET, invoke_result_t<Callable, ARGS...>>);
+concept isCallableOf = (invocable<Callable, ARGS...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, ARGS...>>));
 
 template <typename F>
 //   requires (is_function_v<F>)

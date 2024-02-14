@@ -1,7 +1,9 @@
 #include "proptest/generator/integral.hpp"
+#include "proptest/generator/list.hpp"
 #include "proptest/combinator/just.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/testutil.hpp"
 
 using namespace proptest;
 
@@ -67,16 +69,11 @@ TEST(Generator, monadic)
     EXPECT_EQ(shr.getRef(), "10");
 }
 
-TEST(Generator, monadic2)
-{
-
-}
-
 TEST(AnyGenerator, basic)
 {
     Random rand(getCurrentTime());
     auto gen = interval<int>(0, 10);
-    AnyGenerator anyGen = gen;
+    AnyGenerator anyGen(gen);
     auto anyShr = anyGen(rand).get();
     EXPECT_TRUE(anyShr.getRef<int>() >= 0);
     EXPECT_TRUE(anyShr.getRef<int>() <= 10);
@@ -84,4 +81,35 @@ TEST(AnyGenerator, basic)
     auto shr = anyGen.generate<int>(rand);
     EXPECT_TRUE(shr.getRef() >= 0);
     EXPECT_TRUE(shr.getRef() <= 10);
+}
+
+TEST(AnyGenerator, arbitrary)
+{
+    Random rand(getCurrentTime());
+    AnyGenerator anyGen = Arbi<int>();
+    [[maybe_unused]] auto anyShr = anyGen(rand).get();
+    [[maybe_unused]] auto shr = anyGen.generate<int>(rand);
+    // TODO: test
+}
+
+TEST(AnyGenerator, keep_options)
+{
+    Random rand(getCurrentTime());
+    AnyGenerator anyGen = Arbi<list<int>>(1, 2);
+
+    for(int i = 0; i < 5; i++) {
+        [[maybe_unused]] auto shr = anyGen.generate<list<int>>(rand);
+        show(cout, shr.get());
+        cout << endl;
+        EXPECT_GE(shr.getRef().size(), 1);
+        EXPECT_LE(shr.getRef().size(), 2);
+    }
+
+    AnyGenerator anyGen2 = anyGen;
+    for(int i = 0; i < 5; i++) {
+        [[maybe_unused]] auto shr = anyGen2.generate<list<int>>(rand);
+        EXPECT_GE(shr.getRef().size(), 1);
+        EXPECT_LE(shr.getRef().size(), 2);
+    }
+
 }

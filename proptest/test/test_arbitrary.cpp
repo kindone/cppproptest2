@@ -1,5 +1,6 @@
 #include "proptest/Arbitrary.hpp"
 #include "proptest/generator/integral.hpp"
+#include "proptest/generator/floating.hpp"
 #include "proptest/generator/bool.hpp"
 #include "proptest/generator/list.hpp"
 #include "proptest/generator/vector.hpp"
@@ -30,13 +31,30 @@ TEST(Arbitrary, bool)
     // TODO: validate
 }
 
+/*
 TEST(Arbitrary, toGenerator)
+{
+    Random rand(getCurrentTime());
+    auto arbi = Arbi<bool>();
+    Generator<bool> gen = arbi;
+    for(int i = 0; i < 5; i++)
+        cout << gen(rand).get() << endl;
+
+    // rvalue
+    Generator<bool> gen2 = Arbi<bool>();
+}
+*/
+
+TEST(Arbitrary, toGenFunction)
 {
     Random rand(getCurrentTime());
     auto arbi = Arbi<bool>();
     GenFunction<bool> gen = arbi;
     for(int i = 0; i < 5; i++)
         cout << gen(rand).get() << endl;
+    
+    // rvalue
+    GenFunction<bool> gen2 = Arbi<bool>();
 }
 
 TEST(Arbitrary, int)
@@ -48,6 +66,15 @@ TEST(Arbitrary, int)
         cout << arbi(rand).get() << endl;
     EXPECT_TRUE(val >= std::numeric_limits<int>::min());
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
+}
+
+TEST(Arbitrary, double)
+{
+    Random rand(getCurrentTime());
+    auto arbi = Arbi<double>();
+    auto val = arbi(rand).get();
+    for(int i = 0; i < 5; i++)
+        cout << arbi(rand).get() << endl;
 }
 
 TEST(Arbitrary, list_int)

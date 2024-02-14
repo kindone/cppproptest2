@@ -29,6 +29,7 @@ using GenFunction = Function<Shrinkable<T>(Random&)>;
 
 // forward-declarations
 template <typename T> struct Generator;
+template <typename T> struct Arbi;
 
 template <typename T>
 struct PROPTEST_API GeneratorBase
@@ -101,6 +102,12 @@ struct AnyGenerator
     AnyGenerator(const Generator<T>& gen) : anyGen(gen)
     {
     }
+
+    template <typename T>
+    AnyGenerator(GenFunction<T> gen) : anyGen(gen) {}
+
+    template <typename T>
+    AnyGenerator(const Arbi<T>& arbi) : anyGen(arbi) {}
 
     ShrinkableAny operator()(Random& rand);
 

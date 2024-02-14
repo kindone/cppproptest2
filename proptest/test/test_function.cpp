@@ -201,6 +201,13 @@ TEST(Function, void_return)
     function(1,2);
 }
 
+TEST(Function, void_return2)
+{
+    auto lambda = [](int a, int b) { return; };
+    Function<void(int,int)> function = lambda;
+    function(1,2);
+}
+
 TEST(Function, noncopyable_args)
 {
     struct NonCopyable {
