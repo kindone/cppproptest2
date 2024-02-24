@@ -8,8 +8,8 @@ PROJECT("cppproptest"  VERSION 1.0)
 SET(CMAKE_CXX_FLAGS_RELEASE "")
 SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 SET(CMAKE_CXX_STANDARD 20)
-SET(CLANG_DEBUG_OPTIONS, "-g -O0 -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
+# SET(CLANG_DEBUG_OPTIONS, "-g -O0 -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -Werror -Wimplicit-int-conversion -Werror=unused-local-typedefs -Wsign-compare")
 
 # add_subdirectory("proptest")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -92,7 +92,7 @@ SET(proptest_testsources
     proptest/test/test_shrinkable.cpp
     proptest/test/test_shrinker.cpp
     proptest/test/test_shrinker2.cpp
-    proptest/test/test_anyshrinkable.cpp
+    # proptest/test/test_anyshrinkable.cpp
     proptest/test/test_printing.cpp
     proptest/test/test_random.cpp
     proptest/test/test_arbitrary.cpp

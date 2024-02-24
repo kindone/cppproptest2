@@ -241,7 +241,7 @@ struct Function<RET(ARGS...)> {
     using RetType = RET;
     static constexpr size_t Arity = sizeof...(ARGS);
 
-    Function() = delete;
+    Function() {}
     explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {
         // proptest::cout << "Function shared_ptr constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
@@ -269,6 +269,8 @@ struct Function<RET(ARGS...)> {
     }
 
     RET operator()(ARGS... arg) const {
+        if(!holder)
+            throw runtime_error("Function has no definition");
         if constexpr(same_as<RET, void>) {
             holder->apply({util::make_any<ARGS>(arg)...});
             return;
@@ -278,6 +280,8 @@ struct Function<RET(ARGS...)> {
     }
 
      RET operator()(ARGS... arg) {
+        if(!holder)
+            throw runtime_error("Function has no definition");
         if constexpr(same_as<RET, void>) {
             holder->apply({util::make_any<ARGS>(arg)...});
             return;

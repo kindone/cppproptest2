@@ -75,9 +75,10 @@ struct Shrinkable
 
     template <typename U>
     Shrinkable<U> flatMap(Function<Shrinkable<U>(const T&)> transformer) const {
-        return transformer(value.getRef<T>()).with(shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
-            return shr.flatMap<U>(transformer);
-        }));
+        return transformer(value.getRef<T>()).with([shrinks=this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
+                return shr.flatMap<U>(transformer);
+            });
+        });
     }
 
     template <typename U>
@@ -89,11 +90,11 @@ struct Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument("cannot apply criteria");
         else
-            return with(shrinks->filter([criteria](const Shrinkable& shr) -> bool {
+            return with([shrinks=this->shrinks, criteria]() { return shrinks->filter([criteria](const Shrinkable& shr) -> bool {
                 return criteria(shr.getRef());
             }).template transform<Shrinkable<T>>([criteria](const Shrinkable& shr) {
                 return shr.filter(criteria);
-            }));
+            }); });
     }
 
     // provide filtered generation, shrinking
@@ -121,17 +122,17 @@ struct Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument("cannot apply criteria");
 
-        return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
+        return with([shrinks=this->shrinks, criteria, tolerance]() { return filterStream(*shrinks, criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
             return shr.filter(criteria, tolerance);
-        }));
+        }); });
     }
 
     // concat: continues with then after horizontal dead end
-    Shrinkable<T> concatStatic(const Stream& then) const {
+    Shrinkable<T> concatStatic(Function<Stream()> then) const {
         auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
             return shr.concatStatic(then);
         });
-        return with(shrinksWithThen.concat(then));
+        return with([=]() { return shrinksWithThen.concat(then()); });
     }
 
     // concat: extend shrinks stream with function taking parent as argument
@@ -139,32 +140,32 @@ struct Shrinkable
         auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
             return shr.concat(then);
         });
-        return with(shrinksWithThen.concat(then(*this)));
+        return with([self=*this, shrinksWithThen, then]() { return shrinksWithThen.concat(then(self)); });
     }
 
     // andThen: continues with then after vertical dead end
     Shrinkable<T> andThenStatic(const Stream& then) const {
         if(shrinks->isEmpty())
-            return with(then);
+            return with([=]() { return then; });
         else
-            return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+            return with([shrinks=this->shrinks, then]() { return shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
                 return shr.andThenStatic(then);
-            }));
+            }); });
     }
 
     Shrinkable<T> andThen(Function<Stream(const Shrinkable<T>&)> then) const {
         if(shrinks->isEmpty())
-            return with(then(*this));
+            return with([self=*this, then]() { return then(self); });
         else
-            return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+            return with([shrinks=this->shrinks, then]() { return shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
                 return shr.andThen(then);
-            }));
+            }); });
     }
 
     Shrinkable<T> take(int n) const {
-        return with(shrinks->template transform<Shrinkable<T>>([n](const Shrinkable<T>& shr) -> Shrinkable<T> {
+        return with([shrinks=this->shrinks, n]() { return shrinks->template transform<Shrinkable<T>>([n](const Shrinkable<T>& shr) -> Shrinkable<T> {
             return shr.take(n);
-        }));
+        }); });
     }
 
 private:
