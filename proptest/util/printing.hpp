@@ -108,7 +108,7 @@ ostream& show(ostream& os, const Shrinkable<T>& shrinkable)
     return os;
 }
 
-template <typename T>
+template <typename T, typename U = void>
 struct Show
 {
     Show(const T& _value) : value(_value) {}
@@ -131,6 +131,18 @@ struct Show<char*>
     }
     const char* value;
     size_t n;
+};
+
+template <typename U>
+struct Show<ShrinkableAny, U>
+{
+    Show(const ShrinkableAny& _value) : value(_value) {}
+    friend ostream& operator<<(ostream& os, const Show<ShrinkableAny, U>& sh)
+    {
+        show(os, sh.value.getAny().template getRef<U>());
+        return os;
+    }
+    const ShrinkableAny& value;
 };
 
 namespace util {

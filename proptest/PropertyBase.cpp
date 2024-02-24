@@ -3,6 +3,8 @@
 
 namespace proptest {
 
+int64_t getCurrentTime();
+
 namespace util {
 
 uint64_t getGlobalSeed()

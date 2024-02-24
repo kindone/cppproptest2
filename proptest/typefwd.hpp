@@ -24,7 +24,9 @@ struct Action;
 // Random
 struct Random;
 
+namespace util {
 template <class F, size_t... Is>
 void For(F func, index_sequence<Is...>);
+} // namespace util
 
 } // namespace proptest

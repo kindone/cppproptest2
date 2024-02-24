@@ -1,0 +1,16 @@
+#pragma once
+
+#include "proptest/generator/bool.hpp"
+#include "proptest/generator/integral.hpp"
+#include "proptest/generator/floating.hpp"
+#include "proptest/generator/list.hpp"
+#include "proptest/generator/vector.hpp"
+#include "proptest/generator/set.hpp"
+#include "proptest/generator/map.hpp"
+#include "proptest/generator/pair.hpp"
+#include "proptest/generator/tuple.hpp"
+#include "proptest/generator/string.hpp"
+#include "proptest/generator/utf8string.hpp"
+#include "proptest/generator/utf16string.hpp"
+#include "proptest/generator/cesu8string.hpp"
+#include "proptest/generator/shared_ptr.hpp"

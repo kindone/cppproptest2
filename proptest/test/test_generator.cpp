@@ -1,5 +1,7 @@
 #include "proptest/generator/integral.hpp"
 #include "proptest/generator/list.hpp"
+#include "proptest/generator/vector.hpp"
+#include "proptest/generator/tuple.hpp"
 #include "proptest/combinator/just.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/test/gtest.hpp"
@@ -14,6 +16,28 @@ TEST(GenIntegral, basic)
     auto val = gen(rand).get();
     EXPECT_TRUE(val >= std::numeric_limits<int>::min());
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
+}
+
+TEST(Generator, tupleOf)
+{
+    Random rand(getCurrentTime());
+    auto gen = tupleOf(interval<int>(0, 10), interval<int>(0, 10));
+    tuple<int, int> val = gen(rand).get();
+    EXPECT_TRUE(get<0>(val) >= 0);
+    EXPECT_TRUE(get<0>(val) <= 10);
+    EXPECT_TRUE(get<1>(val) >= 0);
+    EXPECT_TRUE(get<1>(val) <= 10);
+}
+
+TEST(Generator, performance_vector)
+{
+    Random rand(getCurrentTime());
+    Arbi<vector<int>> arbi;
+    for(int i = 0; i < 1000; i++) {
+        auto shr = arbi(rand);
+        EXPECT_LE(shr.getRef().size(), Arbi<vector<int>>::defaultMaxSize);
+        EXPECT_GE(shr.getRef().size(), Arbi<vector<int>>::defaultMinSize);
+    }
 }
 
 TEST(Generator, GenFunction)

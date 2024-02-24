@@ -6,6 +6,7 @@
 #include "proptest/std/functional.hpp"
 #include "proptest/std/concepts.hpp"
 #include "proptest/std/io.hpp"
+#include "proptest/std/tuple.hpp"
 #include "proptest/util/any.hpp"
 #include "proptest/util/function_traits.hpp"
 #include "proptest/typefwd.hpp"
@@ -236,6 +237,10 @@ struct Function;
 
 template <typename RET, typename...ARGS>
 struct Function<RET(ARGS...)> {
+    using ArgTuple = tuple<ARGS...>;
+    using RetType = RET;
+    static constexpr size_t Arity = sizeof...(ARGS);
+
     Function() = delete;
     explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {
         // proptest::cout << "Function shared_ptr constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;

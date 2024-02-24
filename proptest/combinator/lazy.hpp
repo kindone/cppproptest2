@@ -24,8 +24,8 @@ template <typename T, typename LazyEval>
     requires(is_convertible_v<LazyEval&&, function<T()>>)
 Generator<T> lazy(LazyEval&& lazyEval)
 {
-    auto lazyEvalPtr = util::make_shared<function<T()>>(util::forward<LazyEval>(lazyEval));
-    return generator([lazyEvalPtr](Random&) { return make_shrinkable<T>((*lazyEvalPtr)()); });
+    Function<T()> lazyEvalFunc = lazyEval;
+    return generator([lazyEvalFunc](Random&) { return make_shrinkable<T>(lazyEvalFunc()); });
 }
 
 /**

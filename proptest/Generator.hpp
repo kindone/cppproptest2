@@ -109,7 +109,7 @@ struct AnyGenerator
     template <typename T>
     AnyGenerator(const Arbi<T>& arbi) : anyGen(arbi) {}
 
-    ShrinkableAny operator()(Random& rand);
+    ShrinkableAny operator()(Random& rand) const;
 
     template <typename T>
     Shrinkable<T> generate(Random& rand) {

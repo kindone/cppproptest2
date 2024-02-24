@@ -4,7 +4,7 @@
 
 namespace proptest {
 
-ShrinkableAny AnyGenerator::operator()(Random& rand) {
+ShrinkableAny AnyGenerator::operator()(Random& rand) const {
     return anyGen(rand);
 }
 

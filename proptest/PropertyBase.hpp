@@ -3,6 +3,8 @@
 #include "proptest/api.hpp"
 #include "proptest/PropertyContext.hpp"
 #include "proptest/std/io.hpp"
+#include "proptest/std/optional.hpp"
+#include "proptest/util/anyfunction.hpp"
 
 #define PROP_EXPECT_STREAM(condition, a, sign, b)                                            \
     ([&]() -> stringstream& {                                                           \
@@ -70,9 +72,7 @@ class Random;
 
 class PROPTEST_API PropertyBase {
 public:
-    template <typename Func, typename GenTuple>
-    PropertyBase(Func* _funcPtr, GenTuple* _genTupPtr)
- : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), funcPtr(_funcPtr), genTupPtr(_genTupPtr)  {}
+    PropertyBase() : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), onStartup([]() {}), onCleanup([]() {}) {}
 
     static void setDefaultNumRuns(uint32_t);
     static void tag(const char* filename, int lineno, string key, string value);
@@ -97,10 +97,8 @@ protected:
 
     uint32_t maxDurationMs; // indefinitely if 0
 
-    shared_ptr<void> funcPtr;
-    shared_ptr<void> genTupPtr;
-    shared_ptr<Function<void()>> onStartupPtr;
-    shared_ptr<Function<void()>> onCleanupPtr;
+    optional<Function<void()>> onStartup;
+    optional<Function<void()>> onCleanup;
 
     friend struct PropertyContext;
 };

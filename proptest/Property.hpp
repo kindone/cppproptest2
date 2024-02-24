@@ -6,6 +6,9 @@
 #include "proptest/util/printing.hpp"
 #include "proptest/PropertyContext.hpp"
 #include "proptest/PropertyBase.hpp"
+#include "proptest/util/assert.hpp"
+#include "proptest/util/tuple.hpp"
+#include "proptest/util/matrix.hpp"
 
 /**
  * @file Property.hpp
@@ -20,21 +23,21 @@ namespace proptest {
  * to hold the property.
  */
 template <typename... ARGS>
+    requires (sizeof...(ARGS) > 0)
 class Property final : public PropertyBase {
 public:
+    static constexpr size_t Arity = sizeof...(ARGS);
     using Func = Function<bool(ARGS...)>;
-    using GenTuple = tuple<GenFunction<decay_t<ARGS>>...>;
+    using GenVec = vector<AnyGenerator>;
 
 private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
     using ValueTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
-    using ShrinksTuple = tuple<conditional_t<is_same_v<ARGS, bool>, Stream, Stream>...>; // tuple<Stream, ...> (repeats by size of ARGS)
+    using ShrTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
+    using ShrinksTuple = tuple<Stream<Shrinkable<decay_t<ARGS>>>...>;
 
 public:
-    Property(const Func& f, const GenTuple& g) : PropertyBase(new Func(f), new GenTuple(g)) {}
-
-private:
-    bool invoke(Random& rand) { return util::invokeWithGenTuple(rand, getFunc(), getGenTup()); }
+    Property(const Func& f, vector<AnyGenerator>&& gens) : func(f), genVec(util::move(gens)) {}
 
 public:
     /**
@@ -67,9 +70,9 @@ public:
      * @param onStartup Invoked in each run before running the property function
      * @return Property& `Property` object itself for chaining
      */
-    Property& setOnStartup(function<void()> onStartup)
+    Property& setOnStartup(Function<void()> _onStartup)
     {
-        onStartupPtr = util::make_shared<function<void()>>(onStartup);
+        onStartup = _onStartup;
         return *this;
     }
 
@@ -79,9 +82,9 @@ public:
      * @param onCleanup Invoked in each run after running the property function.
      * @return Property& `Property` object itself for chaining
      */
-    Property& setOnCleanup(function<void()> onCleanup)
+    Property& setOnCleanup(Function<void()> _onCleanup)
     {
-        onCleanupPtr = util::make_shared<function<void()>>(onCleanup);
+        onCleanup = _onCleanup;
         return *this;
     }
 
@@ -117,8 +120,13 @@ public:
     bool forAll(ExplicitGens&&... gens)
     {
         // combine explicit generators and implicit generators into a tuple by overriding implicit generators with explicit generators
-        auto curGenTup = util::overrideTuple(getGenTup(), gens...);
-        return runForAll(util::forward<decltype(curGenTup)>(curGenTup));
+        constexpr size_t NumExplicitGens = sizeof...(gens);
+
+        vector<AnyGenerator> curGenVec{generator(gens)...};
+        for(size_t i = NumExplicitGens; i < genVec.size(); i++) {
+            curGenVec.push_back(genVec[i]);
+        }
+        return runForAll(curGenVec);
     }
 
     /**
@@ -128,15 +136,44 @@ public:
      * @return true if the case succeeds
      * @return false if the cases fails
      */
-    bool example(ARGS&&... args)
+    bool example(const ARGS&... args)
     {
+        PropertyContext context;
         auto valueTup = util::make_tuple(args...);
-        return example(valueTup);
+        try {
+            try {
+                try {
+                    if (onStartup)
+                        (*onStartup)();
+                    bool result = func(args...);
+                    if (onCleanup)
+                        (*onCleanup)();
+                    return result;
+                } catch (const AssertFailed& e) {
+                    throw PropertyFailed<tuple<ARGS...>>(e);
+                }
+            } catch (const Success&) {
+                return true;
+            } catch (const Discard&) {
+                // silently discard combination
+                cerr << "Discard is not supported for single run" << endl;
+            }
+        } catch (const PropertyFailedBase& e) {
+            cerr << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
+            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
+            return false;
+        } catch (const exception& e) {
+            // skip shrinking?
+            cerr << "example failed by exception: " << e.what() << endl;
+            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
+            return false;
+        }
+        return false;
     }
 
 private:
 
-    bool runForAll(GenTuple&& curGenTup)
+    bool runForAll(const GenVec& curGenVec)
     {
         Random rand(seed);
         Random savedRand(seed);
@@ -161,21 +198,25 @@ private:
                     pass = true;
                     try {
                         savedRand = rand;
-                        if (onStartupPtr)
-                            (*onStartupPtr)();
-                        bool result = util::invokeWithGenTuple(rand, getFunc(), curGenTup);
-                        if (onCleanupPtr)
-                            (*onCleanupPtr)();
+                        if (onStartup)
+                            (*onStartup)();
+                        // generate values
+                        bool result = util::Call<Arity>(func, [&](auto index_sequence) {
+                            return curGenVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+                        });
+
+                        if (onCleanup)
+                            (*onCleanup)();
                         stringstream failures = ctx.flushFailures();
                         // failed expectations
                         if (failures.rdbuf()->in_avail()) {
                             cerr << "Falsifiable, after " << (i + 1) << " tests: ";
                             cerr << failures.str();
-                            shrink(savedRand, util::forward<GenTuple>(curGenTup));
+                            shrink(savedRand, curGenVec);
                             return false;
                         } else if (!result) {
                             cerr << "Falsifiable, after " << (i + 1) << " tests" << endl;
-                            shrink(savedRand, util::forward<GenTuple>(curGenTup));
+                            shrink(savedRand, curGenVec);
                             return false;
                         }
                         pass = true;
@@ -191,58 +232,24 @@ private:
             cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
                  << ")" << endl;
             // shrink
-            shrink(savedRand, util::forward<GenTuple>(curGenTup));
+            shrink(savedRand, curGenVec);
             return false;
         } catch (const PropertyFailedBase& e) {
             cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
                  << ")" << endl;
             // shrink
-            shrink(savedRand, util::forward<GenTuple>(curGenTup));
+            shrink(savedRand, curGenVec);
             return false;
         } catch (const exception& e) {
             cerr << "Falsifiable, after " << (i + 1) << " tests - unhandled exception thrown: " << e.what() << endl;
             // shrink
-            shrink(savedRand, util::forward<GenTuple>(curGenTup));
+            shrink(savedRand, curGenVec);
             return false;
         }
 
         cout << "OK, passed " << numRuns << " tests" << endl;
         ctx.printSummary();
         return true;
-    }
-
-    bool example(const tuple<ARGS...>& valueTup)
-    {
-        PropertyContext context;
-        try {
-            try {
-                try {
-                    if (onStartupPtr)
-                        (*onStartupPtr)();
-                    bool result = util::invokeWithArgs(getFunc(), valueTup);
-                    if (onCleanupPtr)
-                        (*onCleanupPtr)();
-                    return result;
-                } catch (const AssertFailed& e) {
-                    throw PropertyFailed<tuple<ARGS...>>(e);
-                }
-            } catch (const Success&) {
-                return true;
-            } catch (const Discard&) {
-                // silently discard combination
-                cerr << "Discard is not supported for single run" << endl;
-            }
-        } catch (const PropertyFailedBase& e) {
-            cerr << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
-            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
-            return false;
-        } catch (const exception& e) {
-            // skip shrinking?
-            cerr << "example failed by exception: " << e.what() << endl;
-            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
-            return false;
-        }
-        return false;
     }
 
 public:
@@ -265,34 +272,26 @@ public:
     */
     bool matrix(initializer_list<ARGS>&&... lists)
     {
-        constexpr auto Size = sizeof...(ARGS);
-        auto vecTuple = util::make_tuple(vector<ARGS>(lists)...);
-        vector<int> indices;
-        for (size_t i = 0; i < Size; i++)
-            indices.push_back(0);
-
-        do {
-            auto valueTup = util::Matrix::pickEach(util::forward<decltype(vecTuple)>(vecTuple), indices,
-                                                   make_index_sequence<Size>{});
-            example(valueTup);
-        } while (
-            util::Matrix::progress(util::forward<decltype(vecTuple)>(vecTuple), indices, make_index_sequence<Size>{}));
-
-        return true;
+        Function<bool(ARGS...)> test = [this](ARGS... args) {
+            return example(args...);
+        };
+        return util::cartesianProduct(test, util::forward<initializer_list<ARGS>>(lists)...);
     }
 
 private:
-    template <typename Invoker, typename Replace>
-    bool test(Invoker invoker, ValueTuple&& valueTup, Replace&& replace)
+    bool test(const vector<ShrinkableAny>& curShrVec)
     {
         bool result = false;
-        auto values = util::transformHeteroTuple<util::ShrinkableGet>(util::forward<ValueTuple>(valueTup));
         try {
-            if (onStartupPtr)
-                (*onStartupPtr)();
-            result = invoker(getFunc(), util::forward<decltype(values)>(values), replace.get());
-            if (onCleanupPtr)
-                (*onCleanupPtr)();
+            if (onStartup)
+                (*onStartup)();
+
+            result = util::Call<Arity>(func, [&](auto index_sequence) {
+                return curShrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+            });
+
+            if (onCleanup)
+                (*onCleanup)();
         } catch (const AssertFailed&) {
             result = false;
             // cerr << "    assertion failed: " << e.what() << " (" << e.filename << ":"
@@ -314,127 +313,101 @@ private:
         }
     }
 
-    template <size_t N, typename ValueTuple, typename ShrinksTuple>
-    decltype(auto) shrinkN(ValueTuple&& valueTup, ShrinksTuple&& shrinksTuple)
+    void shrink(Random& savedRand, const GenVec& curGenVec)
     {
-        using ShrinksType = tuple_element_t<N, ValueTuple>;//tuple_element_t<N, tuple<Shrinkable<decay_t<ARGS>>...>>;
-        auto shrinks = get<N>(shrinksTuple);
-        // keep shrinking until no shrinking is possible
-        while (!shrinks.isEmpty()) {
-            // printShrinks(shrinks);
-            auto iter = shrinks.template iterator<ShrinksType>();
-            bool shrinkFound = false;
-            PropertyContext context;
-            // keep trying until failure is reproduced
-            while (iter.hasNext()) {
-                // get shrinkable
-                auto next = iter.next();
-                if (!test(util::invokeWithArgTupleWithReplace<N, Func&, ArgTuple, typename decltype(next)::type>,
-                          util::forward<ValueTuple>(valueTup), next) ||
-                    context.hasFailures()) {
-                    shrinks = next.shrinks();
-                    get<N>(valueTup) = next;
-                    shrinkFound = true;
+        // regenerate failed value tuple
+        vector<ShrinkableAny> shrVec;
+        vector<Stream<ShrinkableAny>> shrinksVec;
+        for(size_t i = 0; i < Arity; i++) {
+            auto shr = curGenVec[i](savedRand);
+            shrVec.push_back(shr);
+            shrinksVec.push_back(shr.getShrinks());
+        };
+
+        cout << "  with args: " << ShowShrVec{shrVec} << endl;
+
+        util::For<Arity>([&](auto index_sequence) {
+            constexpr size_t N = index_sequence.value;
+
+            auto shrinks = shrinksVec[N];
+            while (!shrinks.isEmpty()) {
+                // printShrinks(shrinks);
+                auto iter = shrinks.iterator();
+                bool shrinkFound = false;
+                PropertyContext context;
+                // keep trying until failure is reproduced
+                while (iter.hasNext()) {
+                    // get shrinkable
+                    auto next = iter.next();
+                    vector<ShrinkableAny> curShrVec = shrVec;
+                    curShrVec[N] = next;
+                    if (!test(curShrVec) || context.hasFailures()) {
+                        shrinks = next.getShrinks();
+                        shrVec[N] = next;
+                        shrinkFound = true;
+                        break;
+                    }
+                }
+                if (shrinkFound) {
+                    cout << "  shrinking found simpler failing arg " << N << ": " << ShowShrVec{shrVec} << endl;
+                    if (context.hasFailures())
+                        cout << "    by failed expectation: " << context.flushFailures(4).str() << endl;
+                } else {
                     break;
                 }
             }
-            if (shrinkFound) {
-                cout << "  shrinking found simpler failing arg " << N << ": " << Show<ValueTuple>(valueTup) << endl;
-                if (context.hasFailures())
-                    cout << "    by failed expectation: " << context.flushFailures(4).str() << endl;
-            } else {
-                break;
-            }
+        });
+
+        cout << "  simplest args found by shrinking: " << ShowShrVec{shrVec} << endl;
+    }
+
+    struct ShowShrVec {
+        friend ostream& operator<<(ostream& os, const ShowShrVec& show)
+        {
+            os << "{ " << Show<ShrinkableAny, tuple_element_t<0, ArgTuple>>(show.shrVec[0]);
+            util::For<Arity-1>([&](auto index_sequence) {
+                os << ", " << Show<ShrinkableAny, tuple_element_t<index_sequence.value+1, ArgTuple>>(show.shrVec[index_sequence.value+1]);
+            });
+            os << " }";
+            return os;
         }
-        // cout << "  no more shrinking found for arg " << N << endl;
-        return get<N>(valueTup);
-    }
+        const vector<ShrinkableAny>& shrVec;
+    };
 
-    template <size_t... index, typename ValueTuple, typename ShrinksTuple>
-    decltype(auto) shrinkEach(ValueTuple&& valueTup, ShrinksTuple&& shrinksTup, index_sequence<index...>)
-    {
-        return util::make_tuple(
-            shrinkN<index>(util::forward<ValueTuple>(valueTup), util::forward<ShrinksTuple>(shrinksTup))...);
-    }
-
-    void shrink(Random& savedRand, GenTuple&& curGenTup)
-    {
-        // regenerate failed value tuple
-        auto generatedValueTup =
-            util::transformHeteroTupleWithArg<util::Generate>(util::forward<GenTuple>(curGenTup), savedRand);
-
-        cout << "  with args: " << Show<decltype(generatedValueTup)>(generatedValueTup) << endl;
-        // cout << (valueTup == valueTup2 ? "gen equals original" : "gen not equals original") << endl;
-        static constexpr auto Size = tuple_size<GenTuple>::value;
-        auto shrinksTuple =
-            util::transformHeteroTuple<util::GetShrinks>(util::forward<decltype(generatedValueTup)>(generatedValueTup));
-        auto shrunk = shrinkEach(util::forward<decltype(generatedValueTup)>(generatedValueTup),
-                                 util::forward<decltype(shrinksTuple)>(shrinksTuple), make_index_sequence<Size>{});
-        cout << "  simplest args found by shrinking: " << Show<decltype(shrunk)>(shrunk) << endl;
-    }
-
-    Func& getFunc() { return *static_pointer_cast<Func>(funcPtr); }
-
-    GenTuple& getGenTup() { return *static_pointer_cast<GenTuple>(genTupPtr); }
+    Func func;
+    vector<AnyGenerator> genVec;
 };
 
 namespace util {
 
-template <typename RetType, typename Callable, typename... ARGS>
-    requires(same_as<RetType, bool>)
-function<bool(ARGS...)> functionWithBoolResultHelper(
-    util::TypeList<ARGS...>, Callable&& callable)
+template <typename Callable, typename... ARGS>
+Function<bool(ARGS...)> functionWithBoolResultHelper(util::TypeList<ARGS...>, Callable&& callable)
 {
-    return static_cast<function<RetType(ARGS...)>>(callable);
-}
-
-template <typename Callable, typename ...ARGS>
-struct BoolResultFunctor {
-    BoolResultFunctor(Callable&& _callable) : callable(util::make_shared<function<void(ARGS...)>>(util::forward<Callable>(_callable))) {
-
-    }
-
-    bool operator()(ARGS&&... args) {
-        (*callable)(util::forward<ARGS>(args)...);
+    Function<void(const ARGS&...)> func = callable;
+    return [func](const ARGS&... args) {
+        func(args...);
         return true;
+    };
+}
+
+template <class Callable>
+decltype(auto) toFunctionWithBoolResult(Callable&& callable)
+{
+    using FuncType = function_traits<Callable>::template function_type_with_signature<Function>;
+    using RetType = FuncType::RetType;
+    if constexpr(is_same_v<RetType, void>) {
+        // using FuncTypeBoolRet = function_traits<Callable>::template function_type_with_signature<Function, bool>;
+        typename function_traits<Callable>::argument_type_list argument_type_list;
+        return functionWithBoolResultHelper(argument_type_list, util::forward<Callable>(callable));
     }
-    shared_ptr<function<void(ARGS...)>> callable;
-};
-
-template <typename RetType, typename Callable, typename... ARGS>
-    requires(same_as<RetType, void>)
-function<bool(ARGS...)> functionWithBoolResultHelper(
-    util::TypeList<ARGS...>, Callable&& callable)
-{
-    return BoolResultFunctor<Callable, ARGS...>(util::forward<Callable>(callable));
-}
-
-template <class Callable>
-decltype(auto) functionWithBoolResult(Callable&& callable)
-{
-    using RetType = typename function_traits<Callable>::return_type;
-    typename function_traits<Callable>::argument_type_list argument_type_list;
-    return functionWithBoolResultHelper<RetType>(argument_type_list, util::forward<Callable>(callable));
-}
-
-template <typename RetType, typename Callable, typename... ARGS>
-function<RetType(ARGS...)> asFunctionHelper(util::TypeList<ARGS...>, Callable&& callable)
-{
-    return static_cast<function<RetType(ARGS...)>>(callable);
-}
-
-template <class Callable>
-decltype(auto) asFunction(Callable&& callable)
-{
-    using RetType = typename function_traits<Callable>::return_type;
-    typename function_traits<Callable>::argument_type_list argument_type_list;
-    return asFunctionHelper<RetType>(argument_type_list, util::forward<Callable>(callable));
+    else
+        return FuncType(callable);
 }
 
 template <typename... ARGS>
-decltype(auto) createProperty(function<bool(ARGS...)> func, tuple<GenFunction<decay_t<ARGS>>...>&& genTup)
+decltype(auto) createProperty(Function<bool(ARGS...)> func, vector<AnyGenerator>&& genVec)
 {
-    return Property<ARGS...>(func, genTup);
+    return Property<ARGS...>(func, util::forward<decltype(genVec)>(genVec));
 }
 
 }  // namespace util
@@ -452,10 +425,29 @@ template <typename Callable, typename... ExplicitGens>
 auto property(Callable&& callable, ExplicitGens&&... gens)
 {
     // acquire full tuple of generators
-    typename function_traits<Callable>::argument_type_list argument_type_list;
-    auto func = util::functionWithBoolResult(callable);
-    auto genTup = util::createGenTuple(argument_type_list, util::asFunction(util::forward<decltype(gens)>(gens))...);
-    return util::createProperty(func, util::forward<decltype(genTup)>(genTup));
+    using FuncType = function_traits<Callable>::template function_type_with_signature<Function>;
+    constexpr size_t NumArgs = FuncType::Arity;
+    constexpr size_t NumGens = sizeof...(ExplicitGens);
+    using ArgTuple = typename FuncType::ArgTuple;
+
+    // prepare genVec
+    auto genTuple = util::make_tuple(generator(gens)...);
+    vector<AnyGenerator> genVec;
+    // fill with gens
+    if constexpr(NumGens > 0) {
+        util::For<NumGens>([&](auto index_sequence) {
+            genVec.push_back(get<index_sequence.value>(genTuple));
+        });
+    }
+    // fill the rest with arbitraries
+    util::For<NumArgs-NumGens>([&genVec](auto index_sequence) {
+        using T = decay_t<tuple_element_t<NumGens + index_sequence.value, ArgTuple>>;
+        genVec.push_back(Arbi<T>());
+    });
+
+    // callable to Function
+    auto func = util::toFunctionWithBoolResult(callable);
+    return util::createProperty(func, util::move(genVec));
 }
 /**
  * @brief Immediately executes a randomized property test

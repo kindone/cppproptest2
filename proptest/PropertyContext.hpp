@@ -1,7 +1,10 @@
 #pragma once
 
-#include "api.hpp"
-#include "util/std.hpp"
+#include "proptest/api.hpp"
+#include "proptest/std/string.hpp"
+#include "proptest/std/io.hpp"
+#include "proptest/std/map.hpp"
+#include "proptest/std/list.hpp"
 
 namespace proptest {
 

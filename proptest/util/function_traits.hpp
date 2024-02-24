@@ -31,6 +31,9 @@ struct function_traits<R(Args...)>
     using return_type = R;
     static constexpr size_t arity = sizeof...(Args);
     using argument_type_list = util::TypeList<Args...>;
+
+    template <template <typename...> typename TEMPLATE, typename NEW_RETURN_TYPE = return_type>
+    using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
 };
 
 // member function pointer
@@ -79,7 +82,7 @@ public:
     using template_type_with_args = typename TypeListToTemplateTypeHelper<TEMPLATE, argument_type_list>::type;
     template <template <typename...> typename TEMPLATE>
     using template_type_with_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, return_and_argument_type_list>::type;
-    template <template <typename...> typename TEMPLATE>
+    template <template <typename...> typename TEMPLATE, typename NEW_RETURN_TYPE = return_type>
     using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
     template <template <typename...> typename TEMPLATE, typename CALLABLE>
     using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;

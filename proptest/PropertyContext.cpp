@@ -1,5 +1,6 @@
 #include "proptest/PropertyContext.hpp"
 #include "proptest/PropertyBase.hpp"
+#include "proptest/std/pair.hpp"
 
 namespace proptest {
 

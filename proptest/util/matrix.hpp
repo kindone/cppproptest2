@@ -7,11 +7,6 @@
 namespace proptest {
 namespace util {
 
-template <typename...ARGS>
-struct Matrix {
-
-};
-
 template <typename RET, typename...ARGS>
 decltype(auto) cartesianProduct(Function<RET(ARGS...)> func, initializer_list<ARGS>&&... lists) {
     using TUP = tuple<ARGS...>;
@@ -59,16 +54,21 @@ decltype(auto) cartesianProduct(Function<RET(ARGS...)> func, initializer_list<AR
         return false;
     };
 
-
+    bool result = true;
     do {
         vector<Any> outVec;
         for(size_t j = 0; j < Size; j++) {
             outVec.push_back(vecs[j][is[j]]);
         }
-        Call<Size>(func, [&](auto index_sequence) {
+        bool success = Call<Size>(func, [&](auto index_sequence) {
             return outVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, TUP>>();
         });
+
+        if(!success)
+            result = false;
     } while(progress());
+
+    return result;
 }
 
 

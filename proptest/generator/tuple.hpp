@@ -20,14 +20,14 @@ namespace proptest {
 template <GenLike GEN0, GenLike... GENS>
 decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens)
 {
-    constexpr auto Size = sizeof...(GENS);
-    tuple<decay_t<GEN0>, decay_t<GENS>...> genTup = util::make_tuple(gen0, gens...);
+    constexpr auto Size = sizeof...(GENS) + 1;
+    auto genTup = util::make_tuple(generator(gen0), generator(gens)...);
     // generator
     return generator([genTup](Random& rand) mutable {
-        auto shrTup = util::Map<Size>([&rand](auto index_sequence) {
+        auto shrTup = util::Map<Size>([&rand, genTup](auto index_sequence) {
             return get<index_sequence.value>(genTup)(rand);
         });
-        return shrinkTuple(shrTup);
+        return shrinkTuple(make_shrinkable<decltype(shrTup)>(shrTup));
     });
 }
 
