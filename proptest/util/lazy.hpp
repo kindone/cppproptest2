@@ -1,18 +1,19 @@
 #pragma once
 
+#include "proptest/std/optional.hpp"
 #include "proptest/util/anyfunction.hpp"
 
 namespace proptest {
 
 template <typename T>
 struct Lazy {
-    Lazy(const T& _value) : value(util::make_shared<T>(_value)) {}
+    Lazy(const T& _value) : value(_value) {}
     Lazy(Function<T()> _eval) : eval(_eval) {}
 
     T& getRef() const {
-        if(!value)
+        if(!value.has_value())
         {
-            value = util::make_shared<T>(eval());
+            value = (*eval)();
         }
         return *value;
     }
@@ -26,8 +27,8 @@ struct Lazy {
     }
 
 private:
-    mutable shared_ptr<T> value;
-    Function<T()> eval;
+    mutable optional<T> value;
+    optional<Function<T()>> eval;
 };
 
 }

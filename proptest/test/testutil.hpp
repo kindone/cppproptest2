@@ -1,7 +1,7 @@
 #pragma once
 
 #include "proptest/Shrinkable.hpp"
-// #include "proptest/AnyShrinkable.hpp"
+#include "proptest/AnyShrinkable.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/test/gtest.hpp"
@@ -150,10 +150,10 @@ proptest::string serializeShrinkableAny(const proptest::ShrinkableAny& shr)
     return stream.str();
 }
 
-// template <typename T>
-// proptest::string serializeAnyShrinkable(const proptest::AnyShrinkable& shr)
-// {
-//     proptest::stringstream stream;
-//     outShrinkable<T>(stream, shr.getShrinkableAny().map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
-//     return stream.str();
-// }
+template <typename T>
+proptest::string serializeAnyShrinkable(const proptest::AnyShrinkable& shr)
+{
+    proptest::stringstream stream;
+    outShrinkable<T>(stream, shr.getShrinkableAny().map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
+    return stream.str();
+}

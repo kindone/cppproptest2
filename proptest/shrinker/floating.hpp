@@ -55,7 +55,7 @@ Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
             expShrinkable.map<FLOATTYPE>([fraction](const int& exp) { return util::composeFloat(fraction, exp); });
 
         // prepend 0.0
-        floatShrinkable = floatShrinkable.with([=]() { return Stream::one(make_shrinkable<FLOATTYPE>(0.0f)).concat(floatShrinkable.getShrinks()); });
+        floatShrinkable = floatShrinkable.with(Stream::one(make_shrinkable<FLOATTYPE>(0.0f)).concat(floatShrinkable.getShrinks()));
 
         // shrink fraction within (0.0 and 0.5)
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
@@ -87,7 +87,7 @@ Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
 
 template <typename FLOATTYPE>
 Shrinkable<FLOATTYPE> shrinkFloat(FLOATTYPE value) {
-    return make_shrinkable<FLOATTYPE>(value).with([=]() { return floatShrinks(value); });
+    return make_shrinkable<FLOATTYPE>(value).with(floatShrinks(value));
 }
 
 extern template Shrinkable<float> shrinkFloat<float>(float);
