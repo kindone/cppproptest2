@@ -40,6 +40,18 @@ TEST(Generator, performance_vector)
     }
 }
 
+TEST(Generator, performance_int)
+{
+    Random rand(getCurrentTime());
+    auto gen = interval(0, 10);
+    for(int i = 0; i < 100000; i++) {
+        auto shr = gen(rand);
+        EXPECT_GE(shr.getRef(), 0);
+        EXPECT_LE(shr.getRef(), 10);
+    }
+}
+
+
 TEST(Generator, GenFunction)
 {
     Random rand(getCurrentTime());
