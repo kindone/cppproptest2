@@ -144,10 +144,10 @@ public:
             try {
                 try {
                     if (onStartup)
-                        (*onStartup)();
+                        onStartup();
                     bool result = func(args...);
                     if (onCleanup)
-                        (*onCleanup)();
+                        onCleanup();
                     return result;
                 } catch (const AssertFailed& e) {
                     throw PropertyFailed<tuple<ARGS...>>(e);
@@ -199,14 +199,14 @@ private:
                     try {
                         savedRand = rand;
                         if (onStartup)
-                            (*onStartup)();
+                            onStartup();
                         // generate values
                         bool result = util::Call<Arity>(func, [&](auto index_sequence) {
                             return curGenVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
                         });
 
                         if (onCleanup)
-                            (*onCleanup)();
+                            onCleanup();
                         stringstream failures = ctx.flushFailures();
                         // failed expectations
                         if (failures.rdbuf()->in_avail()) {
@@ -284,14 +284,14 @@ private:
         bool result = false;
         try {
             if (onStartup)
-                (*onStartup)();
+                onStartup();
 
             result = util::Call<Arity>(func, [&](auto index_sequence) {
                 return curShrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
             });
 
             if (onCleanup)
-                (*onCleanup)();
+                onCleanup();
         } catch (const AssertFailed&) {
             result = false;
             // cerr << "    assertion failed: " << e.what() << " (" << e.filename << ":"

@@ -72,7 +72,7 @@ class Random;
 
 class PROPTEST_API PropertyBase {
 public:
-    PropertyBase() : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), onStartup([]() {}), onCleanup([]() {}) {}
+    PropertyBase() : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs) {}
 
     static void setDefaultNumRuns(uint32_t);
     static void tag(const char* filename, int lineno, string key, string value);
@@ -97,8 +97,8 @@ protected:
 
     uint32_t maxDurationMs; // indefinitely if 0
 
-    optional<Function<void()>> onStartup;
-    optional<Function<void()>> onCleanup;
+    Function<void()> onStartup;
+    Function<void()> onCleanup;
 
     friend struct PropertyContext;
 };
