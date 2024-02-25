@@ -100,6 +100,7 @@ SET(proptest_testsources
     proptest/test/test_combinator.cpp
     proptest/test/test_invoke.cpp
     proptest/test/test_property.cpp
+    proptest/test/test_proptest.cpp
 )
 
 
