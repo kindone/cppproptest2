@@ -58,6 +58,7 @@ SET(proptest_sources
     proptest/Random.cpp
     proptest/PropertyContext.cpp
     proptest/PropertyBase.cpp
+    proptest/util/bitmap.cpp
 )
 
 ADD_LIBRARY(proptest
@@ -102,6 +103,7 @@ SET(proptest_testsources
     proptest/test/test_property.cpp
     proptest/test/test_proptest.cpp
     proptest/test/test_stateful_function.cpp
+    proptest/test/test_concurrency_function.cpp
 )
 
 

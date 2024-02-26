@@ -238,9 +238,9 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
         rearShrs.push_back(actionListGen(rand));
     }
 
-    ObjectType& obj = initialShr.getRef();
+    ObjectType& obj = initialShr.getMutableRef();
     ModelType model = modelFactoryPtr ? (*modelFactoryPtr)(obj) : ModelType();
-    ActionList& front = frontShr.getRef();
+    ActionList& front = frontShr.getMutableRef();
 
     atomic<int> counter{0};
     vector<int> log;
@@ -278,7 +278,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 
         // start threads
         for(int i = 0; i < numThreads; i++) {
-            rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(i, obj, model, rearShrs[i].getRef(),
+            rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(i, obj, model, rearShrs[i].getMutableRef(),
                                                                        *thread_ready[i], sync_ready, log, counter));
         }
 
@@ -344,7 +344,7 @@ decltype(auto) concurrency(InitialGen&& initialGen, SimpleActionGen<ObjectType>&
     using ActionType = Action<ObjectType, EmptyModel>;
 
     auto actionGen2 = actionGen.template map<Action<ObjectType, EmptyModel>>(
-        [](SimpleAction<ObjectType>& simpleAction) {
+        [](const SimpleAction<ObjectType>& simpleAction) {
             return Action<ObjectType,EmptyModel>(simpleAction);
         });
 
