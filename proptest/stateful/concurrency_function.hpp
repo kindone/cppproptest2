@@ -2,7 +2,6 @@
 
 #include "proptest/api.hpp"
 #include "proptest/stateful/stateful_function.hpp"
-#include "proptest/gen.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/PropertyContext.hpp"

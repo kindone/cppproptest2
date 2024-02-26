@@ -288,16 +288,16 @@ ostream& show(ostream& os, const shared_ptr<T>& ptr)
 //     return os;
 // }
 
-// namespace stateful {
+namespace stateful {
 
-// template <typename ObjectType, typename ModelType>
-// ostream& show(ostream& os, const Action<ObjectType,ModelType>& action)
-// {
-//     os << action.name;
-//     return os;
-// }
+template <typename ObjectType, typename ModelType>
+ostream& show(ostream& os, const Action<ObjectType,ModelType>& action)
+{
+    os << action.name;
+    return os;
+}
 
-// }
+}
 
 
 }  // namespace proptest

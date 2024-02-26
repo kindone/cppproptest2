@@ -18,8 +18,10 @@ struct Any;
 template <typename T> struct Shrinkable;
 
 // stateful.hpp
+namespace stateful {
 template <typename ObjectType, typename ModelType>
 struct Action;
+} // namespace stateful
 
 // Random
 struct Random;

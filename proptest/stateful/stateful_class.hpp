@@ -24,7 +24,7 @@ GenFunction<shared_ptr<ActionType>> toSharedPtrGen(GEN&& gen)
         });
 }
 
-template <typename ActionType, typename GEN>
+template <typename ActionType, GenLike GEN>
     requires(!is_pointer<typename function_traits<GEN>::return_type::type>::value)
 GEN&& toSharedPtrGen(
     GEN&& gen)
@@ -67,7 +67,6 @@ class StatefulProperty {
     using ObjectType = typename ActionType::ObjectType;
     using ModelType = typename ActionType::ModelType;
     using InitialGen = GenFunction<ObjectType>;
-    // using ActionType = Action<ObjectType, ModelType>;
     using PropertyType = Property<ObjectType, list<shared_ptr<ActionType>>>;
     using Func = function<bool(ObjectType, list<shared_ptr<ActionType>>)>;
     using ActionListGen = GenFunction<list<shared_ptr<ActionType>>>;
