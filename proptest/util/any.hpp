@@ -178,9 +178,9 @@ struct PROPTEST_API Any {
             return *this;
         else {
             if(!ptr)
-                throw invalid_cast_error("no value in an empty Any");
+                throw invalid_cast_error(__FILE__, __LINE__, "no value in an empty Any");
             if(!skipCheck && type() != typeid(T)) {
-                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error(__FILE__, __LINE__, "cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
         }
@@ -192,9 +192,9 @@ struct PROPTEST_API Any {
             return *this;
         else {
             if(!ptr)
-                throw invalid_cast_error("no value in an empty Any");
+                throw invalid_cast_error(__FILE__, __LINE__, "no value in an empty Any");
             if(!skipCheck && type() != typeid(T)) {
-                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error(__FILE__, __LINE__, "cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getMutableRef<T>();
         }

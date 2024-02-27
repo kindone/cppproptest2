@@ -24,7 +24,7 @@ bool Any::isEmpty() const {
 
 Any& Any::operator=(const Any& other) {
     if(!isEmpty() && !other.isEmpty() && type() != other.type())
-        throw invalid_cast_error("cannot assign from " + string(type().name()) + " to " + string(other.type().name()));
+        throw invalid_cast_error(__FILE__, __LINE__, "cannot assign from " + string(type().name()) + " to " + string(other.type().name()));
 
     ptr = other.ptr;
     return *this;

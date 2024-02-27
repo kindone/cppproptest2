@@ -86,8 +86,6 @@ public:
     using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
     template <template <typename...> typename TEMPLATE, typename CALLABLE>
     using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;
-    template <template <typename...> typename TEMPLATE, typename CALLABLE>
-    using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;
     template <template <typename...> typename TEMPLATE, typename CALLABLE, typename TARGET_RET>
     using template_type_with_self_converted_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename converted_return_and_argument_type_list<TARGET_RET>::template prepend<CALLABLE>>::type;
 

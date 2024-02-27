@@ -35,6 +35,7 @@ template <typename T>
 struct PROPTEST_API GeneratorBase
 {
 public:
+    virtual ~GeneratorBase() {}
     virtual Shrinkable<T> operator()(Random& rand) const = 0;
 
     template <typename U>

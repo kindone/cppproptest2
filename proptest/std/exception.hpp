@@ -14,8 +14,8 @@ using std::runtime_error;
 
 class invalid_cast_error: public std::exception {
 public:
-    explicit invalid_cast_error(const char* message) : msg(message) {}
-    explicit invalid_cast_error(const std::string& message) : msg(message) {}
+    explicit invalid_cast_error(const char* fname, int l, const char* message) : filename(fname), line(l), msg(message) {}
+    explicit invalid_cast_error(const char* fname, int l, const std::string& message) : filename(fname), line(l), msg(message) {}
     invalid_cast_error(invalid_cast_error const&) noexcept = default;
 
     invalid_cast_error& operator=(invalid_cast_error const&) noexcept = default;
@@ -23,6 +23,8 @@ public:
 
     const char* what() const noexcept override { return msg.c_str(); }
  private:
+    const char* filename;
+    int line;
     string msg;
 };
 

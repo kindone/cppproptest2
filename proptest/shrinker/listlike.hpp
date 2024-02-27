@@ -11,7 +11,7 @@ struct VectorShrinker
 {
     using shrinkable_vector_t = vector<ShrinkableAny>;
     using shrinkable_t = Shrinkable<shrinkable_vector_t>;
-    using stream_t = shrinkable_t::Stream;
+    using stream_t = shrinkable_t::StreamType;
     using e_stream_t = Stream<ShrinkableAny>;
 
     static stream_t shrinkBulk(const shrinkable_t& ancestor, size_t power, size_t offset);

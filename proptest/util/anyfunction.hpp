@@ -149,7 +149,7 @@ struct FunctionNHolder<TARGET_RET, RET(ARGS...)> : public AnyFunctionNHolder<siz
     virtual TARGET_RET operator()(ARGS... arg) = 0;
     virtual TARGET_RET operator()(ARGS... arg) const = 0;
 
-    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const override {
+    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>...) const override {
         throw runtime_error("FunctionNHolder::invoke const not implemented");
     }
 
@@ -212,7 +212,7 @@ struct FunctionNHolderMutable : public FunctionNHolder<TARGET_RET, RET(ARGS...)>
         return callable(arg...);
     }
 
-    TARGET_RET operator ()(ARGS... arg) const override {
+    TARGET_RET operator ()(ARGS...) const override {
         throw runtime_error("FunctionNHolderMutable::operator() const not implemented");
     }
 
