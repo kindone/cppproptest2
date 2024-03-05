@@ -43,7 +43,8 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
                 const T& t = interpair.first;
                 const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
-                    shrinkableU.template flatMap<Intermediate>([t](const U& u) mutable {
+                    shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {
+                        const T& t = interShr.getRef().first;
                         return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();

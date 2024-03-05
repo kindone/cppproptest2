@@ -133,13 +133,14 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkMid(const Shrinkable<vector<S
 }
 
 VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize, size_t rearSize) {
-    auto shrinkableCont = shr.getRef();
+    const auto& shrinkableCont = shr.getRef();
     // remove front as much as possible
     size_t minFrontSize = minSize >= rearSize ? minSize - rearSize : 0;
     size_t maxFrontSize = shrinkableCont.size() - rearSize;
     // front size within [min,max]
     auto rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
-    return rangeShrinkable.template flatMap<vector<ShrinkableAny>>([shrinkableCont, maxFrontSize](const size_t& frontSize) {
+    return rangeShrinkable.template flatMap<vector<ShrinkableAny>>([shr, maxFrontSize](const size_t& frontSize) {
+        const auto& shrinkableCont = shr.getRef();
         // concat front and rear
         Any cont = Any(vector<ShrinkableAny>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize));
         auto& contRef = cont.getMutableRef<vector<ShrinkableAny>>();

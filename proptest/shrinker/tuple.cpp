@@ -11,7 +11,7 @@ Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<Shrin
             // need a mutable clone
             const auto& parentVec = parent.getRef();
             shared_ptr<vector<ShrinkableAny>> parentVecCopy = util::make_shared<vector<ShrinkableAny>>();
-            util::transform(parentVec.begin(), parentVec.end(), util::inserter(*parentVecCopy, parentVecCopy->begin()), [](const ShrinkableAny& shr) -> ShrinkableAny {
+            util::transform(parentVec.begin(), parentVec.end(), util::inserter(*parentVecCopy, parentVecCopy->begin()), +[](const ShrinkableAny& shr) -> ShrinkableAny {
                 return shr.clone();
             });
 

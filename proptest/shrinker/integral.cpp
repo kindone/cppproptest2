@@ -74,8 +74,8 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
         } else
             return stream_t(make_shrinkable<uint64_t>(mid).with([=]() { return genneg(mid, max); }),
                             [=]() { return genneg(min, mid); });
-    }; 
- 
+    };
+
     return make_shrinkable<uint64_t>(value).with([value]() {
         if (value == 0)
             return stream_t::empty();

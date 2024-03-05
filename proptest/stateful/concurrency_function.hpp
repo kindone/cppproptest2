@@ -344,7 +344,7 @@ decltype(auto) concurrency(InitialGen&& initialGen, SimpleActionGen<ObjectType>&
     using ActionType = Action<ObjectType, EmptyModel>;
 
     auto actionGen2 = actionGen.template map<Action<ObjectType, EmptyModel>>(
-        [](const SimpleAction<ObjectType>& simpleAction) {
+        +[](const SimpleAction<ObjectType>& simpleAction) {
             return Action<ObjectType,EmptyModel>(simpleAction);
         });
 

@@ -26,7 +26,7 @@ struct PROPTEST_API Shrinkable
     // for Shrinkable<Any> a.k.a. ShrinkableAny
     template <typename U>
         requires (is_same_v<T, Any>)
-    Shrinkable(const Shrinkable<U>& otherShr) : Shrinkable(otherShr.template map<Any>([](const U& u) -> Any {
+    Shrinkable(const Shrinkable<U>& otherShr) : Shrinkable(otherShr.template map<Any>(+[](const U& u) -> Any {
         return Any(u);
     })) {}
 
@@ -139,10 +139,12 @@ struct PROPTEST_API Shrinkable
 
     // concat: extend shrinks stream with function taking parent as argument
     Shrinkable<T> concat(Function<StreamType(const Shrinkable<T>&)> then) const {
-        auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
-            return shr.concat(then);
+        return with([copy = *this, shrinks = this->shrinks, then]() {
+            auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+                return shr.concat(then);
+            });
+            return shrinksWithThen.concat([=]() { return then(copy); });
         });
-        return with(shrinksWithThen.concat(then(*this)));
     }
 
     // andThen: continues with then after vertical dead end
@@ -171,7 +173,7 @@ struct PROPTEST_API Shrinkable
     }
 
 private:
-    Shrinkable(Any _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
+    Shrinkable(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
         if constexpr(is_same_v<T, Any>) {
             if(!_shrinks->isEmpty() && _shrinks->getHeadRef().getRef().type() != value.type())
                 throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));

@@ -291,11 +291,11 @@ struct PROPTEST_API Function<RET(ARGS...)> {
         if(!holder)
             throw runtime_error(__FILE__, __LINE__, "Function not initialized");
         if constexpr(is_void_v<RET>) {
-            (*holder)(util::forward<Args>(args)...);
+            holder->operator()(util::forward<Args>(args)...);
             return;
         }
         else
-            return (*holder)(util::forward<Args>(args)...);
+            return holder->operator()(util::forward<Args>(args)...);
     }
 
     /*

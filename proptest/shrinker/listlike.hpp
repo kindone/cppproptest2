@@ -26,7 +26,7 @@ struct PROPTEST_API VectorShrinker
 
 }  // namespace util
 
-//extern template struct Shrinkable<vector<ShrinkableAny>>;
+extern template struct Shrinkable<vector<ShrinkableAny>>;
 extern template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
 extern template struct Stream<ShrinkableAny>;
 
@@ -50,7 +50,7 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
     // change type to any
     Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = make_shrinkable<vector<ShrinkableAny>>();
     vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
-    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), [](Shrinkable<T> shr) -> ShrinkableAny {
+    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), +[](Shrinkable<T> shr) -> ShrinkableAny {
         return shr;
     });
     // membershipwise shrinking
@@ -128,11 +128,13 @@ Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLi
     auto size = shrinkableElems->size();
     auto rangeShrinkable =
         shrinkIntegral<size_t>(size - minSize).template map<size_t>([minSize](const size_t& s) { return s + minSize; });
-    return rangeShrinkable.template map<ListLike<Shrinkable<T>>>([shrinkableElems](const size_t& newSize) {
+    return rangeShrinkable.template map<ListLike<Shrinkable<T>>>([shr](const size_t& newSize) {
         if (newSize == 0)
             return ListLike<Shrinkable<T>>();
-        else
+        else {
+            auto shrinkableElems = shr.getRef();
             return ListLike<Shrinkable<T>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize);
+        }
     });
 }
 

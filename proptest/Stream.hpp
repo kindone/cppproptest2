@@ -44,10 +44,10 @@ struct StreamIterator
 template <typename T>
 struct PROPTEST_API Stream
 {
-    Stream(const Any& _head) : head(_head), tailGen([]() -> Stream { return Stream::empty(); }) {}
+    Stream(const Any& _head) : head(_head), tailGen(emptyTailGen) {}
     Stream(const Any& _head, const Function<Stream()>& _tailGen) : head(_head), tailGen(_tailGen) {}
 
-    Stream(const Stream<T>& other) : head(other.head), tailGen(other.tailGen) {}
+    // Stream(const Stream<T>& other) : head(other.head), tailGen(other.tailGen) {}
 
     bool isEmpty() const {
         return head.isEmpty();
@@ -58,7 +58,7 @@ struct PROPTEST_API Stream
     }
 
     Stream<T> getTail() const {
-        return Stream<T>{tailGen()};
+        return tailGen();
     }
 
     StreamIterator<T> iterator() const {
@@ -69,8 +69,8 @@ struct PROPTEST_API Stream
     Stream<U> transform(Function<U(const T&)> transformer) const {
         if(isEmpty())
             return Stream<U>::empty();
-        return Stream<U>(transformer(head.getRef<T>()), [thisStream = *this, transformer]() -> Stream<U> {
-            return thisStream.tailGen().template transform<U>(transformer);
+        return Stream<U>(transformer(head.getRef<T>()), [tailGen = this->tailGen, transformer]() -> Stream<U> {
+            return tailGen().template transform<U>(transformer);
         });
     }
 
@@ -82,7 +82,7 @@ struct PROPTEST_API Stream
                 const T& value = itr.next();
                 if(criteria(value)) {
                     auto stream = itr.stream;
-                    return Stream(value, [stream,criteria]() -> Stream { return stream.filter(criteria); });
+                    return Stream(value, [stream, criteria]() -> Stream { return stream.filter(criteria); });
                 }
             }
         }
@@ -93,7 +93,15 @@ struct PROPTEST_API Stream
         if(isEmpty())
             return other;
         else {
-            return Stream(head.getRef<T>(), [stream = *this, other]() -> Stream { return stream.getTail().concat(other); });
+            return Stream(head.getRef<T>(), [tailGen = this->tailGen, other]() -> Stream { return tailGen().concat(other); });
+        }
+    }
+
+    Stream concat(Function<Stream()> otherFunc) const {
+        if(isEmpty())
+            return otherFunc();
+        else {
+            return Stream(head.getRef<T>(), [tailGen = this->tailGen, otherFunc]() -> Stream { return tailGen().concat(otherFunc()); });
         }
     }
 
@@ -101,7 +109,7 @@ struct PROPTEST_API Stream
         if(isEmpty() || n <= 0)
             return Stream::empty();
         else {
-            return Stream(head.getRef<T>(), [stream = *this, n]() -> Stream { return stream.getTail().take(n-1); });
+            return Stream(head.getRef<T>(), [tailGen = this->tailGen, n]() -> Stream { return tailGen().take(n-1); });
         }
     }
 
@@ -112,7 +120,8 @@ private:
 public:
 
     static Stream empty() {
-        return Stream(Any::empty);
+        static const Stream emptyStream = Stream(Any::empty);
+        return emptyStream;
     }
 
     static Stream one(const T& value) {
@@ -148,7 +157,12 @@ private:
             return one((*vec)[beginIdx]);
         return Stream(Any((*vec)[beginIdx]), [vec, beginIdx]() -> Stream { return values(vec, beginIdx+1);});
     }
+
+    static Function<Stream()> emptyTailGen;
 };
+
+template <typename T>
+Function<Stream<T>()> Stream<T>::emptyTailGen = +[]() -> Stream<T> { return Stream<T>::empty(); };
 
 /*
 struct PROPTEST_API AnyStream {
