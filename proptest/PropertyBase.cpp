@@ -32,7 +32,7 @@ void PropertyBase::setContext(PropertyContext* ctx)
 void PropertyBase::tag(const char* file, int lineno, string key, string value)
 {
     if (!context)
-        throw runtime_error("context is not set");
+        throw runtime_error(__FILE__, __LINE__, "context is not set");
 
     context->tag(file, lineno, key, value);
 }
@@ -40,7 +40,7 @@ void PropertyBase::tag(const char* file, int lineno, string key, string value)
 void PropertyBase::succeed(const char* file, int lineno, const char* condition, const stringstream& str)
 {
     if (!context)
-        throw runtime_error("context is not set");
+        throw runtime_error(__FILE__, __LINE__, "context is not set");
 
     context->succeed(file, lineno, condition, str);
 }
@@ -48,7 +48,7 @@ void PropertyBase::succeed(const char* file, int lineno, const char* condition, 
 void PropertyBase::fail(const char* file, int lineno, const char* condition, const stringstream& str)
 {
     if (!context)
-        throw runtime_error("context is not set");
+        throw runtime_error(__FILE__, __LINE__, "context is not set");
 
     context->fail(file, lineno, condition, str);
 }
@@ -61,7 +61,7 @@ bool PropertyBase::invoke(Random&)
 stringstream& PropertyBase::getLastStream()
 {
     if (!context)
-        throw runtime_error("context is not set");
+        throw runtime_error(__FILE__, __LINE__, "context is not set");
 
     return context->getLastStream();
 }

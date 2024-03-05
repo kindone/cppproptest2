@@ -1,4 +1,5 @@
 #pragma once
+#include "proptest/api.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/shrinker/integral.hpp"
 #include "proptest/std/algorithm.hpp"
@@ -7,11 +8,11 @@ namespace proptest {
 
 namespace util {
 
-struct VectorShrinker
+struct PROPTEST_API VectorShrinker
 {
     using shrinkable_vector_t = vector<ShrinkableAny>;
     using shrinkable_t = Shrinkable<shrinkable_vector_t>;
-    using stream_t = shrinkable_t::Stream;
+    using stream_t = shrinkable_t::StreamType;
     using e_stream_t = Stream<ShrinkableAny>;
 
     static stream_t shrinkBulk(const shrinkable_t& ancestor, size_t power, size_t offset);
@@ -25,7 +26,7 @@ struct VectorShrinker
 
 }  // namespace util
 
-extern template struct Shrinkable<vector<ShrinkableAny>>;
+//extern template struct Shrinkable<vector<ShrinkableAny>>;
 extern template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
 extern template struct Stream<ShrinkableAny>;
 

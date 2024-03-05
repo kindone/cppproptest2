@@ -29,7 +29,7 @@ TEST(tupleToVector, basic)
 TEST(Map, basic)
 {
     auto t = util::Map<3>([](auto index) { return index.value; });
-    EXPECT_EQ(t, util::make_tuple(0, 1, 2));
+    EXPECT_EQ(t, util::make_tuple(0UL, 1UL, 2UL));
 }
 
 TEST(Map, hetero)

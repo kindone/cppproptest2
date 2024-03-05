@@ -1,4 +1,5 @@
 #pragma once
+#include "proptest/api.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/shrinker/integral.hpp"
 
@@ -27,7 +28,7 @@ double composeFloat<double>(double value, int exp);
 }  // namespace util
 
 template <typename FLOATTYPE>
-Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
+PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
 {
     using Stream = Stream<Shrinkable<FLOATTYPE>>;
     int exp = 0;
@@ -86,7 +87,7 @@ Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
 }
 
 template <typename FLOATTYPE>
-Shrinkable<FLOATTYPE> shrinkFloat(FLOATTYPE value) {
+PROPTEST_API Shrinkable<FLOATTYPE> shrinkFloat(FLOATTYPE value) {
     return make_shrinkable<FLOATTYPE>(value).with(floatShrinks(value));
 }
 

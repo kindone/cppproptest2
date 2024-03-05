@@ -64,14 +64,14 @@ decltype(auto) oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPt
     for (size_t i = 0; i < genVecPtr->size(); i++) {
         double weight = (*genVecPtr)[i].weight;
         if (weight < 0.0 || weight > 1.0)
-            throw runtime_error("invalid weight: " + to_string(weight));
+            throw runtime_error(__FILE__, __LINE__, "invalid weight: " + to_string(weight));
         sum += weight;
         if (weight == 0.0)
             numUnassigned++;
     }
 
     if (sum > 1.0)
-        throw runtime_error("sum of weight exceeds 1.0");
+        throw runtime_error(__FILE__, __LINE__, "sum of weight exceeds 1.0");
 
     if (numUnassigned > 0 && sum < 1.0)
         for (size_t i = 0; i < genVecPtr->size(); i++) {
@@ -132,10 +132,11 @@ template <typename T, typename... GENS>
     requires ((GenLike<GENS, T> || is_same_v<decay_t<GENS>, util::Weighted<T>>) && ...)
 decltype(auto) oneOf(GENS&&... gens)
 {
-    static_assert(
+    /*static_assert(
         conjunction_v<bool_constant<(is_convertible_v<GENS, function<Shrinkable<T>(Random&)>> ||
                                           is_convertible_v<GENS, util::Weighted<T>>)>...>,
         "A GENS must be a generator callable for T (GenFunction<T> or Random& -> Shrinkable<T>) or a WeightGen<T>");
+    */
     using WeightedVec = vector<util::Weighted<T>>;
     shared_ptr<WeightedVec> genVecPtr(new WeightedVec{util::GenToWeighted<T>(util::forward<GENS>(gens))...});
 

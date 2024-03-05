@@ -102,10 +102,10 @@ struct PROPTEST_API AnyRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
     virtual ~AnyRef() {}
 
-    AnyRef(const T& t) : ptr(static_pointer_cast<void>(util::make_shared<T>(t))) {
+    AnyRef(const T& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(t)))) {
     }
 
-    AnyRef(const shared_ptr<T>& tptr) : ptr(static_pointer_cast<void>(tptr)) {
+    AnyRef(const shared_ptr<T>& tptr) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(tptr))) {
     }
 
     const void* rawPtr() const override {
@@ -124,7 +124,7 @@ struct PROPTEST_API AnyRef : AnyHolder {
         if constexpr(copy_constructible<T>)
             return util::make_shared<AnyRef<T>>(*static_pointer_cast<T>(ptr));
         else
-            throw runtime_error("cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
+            throw runtime_error(__FILE__, __LINE__, "cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
     }
 
 private:
@@ -178,9 +178,9 @@ struct PROPTEST_API Any {
             return *this;
         else {
             if(!ptr)
-                throw invalid_cast_error("no value in an empty Any");
+                throw invalid_cast_error(__FILE__, __LINE__, "no value in an empty Any");
             if(!skipCheck && type() != typeid(T)) {
-                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error(__FILE__, __LINE__, "cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getRef<T>();
         }
@@ -192,9 +192,9 @@ struct PROPTEST_API Any {
             return *this;
         else {
             if(!ptr)
-                throw invalid_cast_error("no value in an empty Any");
+                throw invalid_cast_error(__FILE__, __LINE__, "no value in an empty Any");
             if(!skipCheck && type() != typeid(T)) {
-                throw invalid_cast_error("cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
+                throw invalid_cast_error(__FILE__, __LINE__, "cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
             return ptr->getMutableRef<T>();
         }
@@ -236,7 +236,7 @@ Any make_any(Args&&... args)
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
     }
     else {
-        return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(args...)));
+        return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(util::forward<Args>(args)...)));
     }
 }
 

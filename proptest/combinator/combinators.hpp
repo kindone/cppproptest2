@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/combinator/just.hpp"
+#include "proptest/combinator/lazy.hpp"
 #include "proptest/combinator/reference.hpp"
 #include "proptest/combinator/filter.hpp"
 #include "proptest/combinator/transform.hpp"

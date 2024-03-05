@@ -90,17 +90,17 @@ stringstream PropertyContext::flushFailures(int indent)
 
 void PropertyContext::printSummary()
 {
-    for (auto tagKV : tags) {
+    for (const auto& tagKV : tags) {
         auto& key = tagKV.first;
         auto& valueMap = tagKV.second;
         cout << "  " << key << ": " << endl;
         size_t total = 0;
-        for (auto valueKV : valueMap) {
+        for (const auto& valueKV : valueMap) {
             auto tag = valueKV.second;
             total += tag.count;
         }
 
-        for (auto valueKV : valueMap) {
+        for (const auto& valueKV : valueMap) {
             auto value = valueKV.first;
             auto tag = valueKV.second;
             cout << "    " << value << ": " << tag.count << "/" << total << " ("

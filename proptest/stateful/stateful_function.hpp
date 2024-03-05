@@ -31,7 +31,7 @@ class StatefulProperty {
     using InitialGen = GenFunction<ObjectType>;
     using ModelFactoryFunction = Function<ModelType(ObjectType&)>;
     using PropertyType = Property<ObjectType, list<Action<ObjectType, ModelType>>>;
-    using Func = function<bool(ObjectType, list<Action<ObjectType, ModelType>>)>;
+    using Func = Function<bool(ObjectType, list<Action<ObjectType, ModelType>>)>;
 
 public:
     StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGen<ObjectType, ModelType>& actGen)

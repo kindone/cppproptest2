@@ -45,7 +45,7 @@ TEST(Shrinkable, concat)
 {
     Shrinkable<int> shr(100);
     EXPECT_EQ(shr.get(), 100);
-    auto shr2 = shr.concat([](const Shrinkable<int>& shr) {
+    auto shr2 = shr.concat([](const Shrinkable<int>&) {
         return Stream<Shrinkable<int>>::one(Shrinkable<int>(200));
     });
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
@@ -79,7 +79,7 @@ TEST(Shrinkable, andThen)
 {
     Shrinkable<int> shr(100);
     EXPECT_EQ(shr.get(), 100);
-    auto shr2 = shr.andThen([](const Shrinkable<int>& shr) {
+    auto shr2 = shr.andThen([](const Shrinkable<int>&) {
         return Stream<Shrinkable<int>>::one(Shrinkable<int>(200));
     });
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");

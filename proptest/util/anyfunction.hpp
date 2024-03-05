@@ -1,5 +1,6 @@
 #pragma once
 
+#include "proptest/api.hpp"
 #include "proptest/std/lang.hpp"
 #include "proptest/std/initializer_list.hpp"
 #include "proptest/std/exception.hpp"
@@ -14,7 +15,7 @@
 namespace proptest {
 
 // forward declaration
-struct AnyFunction;
+// struct AnyFunction;
 
 
 struct FunctionHolder {
@@ -27,16 +28,16 @@ struct FunctionHolder {
     }
 
     virtual Any apply(const initializer_list<Any>&) const {
-        throw runtime_error("FunctionHolder::apply const not implemented");
+        throw runtime_error(__FILE__, __LINE__, "FunctionHolder::apply const not implemented");
     };
 
     virtual Any apply(const initializer_list<Any>&) {
-        throw runtime_error("FunctionHolder::apply not implemented");
+        throw runtime_error(__FILE__, __LINE__, "FunctionHolder::apply not implemented");
     };
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) const {
-        if constexpr(same_as<RET,void>) {
+        if constexpr(is_void_v<RET>) {
             apply({Any(arg)...});
             return;
         }
@@ -46,7 +47,7 @@ struct FunctionHolder {
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) {
-        if constexpr(same_as<RET,void>) {
+        if constexpr(is_void_v<RET>) {
             apply({Any(arg)...});
             return;
         }
@@ -65,7 +66,7 @@ template <typename Callable, typename... ARGS, size_t... Is>
     requires (invocable<Callable, ARGS...>)
 decltype(auto) invokeWithInitializerListImplConst(const Callable&& callable, const initializer_list<Any>& list, index_sequence<Is...>) {
     if (list.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("number of arguments does not match the number of function parameters");
+        throw invalid_argument(__FILE__, __LINE__, "number of arguments does not match the number of function parameters");
     }
     auto it = list.begin();
     return callable((*(it + Is)).getRef<ARGS>()...);
@@ -81,7 +82,7 @@ template <typename Callable, typename... ARGS, size_t... Is>
     requires (invocable<Callable, ARGS...>)
 decltype(auto) invokeWithInitializerListImplMutable(Callable&& callable, const initializer_list<Any>& list, index_sequence<Is...>) {
     if (list.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("number of arguments does not match the number of function parameters");
+        throw invalid_argument(__FILE__, __LINE__, "number of arguments does not match the number of function parameters");
     }
     auto it = list.begin();
     return callable((*(it + Is)).getRef<ARGS>()...);
@@ -112,6 +113,7 @@ struct FunctionHolderHelper_t<index_sequence<Is...>> {
 
 } // namespace util
 
+/*
 template <size_t N>
 struct AnyFunctionNHolder : public util::FunctionHolderHelper_t<make_index_sequence<N>>::type {
     virtual ~AnyFunctionNHolder() {}
@@ -128,17 +130,19 @@ struct FunctionNHolder<TARGET_RET, RET(ARGS...) const> : public AnyFunctionNHold
     virtual ~FunctionNHolder() {}
 
     virtual TARGET_RET operator()(ARGS... arg) const = 0;
-    virtual TARGET_RET operator()(ARGS... arg) = 0;
+    //virtual TARGET_RET operator()(ARGS... arg) = 0;
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const override {
-        if constexpr(same_as<RET, void>)
+        if constexpr(is_void_v<TARGET_RET>) {
+            operator()(arg.template getRef<ARGS>(true)...);
             return Any();
+        }
         else
             return Any(static_cast<TARGET_RET>(operator()(arg.template getRef<ARGS>(true)...)));
     }
 
-    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) override {
-        throw runtime_error("FunctionNHolder::invoke not implemented");
+    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>...) override {
+        throw runtime_error(__FILE__, __LINE__, "FunctionNHolder::invoke not implemented");
     }
 };
 
@@ -146,16 +150,18 @@ template <typename TARGET_RET, typename RET, typename...ARGS>
 struct FunctionNHolder<TARGET_RET, RET(ARGS...)> : public AnyFunctionNHolder<sizeof...(ARGS)> {
     virtual ~FunctionNHolder() {}
 
-    virtual TARGET_RET operator()(ARGS... arg) = 0;
+    //virtual TARGET_RET operator()(ARGS... arg) = 0;
     virtual TARGET_RET operator()(ARGS... arg) const = 0;
 
-    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const override {
-        throw runtime_error("FunctionNHolder::invoke const not implemented");
+    Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>...) const override {
+        throw runtime_error(__FILE__, __LINE__, "FunctionNHolder::invoke const not implemented");
     }
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) override {
-        if constexpr(same_as<RET, void>)
+        if constexpr(is_void_v<TARGET_RET>) {
+            operator()(arg.template getRef<ARGS>(true)...);
             return Any();
+        }
         else
             return Any(static_cast<TARGET_RET>(operator()(arg.template getRef<ARGS>()...)));
     }
@@ -171,9 +177,11 @@ struct FunctionNHolderConst : public FunctionNHolder<TARGET_RET, RET(ARGS...) co
         return static_cast<TARGET_RET>(callable(arg...));
     }
 
-    TARGET_RET operator ()(ARGS... arg) override {
-        return static_cast<TARGET_RET>(callable(arg...));
-    }
+
+    //TARGET_RET operator ()(ARGS... arg) override {
+    //    return static_cast<TARGET_RET>(callable(arg...));
+    //}
+
 
     Any apply(const initializer_list<Any>& args) const override {
         if constexpr(same_as<TARGET_RET, void>) {
@@ -208,12 +216,14 @@ struct FunctionNHolderMutable : public FunctionNHolder<TARGET_RET, RET(ARGS...)>
         // proptest::cout << "FunctionNHolderMutable destructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() <<  proptest::endl;
     }
 
-    TARGET_RET operator ()(ARGS... arg) override {
-        return callable(arg...);
-    }
 
-    TARGET_RET operator ()(ARGS... arg) const override {
-        throw runtime_error("FunctionNHolderMutable::operator() const not implemented");
+    //TARGET_RET operator ()(ARGS... arg) override {
+    //    return callable(arg...);
+    //}
+
+
+    TARGET_RET operator ()(ARGS...args) const override {
+        return callable(args...);
     }
 
     Any apply(const initializer_list<Any>& args) override {
@@ -225,8 +235,9 @@ struct FunctionNHolderMutable : public FunctionNHolder<TARGET_RET, RET(ARGS...)>
             return static_cast<TARGET_RET>(util::invokeWithInitializerListMutable<Callable, ARGS...>(util::forward<Callable>(callable), args));
     }
 
-    Callable callable;
+    mutable Callable callable;
 };
+*/
 
 template <typename Callable, typename RET, typename...ARGS>
 concept isCallableOf = (invocable<Callable, ARGS...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, ARGS...>>));
@@ -236,34 +247,37 @@ template <typename F>
 struct Function;
 
 template <typename RET, typename...ARGS>
-struct Function<RET(ARGS...)> {
+struct PROPTEST_API Function<RET(ARGS...)> {
     using ArgTuple = tuple<ARGS...>;
     using RetType = RET;
     static constexpr size_t Arity = sizeof...(ARGS);
 
     Function() {}
-    explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {
-        // proptest::cout << "Function shared_ptr constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
-    }
+
+    //explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {
+    //    // proptest::cout << "Function shared_ptr constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
+    //}
+
     Function(const Function& other) : holder(other.holder) {
         // proptest::cout << "Function copy constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  " <- " << &other << ")" << proptest::endl;
     }
-    Function(const AnyFunction& otherAnyFunction);
+
+    // Function(const AnyFunction& otherAnyFunction);
 
     ~Function() {
         // proptest::cout << "Function destructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
 
     template<typename Callable>
-        requires (!is_base_of_v<AnyFunction, decay_t<Callable>> && !is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable>)
-    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderConst<decay_t<Callable>, RET, invoke_result_t<Callable, ARGS...>, ARGS...>>(util::forward<Callable>(c))) {
+        requires (!is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
+    Function(Callable&& c) : holder(util::make_shared<std::function<RET(ARGS...)>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" <<  proptest::endl;
     }
 
     template<typename Callable>
-        requires (!is_base_of_v<AnyFunction, decay_t<Callable>>  && !is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable>)
-    Function(Callable&& c) : holder(util::make_shared<FunctionNHolderMutable<decay_t<Callable>, RET, invoke_result_t<Callable, ARGS...>, ARGS...>>(util::forward<Callable>(c))) {
+        requires (!is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
+    Function(Callable&& c) : holder(util::make_shared<std::function<RET(ARGS...)>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
@@ -272,31 +286,35 @@ struct Function<RET(ARGS...)> {
         return static_cast<bool>(holder);
     }
 
-    RET operator()(ARGS... arg) const {
+    template <typename...Args>
+    RET operator()(Args&&... args) const {
         if(!holder)
-            throw runtime_error("Function not initialized");
-        if constexpr(same_as<RET, void>) {
+            throw runtime_error(__FILE__, __LINE__, "Function not initialized");
+        if constexpr(is_void_v<RET>) {
+            (*holder)(util::forward<Args>(args)...);
+            return;
+        }
+        else
+            return (*holder)(util::forward<Args>(args)...);
+    }
+
+    /*
+    RET operator()(ARGS... arg) {
+        if(!holder)
+            throw runtime_error(__FILE__, __LINE__, "Function not initialized");
+        if constexpr(is_void_v<RET>) {
             holder->apply({util::make_any<ARGS>(arg)...});
             return;
         }
         else
             return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
     }
+    */
 
-     RET operator()(ARGS... arg) {
-        if(!holder)
-            throw runtime_error("Function not initialized");
-        if constexpr(same_as<RET, void>) {
-            holder->apply({util::make_any<ARGS>(arg)...});
-            return;
-        }
-        else
-            return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
-    }
-
-    shared_ptr<FunctionHolder> holder;
+    mutable shared_ptr<std::function<RET(ARGS...)>> holder;
 };
 
+/*
 struct AnyFunction {
     AnyFunction() = delete;
     explicit AnyFunction(shared_ptr<FunctionHolder> h) : holder(h) {}
@@ -324,8 +342,11 @@ struct AnyFunction {
 template <typename RET, typename...ARGS>
 Function<RET(ARGS...)>::Function(const AnyFunction& otherAnyFunction) : holder(otherAnyFunction.holder) {}
 
+*/
+
 namespace util {
 
+/*
 template <typename Callable>
 decltype(auto) make_function(Callable&& c) {
     using RetType = typename function_traits<Callable>::return_type;
@@ -340,6 +361,7 @@ AnyFunction make_anyfunction(Callable&& c) {
     using HolderType = typename function_traits<Callable>::template template_type_with_self_converted_ret_and_args<FunctionNHolderConst, Callable, RetType>;
     return AnyFunction{static_pointer_cast<FunctionHolder>(util::make_shared<HolderType>(util::forward<Callable>(c)))};
 }
+*/
 
 } // namespace util
 

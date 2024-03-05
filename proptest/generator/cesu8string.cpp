@@ -61,7 +61,7 @@ Shrinkable<CESU8String> Arbi<CESU8String>::operator()(Random& rand) const
         }
         printf("\n");
 
-        throw runtime_error(os.str());
+        throw runtime_error(__FILE__, __LINE__, os.str());
     }
 
     // cout << "hex = {";

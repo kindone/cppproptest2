@@ -11,5 +11,5 @@ TEST(FunctionTraits, basic)
 {
     auto lambda = [](int a, int b) { return a+b; };
     using TheOtherType = function_traits<decltype(lambda)>::template_type_with_args<OtherType>;
-    TheOtherType otherType;
+    [[maybe_unused]] TheOtherType otherType;
 }

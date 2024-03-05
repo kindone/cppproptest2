@@ -15,10 +15,10 @@ struct EmptyModel
 
 template <typename ObjectType>
 struct SimpleAction {
-    using Function = Function<void(ObjectType&)>;
-    explicit SimpleAction(Function f) : name("Action<?>"), func(f) {}
+    using function_t = Function<void(ObjectType&)>;
+    explicit SimpleAction(function_t f) : name("Action<?>"), func(f) {}
 
-    SimpleAction(const string& _name, Function f) : name(_name), func(f) {}
+    SimpleAction(const string& _name, function_t f) : name(_name), func(f) {}
 
     void operator()(ObjectType& obj) const {
         func(obj);
@@ -30,15 +30,15 @@ struct SimpleAction {
     }
 
     string name;
-    Function func;
+    function_t func;
 };
 
 template <typename ObjectType, typename ModelType>
 struct Action {
-    using Function = Function<void(ObjectType&, ModelType&)>;
-    explicit Action(Function f) : name("Action<?>"), func(f) {}
+    using function_t = Function<void(ObjectType&, ModelType&)>;
+    explicit Action(function_t f) : name("Action<?>"), func(f) {}
 
-    Action(const string& _name, Function f) : name(_name), func(f) {}
+    Action(const string& _name, function_t f) : name(_name), func(f) {}
 
     Action(const SimpleAction<ObjectType>& simpleAction) : name(simpleAction.name) {
         func = [simpleAction](ObjectType& obj, ModelType&) {
@@ -56,7 +56,7 @@ struct Action {
     }
 
     string name;
-    Function func;
+    function_t func;
 };
 
 } // namespace stateful

@@ -32,13 +32,13 @@ public:
     template <typename T>
     T getRandom(int64_t /*min*/, int64_t /*max*/)
     {
-        throw runtime_error("getRandom for type not defined");
+        throw runtime_error(__FILE__, __LINE__, "getRandom for type not defined");
     }
 
     template <typename T>
     T getRandomU(uint64_t /*min*/, uint64_t /*max*/)
     {
-        throw runtime_error("getRandom for type not defined");
+        throw runtime_error(__FILE__, __LINE__, "getRandom for type not defined");
     }
 
 private:

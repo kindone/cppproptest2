@@ -4,6 +4,9 @@
 
 namespace proptest {
 
+template <typename F> struct Function;
+template <typename RET, typename...ARGS> struct Function<RET(ARGS...)>;
+
 template <template <typename...> typename TEMPLATE, typename RET, typename...ARGS>
 TEMPLATE<RET(ARGS...)> TypeListToFunctionType(util::TypeList<ARGS...> list)
 {
@@ -54,6 +57,13 @@ struct function_traits<R C::*> : public function_traits<R(C&)>
 {
 };
 
+// member object pointer
+template <class R, class...ARGS>
+struct function_traits<Function<R(ARGS...)>> : public function_traits<R(ARGS...)>
+{
+};
+
+
 // functor
 template <class F>
 struct function_traits
@@ -84,8 +94,6 @@ public:
     using template_type_with_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, return_and_argument_type_list>::type;
     template <template <typename...> typename TEMPLATE, typename NEW_RETURN_TYPE = return_type>
     using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
-    template <template <typename...> typename TEMPLATE, typename CALLABLE>
-    using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;
     template <template <typename...> typename TEMPLATE, typename CALLABLE>
     using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;
     template <template <typename...> typename TEMPLATE, typename CALLABLE, typename TARGET_RET>

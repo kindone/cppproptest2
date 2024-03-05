@@ -4,6 +4,7 @@
 #include "proptest/shrinker/integral.hpp"
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/pair.hpp"
+#include "proptest/std/map.hpp"
 
 namespace proptest {
 

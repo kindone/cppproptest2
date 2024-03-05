@@ -15,7 +15,7 @@ struct PROPTEST_API AssertFailed : public logic_error
 {
     AssertFailed(const char* fname, int line, const error_code& /*error*/, const char* condition,
                  const void* /*caller*/)
-        : logic_error(condition), filename(fname), lineno(line)
+        : logic_error(fname, line, condition), filename(fname), lineno(line)
     {
     }
 
@@ -50,9 +50,9 @@ PropertyFailed<ValueTuple>::~PropertyFailed()
 
 struct PROPTEST_API Discard : public logic_error
 {
-    Discard(const char* /*fname*/, int /*line*/, const error_code& /*error*/, const char* /*condition*/,
-            const void* /*caller*/)
-        : logic_error("Discard")
+    Discard(const char* fname, int line, const error_code& /*error*/, const char* /*condition*/,
+            const void* caller)
+        : logic_error(fname, line, "Discard", caller)
     {
     }
     virtual ~Discard();
@@ -60,9 +60,9 @@ struct PROPTEST_API Discard : public logic_error
 
 struct PROPTEST_API Success : public logic_error
 {
-    Success(const char* /*fname*/, int /*line*/, const error_code& /*error*/, const char* /*condition*/,
-            const void* /*caller*/)
-        : logic_error("Success")
+    Success(const char* fname, int line, const error_code& /*error*/, const char* /*condition*/,
+            const void* caller)
+        : logic_error(fname, line, "Discard", caller)
     {
     }
     virtual ~Success();

@@ -12,7 +12,7 @@ struct Num { static const constexpr size_t value = N; };
 
 template <class F, size_t... Is>
 // func is a template lambda that takes (auto index_sequence) as an argument
-void For(F func, index_sequence<Is...>)
+void For([[maybe_unused]] F func, index_sequence<Is...>)
 {
     (func(std::integral_constant<size_t, Is>{}), ...);
 }

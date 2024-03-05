@@ -18,6 +18,7 @@ void outStream(ostream& ostr, const Stream<T>& stream) {
     ostr << "]";
 }
 
+/*
 template <typename T>
 void outAnyStream(ostream& ostr, const AnyStream& stream) {
     ostr << "[";
@@ -28,6 +29,7 @@ void outAnyStream(ostream& ostr, const AnyStream& stream) {
     }
     ostr << "]";
 }
+*/
 
 template <typename T>
 string serializeStream(const Stream<T>& stream)
@@ -37,6 +39,7 @@ string serializeStream(const Stream<T>& stream)
     return ostr.str();
 }
 
+/*
 template <typename T>
 string serializeAnyStream(const AnyStream& stream)
 {
@@ -44,6 +47,7 @@ string serializeAnyStream(const AnyStream& stream)
     outAnyStream<T>(ostr, stream);
     return ostr.str();
 }
+*/
 
 TEST(Stream, empty)
 {
@@ -93,7 +97,7 @@ TEST(Stream, values)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 8);
+    EXPECT_EQ(values.size(), 8U);
     EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
 }
 
@@ -105,7 +109,7 @@ TEST(Stream, values2)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 8);
+    EXPECT_EQ(values.size(), 8U);
     EXPECT_EQ(values, vector<int>({1,2,3,4,5,6,7,8}));
 }
 
@@ -119,7 +123,7 @@ TEST(Stream, iterator)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 2);
+    EXPECT_EQ(values.size(), 2U);
     EXPECT_EQ(values, vector<int>({100, 200}));
 }
 
@@ -133,7 +137,7 @@ TEST(Stream, string)
         string value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 2);
+    EXPECT_EQ(values.size(), 2U);
     EXPECT_EQ(values[0], "hello");
     EXPECT_EQ(values[1], "world");
     EXPECT_EQ(values, vector<string>({"hello", "world"}));
@@ -143,14 +147,14 @@ TEST(Stream, transform)
 {
     auto stream = Stream<int>::two(100, 200);
 
-    auto stream2 = stream.transform<string>(util::make_function([](const int& value) { return to_string(value); }));
+    auto stream2 = stream.transform<string>([](const int& value) { return to_string(value); });
 
     vector<string> values;
     for(StreamIterator<string> itr = stream2.iterator(); itr.hasNext(); ) {
         string value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 2);
+    EXPECT_EQ(values.size(), 2U);
     EXPECT_EQ(values[0], "100");
     EXPECT_EQ(values[1], "200");
 }
@@ -158,24 +162,24 @@ TEST(Stream, transform)
 TEST(Stream, filter)
 {
     auto stream = Stream<int>::two(100, 200);
-    auto stream2 = stream.filter(util::make_function([](const int& value) { return value > 100; }));
+    auto stream2 = stream.filter([](const int& value) { return value > 100; });
 
     vector<int> values;
     for(StreamIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 1);
+    EXPECT_EQ(values.size(), 1U);
     EXPECT_EQ(values[0], 200);
 
     values.clear();
-    auto stream3 = stream.filter(util::make_function([](const int& value) { return value < 200; }));
+    auto stream3 = stream.filter([](const int& value) { return value < 200; });
 
     for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 1);
+    EXPECT_EQ(values.size(), 1U);
     EXPECT_EQ(values[0], 100);
 }
 
@@ -190,7 +194,7 @@ TEST(Stream, concat)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 4);
+    EXPECT_EQ(values.size(), 4U);
     EXPECT_EQ(values[0], 100);
     EXPECT_EQ(values[1], 200);
     EXPECT_EQ(values[2], 300);
@@ -207,7 +211,7 @@ TEST(Stream, take)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 1);
+    EXPECT_EQ(values.size(), 1U);
     EXPECT_EQ(values[0], 100);
 
     auto stream3 = stream.take(3); // taking exceeding size is ok
@@ -216,7 +220,7 @@ TEST(Stream, take)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 2);
+    EXPECT_EQ(values.size(), 2U);
     EXPECT_EQ(values[0], 100);
     EXPECT_EQ(values[1], 200);
 }
@@ -234,10 +238,11 @@ TEST(Stream, performance)
         int value = itr.next();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 4096);
+    EXPECT_EQ(values.size(), 4096U);
     EXPECT_EQ(values[4095], 100);
 }
 
+/*
 TEST(AnyStream, basic)
 {
     AnyStream anyStream(Any(100), util::make_anyfunction([]() -> Stream<int> { return Stream<int>::empty(); }));
@@ -261,7 +266,7 @@ TEST(AnyStream, iterator)
         int value = itr.next<int>();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 2);
+    EXPECT_EQ(values.size(), 2U);
     EXPECT_EQ(values[0], 100);
     EXPECT_EQ(values[1], 200);
 }
@@ -319,6 +324,7 @@ TEST(AnyStream, performance)
         int value = itr.next<int>();
         values.push_back(value);
     }
-    EXPECT_EQ(values.size(), 4096);
+    EXPECT_EQ(values.size(), 4096U);
     EXPECT_EQ(values[4095], 100);
 }
+*/

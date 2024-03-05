@@ -27,7 +27,7 @@ Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T 
         value = rand.getRandomU<T>(min, max);
 
     if (value < min || max < value)
-        throw runtime_error("invalid range");
+        throw runtime_error(__FILE__, __LINE__, "invalid range");
 
     if (min >= 0)  // [3,5] -> [0,2] -> [3,5]
     {
@@ -339,7 +339,7 @@ struct IntegersFunctor {
  * @brief Generates a positive integer, excluding 0
  */
 template <proptest::integral T>
-Generator<T> natural(T max = numeric_limits<T>::max())
+PROPTEST_API Generator<T> natural(T max = numeric_limits<T>::max())
 {
     return Generator<T>(util::NaturalFunctor<T>(max));
 }
@@ -349,7 +349,7 @@ Generator<T> natural(T max = numeric_limits<T>::max())
  * @brief Generates 0 or a positive integer
  */
 template <proptest::integral T>
-Generator<T> nonNegative(T max = numeric_limits<T>::max())
+PROPTEST_API Generator<T> nonNegative(T max = numeric_limits<T>::max())
 {
     return Generator<T>(util::NonNegativeFunctor<T>(max));
 }
@@ -359,7 +359,7 @@ Generator<T> nonNegative(T max = numeric_limits<T>::max())
  * @brief Generates numeric values in [min, max]. e.g. interval(0,100) generates a value in {0, ..., 100}
  */
 template <proptest::integral T>
-Generator<T> interval(T min, T max)
+PROPTEST_API Generator<T> interval(T min, T max)
 {
     return Generator<T>([min, max](Random& rand) { return generateInteger<T>(rand, min, max); });
 }
@@ -369,7 +369,7 @@ Generator<T> interval(T min, T max)
  * @brief Generates numeric values in [from, to). e.g. inRange(0,100) generates a value in {0, ..., 99}
  */
 template <proptest::integral T>
-Generator<T> inRange(T from, T to)
+PROPTEST_API Generator<T> inRange(T from, T to)
 {
     return Generator<T>(util::InRangeFunctor(from, to));
 }
@@ -379,7 +379,7 @@ Generator<T> inRange(T from, T to)
  * @brief Generates numeric values in [a, a+count). e.g. integers(0,100) generates a value in {0, ..., 99}
  */
 template <proptest::integral T>
-Generator<T> integers(T start, T count)
+PROPTEST_API Generator<T> integers(T start, T count)
 {
     return Generator<T>(util::IntegersFunctor<T>(start, count));
 }

@@ -25,7 +25,6 @@ TEST(Arbitrary, bool)
 {
     Random rand(getCurrentTime());
     auto arbi = Arbi<bool>();
-    auto val = arbi(rand).get();
     for(int i = 0; i < 5; i++)
         cout << arbi(rand).get() << endl;
     // TODO: validate
@@ -72,7 +71,6 @@ TEST(Arbitrary, double)
 {
     Random rand(getCurrentTime());
     auto arbi = Arbi<double>();
-    auto val = arbi(rand).get();
     for(int i = 0; i < 5; i++)
         cout << arbi(rand).get() << endl;
 }
@@ -224,7 +222,7 @@ bool isStringValid(ARGS&&...args) {
     else if(is_same_v<T, UTF16LEString>)
         return util::isValidUTF16LE(util::forward<ARGS>(args)...);
     else {
-        throw runtime_error("unsupported string type");
+        throw runtime_error(__FILE__, __LINE__, "unsupported string type");
     }
 }
 
@@ -251,8 +249,9 @@ TYPED_TEST(StringLikeTest, Arbitrary_customchars)
     for(int i = 0; i < 10; i++) {
         auto str = arbi(rand).get();
         for(auto c : str) {
-            if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>)
+            if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
                 EXPECT_TRUE(c >= '0' && c<= '9');
+            }
         }
     }
 }

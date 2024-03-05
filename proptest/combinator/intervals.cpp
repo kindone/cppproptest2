@@ -11,7 +11,7 @@ Generator<int64_t> intervals(initializer_list<Interval> intervals)
     uint64_t sum = 0;
     for (auto interval : intervals) {
         if (interval.size() == 0)
-            throw runtime_error("invalid empty interval: [" + to_string(interval.min) + ", " +
+            throw runtime_error(__FILE__, __LINE__, "invalid empty interval: [" + to_string(interval.min) + ", " +
                                      to_string(interval.max) + "]");
         sum += interval.size();
     }
@@ -35,7 +35,7 @@ Generator<uint64_t> uintervals(initializer_list<UInterval> intervals)
 
     for (auto interval : intervals) {
         if (interval.size() == 0)
-            throw runtime_error("invalid empty interval: [" + to_string(interval.min) + ", " +
+            throw runtime_error(__FILE__, __LINE__, "invalid empty interval: [" + to_string(interval.min) + ", " +
                                      to_string(interval.max) + "]");
         sum += interval.size();
     }

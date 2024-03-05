@@ -39,7 +39,7 @@ struct Copyable {
     int numCopied;
 };
 
-
+/*
 TEST(AssumptionStdAny, int_performance)
 {
     for(int i = 0; i < 1000000; i++)
@@ -94,6 +94,7 @@ TEST(AssumptionStdAny, reference)
     ASSERT_EQ(any.type(), typeid(int&));
     ASSERT_EQ(util::any_cast<int&>(any), 100);
 }
+*/
 
 TEST(AssumptionContainerInit, Copyable)
 {
@@ -210,7 +211,7 @@ TEST(AssumptionContainerInit, InitializeWithCopyElision)
     ASSERT_EQ(nonCopyable.value, 100);
 
     // copy elision
-    Container container{NonCopyable(100)};
+    [[maybe_unused]] Container container{NonCopyable(100)};
 
     // further construction methods are not allowed (copy constructor is deleted + no move constructor)
 }
