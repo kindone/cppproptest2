@@ -52,10 +52,6 @@ public:
         return *this;
     }
 
-    shared_ptr<GeneratorBase<Map>> clone() const override {
-        return util::make_shared<Arbi>(pairGen, minSize, maxSize);
-    }
-
 private:
     GenFunction<Pair> pairGen;
 };

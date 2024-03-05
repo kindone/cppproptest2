@@ -8,6 +8,9 @@ namespace proptest {
 template <typename T>
 class PROPTEST_API ArbitraryBase : public GeneratorBase<T>
 {
+    virtual shared_ptr<GeneratorBase<T>> clone() const override {
+        return util::make_shared<Arbi<T>>(*dynamic_cast<Arbi<T>*>(const_cast<ArbitraryBase<T>*>(this)));
+    }
 };
 
 

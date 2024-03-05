@@ -22,10 +22,6 @@ public:
 
     Arbi(const Arbi<bool>&) = default;
 
-    shared_ptr<GeneratorBase> clone() const override {
-        return util::make_shared<Arbi>(trueProb);
-    }
-
 private:
     double trueProb;
 };
