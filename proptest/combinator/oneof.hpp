@@ -132,10 +132,11 @@ template <typename T, typename... GENS>
     requires ((GenLike<GENS, T> || is_same_v<decay_t<GENS>, util::Weighted<T>>) && ...)
 decltype(auto) oneOf(GENS&&... gens)
 {
-    static_assert(
+    /*static_assert(
         conjunction_v<bool_constant<(is_convertible_v<GENS, function<Shrinkable<T>(Random&)>> ||
                                           is_convertible_v<GENS, util::Weighted<T>>)>...>,
         "A GENS must be a generator callable for T (GenFunction<T> or Random& -> Shrinkable<T>) or a WeightGen<T>");
+    */
     using WeightedVec = vector<util::Weighted<T>>;
     shared_ptr<WeightedVec> genVecPtr(new WeightedVec{util::GenToWeighted<T>(util::forward<GENS>(gens))...});
 

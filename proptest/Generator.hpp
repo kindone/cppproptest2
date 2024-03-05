@@ -41,17 +41,45 @@ public:
     template <typename U>
     Generator<U> map(Function<U(const T&)> mapper);
 
+    template <invocable<T&> F>
+    auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
+    {
+        return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
+    }
+
     template <typename Criteria>
     Generator<T> filter(Criteria&& criteria);
 
     template <typename U>
     Generator<pair<T, U>> pairWith(Function<GenFunction<U>(const T&)> genFactory);
 
+    template <invocable<T&> FACTORY>
+    decltype(auto) pairWith(FACTORY&& genFactory)
+    {
+        using GEN = invoke_result_t<FACTORY, T&>;
+        using RetType = typename invoke_result_t<GEN, Random&>::type;
+        return pairWith<RetType>(util::forward<FACTORY>(genFactory));
+    }
+
     template <typename U>
     decltype(auto) tupleWith(Function<GenFunction<U>(const T&)> genFactory);
 
+    template <typename FACTORY>
+    decltype(auto) tupleWith(FACTORY&& genFactory)
+    {
+        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
+        return tupleWith<U>(util::forward<FACTORY>(genFactory));
+    }
+
     template <typename U>
-    Generator<U> flatMap(Function<U(const T&)> genFactory);
+    Generator<U> flatMap(Function<GenFunction<U>(const T&)> genFactory);
+
+    template <invocable<T&> FACTORY>
+    decltype(auto) flatMap(FACTORY&& genFactory)
+    {
+        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
+        return flatMap<U>(util::forward(genFactory));
+    }
 
     virtual shared_ptr<GeneratorBase> clone() const = 0;
 
@@ -97,7 +125,7 @@ decltype(auto) asGenFunction(GEN&& gen)
     return static_cast<Function<retType(Random&)>>(gen);
 }
 
-struct AnyGenerator
+struct PROPTEST_API AnyGenerator
 {
     template <typename T>
     AnyGenerator(const Generator<T>& gen) : anyGen(gen)

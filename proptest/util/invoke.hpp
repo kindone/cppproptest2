@@ -10,6 +10,27 @@ namespace util {
 
 template <typename RET, typename...ARGS, GenLike<ARGS>...GENS>
 decltype(auto) invokeExplicit(Function<RET(ARGS...)> func, GENS&&...gens) {
+    constexpr size_t NumArgs = sizeof...(ARGS);
+    using ArgTuple = tuple<ARGS...>;
+    auto genTuple = util::make_tuple(generator(gens)...);
+
+    vector<AnyGenerator> genVec;
+
+    util::For<NumArgs>([&](auto index_sequence) {
+        genVec.push_back(get<index_sequence.value>(genTuple));
+    });
+
+    Random rand(getCurrentTime());
+    auto generateArgs = [&](auto index_sequence) {
+        return genVec[index_sequence.value].template generate<tuple_element_t<index_sequence.value, ArgTuple>>(rand).get();
+    };
+
+    if constexpr(is_same_v<RET, void>) {
+        util::Call<NumArgs>(func, generateArgs);
+    }
+    else {
+        return util::Call<NumArgs>(func, generateArgs);
+    }
 }
 
 template <typename RET, typename...ARGS, GenLike...GENS>

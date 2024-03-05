@@ -1,5 +1,6 @@
 #pragma once
 
+#include "proptest/api.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/util/tuple.hpp"
 #include "proptest/util/tupleorvector.hpp"
@@ -8,16 +9,16 @@
 
 namespace proptest {
 
-extern template struct Shrinkable<vector<ShrinkableAny>>;
+//extern template struct Shrinkable<vector<ShrinkableAny>>;
 
 namespace util {
-Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr);
+PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr);
 } // namespace util
 
 template <typename... ARGS>
-Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
+PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
-    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.template map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
         vector<ShrinkableAny> anyVector;
         util::For([&] (auto index_sequence) {
             anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tuple)));

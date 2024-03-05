@@ -81,7 +81,7 @@ TEST(concurrency_function, WithModel)
     auto actionGen = oneOf<Action<vector<int>, Model>>(pushBackGen, popBackGen, clearGen);
 
     auto prop = concurrency<vector<int>, Model>(
-        Arbi<vector<int>>(), [](vector<int>&) { return Model(); }, actionGen);
+        Arbi<vector<int>>(), [](const vector<int>&) { return Model(); }, actionGen);
     prop.setMaxConcurrency(2);
     prop.go();
 }

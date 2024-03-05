@@ -1,4 +1,5 @@
 #pragma once
+#include "proptest/api.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/std/pair.hpp"
 
@@ -6,7 +7,7 @@ namespace proptest {
 
 namespace util {
 
-class PairShrinker {
+class PROPTEST_API PairShrinker {
     using ARG1 = Any;
     using ARG2 = Any;
     using out_pair_t = pair<ARG1, ARG2>;

@@ -64,7 +64,7 @@ TEST(Generator, GenFunction)
     Generator<int> gen2 = genFunc;
     EXPECT_EQ(gen2(rand).get(), 1339);
 
-    auto lambda = [](Random& rand) -> Shrinkable<int>
+    auto lambda = [](Random&) -> Shrinkable<int>
     {
         return make_shrinkable<int>(1339);
     };
@@ -137,15 +137,15 @@ TEST(AnyGenerator, keep_options)
         [[maybe_unused]] auto shr = anyGen.generate<list<int>>(rand);
         show(cout, shr.get());
         cout << endl;
-        EXPECT_GE(shr.getRef().size(), 1);
-        EXPECT_LE(shr.getRef().size(), 2);
+        EXPECT_GE(shr.getRef().size(), 1U);
+        EXPECT_LE(shr.getRef().size(), 2U);
     }
 
     AnyGenerator anyGen2 = anyGen;
     for(int i = 0; i < 5; i++) {
         [[maybe_unused]] auto shr = anyGen2.generate<list<int>>(rand);
-        EXPECT_GE(shr.getRef().size(), 1);
-        EXPECT_LE(shr.getRef().size(), 2);
+        EXPECT_GE(shr.getRef().size(), 1U);
+        EXPECT_LE(shr.getRef().size(), 2U);
     }
 
 }

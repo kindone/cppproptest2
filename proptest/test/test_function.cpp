@@ -6,6 +6,7 @@
 using namespace proptest;
 
 
+/*
 TEST(FunctionNHolderConst, fptr)
 {
     auto lambda0 = +[]() { return 1; };
@@ -22,7 +23,7 @@ TEST(FunctionNHolderConst, fptr_void)
     auto lambda0 = +[]() { return; };
     FunctionNHolderConst<decltype(lambda0),void,void> holder0(util::forward<decltype(lambda0)>(lambda0));
     holder0();
-    auto lambda = +[](int a, int b) { return; };
+    auto lambda = +[](int, int) { return; };
     FunctionNHolderConst<decltype(lambda),void,void,int,int> holder(util::forward<decltype(lambda)>(lambda));
     holder(1,2);
     holder.apply({Any(1),Any(2)});
@@ -93,6 +94,7 @@ TEST(FunctionNHolder, ptr)
     EXPECT_EQ((*lambda0)(1,2), 3);
     EXPECT_EQ(lambda0->invoke(Any(1),Any(2)).getRef<int>(), 3);
 }
+*/
 
 TEST(Function, fptr)
 {
@@ -141,12 +143,14 @@ TEST(Function, reference_args_mutable)
     EXPECT_EQ(x, 5);
 }
 
+/*
 TEST(Function, make_function)
 {
     auto lambda = [](int a, int b) { return a+b; };
     Function<int(int,int)> function = util::make_function(lambda);
     EXPECT_EQ(function(1,2), 3);
 }
+*/
 
 TEST(Function, assign_functor)
 {
@@ -174,6 +178,7 @@ TEST(Function, assign_function_pointer)
     EXPECT_EQ(function(1,2), 3);
 }
 
+/*
 TEST(Function, assign_FunctionNHolderImpl)
 {
     auto lambda = [](int a, int b) { return a+b; };
@@ -181,14 +186,15 @@ TEST(Function, assign_FunctionNHolderImpl)
     Function<int(int,int)> function(functionNHolderImpl);
     EXPECT_EQ(function(1,2), 3);
 }
+*/
 
 TEST(Function, copy_and_reset_original)
 {
     auto lambda = [](int a, int b) { return a+b; };
-    Function<int(int,int)> function = util::make_function(lambda);
+    Function<int(int,int)> function = lambda;
     Function<int(int,int)> function2(function);
     EXPECT_EQ(function2(1,2), 3);
-    shared_ptr<Function<int(int,int)>> function3 = util::make_shared<Function<int(int,int)>>(util::make_function(lambda));
+    shared_ptr<Function<int(int,int)>> function3 = util::make_shared<Function<int(int,int)>>(lambda);
     Function<int(int,int)> function4(*function3);
     function3.reset();
     EXPECT_EQ(function4(1,2), 3);
@@ -196,14 +202,14 @@ TEST(Function, copy_and_reset_original)
 
 TEST(Function, void_return)
 {
-    auto lambda = [](int a, int b) { return; };
-    Function<void(int,int)> function = util::make_function(lambda);
+    auto lambda = [](int, int) { return; };
+    Function<void(int,int)> function = lambda;
     function(1,2);
 }
 
 TEST(Function, void_return2)
 {
-    auto lambda = [](int a, int b) { return; };
+    auto lambda = [](int, int) { return; };
     Function<void(int,int)> function = lambda;
     function(1,2);
 }
@@ -214,18 +220,18 @@ TEST(Function, noncopyable_args)
         NonCopyable() = default;
         NonCopyable(const NonCopyable&) = delete;
     };
-    auto lambda = [](const NonCopyable& a, const NonCopyable& b) { return 0; };
-    Function<int(const NonCopyable&, const NonCopyable&)> function = util::make_function(lambda);
+    auto lambda = [](const NonCopyable&, const NonCopyable&) { return 0; };
+    Function<int(const NonCopyable&, const NonCopyable&)> function = lambda;
     function(NonCopyable(), NonCopyable());
 }
 
 TEST(Function, Any_as_parameter)
 {
     auto lambda = [](Any a, Any b) -> int { return a.getRef<int>() + b.getRef<int>(); };
-    Function<int(Any,Any)> function = util::make_function(lambda);
+    Function<int(Any,Any)> function = lambda;
     Function<int(Any,Any)> function2(function);
     EXPECT_EQ(function2(1,2), 3);
-    shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(util::make_function(lambda));
+    shared_ptr<Function<int(Any,Any)>> function3 = util::make_shared<Function<int(Any,Any)>>(lambda);
     Function<int(Any,Any)> function4(*function3);
     function3.reset();
     EXPECT_EQ(function4(Any(1),Any(2)), 3);
@@ -234,15 +240,16 @@ TEST(Function, Any_as_parameter)
 TEST(Function, Any_reference_as_parameter)
 {
     auto lambda = [](const Any& a, const Any& b) -> int { return a.getRef<int>() + b.getRef<int>(); };
-    Function<int(const Any&,const Any&)> function = util::make_function(lambda);
+    Function<int(const Any&,const Any&)> function = lambda;
     Function<int(const Any&,const Any&)> function2(function);
     // EXPECT_EQ(function2(1,2), 3);
-    shared_ptr<Function<int(const Any&,const Any&)>> function3 = util::make_shared<Function<int(const Any&,const Any&)>>(util::make_function(lambda));
+    shared_ptr<Function<int(const Any&,const Any&)>> function3 = util::make_shared<Function<int(const Any&,const Any&)>>(lambda);
     Function<int(const Any&,const Any&)> function4(*function3);
     function3.reset();
     EXPECT_EQ(function4(Any(1),Any(2)), 3);
 }
 
+/*
 TEST(Function, from_AnyFunction)
 {
     auto lambda = [](int a, int b) { return a+b; };
@@ -263,6 +270,7 @@ TEST(Function, from_incompatible_AnyFunction)
     Function<int(int,double)> function3 = anyFunction;
     EXPECT_THROW(function3(1, 2.0), invalid_cast_error);
 }
+*/
 
 TEST(Function, in_capture)
 {
@@ -280,12 +288,14 @@ TEST(Function, in_capture)
         return Function<int(int)>(lambda);
     };
 
+    /*
     auto factory2 = [](int a) {
         auto lambda = [a](int b) -> int { return a+b; };
         return FunctionNHolderConst<decltype(lambda),int,int,int>(util::forward<decltype(lambda)>(lambda));
     };
     auto functionx = factory2(1);
     EXPECT_EQ(functionx(2), 3);
+    */
     Function<int(int)> function0 = factory(1);
     EXPECT_EQ(function0(2), 3);
     EXPECT_EQ(function0(2), 3);

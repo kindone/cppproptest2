@@ -17,8 +17,8 @@ template<typename T, typename... ARGS>
 
 template <typename T> struct Stream;
 template <typename T> struct StreamIterator;
-struct AnyStream;
-struct AnyStreamIterator;
+//struct AnyStream;
+//struct AnyStreamIterator;
 
 template <typename T>
 struct StreamIterator
@@ -42,7 +42,7 @@ struct StreamIterator
 };
 
 template <typename T>
-struct Stream
+struct PROPTEST_API Stream
 {
     Stream(const Any& _head) : head(_head), tailGen([]() -> Stream { return Stream::empty(); }) {}
     Stream(const Any& _head, const Function<Stream()>& _tailGen) : head(_head), tailGen(_tailGen) {}
@@ -150,8 +150,8 @@ private:
     }
 };
 
-
-struct AnyStream {
+/*
+struct PROPTEST_API AnyStream {
     template <typename T>
     AnyStream(const Stream<T>& otherStream) : stream(otherStream.template transform<Any>([](const T& t) { return Any(t); })) {}
     AnyStream(const Stream<Any>& otherStream) : stream(otherStream) {}
@@ -194,7 +194,7 @@ private:
     Stream<Any> stream;
 };
 
-struct AnyStreamIterator
+struct PROPTEST_API AnyStreamIterator
 {
     AnyStreamIterator(const Stream<Any>& stream);
     AnyStreamIterator(const AnyStream& stream);
@@ -216,5 +216,6 @@ struct AnyStreamIterator
 
     AnyStream stream;
 };
+*/
 
 } // namespace proptest

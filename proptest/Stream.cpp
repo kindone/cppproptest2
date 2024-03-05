@@ -1,7 +1,7 @@
 #include "proptest/Stream.hpp"
 
 namespace proptest {
-
+/*
 AnyStreamIterator::AnyStreamIterator(const Stream<Any>& stream) : stream(stream) {}
 
 AnyStreamIterator::AnyStreamIterator(const AnyStream& stream) : stream(stream) {}
@@ -18,5 +18,6 @@ Any AnyStreamIterator::nextAny() {
     stream = stream.getTail();
     return value;
 }
+*/
 
 } // namespace proptest

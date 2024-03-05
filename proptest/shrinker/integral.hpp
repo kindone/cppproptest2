@@ -1,13 +1,14 @@
 #pragma once
 
+#include "proptest/api.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/std/type.hpp"
 
 namespace proptest {
 namespace util {
 
-Shrinkable<int64_t> binarySearchShrinkable(int64_t value);
-Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value);
+PROPTEST_API Shrinkable<int64_t> binarySearchShrinkable(int64_t value);
+PROPTEST_API Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value);
 
 }  // namespace util
 

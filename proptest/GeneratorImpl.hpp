@@ -38,7 +38,7 @@ decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(const T&)> ge
 
 template <typename T>
 template <typename U>
-Generator<U> GeneratorBase<T>::flatMap(Function<U(const T&)> genFactory)
+Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(const T&)> genFactory)
 {
     return Generator<U>(proptest::derive<T, U>(this->asGenFunction(), genFactory));
 }

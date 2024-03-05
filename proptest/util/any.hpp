@@ -102,10 +102,10 @@ struct PROPTEST_API AnyRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
     virtual ~AnyRef() {}
 
-    AnyRef(const T& t) : ptr(static_pointer_cast<void>(util::make_shared<T>(t))) {
+    AnyRef(const T& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(t)))) {
     }
 
-    AnyRef(const shared_ptr<T>& tptr) : ptr(static_pointer_cast<void>(tptr)) {
+    AnyRef(const shared_ptr<T>& tptr) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(tptr))) {
     }
 
     const void* rawPtr() const override {
@@ -236,7 +236,7 @@ Any make_any(Args&&... args)
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
     }
     else {
-        return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(args...)));
+        return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(util::forward<Args>(args)...)));
     }
 }
 

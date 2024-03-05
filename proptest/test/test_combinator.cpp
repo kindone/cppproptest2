@@ -157,8 +157,9 @@ TEST(Derive, basic)
         // TODO validation
         auto result = derived(rand);
         cout << serializeShrinkable(result) << endl;
-        if(result.get() == 8)
+        if(result.get() == 8) {
             EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
+        }
     }
 }
 
@@ -224,7 +225,7 @@ TEST(PropTest, TestChain)
 TEST(Chain, chainTwice)
 {
     Random rand(getCurrentTime());
-    auto gen = chain(interval<int>(0, 4), [](const int& i) -> Generator<int> { return interval(0, 4); });
+    auto gen = chain(interval<int>(0, 4), [](const int&) -> Generator<int> { return interval(0, 4); });
 
     for(int i = 0; i < 5; i++)
     {
@@ -233,7 +234,7 @@ TEST(Chain, chainTwice)
         cout << serializeShrinkable(result) << endl;
     }
 
-    auto gen2 = chain(gen, [](const tuple<int, int>& t) -> Generator<int> { return interval(0, 4); });
+    auto gen2 = chain(gen, [](const tuple<int, int>&) -> Generator<int> { return interval(0, 4); });
 
     for(int i = 0; i < 5; i++)
     {

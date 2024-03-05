@@ -3,6 +3,6 @@
 
 namespace proptest {
 
-Shrinkable<string> shrinkString(const string& str, size_t minSize = 0);
+PROPTEST_API Shrinkable<string> shrinkString(const string& str, size_t minSize = 0);
 
 }

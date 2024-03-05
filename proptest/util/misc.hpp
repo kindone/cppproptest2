@@ -1,5 +1,5 @@
 #pragma once
-#include "std.hpp"
+#include "proptest/std/io.hpp"
 
 namespace proptest {
 namespace util {

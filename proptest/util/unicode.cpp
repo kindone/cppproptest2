@@ -1,6 +1,5 @@
-#include "misc.hpp"
-#include "unicode.hpp"
-#include "std.hpp"
+#include "proptest/util/misc.hpp"
+#include "proptest/util/unicode.hpp"
 
 namespace proptest {
 namespace util {

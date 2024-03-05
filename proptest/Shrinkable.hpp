@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include "proptest/api.hpp"
 #include "proptest/typefwd.hpp"
 #include "proptest/util/any.hpp"
 #include "proptest/util/anyfunction.hpp"
@@ -9,13 +10,15 @@
 
 namespace proptest {
 
-template <typename T> struct Shrinkable;
+template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
+
 
 template <typename T, typename... Args>
 Shrinkable<T> make_shrinkable(Args&&... args);
 
 template <typename T>
-struct Shrinkable
+    requires (!std::is_const_v<T>)
+struct PROPTEST_API Shrinkable
 {
     using type = T;
     using StreamType = Stream<Shrinkable<T>>;
@@ -40,7 +43,7 @@ struct Shrinkable
     Shrinkable with(const StreamType& otherShrinks) const {
         if constexpr(is_same_v<T, Any>) {
             if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
-                throw invalid_argument("cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
         }
         return Shrinkable(value, otherShrinks);
     }
@@ -49,7 +52,7 @@ struct Shrinkable
         if constexpr(is_same_v<T, Any>) {
             auto otherShrinks = otherStream();
             if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
-                throw invalid_argument("cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
         }
         return Shrinkable(value, Lazy<StreamType>(otherStream));
     }
@@ -87,7 +90,7 @@ struct Shrinkable
     Shrinkable<T> filter(Function<bool(const T&)> criteria) const {
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
-            throw invalid_argument("cannot apply criteria");
+            throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
         else
             return with(shrinks->filter([criteria](const Shrinkable& shr) -> bool {
                 return criteria(shr.getRef());
@@ -119,7 +122,7 @@ struct Shrinkable
         };
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
-            throw invalid_argument("cannot apply criteria");
+            throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
         return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
             return shr.filter(criteria, tolerance);
@@ -171,7 +174,7 @@ private:
     Shrinkable(Any _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
         if constexpr(is_same_v<T, Any>) {
             if(!_shrinks->isEmpty() && _shrinks->getHeadRef().getRef().type() != value.type())
-                throw invalid_argument("cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
         }
     }
 
@@ -184,6 +187,7 @@ public:
     friend Shrinkable<U> make_shrinkable(ARGS&&... args);
 
     template <typename U>
+        requires (!std::is_const_v<U>)
     friend struct Shrinkable;
 };
 

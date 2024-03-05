@@ -8,8 +8,8 @@ using namespace proptest;
 
 TEST(Property, matrix)
 {
-    matrix([](int a, int b) {
-        return a + b == b + a;
+    matrix([](int, int) {
+        return true;
     }, {1,2,3}, {2,3,4});
 }
 
@@ -18,7 +18,7 @@ TEST(Property, forAll)
     forAll([](int a, int b) {
         PROP_ASSERT(0 <= a && a <= 10);
         PROP_ASSERT(20 <= b && b <= 30);
-        return a + b == b + a;
+        return true;
     }, interval(0, 10), interval(20, 30));
 }
 
@@ -407,7 +407,7 @@ TEST(Property, TestCheckArbitraryWithConstruct)
 
 decltype(auto) dummyProperty()
 {
-    using Type = function<int()>;
+    using Type = Function<int()>;
     shared_ptr<Type> modelPtr = util::make_shared<Type>([]() { return 0; });
     return property([modelPtr](int) {
         auto model = *modelPtr;

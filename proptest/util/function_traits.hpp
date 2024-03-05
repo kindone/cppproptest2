@@ -4,6 +4,9 @@
 
 namespace proptest {
 
+template <typename F> struct Function;
+template <typename RET, typename...ARGS> struct Function<RET(ARGS...)>;
+
 template <template <typename...> typename TEMPLATE, typename RET, typename...ARGS>
 TEMPLATE<RET(ARGS...)> TypeListToFunctionType(util::TypeList<ARGS...> list)
 {
@@ -53,6 +56,13 @@ template <class C, class R>
 struct function_traits<R C::*> : public function_traits<R(C&)>
 {
 };
+
+// member object pointer
+template <class R, class...ARGS>
+struct function_traits<Function<R(ARGS...)>> : public function_traits<R(ARGS...)>
+{
+};
+
 
 // functor
 template <class F>

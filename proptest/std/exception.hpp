@@ -8,16 +8,25 @@ namespace proptest {
 
 using std::error_code;
 using std::exception;
-using std::invalid_argument;
-using std::logic_error;
+
+
+class logic_error : public std::logic_error {
+public:
+    explicit logic_error(const char*, int, const char* message, const void* = nullptr) : std::logic_error(message) {}
+    explicit logic_error(const char*, int, const std::string& message, const void* = nullptr) : std::logic_error(message.c_str()) {}
+};
+
+class invalid_argument : public std::invalid_argument {
+public:
+    explicit invalid_argument(const char*, int, const char* message) : std::invalid_argument(message) {}
+    explicit invalid_argument(const char*, int, const std::string& message) : std::invalid_argument(message.c_str()) {}
+};
+
 
 class runtime_error : public std::runtime_error {
 public:
-    explicit runtime_error(const char* fname, int l, const char* message) : std::runtime_error(message), filename(fname), line(l) {}
-    explicit runtime_error(const char* fname, int l, const std::string& message) : std::runtime_error(message.c_str()), filename(fname), line(l) {}
-
-    const char* filename;
-    int line;
+    explicit runtime_error(const char*, int, const char* message) : std::runtime_error(message) {}
+    explicit runtime_error(const char* fname, int l, const std::string& message) : std::runtime_error(message.c_str()) {}
 };
 
 class invalid_cast_error: public std::exception {
