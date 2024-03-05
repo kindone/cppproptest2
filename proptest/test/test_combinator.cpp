@@ -8,6 +8,7 @@
 #include "proptest/combinator/elementof.hpp"
 #include "proptest/combinator/chain.hpp"
 #include "proptest/combinator/intervals.hpp"
+#include "proptest/generator/bool.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/Random.hpp"
@@ -189,6 +190,34 @@ TEST(Chain, basic)
         // if(get<0>(result.get()) == 8) {
         //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
         // }
+    }
+}
+
+
+TEST(PropTest, TestChain)
+{
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+
+    auto nullableIntegers = Arbi<bool>().tupleWith<int>(+[](const bool& isNull) -> GenFunction<int> {
+        if (isNull)
+            return just(0);
+        else
+            return interval<int>(10, 20);
+    });
+
+    auto tupleGen = nullableIntegers.tupleWith<int>(+[](const Chain<bool, int>& chain) {
+        bool isNull = get<0>(chain);
+        int value = get<1>(chain);
+        if (isNull)
+            return interval(0, value);
+        else
+            return interval(-10, value);
+    });
+
+    for (int i = 0; i < 3; i++) {
+        auto tupleShr = tupleGen(rand);
+        cout << serializeShrinkable(tupleShr) << endl;
     }
 }
 

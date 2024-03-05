@@ -10,14 +10,14 @@ Any::Any(const Any& other) : ptr(other.ptr) {}
 
 const type_info& Any::type() const {
     if(!ptr) {
-        throw runtime_error("empty ptr");
+        throw runtime_error(__FILE__, __LINE__, "empty ptr");
     }
-    return ptr->type();
+return ptr->type();
 }
 
 bool Any::isEmpty() const {
     if((ptr.get() == nullptr) != !static_cast<bool>(ptr))
-        throw runtime_error("somehow nullptr comparison misbehaves");
+        throw runtime_error(__FILE__, __LINE__, "somehow nullptr comparison misbehaves");
     return !static_cast<bool>(ptr);
     //return ptr.get() == nullptr;
 }

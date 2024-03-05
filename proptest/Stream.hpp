@@ -2,7 +2,8 @@
 
 #include "proptest/api.hpp"
 #include "proptest/std/lang.hpp"
-#include "proptest/util/std.hpp"
+#include "proptest/std/vector.hpp"
+#include "proptest/std/limits.hpp"
 #include "proptest/util/any.hpp"
 #include "proptest/util/anyfunction.hpp"
 
@@ -30,7 +31,7 @@ struct StreamIterator
     }
     T next() {
         if(!hasNext())
-            throw runtime_error("no more elements in stream");
+            throw runtime_error(__FILE__, __LINE__, "no more elements in stream");
 
         T value = stream.getHeadRef();
         stream = stream.getTail();
@@ -204,7 +205,7 @@ struct AnyStreamIterator
     template <typename T>
     T next() {
         if(!hasNext())
-            throw runtime_error("no more elements in stream");
+            throw runtime_error(__FILE__, __LINE__, "no more elements in stream");
 
         T value = stream.getHeadRef<T>();
         stream = stream.getTail();

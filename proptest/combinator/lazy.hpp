@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../util/std.hpp"
-#include "../Shrinkable.hpp"
-#include "../Random.hpp"
-#include "../gen.hpp"
+#include "proptest/Shrinkable.hpp"
+#include "proptest/Random.hpp"
+#include "proptest/Generator.hpp"
 
 /**
  * @file lazy.hpp

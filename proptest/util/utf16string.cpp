@@ -106,7 +106,7 @@ ostream& decodeUTF16BE(ostream& os, vector<uint8_t>& chars)
 uint32_t decodeUTF16BE(vector<uint8_t>& chars)
 {
     if (2 > chars.size()) {
-        throw runtime_error("invalid UTF-16 BE sequence");
+        throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 BE sequence");
     }
     // ASCII: U+0000..U+007F
     if (chars[0] == 0 && chars[1] <= 0x7f) {
@@ -116,7 +116,7 @@ uint32_t decodeUTF16BE(vector<uint8_t>& chars)
     else if (chars[0] <= 0xD7 || 0xE0 <= chars[0]) {
         return static_cast<uint32_t>((chars[0] << 8) + chars[1]);
     } else if (4 > chars.size()) {
-        throw runtime_error("invalid UTF-16 BE sequence");
+        throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 BE sequence");
     }
     // U+10000.. use surrogate pairs
     // U+0000..U+D7FF or U+E000..U+FFFF
@@ -127,7 +127,7 @@ uint32_t decodeUTF16BE(vector<uint8_t>& chars)
         uint32_t p1 = (s1 - 0xDC00);
         return static_cast<uint32_t>(0x10000 + p0 + p1);
     }
-    throw runtime_error("invalid UTF-16 BE sequence");
+    throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 BE sequence");
 }
 
 void encodeUTF16BE(uint32_t code, vector<uint8_t>& chars)
@@ -154,7 +154,7 @@ void encodeUTF16BE(uint32_t code, vector<uint8_t>& chars)
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c1) << " ";
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c2) << " ";
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c3) << " ";
-            throw runtime_error(os.str());
+            throw runtime_error(__FILE__, __LINE__, os.str());
         }
 
         chars.push_back(c0);
@@ -200,7 +200,7 @@ ostream& decodeUTF16LE(ostream& os, vector<uint8_t>& chars)
 uint32_t decodeUTF16LE(vector<uint8_t>& chars)
 {
     if (2 > chars.size()) {
-        throw runtime_error("invalid UTF-16 LE sequence");
+        throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 LE sequence");
     }
     // ASCII: U+0000..U+007F
     if (chars[1] == 0 && chars[0] <= 0x7f) {
@@ -210,7 +210,7 @@ uint32_t decodeUTF16LE(vector<uint8_t>& chars)
     else if (chars[1] <= 0xD7 || 0xE0 <= chars[1]) {
         return static_cast<uint32_t>((chars[1] << 8) + chars[0]);
     } else if (4 > chars.size()) {
-        throw runtime_error("invalid UTF-16 LE sequence");
+        throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 LE sequence");
     }
     // U+10000.. use surrogate pairs
     // U+0000..U+D7FF or U+E000..U+FFFF
@@ -221,7 +221,7 @@ uint32_t decodeUTF16LE(vector<uint8_t>& chars)
         uint32_t p1 = (s1 - 0xDC00);
         return static_cast<uint32_t>(0x10000 + p0 + p1);
     }
-    throw runtime_error("invalid UTF-16 LE sequence");
+    throw runtime_error(__FILE__, __LINE__, "invalid UTF-16 LE sequence");
 }
 
 void encodeUTF16LE(uint32_t code, vector<uint8_t>& chars)
@@ -248,8 +248,8 @@ void encodeUTF16LE(uint32_t code, vector<uint8_t>& chars)
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c0) << " ";
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c3) << " ";
             os << setfill('0') << setw(2) << util::hex << static_cast<int>(c2) << " ";
-            throw runtime_error(os.str());
-            // throw runtime_error("invalid surrogate pairs: ");
+            throw runtime_error(__FILE__, __LINE__, os.str());
+            // throw runtime_error(__FILE__, __LINE__, "invalid surrogate pairs: ");
         }
         chars.push_back(c1);
         chars.push_back(c0);
@@ -273,7 +273,7 @@ size_t UTF16BECharSize(const string& str)
         for (size_t i = 0; i < str.size(); i++) {
             stream << setfill('0') << setw(2) << util::hex << static_cast<int>(str[i]) << " ";
         }
-        throw runtime_error(stream.str());
+        throw runtime_error(__FILE__, __LINE__, stream.str());
     }
 }
 
@@ -292,7 +292,7 @@ size_t UTF16LECharSize(const string& str)
         for (size_t i = 0; i < str.size(); i++) {
             stream << setfill('0') << setw(2) << util::hex << static_cast<int>(str[i]) << " ";
         }
-        throw runtime_error(stream.str());
+        throw runtime_error(__FILE__, __LINE__, stream.str());
     }
 }
 

@@ -15,7 +15,7 @@ namespace util {
 template<typename... ARGS, size_t... Is>
 tuple<ARGS...> vectorToTupleImpl(const vector<Any>& vec, index_sequence<Is...>) {
     if (vec.size() != sizeof...(ARGS)) {
-        throw std::invalid_argument("vector size does not match the number of tuple elements");
+        throw invalid_argument("vector size does not match the number of tuple elements");
     }
     return util::make_tuple(vec[Is].getRef<ARGS>()...);
 }

@@ -10,7 +10,15 @@ using std::error_code;
 using std::exception;
 using std::invalid_argument;
 using std::logic_error;
-using std::runtime_error;
+
+class runtime_error : public std::runtime_error {
+public:
+    explicit runtime_error(const char* fname, int l, const char* message) : std::runtime_error(message), filename(fname), line(l) {}
+    explicit runtime_error(const char* fname, int l, const std::string& message) : std::runtime_error(message.c_str()), filename(fname), line(l) {}
+
+    const char* filename;
+    int line;
+};
 
 class invalid_cast_error: public std::exception {
 public:

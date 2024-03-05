@@ -9,6 +9,7 @@
 #include "proptest/util/assert.hpp"
 #include "proptest/util/tuple.hpp"
 #include "proptest/util/matrix.hpp"
+#include "proptest/std/chrono.hpp"
 
 /**
  * @file Property.hpp

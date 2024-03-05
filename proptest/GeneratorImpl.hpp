@@ -31,14 +31,14 @@ Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(const T
 
 template <typename T>
 template <typename U>
-decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(T&)> genFactory)
+decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(const T&)> genFactory)
 {
     return proptest::chain(this->asGenFunction(), genFactory);
 }
 
 template <typename T>
 template <typename U>
-Generator<U> GeneratorBase<T>::flatmap(Function<U(T&)> genFactory)
+Generator<U> GeneratorBase<T>::flatMap(Function<U(const T&)> genFactory)
 {
     return Generator<U>(proptest::derive<T, U>(this->asGenFunction(), genFactory));
 }

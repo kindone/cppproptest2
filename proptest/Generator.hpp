@@ -48,10 +48,10 @@ public:
     Generator<pair<T, U>> pairWith(Function<GenFunction<U>(const T&)> genFactory);
 
     template <typename U>
-    decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
+    decltype(auto) tupleWith(Function<GenFunction<U>(const T&)> genFactory);
 
     template <typename U>
-    Generator<U> flatmap(Function<U(T&)> genFactory);
+    Generator<U> flatMap(Function<U(const T&)> genFactory);
 
     virtual shared_ptr<GeneratorBase> clone() const = 0;
 

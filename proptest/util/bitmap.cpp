@@ -69,14 +69,14 @@ void Bitmap::take(int n)
 {
     // assert
     if (states[n] != Changing)
-        throw runtime_error("invalid state");
+        throw runtime_error(__FILE__, __LINE__, "invalid state");
     states[n] = Unavailable;
 }
 
 void Bitmap::put(int n)
 {
     if (states[n] != Changing)
-        throw runtime_error("invalid state");
+        throw runtime_error(__FILE__, __LINE__, "invalid state");
     states[n] = Available;
 }
 

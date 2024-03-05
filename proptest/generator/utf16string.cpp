@@ -54,7 +54,7 @@ Shrinkable<UTF16BEString> Arbi<UTF16BEString>::operator()(Random& rand) const
         for (size_t i = 0; i < chars.size(); i++) {
             os << static_cast<int>(chars[i]) << " ";
         }
-        throw runtime_error(os.str());
+        throw runtime_error(__FILE__, __LINE__, os.str());
     }
 
     UTF16BEString str(chars.size(), ' ' /*, allocator()*/);
@@ -118,7 +118,7 @@ Shrinkable<UTF16LEString> Arbi<UTF16LEString>::operator()(Random& rand) const
         }
         printf("\n");
 
-        throw runtime_error(os.str());
+        throw runtime_error(__FILE__, __LINE__, os.str());
     }
 
     // cout << "hex = {";

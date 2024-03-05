@@ -3,6 +3,8 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/util/tuple.hpp"
 #include "proptest/util/tupleorvector.hpp"
+#include "proptest/std/algorithm.hpp"
+#include "proptest/std/map.hpp"
 
 namespace proptest {
 

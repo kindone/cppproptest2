@@ -1,5 +1,5 @@
 #pragma once
-#include "../Shrinkable.hpp"
+#include "proptest/Shrinkable.hpp"
 
 namespace proptest {
 

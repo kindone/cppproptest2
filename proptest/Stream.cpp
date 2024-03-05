@@ -12,7 +12,7 @@ bool AnyStreamIterator::hasNext() {
 
 Any AnyStreamIterator::nextAny() {
     if(!hasNext())
-        throw runtime_error("no more elements in stream");
+        throw runtime_error(__FILE__, __LINE__, "no more elements in stream");
 
     Any value = stream.getHeadRef();
     stream = stream.getTail();

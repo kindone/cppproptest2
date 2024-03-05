@@ -3,6 +3,7 @@
 #include "proptest/Random.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/just.hpp"
+#include "proptest/std/algorithm.hpp"
 
 /**
  * @file elementof.hpp

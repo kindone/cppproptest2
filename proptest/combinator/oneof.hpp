@@ -64,14 +64,14 @@ decltype(auto) oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPt
     for (size_t i = 0; i < genVecPtr->size(); i++) {
         double weight = (*genVecPtr)[i].weight;
         if (weight < 0.0 || weight > 1.0)
-            throw runtime_error("invalid weight: " + to_string(weight));
+            throw runtime_error(__FILE__, __LINE__, "invalid weight: " + to_string(weight));
         sum += weight;
         if (weight == 0.0)
             numUnassigned++;
     }
 
     if (sum > 1.0)
-        throw runtime_error("sum of weight exceeds 1.0");
+        throw runtime_error(__FILE__, __LINE__, "sum of weight exceeds 1.0");
 
     if (numUnassigned > 0 && sum < 1.0)
         for (size_t i = 0; i < genVecPtr->size(); i++) {

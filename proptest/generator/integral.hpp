@@ -27,7 +27,7 @@ Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T 
         value = rand.getRandomU<T>(min, max);
 
     if (value < min || max < value)
-        throw runtime_error("invalid range");
+        throw runtime_error(__FILE__, __LINE__, "invalid range");
 
     if (min >= 0)  // [3,5] -> [0,2] -> [3,5]
     {

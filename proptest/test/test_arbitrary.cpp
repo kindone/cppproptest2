@@ -224,7 +224,7 @@ bool isStringValid(ARGS&&...args) {
     else if(is_same_v<T, UTF16LEString>)
         return util::isValidUTF16LE(util::forward<ARGS>(args)...);
     else {
-        throw runtime_error("unsupported string type");
+        throw runtime_error(__FILE__, __LINE__, "unsupported string type");
     }
 }
 

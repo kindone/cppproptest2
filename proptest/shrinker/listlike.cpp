@@ -16,7 +16,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
             return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
 
         if (elemStreams->size() != size)
-            throw runtime_error("element streams size error");
+            throw runtime_error(__FILE__, __LINE__, "element streams size error");
 
         shared_ptr<vector<e_stream_t>> newElemStreams = util::make_shared<vector<e_stream_t>>();
         newElemStreams->reserve(size);
@@ -25,7 +25,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         const vector<ShrinkableAny>& ancestorVec = _ancestor.getRef();
 
         if (newVec.size() != ancestorVec.size())
-            throw runtime_error("list size error: " + to_string(newVec.size()) +
+            throw runtime_error(__FILE__, __LINE__, "list size error: " + to_string(newVec.size()) +
                                 " != " + to_string(ancestorVec.size()));
 
         // shrink each element in frompos~topos, put parent if shrink no longer possible
@@ -60,13 +60,13 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
 
     if (offset >= numSplits)
-        throw runtime_error("offset should not reach numSplits");
+        throw runtime_error(__FILE__, __LINE__, "offset should not reach numSplits");
 
     size_t frompos = parentSize * offset / numSplits;
     size_t topos = parentSize * (offset + 1) / numSplits;
 
     if (topos < parentSize)
-        throw runtime_error("topos error: " + to_string(topos) + " != " + to_string(parentSize));
+        throw runtime_error(__FILE__, __LINE__, "topos error: " + to_string(topos) + " != " + to_string(parentSize));
 
     const size_t size = topos - frompos;
     const vector<ShrinkableAny>& parentVec = ancestor.getRef();

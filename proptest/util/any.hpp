@@ -124,7 +124,7 @@ struct PROPTEST_API AnyRef : AnyHolder {
         if constexpr(copy_constructible<T>)
             return util::make_shared<AnyRef<T>>(*static_pointer_cast<T>(ptr));
         else
-            throw runtime_error("cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
+            throw runtime_error(__FILE__, __LINE__, "cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
     }
 
 private:
