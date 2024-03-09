@@ -15,6 +15,7 @@ decltype(auto) invokeExplicit(Function<RET(ARGS...)> func, GENS&&...gens) {
     auto genTuple = util::make_tuple(generator(gens)...);
 
     vector<AnyGenerator> genVec;
+    genVec.reserve(NumArgs);
 
     util::For<NumArgs>([&](auto index_sequence) {
         genVec.push_back(get<index_sequence.value>(genTuple));
@@ -44,6 +45,7 @@ decltype(auto) invoke(Function<RET(ARGS...)> func, GENS&&...gens) {
 
     // prepare genVec
     vector<AnyGenerator> genVec;
+    genVec.reserve(NumArgs);
 
     util::For<NumGens>([&](auto index_sequence) {
         genVec.push_back(get<index_sequence.value>(genTuple));

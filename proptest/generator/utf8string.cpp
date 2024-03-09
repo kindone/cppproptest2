@@ -36,7 +36,7 @@ Shrinkable<UTF8String> Arbi<UTF8String>::operator()(Random& rand) const
 
     chars.reserve(len * 4);
     codes.reserve(len);
-    positions.reserve(len);
+    positions.reserve(len+1);
 
     // cout << "utf8 gen, len = " << len << endl;
 

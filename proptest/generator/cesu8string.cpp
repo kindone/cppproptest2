@@ -37,7 +37,7 @@ Shrinkable<CESU8String> Arbi<CESU8String>::operator()(Random& rand) const
 
     chars.reserve(len * 6);
     codes.reserve(len);
-    positions.reserve(len);
+    positions.reserve(len+1);
 
     // cout << "cesu8 gen, len = " << len << endl;
 

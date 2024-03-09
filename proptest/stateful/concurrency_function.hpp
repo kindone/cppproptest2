@@ -234,6 +234,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
     auto actionListGen = Arbi<list<Action<ObjectType,ModelType>>>(*actionGenPtr);
     Shrinkable<ActionList> frontShr = actionListGen(rand);
     vector<Shrinkable<ActionList>> rearShrs;
+    rearShrs.reserve(numThreads);
     for (int i = 0; i < numThreads; i++) {
         rearShrs.push_back(actionListGen(rand));
     }
@@ -296,6 +297,9 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
         auto frontItr = front.begin();
         vector<typename ActionList::iterator> rearItrs;
         vector<bool> rearStarted;
+        rearItrs.reserve(numThreads);
+        rearStarted.reserve(numThreads);
+
         for(int i = 0; i < numThreads; i++) {
             rearItrs.push_back(rears[i].begin());
             rearStarted.push_back(false);

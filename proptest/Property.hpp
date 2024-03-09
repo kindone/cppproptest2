@@ -124,6 +124,7 @@ public:
         constexpr size_t NumExplicitGens = sizeof...(gens);
 
         vector<AnyGenerator> curGenVec{generator(gens)...};
+        curGenVec.reserve(genVec.size());
         for(size_t i = NumExplicitGens; i < genVec.size(); i++) {
             curGenVec.push_back(genVec[i]);
         }
@@ -319,6 +320,8 @@ private:
         // regenerate failed value tuple
         vector<ShrinkableAny> shrVec;
         vector<Stream<ShrinkableAny>> shrinksVec;
+        shrVec.reserve(Arity);
+        shrinksVec.reserve(Arity);
         for(size_t i = 0; i < Arity; i++) {
             auto shr = curGenVec[i](savedRand);
             shrVec.push_back(shr);
@@ -434,6 +437,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     // prepare genVec
     auto genTuple = util::make_tuple(generator(gens)...);
     vector<AnyGenerator> genVec;
+    genVec.reserve(NumArgs);
     // fill with gens
     if constexpr(NumGens > 0) {
         util::For<NumGens>([&](auto index_sequence) {

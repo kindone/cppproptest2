@@ -9,7 +9,7 @@
 
 namespace proptest {
 
-//extern template struct Shrinkable<vector<ShrinkableAny>>;
+extern template struct Shrinkable<vector<ShrinkableAny>>;
 
 namespace util {
 PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr);
@@ -20,6 +20,7 @@ PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrin
 {
     Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.template map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
         vector<ShrinkableAny> anyVector;
+        anyVector.reserve(sizeof...(ARGS));
         util::For([&] (auto index_sequence) {
             anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tuple)));
         }, make_index_sequence<sizeof...(ARGS)>{});
@@ -29,6 +30,7 @@ PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrin
     vectorAnyShr = util::shrinkTupleUsingVector(vectorAnyShr);
     return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableAny>& shrAnyVec) {
         vector<Any> anyVec;
+        anyVec.reserve(shrAnyVec.size());
         util::transform(shrAnyVec.begin(), shrAnyVec.end(), util::inserter(anyVec, anyVec.begin()), [](const ShrinkableAny& shr) -> Any {
             return shr.getAny();
         });

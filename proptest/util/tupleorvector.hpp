@@ -28,9 +28,11 @@ tuple<ARGS...> vectorToTuple(const vector<Any>& v) {
 template <typename... ARGS>
 vector<Any> tupleToAnyVector(const tuple<ARGS...>& tup) {
     vector<Any> anyVector;
-    util::For([&] (auto index_sequence) {
+    anyVector.reserve(sizeof...(ARGS));
+
+    util::For<sizeof...(ARGS)>([&] (auto index_sequence) {
         anyVector.push_back(Any(proptest::get<index_sequence.value>(tup)));
-    }, make_index_sequence<sizeof...(ARGS)>{});
+    });
     return anyVector;
 }
 
@@ -55,6 +57,7 @@ struct VectorHolder : public TupleOrVectorHolder {
 
     virtual vector<Any> toAnyVector() const override {
         vector<Any> anyVector;
+        anyVector.reserve(value.size());
         for (const auto& elem : value)
             anyVector.push_back(Any(elem));
         return anyVector;
@@ -73,10 +76,11 @@ struct TupleHolder : public TupleOrVectorHolder {
 
     virtual vector<Any> toAnyVector() const override {
         vector<Any> anyVector;
+        anyVector.reserve(TUP_SIZE);
 
-        util::For([&] (auto index_sequence) {
+        util::For<TUP_SIZE>([&] (auto index_sequence) {
             anyVector.push_back(Any(proptest::get<index_sequence.value>(value)));
-        }, make_index_sequence<TUP_SIZE>{});
+        });
 
         return anyVector;
     };
@@ -113,8 +117,11 @@ struct TupleOrVector {
 
     template <typename T>
     vector<T> toVector() const {
+        auto anyVec = holder->toAnyVector();
         vector<T> vec;
-        for (const auto& elem : holder->toAnyVector())
+        vec.reserve(anyVec.size());
+
+        for (const auto& elem : anyVec)
             vec.push_back(elem.getRef<T>());
         return vec;
     }

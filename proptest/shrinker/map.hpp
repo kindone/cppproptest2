@@ -27,6 +27,7 @@ Shrinkable<map<Key, Value>> shrinkMap(const shared_ptr<vector<Shrinkable<Key>>> 
     // 3. convert this to Shrinkable<map<Key, Value>>
 
     vector<Shrinkable<pair<Key, Value>>> pairShrVec;
+    pairShrVec.reserve(valShrVec->size());
     for(size_t i = 0; i < valShrVec->size(); i++) {
         Shrinkable<pair<Key, Value>> pairShr = valShrVec->at(i).template map<pair<Key, Value>>([keyShrVec, i](const Value& val) -> pair<Key, Value> {
             return util::make_pair(keyShrVec->at(i).getRef(), val);

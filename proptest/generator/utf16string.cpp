@@ -32,7 +32,7 @@ Shrinkable<UTF16BEString> Arbi<UTF16BEString>::operator()(Random& rand) const
 
     chars.reserve(len * 4 + 2);
     codes.reserve(len);
-    positions.reserve(len);
+    positions.reserve(len+1);
 
     // cout << "UTF16 BE gen, len = " << len << endl;
 
@@ -92,7 +92,7 @@ Shrinkable<UTF16LEString> Arbi<UTF16LEString>::operator()(Random& rand) const
 
     chars.reserve(len * 4);
     codes.reserve(len);
-    positions.reserve(len);
+    positions.reserve(len+1);
 
     // cout << "UTF16 LE gen, len = " << len << endl;
 

@@ -57,6 +57,7 @@ decltype(auto) cartesianProduct(Function<RET(ARGS...)> func, initializer_list<AR
     bool result = true;
     do {
         vector<Any> outVec;
+        outVec.reserve(Size);
         for(size_t j = 0; j < Size; j++) {
             outVec.push_back(vecs[j][is[j]]);
         }
