@@ -105,6 +105,7 @@ SET(proptest_testsources
     proptest/test/test_proptest.cpp
     proptest/test/test_stateful_function.cpp
     proptest/test/test_concurrency_function.cpp
+    proptest/test/test_performance.cpp
 )
 
 
