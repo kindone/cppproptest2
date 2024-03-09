@@ -41,19 +41,19 @@ struct PROPTEST_API Shrinkable
     }
 
     Shrinkable with(const StreamType& otherShrinks) const {
-        if constexpr(is_same_v<T, Any>) {
-            if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
-                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
-        }
+        // if constexpr(is_same_v<T, Any>) {
+        //     if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
+        //         throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        // }
         return Shrinkable(value, otherShrinks);
     }
 
     Shrinkable with(Function<StreamType()> otherStream) const {
-        if constexpr(is_same_v<T, Any>) {
-            auto otherShrinks = otherStream();
-            if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
-                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
-        }
+        // if constexpr(is_same_v<T, Any>) {
+        //     auto otherShrinks = otherStream();
+        //     if(!otherShrinks.isEmpty() && otherShrinks.getHeadRef().getRef().type() != value.type())
+        //         throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(otherShrinks.getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        // }
         return Shrinkable(value, Lazy<StreamType>(otherStream));
     }
 
@@ -178,10 +178,10 @@ struct PROPTEST_API Shrinkable
 
 private:
     Shrinkable(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
-        if constexpr(is_same_v<T, Any>) {
-            if(!_shrinks->isEmpty() && _shrinks->getHeadRef().getRef().type() != value.type())
-                throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
-        }
+        // if constexpr(is_same_v<T, Any>) {
+        //     if(!_shrinks->isEmpty() && _shrinks->getHeadRef().getRef().type() != value.type())
+        //         throw invalid_argument(__FILE__, __LINE__, "cannot apply stream to shrinkable: " + string(_shrinks->getHeadRef().getRef().type().name()) + " to " + string(value.type().name()));
+        // }
     }
 
     Any value;

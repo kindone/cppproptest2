@@ -282,6 +282,20 @@ TEST(Performance, ShrinkableMap)
     }
 }
 
+TEST(Performance, ShrinkableMapMany)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        for(int j = 0; j < 10; j++) {
+            shr = shr.map<int>(+[](const int& n) {
+                return n + 1;
+            });
+            EXPECT_EQ(shr.getRef(), i+1+j);
+        }
+    }
+}
+
 TEST(Performance, ShrinkableFlatMap)
 {
     for(int i = 0; i < 10000; i++)
@@ -291,6 +305,20 @@ TEST(Performance, ShrinkableFlatMap)
             return make_shrinkable<int>(n + 1);
         });
         EXPECT_EQ(shr.getRef(), i+1);
+    }
+}
+
+TEST(Performance, ShrinkableFlatMapMany)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        for(int j = 0; j < 10; j++) {
+            shr = shr.flatMap<int>(+[](const int& n) {
+                return make_shrinkable<int>(n + 1);
+            });
+            EXPECT_EQ(shr.getRef(), i+1+j);
+        }
     }
 }
 
@@ -416,6 +444,16 @@ TEST(Performance, ArbiString)
     for(int i = 0; i < 10000; i++)
     {
         auto gen = Arbi<string>();
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiList)
+{
+    Random rand(seed);
+    for(int i = 0; i < 10; i++)
+    {
+        auto gen = Arbi<list<int>>(1, 2);;
         gen(rand);
     }
 }
