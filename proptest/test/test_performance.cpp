@@ -44,7 +44,7 @@ TEST(Performance, StreamFilter)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<int>::one(i);
-        stream = stream.filter(+[](const int& n) {
+        stream = stream.filter(+[](const int&) {
             return true;
         });
         EXPECT_EQ(stream.getHeadRef(), i);
@@ -158,7 +158,7 @@ TEST(Performance, StreamFilterLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
-        stream = stream.filter(+[](const LargeObject& n) {
+        stream = stream.filter(+[](const LargeObject&) {
             return true;
         });
         EXPECT_EQ(stream.getHeadRef().array[0], i);
@@ -238,5 +238,184 @@ TEST(Performance, ShrinkableCopy)
         Shrinkable<int> shr = make_shrinkable<int>(i);
         auto shr2 = shr;
         EXPECT_EQ(shr2.getRef(), i);
+    }
+}
+
+TEST(Performance, ShrinkableVector)
+{
+    vector<Shrinkable<int>> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        vec.push_back(shr);
+    }
+
+    for(int i = 0; i < 10000; i++)
+    {
+        const auto& shr = vec[i];
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+TEST(Performance, ShrinkableFilter)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.filter(+[](const int&) {
+            return true;
+        });
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+TEST(Performance, ShrinkableMap)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.map<int>(+[](const int& n) {
+            return n + 1;
+        });
+        EXPECT_EQ(shr.getRef(), i+1);
+    }
+}
+
+TEST(Performance, ShrinkableFlatMap)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.flatMap<int>(+[](const int& n) {
+            return make_shrinkable<int>(n + 1);
+        });
+        EXPECT_EQ(shr.getRef(), i+1);
+    }
+}
+
+// TODO: slower than proptest1 due to eagerness
+TEST(Performance, ShrinkableConcatStatic)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.concatStatic(Stream<Shrinkable<int>>::one(make_shrinkable<int>(i+1)));
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+TEST(Performance, ShrinkableConcat)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.concat([](const Shrinkable<int>& s) {
+            return Stream<Shrinkable<int>>::one(s);
+        });
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+// TODO: slower than proptest1 due to eagerness
+TEST(Performance, ShrinkableAndThenStatic)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.andThenStatic(Stream<Shrinkable<int>>::one(make_shrinkable<int>(i+1)));
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+TEST(Performance, ShrinkableAndthen)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<int>(i);
+        shr = shr.andThen([](const Shrinkable<int>& s) {
+            return Stream<Shrinkable<int>>::one(s);
+        });
+        EXPECT_EQ(shr.getRef(), i);
+    }
+}
+
+////////////////////// Large Object
+
+TEST(Performance, ShrinkableConstructLarge)
+{
+    for(int i = 0; i < 10000; i++) {
+        Shrinkable<LargeObject> shr = make_shrinkable<LargeObject>(i);
+        EXPECT_EQ(shr.getRef().array[0], i);
+    }
+}
+
+TEST(Performance, ShrinkableCopyLarge)
+{
+    for(int i = 0; i < 10000; i++) {
+        Shrinkable<LargeObject> shr = make_shrinkable<LargeObject>(i);
+        auto shr2 = shr;
+        EXPECT_EQ(shr.getRef().array[0], i);
+    }
+}
+
+TEST(Performance, ShrinkableVectorLarge)
+{
+    vector<Shrinkable<LargeObject>> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<LargeObject>(i);
+        vec.push_back(shr);
+    }
+
+    for(int i = 0; i < 10000; i++)
+    {
+        const auto& shr = vec[i];
+        EXPECT_EQ(shr.getRef().array[0], i);
+    }
+}
+
+TEST(Performance, ShrinkableFilterLarge)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        auto shr = make_shrinkable<LargeObject>(i);
+        shr = shr.filter(+[](const LargeObject&) {
+            return true;
+        });
+        EXPECT_EQ(shr.getRef().array[0], i);
+    }
+}
+
+constexpr uint64_t seed = 1709963283213UL;
+
+TEST(Performance, ArbiBool)
+{
+    Random rand(seed);
+    for(int i = 0; i < 10000; i++)
+    {
+        auto gen = Arbi<bool>();
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiInt)
+{
+    Random rand(seed);
+    for(int i = 0; i < 10000; i++)
+    {
+        auto gen = Arbi<int>();
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiString)
+{
+    Random rand(seed);
+    for(int i = 0; i < 10000; i++)
+    {
+        auto gen = Arbi<string>();
+        gen(rand);
     }
 }

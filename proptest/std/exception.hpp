@@ -26,7 +26,7 @@ public:
 class runtime_error : public std::runtime_error {
 public:
     explicit runtime_error(const char*, int, const char* message) : std::runtime_error(message) {}
-    explicit runtime_error(const char* fname, int l, const std::string& message) : std::runtime_error(message.c_str()) {}
+    explicit runtime_error(const char*, int, const std::string& message) : std::runtime_error(message.c_str()) {}
 };
 
 class invalid_cast_error: public std::exception {

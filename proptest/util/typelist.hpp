@@ -28,7 +28,7 @@ struct TypeList<First, Ts...>
 } // namespace util
 
 template <template <typename...> typename TEMPLATE, typename...ARGS>
-TEMPLATE<ARGS...> TypeListToType(util::TypeList<ARGS...> list)
+TEMPLATE<ARGS...> TypeListToType(util::TypeList<ARGS...>)
 {
     return declval<TEMPLATE<ARGS...>>();
 }

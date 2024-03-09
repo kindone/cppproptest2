@@ -71,16 +71,20 @@ struct PROPTEST_API Shrinkable
 
     template <typename U>
     Shrinkable<U> map(Function<U(const T&)> transformer) const {
-        return Shrinkable<U>{transformer(value.getRef<T>()), shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
-            return shr.map<U>(transformer);
-        })};
+        return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
+                    return shr.map<U>(transformer);
+                });
+            }
+        );
     }
 
     template <typename U>
     Shrinkable<U> flatMap(Function<Shrinkable<U>(const T&)> transformer) const {
-        return transformer(value.getRef<T>()).with(shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
-            return shr.flatMap<U>(transformer);
-        }));
+        return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
+                    return shr.flatMap<U>(transformer);
+                });
+            }
+        );
     }
 
     template <typename U>

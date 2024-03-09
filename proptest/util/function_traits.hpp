@@ -8,7 +8,7 @@ template <typename F> struct Function;
 template <typename RET, typename...ARGS> struct Function<RET(ARGS...)>;
 
 template <template <typename...> typename TEMPLATE, typename RET, typename...ARGS>
-TEMPLATE<RET(ARGS...)> TypeListToFunctionType(util::TypeList<ARGS...> list)
+TEMPLATE<RET(ARGS...)> TypeListToFunctionType(util::TypeList<ARGS...>)
 {
     return declval<TEMPLATE<RET(ARGS...)>>();
 }
