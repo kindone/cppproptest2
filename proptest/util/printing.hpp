@@ -13,6 +13,7 @@
 #include "proptest/std/list.hpp"
 #include "proptest/std/set.hpp"
 #include "proptest/std/map.hpp"
+#include "proptest/std/optional.hpp"
 
 namespace proptest {
 
@@ -56,7 +57,7 @@ ostream& show(ostream& os, const map<Key, T, Compare, Allocator>& input);
 template <typename T>
 ostream& show(ostream& os, const shared_ptr<T>& ptr);
 template <typename T>
-ostream& show(ostream& os, const Nullable<T>& nullable);
+ostream& show(ostream& os, const optional<T>& opt);
 
 namespace stateful {
 template <typename ObjectType, typename ModelType>
@@ -278,15 +279,15 @@ ostream& show(ostream& os, const shared_ptr<T>& ptr)
     return os;
 }
 
-// template <typename T>
-// ostream& show(ostream& os, const Nullable<T>& nullable)
-// {
-//     if (!nullable.isNull())
-//         os << Show<T>(*nullable.ptr);
-//     else
-//         os << "(null)";
-//     return os;
-// }
+template <typename T>
+ostream& show(ostream& os, const optional<T>& opt)
+{
+    if (opt)
+        os << Show<T>(*opt);
+    else
+        os << "(empty)";
+    return os;
+}
 
 namespace stateful {
 

@@ -41,7 +41,7 @@ public:
     template <typename U>
     Generator<U> map(Function<U(const T&)> mapper);
 
-    template <invocable<T&> F>
+    template <invocable<const T&> F>
     auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
     {
         return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
@@ -74,11 +74,11 @@ public:
     template <typename U>
     Generator<U> flatMap(Function<GenFunction<U>(const T&)> genFactory);
 
-    template <invocable<T&> FACTORY>
+    template <invocable<const T&> FACTORY>
     decltype(auto) flatMap(FACTORY&& genFactory)
     {
         using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
-        return flatMap<U>(util::forward(genFactory));
+        return flatMap<U>(util::forward<FACTORY>(genFactory));
     }
 
     virtual shared_ptr<GeneratorBase> clone() const = 0;

@@ -83,7 +83,8 @@
         "complex": "cpp",
         "__memory": "cpp",
         "utility": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "execution": "cpp"
     },
     "files.exclude": {
         "BUILD/": true

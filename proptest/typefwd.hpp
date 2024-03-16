@@ -7,7 +7,6 @@
 
 namespace proptest {
 
-template <typename T> class Nullable;
 // any.hpp
 struct AnyHolder;
 template <typename T> struct AnyRef;

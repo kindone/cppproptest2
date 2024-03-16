@@ -123,8 +123,32 @@ ADD_TEST(NAME proptest_gtest COMMAND test_proptest)
 
 ### compile
 SET(compile_sources
-    proptest/test/compile/compile_any.cpp
-    proptest/test/compile/compile_concept.cpp
+    proptest/test/compile/accumulate.cpp
+    proptest/test/compile/aggregate.cpp
+    proptest/test/compile/any.cpp
+    proptest/test/compile/arbitrary.cpp
+    proptest/test/compile/concept.cpp
+    proptest/test/compile/container.cpp
+    proptest/test/compile/derive.cpp
+    proptest/test/compile/elementof.cpp
+    proptest/test/compile/example.cpp
+    proptest/test/compile/filter.cpp
+    proptest/test/compile/flatmap.cpp
+    proptest/test/compile/floating.cpp
+    proptest/test/compile/integral.cpp
+    proptest/test/compile/just.cpp
+    proptest/test/compile/lazy.cpp
+    proptest/test/compile/map.cpp
+    proptest/test/compile/oneof.cpp
+    proptest/test/compile/pair.cpp
+    proptest/test/compile/printing.cpp
+    proptest/test/compile/property.cpp
+    proptest/test/compile/shrinkable.cpp
+    proptest/test/compile/stream.cpp
+    proptest/test/compile/string.cpp
+    proptest/test/compile/tuple.cpp
+    proptest/test/compile/unicode.cpp
+    proptest/test/compile/vector.cpp
 )
 
 ADD_EXECUTABLE(compile_proptest

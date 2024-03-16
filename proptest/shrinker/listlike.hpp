@@ -125,7 +125,7 @@ Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLi
                                                          size_t minSize)
 {
     auto shrinkableElems = shr.getRef();
-    auto size = shrinkableElems->size();
+    auto size = shrinkableElems.size();
     auto rangeShrinkable =
         shrinkIntegral<size_t>(size - minSize).template map<size_t>([minSize](const size_t& s) { return s + minSize; });
     return rangeShrinkable.template map<ListLike<Shrinkable<T>>>([shr](const size_t& newSize) {

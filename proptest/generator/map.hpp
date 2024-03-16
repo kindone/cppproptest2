@@ -58,6 +58,7 @@ public:
     Arbi<Map> setPairGen(GenFunction<Pair> _pairGen)
     {
         pairGen = _pairGen;
+        return *this;
     }
 
     shared_ptr<GeneratorBase<Map>> clone() const override {

@@ -11,5 +11,7 @@
 #include "proptest/combinator/elementof.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/intervals.hpp"
+#include "proptest/combinator/aggregate.hpp"
+#include "proptest/combinator/accumulate.hpp"
 // #include "proptest/combinator/construct.hpp"
 

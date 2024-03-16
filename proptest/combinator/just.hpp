@@ -48,7 +48,7 @@ Generator<T> just(const T& value)
 template <typename T>
 Generator<T> just(const Any& any)
 {
-    return generator([any](Random&) { return Shrinkable<T>(any.getRef<T>()); });
+    return generator([any](Random&) { return Shrinkable<T>(any); });
 }
 
 } // namespace proptest

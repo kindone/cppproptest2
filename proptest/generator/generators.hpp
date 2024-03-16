@@ -13,4 +13,6 @@
 #include "proptest/generator/utf8string.hpp"
 #include "proptest/generator/utf16string.hpp"
 #include "proptest/generator/cesu8string.hpp"
+#include "proptest/generator/unicode.hpp"
 #include "proptest/generator/shared_ptr.hpp"
+#include "proptest/generator/optional.hpp"
