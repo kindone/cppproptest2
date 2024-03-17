@@ -12,7 +12,7 @@ const type_info& Any::type() const {
     if(!ptr) {
         throw runtime_error(__FILE__, __LINE__, "empty ptr");
     }
-return ptr->type();
+    return ptr->type();
 }
 
 bool Any::isEmpty() const {

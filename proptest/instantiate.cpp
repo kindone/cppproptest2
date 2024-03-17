@@ -1,3 +1,4 @@
+#include "proptest/api.hpp"
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/std/vector.hpp"
@@ -5,12 +6,13 @@
 
 namespace proptest {
 
-template struct Function<ShrinkableAny(Random&)>;
-template struct Shrinkable<Any>;
-template struct Shrinkable<vector<ShrinkableAny>>;
-template struct Shrinkable<pair<Any, Any>>;
-template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
-template struct Stream<ShrinkableAny>;
-template struct Stream<Shrinkable<pair<Any, Any>>>;
+template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
+template struct PROPTEST_API Shrinkable<Any>;
+template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
+template struct PROPTEST_API Shrinkable<pair<Any, Any>>;
+template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
+template struct PROPTEST_API Stream<Shrinkable<Any>>;
+template struct PROPTEST_API Stream<Shrinkable<pair<Any, Any>>>;
+
 
 } // namespace proptest

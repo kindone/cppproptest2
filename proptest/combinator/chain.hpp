@@ -40,7 +40,6 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
                 const Intermediate& interpair = interShr.getRef();
-                const T& t = interpair.first;
                 const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {

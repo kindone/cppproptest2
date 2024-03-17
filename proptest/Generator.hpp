@@ -149,7 +149,7 @@ private:
     Function<ShrinkableAny(Random&)> anyGen;
 };
 
-extern template struct Function<ShrinkableAny(Random&)>;
+extern template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
 
 }  // namespace proptest
 

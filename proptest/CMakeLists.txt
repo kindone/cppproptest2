@@ -35,6 +35,7 @@ SET(proptest_sources
     PropertyContext.cpp
     PropertyBase.cpp
     util/bitmap.cpp
+    instantiate.cpp
     stateful/stateful.cpp
     stateful/concurrency.cpp
 )
@@ -96,4 +97,52 @@ TARGET_LINK_LIBRARIES(test_proptest
 )
 
 ADD_TEST(NAME proptest_gtest COMMAND test_proptest)
+
+## compile_proptest
+
+SET(compile_sources
+    test/compile/accumulate.cpp
+    test/compile/aggregate.cpp
+    test/compile/any.cpp
+    test/compile/arbitrary.cpp
+    test/compile/concept.cpp
+    test/compile/container.cpp
+    test/compile/derive.cpp
+    test/compile/elementof.cpp
+    test/compile/example.cpp
+    test/compile/filter.cpp
+    test/compile/flatmap.cpp
+    test/compile/floating.cpp
+    test/compile/integral.cpp
+    test/compile/just.cpp
+    test/compile/lazy.cpp
+    test/compile/map.cpp
+    test/compile/oneof.cpp
+    test/compile/pair.cpp
+    test/compile/printing.cpp
+    test/compile/property.cpp
+    test/compile/shrinkable.cpp
+    test/compile/stream.cpp
+    test/compile/string.cpp
+    test/compile/tuple.cpp
+    test/compile/unicode.cpp
+    test/compile/vector.cpp
+)
+
+ADD_HDB_TEST(compile_proptest
+    EXCLUDE_FROM_ALL
+    NO_PACKAGE
+    ALTERNATIVE GMOCK_HDB_MAIN
+    USE_GMOCKUTILS
+    ${compile_sources}
+)
+
+
+TARGET_LINK_LIBRARIES(compile_proptest
+    PRIVATE
+        proptest
+        hdblttbase
+        hdbbasement
+        hdbbasis
+)
 

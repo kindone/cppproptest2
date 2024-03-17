@@ -6,6 +6,7 @@
 #include "proptest/util/any.hpp"
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/util/lazy.hpp"
+#include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
 
 namespace proptest {
@@ -206,7 +207,8 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
 using ShrinkableAny = Shrinkable<Any>;
 
 // explicit instantiation of Shrinkable<Any>
-extern template struct Shrinkable<Any>;
+extern template struct PROPTEST_API Shrinkable<Any>;
+extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
 
 } // namespace proptest
 

@@ -26,8 +26,8 @@ public:
 
 } // namespace util
 
-extern template struct Shrinkable<pair<Any, Any>>;
-extern template struct Stream<Shrinkable<pair<Any, Any>>>;
+extern template struct PROPTEST_API Shrinkable<pair<Any, Any>>;
+extern template struct PROPTEST_API Stream<Shrinkable<pair<Any, Any>>>;
 
 template <typename ARG1, typename ARG2>
 Shrinkable<pair<ARG1, ARG2>> shrinkPair(

@@ -119,11 +119,7 @@ private:
 
 public:
 
-    static Stream empty() {
-        static const Stream emptyStream = Stream(Any::empty);
-        return emptyStream;
-    }
-
+    static Stream empty();
     static Stream one(const T& value) {
         return Stream<T>(Any(value));
     }
@@ -163,6 +159,12 @@ private:
 
 template <typename T>
 Function<Stream<T>()> Stream<T>::emptyTailGen = +[]() -> Stream<T> { return Stream<T>::empty(); };
+
+template <typename T>
+Stream<T> Stream<T>::empty() {
+    static const Stream<T> emptyStream = Stream<T>(Any::empty);
+    return emptyStream;
+}
 
 /*
 struct PROPTEST_API AnyStream {

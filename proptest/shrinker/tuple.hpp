@@ -9,7 +9,7 @@
 
 namespace proptest {
 
-extern template struct Shrinkable<vector<ShrinkableAny>>;
+//extern template struct Shrinkable<vector<ShrinkableAny>>;
 
 namespace util {
 PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr);

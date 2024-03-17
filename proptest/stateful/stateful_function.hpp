@@ -144,7 +144,7 @@ decltype(auto) statefulProperty(InitialGen&& initialGen, SimpleActionGen<ObjectT
 }
 
 template <typename ObjectType, typename ModelType, typename InitialGen>
-decltype(auto) statefulProperty(InitialGen&& initialGen, function<ModelType(ObjectType&)> modelFactory,
+decltype(auto) statefulProperty(InitialGen&& initialGen, Function<ModelType(ObjectType&)> modelFactory,
                                 ActionGen<ObjectType, ModelType>& actionGen)
 {
     return StatefulProperty<ObjectType, ModelType>(util::forward<InitialGen>(initialGen), modelFactory, actionGen);
