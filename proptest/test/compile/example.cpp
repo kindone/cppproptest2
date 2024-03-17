@@ -6,7 +6,7 @@ using namespace proptest;
 
 TEST(Example, DefaultGen)
 {
-    forAll([]([[maybe_unused]] int i, [[maybe_unused]] double d, [[maybe_unused]] std::string str, [[maybe_unused]] std::vector<uint64_t> vec) {
+    forAll([]([[maybe_unused]] int i, [[maybe_unused]] double d, [[maybe_unused]] string str, [[maybe_unused]] vector<uint64_t> vec) {
         // i, d .....
     });
 }
@@ -16,14 +16,14 @@ TEST(Example, CustomGen)
     auto intGen = elementOf<int>(2, 4, 6);
 
     forAll([](int num) {
-        std::cout << num << std::endl;
+        cout << num << endl;
     }, intGen);
 }
 
 TEST(Example, property)
 {
-    auto prop = property([](std::string name, int num) {
-        std::cout << "name: " << name << ", num: " << num << std::endl;
+    auto prop = property([](string name, int num) {
+        cout << "name: " << name << ", num: " << num << endl;
     });
 
     prop.forAll();
@@ -36,33 +36,33 @@ TEST(Example, TemplatedGen)
 {
     auto intGen = interval<int>(2, 100000);
     auto stringIntGen = intGen.map([](const int& num) {
-        return std::to_string(num);/// "2", "4", "6"
+        return to_string(num);/// "2", "4", "6"
     });
 
-    forAll([]([[maybe_unused]] std::string str, std::vector<std::string> numStrings) {
-        //std::cout << str << std::endl;
-        std::cout << "[ ";
+    forAll([]([[maybe_unused]] string str, vector<string> numStrings) {
+        //cout << str << endl;
+        cout << "[ ";
         if(numStrings.size() > 0)
-            std::cout << numStrings[0];
+            cout << numStrings[0];
         for(size_t i = 1; i < numStrings.size(); i++)
-            std::cout << ", " << numStrings[i];
-        std::cout << " ]" << std::endl;
+            cout << ", " << numStrings[i];
+        cout << " ]" << endl;
 
-    }, stringIntGen, Arbi<std::vector<std::string>>(stringIntGen) );
+    }, stringIntGen, Arbi<vector<string>>(stringIntGen) );
 }
 
 TEST(Example, MapGen)
 {
     auto intGen = elementOf<int>(2, 4, 6);
     auto stringIntGen = intGen.map([](const int& num) {
-        return std::to_string(num);
+        return to_string(num);
     });
 
     auto pairGen = pairOf(intGen, stringIntGen);
 
-    Arbi<std::map<int, std::string>> mapGen;
+    Arbi<map<int, string>> mapGen;
 
-    forAll([]([[maybe_unused]] std::string str, [[maybe_unused]] std::map<int, std::string> nameAgeMap) {
-        //std::cout << str << std::endl;
+    forAll([]([[maybe_unused]] string str, [[maybe_unused]] map<int, string> nameAgeMap) {
+        //cout << str << endl;
     }, stringIntGen, mapGen.setPairGen(pairGen).setMaxSize(3));
 }
