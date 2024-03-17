@@ -99,12 +99,14 @@ SET(proptest_testsources
     proptest/test/test_arbitrary.cpp
     proptest/test/test_generator.cpp
     proptest/test/test_combinator.cpp
+    proptest/test/test_combinator2.cpp
     proptest/test/test_invoke.cpp
     proptest/test/test_property.cpp
     proptest/test/test_proptest.cpp
     proptest/test/test_stateful_function.cpp
     proptest/test/test_concurrency_function.cpp
     proptest/test/test_performance.cpp
+    proptest/test/testutil.cpp
 )
 
 

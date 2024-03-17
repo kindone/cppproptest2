@@ -1,10 +1,19 @@
 #pragma once
 
+#include "proptest/test/gtest.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/AnyShrinkable.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/std/io.hpp"
-#include "proptest/test/gtest.hpp"
+#include "proptest/std/pair.hpp"
+#include "proptest/std/tuple.hpp"
+#include "proptest/std/list.hpp"
+#include "proptest/std/vector.hpp"
+#include "proptest/std/set.hpp"
+#include "proptest/std/map.hpp"
+#include "proptest/std/memory.hpp"
+#include "proptest/std/optional.hpp"
+#include "proptest/Generator.hpp"
 #include "proptest/util/utf8string.hpp"
 #include "proptest/util/cesu8string.hpp"
 #include "proptest/util/utf16string.hpp"
@@ -156,4 +165,85 @@ proptest::string serializeAnyShrinkable(const proptest::AnyShrinkable& shr)
     proptest::stringstream stream;
     outShrinkable<T>(stream, shr.getShrinkableAny().map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
     return stream.str();
+}
+
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::vector<int>& input);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::vector<int8_t>& input);
+
+template <typename ARG1, typename ARG2>
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::tuple<ARG1, ARG2>& tup)
+{
+    os << proptest::Show<proptest::tuple<ARG1, ARG2>>(tup);
+    return os;
+}
+
+template <typename ARG1, typename ARG2, typename ARG3>
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::tuple<ARG1, ARG2, ARG3>& tup)
+{
+    os << proptest::Show<proptest::tuple<ARG1, ARG2, ARG3>>(tup);
+    return os;
+}
+
+template <typename ARG1, typename ARG2>
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::pair<ARG1, ARG2>& pr)
+{
+    os << proptest::Show<proptest::pair<ARG1, ARG2>>(pr);
+    return os;
+}
+
+struct Animal
+{
+    Animal(int f, proptest::string n, const proptest::vector<int>& m)
+        : numFeet(f), name(n /*, allocator()*/), measures(m /*, allocator()*/)
+    {
+    }
+    int numFeet;
+    proptest::string name;
+    proptest::vector<int> measures;
+};
+
+struct TableData
+{
+    int num_rows;
+    uint16_t num_elements;
+    proptest::vector<proptest::pair<uint16_t, bool>> indexes;
+};
+
+struct Foo
+{
+    Foo(int a) : a(a) {}
+    int a;
+};
+
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::UTF8String&);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::UTF16BEString&);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::UTF16LEString&);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::CESU8String&);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::vector<Foo>& vec);
+proptest::ostream& operator<<(proptest::ostream& os, const TableData& td);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::vector<proptest::tuple<uint16_t, bool>>& indexVec);
+proptest::ostream& operator<<(proptest::ostream& os,
+                         const proptest::pair<proptest::tuple<int, uint16_t>, proptest::vector<proptest::tuple<uint16_t, bool>>>& input);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::set<int>& input);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::map<int, int>& input);
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::list<int>& input);
+
+template <typename T>
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::shared_ptr<T>& ptr)
+{
+    if (static_cast<bool>(ptr))
+        os << *ptr;
+    else
+        os << "(null)";
+    return os;
+}
+
+template <typename T>
+proptest::ostream& operator<<(proptest::ostream& os, const proptest::optional<T>& opt)
+{
+    if(opt)
+        os << *opt;
+    else
+        os << "(empty)";
+    return os;
 }

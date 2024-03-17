@@ -341,18 +341,6 @@ TEST(Property, TestPropertyFunctionLambdaMethod)
     forAll(PropertyAsClass::propertyAsMethod);
 }
 
-
-struct Animal
-{
-    Animal(int f, string n, const vector<int>& m)
-        : numFeet(f), name(n /*, allocator()*/), measures(m /*, allocator()*/)
-    {
-    }
-    int numFeet;
-    string name;
-    vector<int> measures;
-};
-
 namespace proptest {
 namespace util {
 
