@@ -81,7 +81,7 @@ TEST(MapShrinker, int_ints)
     auto valShrVec = util::make_shared<vector<Shrinkable<int>>,initializer_list<Shrinkable<int>>>({shrinkIntegral<int>(1), shrinkIntegral<int>(3), shrinkIntegral<int>(5)});
     Shrinkable<map<int, int>> shr = shrinkMap<int, int>(keyShrVec, valShrVec, 0);
     // EXPECT_EQ(shr.getRef(), map<int, int>({ { 1, 2 }, { 3, 4 }, { 5, 6 } }));
-    EXPECT_EQ(serializeShrinkable(shr), 
+    EXPECT_EQ(serializeShrinkable(shr),
         "{value: { (100, 1), (300, 3), (500, 5) }, shrinks: "
             "[{value: {  }}, "
             "{value: { (100, 1) }, shrinks: "

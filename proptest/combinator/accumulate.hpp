@@ -17,46 +17,36 @@ namespace proptest {
 
 namespace util {
 
+PROPTEST_API Generator<vector<Any>> accumulateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(const Any&)> gen2gen, size_t minSize,
+                                    size_t maxSize);
+
 template <typename T>
 Generator<vector<T>> accumulateImpl(GenFunction<T> gen1, Function<GenFunction<T>(const T&)> gen2gen, size_t minSize,
                                     size_t maxSize)
 {
-    return interval<uint64_t>(minSize, maxSize).flatMap<vector<T>>([gen1, gen2gen, minSize](const uint64_t& size) {
-        if (size == 0)
-            return Generator<vector<T>>([](Random&) { return make_shrinkable<vector<T>>(); });
-        return Generator<vector<T>>([gen1, gen2gen, size, minSize](Random& rand) {
-            Shrinkable<T> shr = gen1(rand);
-            auto shrVec = make_shrinkable<vector<Shrinkable<T>>>();
-            auto& vec = shrVec.getMutableRef();
-            vec.reserve(size);
-            vec.push_back(shr);
-            for (size_t i = 1; i < size; i++) {
-                shr = gen2gen(shr.get())(rand);
-                vec.push_back(shr);
-            }
-            return shrinkListLikeLength<vector, T>(shrVec, minSize)
-                .andThen([](const Shrinkable<vector<Shrinkable<T>>>& parent) {
-                    const vector<Shrinkable<T>>& shrVec_ = parent.getRef();
-                    if (shrVec_.size() == 0)
-                        return Stream<Shrinkable<vector<Shrinkable<T>>>>::empty();
-                    const Shrinkable<T>& lastElemShr = shrVec_.back();
-                    Stream<Shrinkable<T>> elemShrinks = lastElemShr.getShrinks();
-                    if (elemShrinks.isEmpty())
-                        return Stream<Shrinkable<vector<Shrinkable<T>>>>::empty();
-                    return elemShrinks.template transform<Shrinkable<vector<Shrinkable<T>>>>(
-                        [copy = shrVec_](const Shrinkable<T>& elem) mutable -> Shrinkable<vector<Shrinkable<T>>> {
-                            copy[copy.size() - 1] = Shrinkable<T>(elem);
-                            return make_shrinkable<vector<Shrinkable<T>>>(copy);
-                        });
-                })
-                .template map<vector<T>>([](const vector<Shrinkable<T>>& shrVec) {
-                    vector<T> valVec;
-                    valVec.reserve(shrVec.size());
-                    util::transform(shrVec.begin(), shrVec.end(), util::back_inserter(valVec),
-                                    [](const Shrinkable<T>& shr) { return shr.get(); });
-                    return valVec;
-                });
-        });
+    // Convert gen1 to work with Any by wrapping its output
+    GenFunction<Any> anyGen1 = [gen1](Random& rand) -> Shrinkable<Any> {
+        return gen1(rand).template map<Any>([](const T& value) { return Any(value); });
+    };
+
+    // Convert gen2gen to work with Any by adapting its input and output
+    Function<GenFunction<Any>(const Any&)> anyGen2Gen = [gen2gen](const Any& any) -> GenFunction<Any> {
+        return [any, gen2gen](Random& rand) -> Shrinkable<Any> {
+            return gen2gen(any.getRef<T>())(rand).template map<Any>([](const T& value) { return Any(value); });
+        };
+    };
+
+    // Call accumulateImplAny with Any type
+    auto anyVecGen = accumulateImplAny(anyGen1, anyGen2Gen, minSize, maxSize);
+
+    // Convert the generated vector<Any> back to vector<T>
+    return anyVecGen.template map<vector<T>>([](const vector<Any>& anyVec) -> vector<T> {
+        vector<T> tVec;
+        tVec.reserve(anyVec.size());
+        for (const Any& any : anyVec) {
+            tVec.push_back(any.getRef<T>()); // Assuming Any has a get<T>() method
+        }
+        return tVec;
     });
 }
 

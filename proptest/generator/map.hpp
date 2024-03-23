@@ -44,15 +44,6 @@ public:
         vector<Shrinkable<Pair>> pairShrVec(pairShrSet.begin(), pairShrSet.end());
 
         return shrinkMap(pairShrVec, minSize);
-        // shared_ptr<map<Shrinkable<Key>, Shrinkable<T>>> shrinkableMap =
-        //     util::make_shared<map<Shrinkable<Key>, Shrinkable<T>>>();
-
-        // for (auto itr = shrinkSet->begin(); itr != shrinkSet->end(); ++itr) {
-        //     auto elem = elemGen(rand);
-        //     shrinkableMap->insert(pair<Shrinkable<Key>, Shrinkable<T>>(*itr, elem));
-        // }
-
-        // return shrinkMap(shrinkableMap, minSize);
     }
 
     Arbi<Map> setPairGen(GenFunction<Pair> _pairGen)
