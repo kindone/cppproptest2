@@ -32,6 +32,34 @@ extern template struct PROPTEST_API Stream<Shrinkable<Any>>;
 
 PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize);
 
+PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);
+
+template <template <typename...> class Container, typename T>
+Shrinkable<vector<ShrinkableAny>> toAnyVectorShrinkable(const Container<Shrinkable<T>>& shrinkableCont)
+{
+    Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = make_shrinkable<vector<ShrinkableAny>>();
+    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
+    shrinkAnyVec.reserve(shrinkableCont.size());
+    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), +[](const Shrinkable<T>& shr) -> ShrinkableAny {
+        return shr;
+    });
+    return shrinkAnyVecShr;
+}
+
+template <template <typename...> class Container, typename T>
+Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
+{
+    return shrinkableAnyVecShr.template flatMap<Container<T>>(
+        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<Container<T>> {
+            auto value = make_shrinkable<Container<T>>();
+            Container<T>& valueCont = value.getMutableRef();
+            for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
+                valueCont.insert(valueCont.end(), itr->getRef().getRef<T>());
+            }
+            return value;
+        });
+}
+
 /**
  * @brief Shrinking of a container (such as a set) using membership-wise shrinking
  *
@@ -48,30 +76,12 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
 {
     auto shrinkableCont = shr.getRef();
     // change type to any
-    Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = make_shrinkable<vector<ShrinkableAny>>();
-    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
-    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), +[](Shrinkable<T> shr) -> ShrinkableAny {
-        return shr;
-    });
+    Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = toAnyVectorShrinkable(shrinkableCont);
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shrinkAnyVecShr);
-
-    // elementwise shrinking
-    if(elementwise)
-        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const Shrinkable<vector<ShrinkableAny>>& parent) {
-            return util::VectorShrinker::shrinkElementwise(parent, 0, 0);
-        });
+    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
 
     // transform to proper output type
-    return shrinkableElemsShr.template flatMap<Container<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<Container<T>> {
-            auto value = make_shrinkable<Container<T>>();
-            Container<T>& valueCont = value.getMutableRef();
-            for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.insert(valueCont.end(), itr->getRef().getRef<T>());
-            }
-            return value;
-        });
+    return toContainerTShrinkable<Container, T>(shrinkableElemsShr);
 }
 
 

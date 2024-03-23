@@ -171,6 +171,21 @@ Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<S
     return util::VectorShrinker::shrinkFrontAndThenMid(shr, minSize, 0);
 }
 
+Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise) {
+    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
+    // membershipwise shrinking
+    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shrinkAnyVecShr);
+
+    // elementwise shrinking
+    if(elementwise)
+        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const Shrinkable<vector<ShrinkableAny>>& parent) {
+            return util::VectorShrinker::shrinkElementwise(parent, 0, 0);
+        });
+
+    return shrinkableElemsShr;
+}
+
+
 template struct Shrinkable<vector<ShrinkableAny>>;
 template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
 template struct Stream<ShrinkableAny>;
