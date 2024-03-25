@@ -56,7 +56,7 @@ Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<Shrinkab
             auto value = make_shrinkable<Container<T>>();
             Container<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.insert(valueCont.begin(), itr->getRef().getRef<T>());
+                valueCont.insert(valueCont.end(), itr->getRef().getRef<T>());
             }
             return value;
         });
