@@ -27,7 +27,9 @@ public:
 } // namespace util
 
 extern template struct PROPTEST_API Shrinkable<pair<Any, Any>>;
+#ifndef PROPTEST_UNTYPED_STREAM
 extern template struct PROPTEST_API Stream<Shrinkable<pair<Any, Any>>>;
+#endif
 
 template <typename ARG1, typename ARG2>
 Shrinkable<pair<ARG1, ARG2>> shrinkPair(

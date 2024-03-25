@@ -86,7 +86,7 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level = 0)
     printShrinkable(shrinkable, level);
 
     auto shrinks = shrinkable.getShrinks();
-    for (auto itr = shrinks.iterator(); itr.hasNext();) {
+    for (auto itr = shrinks.template iterator<proptest::Shrinkable<T>>(); itr.hasNext();) {
         auto shrinkable2 = itr.next();
         printExhaustive(shrinkable2, level + 1);
     }
@@ -115,7 +115,7 @@ bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrin
     auto lhsShrinks = lhs.getShrinks();
     auto rhsShrinks = rhs.getShrinks();
 
-    for(auto litr = lhsShrinks.iterator(), ritr = lhsShrinks.iterator() ; litr.hasNext() || ritr.hasNext();)
+    for(auto litr = lhsShrinks.template iterator<proptest::Shrinkable<T>>(), ritr = lhsShrinks.template iterator<proptest::Shrinkable<T>>() ; litr.hasNext() || ritr.hasNext();)
     {
         if(litr.hasNext() != ritr.hasNext())
             return false;
@@ -132,7 +132,7 @@ void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shr
     auto shrinks = shrinkable.getShrinks();
     if(!shrinks.isEmpty()) {
         stream << ", shrinks: [";
-        for (auto itr = shrinks.iterator(); itr.hasNext();) {
+        for (auto itr = shrinks.template iterator<proptest::Shrinkable<T>>(); itr.hasNext();) {
             auto shrinkable2 = itr.next();
             outShrinkable(stream, shrinkable2);
             if(itr.hasNext())

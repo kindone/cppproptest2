@@ -47,6 +47,8 @@ Shrinkable<PairShrinker::out_pair_t> PairShrinker::shrink(const PairShrinker::sh
 } // namespace util
 
 template struct Shrinkable<pair<Any, Any>>;
+#ifndef PROPTEST_UNTYPED_STREAM
 template struct Stream<Shrinkable<pair<Any, Any>>>;
+#endif
 
 } // namespace proptest

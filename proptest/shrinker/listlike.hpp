@@ -27,12 +27,14 @@ struct PROPTEST_API VectorShrinker
 }  // namespace util
 
 //extern template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
+#ifndef PROPTEST_UNTYPED_STREAM
 extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
 extern template struct PROPTEST_API Stream<Shrinkable<Any>>;
+#endif
 
 PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize);
 
-PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);
+PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);
 
 template <template <typename...> class Container, typename T>
 Shrinkable<vector<ShrinkableAny>> toAnyVectorShrinkable(const Container<Shrinkable<T>>& shrinkableCont)
@@ -54,7 +56,21 @@ Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<Shrinkab
             auto value = make_shrinkable<Container<T>>();
             Container<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.insert(valueCont.end(), itr->getRef().getRef<T>());
+                valueCont.insert(valueCont.begin(), itr->getRef().getRef<T>());
+            }
+            return value;
+        });
+}
+
+template <template <typename...> class ListLike, typename T>
+Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
+{
+    return shrinkableAnyVecShr.template flatMap<ListLike<T>>(
+        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<ListLike<T>> {
+            auto value = make_shrinkable<ListLike<T>>();
+            ListLike<T>& valueCont = value.getMutableRef();
+            for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
+                valueCont.push_back(itr->getRef().getRef<T>());
             }
             return value;
         });
@@ -99,28 +115,14 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
  * @return Shrinkable<ListLike<T>>
  */
 template <template <typename...> class ListLike, typename T>
-Shrinkable<ListLike<T>> shrinkListLike(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize, bool elementwise = true, bool membershipwise = true)
+Shrinkable<ListLike<T>> shrinkListLike(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise = true, bool membershipwise = true)
 {
-    const vector<ShrinkableAny>& shrinkAnyVec = shr.getRef();
+    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef();
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shr);
-
-    // elementwise shrinking
-    if(elementwise)
-        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const Shrinkable<vector<ShrinkableAny>>& parent) {
-            return util::VectorShrinker::shrinkElementwise(parent, 0, 0);
-        });
+    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
 
     // transform to proper output type
-    return shrinkableElemsShr.template flatMap<ListLike<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkAnyVec) -> Shrinkable<ListLike<T>> {
-            auto value = make_shrinkable<ListLike<T>>();
-            ListLike<T>& valueVec = const_cast<ListLike<T>&>(value.getRef());
-            util::transform(
-                _shrinkAnyVec.begin(), _shrinkAnyVec.end(), util::back_inserter(valueVec),
-                +[](const ShrinkableAny& shr) -> T { return shr.getRef().getRef<T>(); });
-            return value;
-        });
+    return toListLikeTShrinkable<ListLike, T>(shrinkableElemsShr);
 }
 
 /**

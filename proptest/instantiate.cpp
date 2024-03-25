@@ -10,9 +10,12 @@ template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
 template struct PROPTEST_API Shrinkable<Any>;
 template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
 template struct PROPTEST_API Shrinkable<pair<Any, Any>>;
-template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
+// template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
+
+#ifndef PROPTEST_UNTYPED_STREAM
 template struct PROPTEST_API Stream<Shrinkable<Any>>;
 template struct PROPTEST_API Stream<Shrinkable<pair<Any, Any>>>;
+#endif
 
 
 } // namespace proptest

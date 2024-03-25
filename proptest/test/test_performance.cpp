@@ -7,8 +7,8 @@ TEST(Performance, StreamConstructor)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
-        EXPECT_EQ(stream.getHeadRef(), i);
+        auto stream = Stream<int>::one<int>(i);
+        EXPECT_EQ(stream.getHeadRef<int>(), i);
     }
 }
 
@@ -16,9 +16,9 @@ TEST(Performance, StreamCopy)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
+        auto stream = Stream<int>::one<int>(i);
         auto stream2 = stream;
-        EXPECT_EQ(stream2.getHeadRef(), i);
+        EXPECT_EQ(stream2.getHeadRef<int>(), i);
     }
 }
 
@@ -28,14 +28,14 @@ TEST(Performance, StreamVector)
     vec.reserve(10000);
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
+        auto stream = Stream<int>::one<int>(i);
         vec.push_back(stream);
     }
 
     for(int i = 0; i < 10000; i++)
     {
         const auto& stream = vec[i];
-        EXPECT_EQ(stream.getHeadRef(), i);
+        EXPECT_EQ(stream.getHeadRef<int>(), i);
     }
 }
 
@@ -43,11 +43,11 @@ TEST(Performance, StreamFilter)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
-        stream = stream.filter(+[](const int&) {
+        auto stream = Stream<int>::one<int>(i);
+        stream = stream.filter<int>(+[](const int&) {
             return true;
         });
-        EXPECT_EQ(stream.getHeadRef(), i);
+        EXPECT_EQ(stream.getHeadRef<int>(), i);
     }
 }
 
@@ -55,11 +55,11 @@ TEST(Performance, StreamTransform)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
-        stream = stream.transform<int>(+[](const int& n) {
+        auto stream = Stream<int>::one<int>(i);
+        stream = stream.transform<int,int>(+[](const int& n) {
             return n + 1;
         });
-        EXPECT_EQ(stream.getHeadRef(), i+1);
+        EXPECT_EQ(stream.getHeadRef<int>(), i+1);
     }
 }
 
@@ -67,13 +67,13 @@ TEST(Performance, StreamTransformMany)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
+        auto stream = Stream<int>::one<int>(i);
         for(int j = 0; j < 10; j++) {
-            stream = stream.transform<int>(+[](const int& n) {
+            stream = stream.transform<int,int>(+[](const int& n) {
                 return n + 1;
             });
         }
-        EXPECT_EQ(stream.getHeadRef(), i+10);
+        EXPECT_EQ(stream.getHeadRef<int>(), i+10);
     }
 }
 
@@ -81,9 +81,9 @@ TEST(Performance, StreamConcatStream)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
+        auto stream = Stream<int>::one<int>(i);
         stream = stream.concat(Stream<int>::one(i+1));
-        EXPECT_EQ(stream.getHeadRef(), i);
+        EXPECT_EQ(stream.getHeadRef<int>(), i);
     }
 }
 
@@ -91,9 +91,9 @@ TEST(Performance, StreamConcatFunc)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<int>::one(i);
+        auto stream = Stream<int>::one<int>(i);
         stream = stream.concat([=]() { return Stream<int>::one(i+1); });
-        EXPECT_EQ(stream.getHeadRef(), i);
+        EXPECT_EQ(stream.getHeadRef<int>(), i);
     }
 }
 
@@ -122,7 +122,7 @@ TEST(Performance, StreamConstructorLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
-        EXPECT_EQ(stream.getHeadRef().array[0], i);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -132,7 +132,7 @@ TEST(Performance, StreamCopyLarge)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
         auto stream2 = stream;
-        EXPECT_EQ(stream2.getHeadRef().array[0], i);
+        EXPECT_EQ(stream2.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -149,7 +149,7 @@ TEST(Performance, StreamVectorLarge)
     for(int i = 0; i < 10000; i++)
     {
         const auto& stream = vec[i];
-        EXPECT_EQ(stream.getHeadRef().array[0], i);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -158,10 +158,10 @@ TEST(Performance, StreamFilterLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
-        stream = stream.filter(+[](const LargeObject&) {
+        stream = stream.filter<LargeObject>(+[](const LargeObject&) {
             return true;
         });
-        EXPECT_EQ(stream.getHeadRef().array[0], i);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -170,10 +170,10 @@ TEST(Performance, StreamTransformLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
-        stream = stream.transform<LargeObject>(+[](const LargeObject& n) {
+        stream = stream.transform<LargeObject,LargeObject>(+[](const LargeObject& n) {
             return LargeObject(n.array[0]+1);
         });
-        EXPECT_EQ(stream.getHeadRef().array[0], i+1);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i+1);
     }
 }
 
@@ -181,13 +181,13 @@ TEST(Performance, StreamTransformManyLarge)
 {
     for(int i = 0; i < 10000; i++)
     {
-        auto stream = Stream<LargeObject>::one(i);
+        auto stream = Stream<LargeObject>::one<LargeObject>(i);
         for(int j = 0; j < 10; j++) {
-            stream = stream.transform<LargeObject>(+[](const LargeObject& n) {
+            stream = stream.transform<LargeObject,LargeObject>(+[](const LargeObject& n) {
                 return LargeObject(n.array[0]+1);
             });
         }
-        EXPECT_EQ(stream.getHeadRef().array[0], i+10);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i+10);
     }
 }
 
@@ -197,7 +197,7 @@ TEST(Performance, StreamConcatStreamLarge)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
         stream = stream.concat(Stream<LargeObject>::one(LargeObject(i+1)));
-        EXPECT_EQ(stream.getHeadRef().array[0], i);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -207,7 +207,7 @@ TEST(Performance, StreamConcatFuncLarge)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
         stream = stream.concat([=]() { return Stream<LargeObject>::one(LargeObject(i+1)); });
-        EXPECT_EQ(stream.getHeadRef().array[0], i);
+        EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
     }
 }
 
@@ -217,7 +217,7 @@ TEST(Performance, StreamIteratorLarge)
     {
         auto stream = Stream<LargeObject>(LargeObject(i), [=]() { return Stream<LargeObject>::one(LargeObject(i)); });
         int j = 0;
-        for(StreamIterator<LargeObject> itr = stream.iterator(); itr.hasNext() && j < 100; j++) {
+        for(StreamIterator<LargeObject> itr = stream.template iterator<LargeObject>(); itr.hasNext() && j < 100; j++) {
             auto res = itr.next();
             EXPECT_EQ(res.array[0], i);
         }

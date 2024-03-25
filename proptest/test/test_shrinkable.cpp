@@ -21,7 +21,7 @@ TEST(Shrinkable, with)
     auto shr2 = shr.with(Stream<Shrinkable<int>>::one(Shrinkable<int>(200)));
     EXPECT_EQ(shr2.get(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
-    EXPECT_EQ(shr2.getShrinks().getHeadRef().get(), 200);
+    EXPECT_EQ(shr2.getShrinks().getHeadRef<Shrinkable<int>>().get(), 200);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100, shrinks: [{value: 200}]}");
 }
@@ -128,14 +128,14 @@ TEST(Shrinkable, build)
 {
     using Shr = Shrinkable<int64_t>;
     using Str = Stream<Shr>;
-    printExhaustive(Shr(8).with(Str::of(
+    printExhaustive(Shr(8).with(Str::of<Shr>(
         Shr(0),
-        Shr(4).with(Str::of(
-            Shr(2).with(Str::of(
+        Shr(4).with(Str::of<Shr>(
+            Shr(2).with(Str::of<Shr>(
                 Shr(1)
             ))
         )),
-        Shr(6).with(Str::of(
+        Shr(6).with(Str::of<Shr>(
             Shr(5)
         )),
         Shr(7)
@@ -148,14 +148,14 @@ TEST(Shrinker, integral)
     using Str = Stream<Shr>;
     auto shr= util::binarySearchShrinkable(8);
     printExhaustive(shr);
-    EXPECT_TRUE(compareShrinkable(shr, Shr(8).with(Str::of(
+    EXPECT_TRUE(compareShrinkable(shr, Shr(8).with(Str::of<Shr>(
         Shr(0),
-        Shr(4).with(Str::of(
-            Shr(2).with(Str::of(
+        Shr(4).with(Str::of<Shr>(
+            Shr(2).with(Str::of<Shr>(
                 Shr(1)
             ))
         )),
-        Shr(6).with(Str::of(
+        Shr(6).with(Str::of<Shr>(
             Shr(5)
         )),
         Shr(7)
@@ -170,8 +170,8 @@ TEST(Shrinkable, filter_exhaustive)
     using Str = Stream<Shr>;
     auto shr = util::binarySearchShrinkable(8).filter([](const int& val) { return val > 4; });
     printExhaustive(shr);
-    EXPECT_TRUE(compareShrinkable(shr, Shr(8).with(Str::of(
-        Shr(6).with(Str::of(
+    EXPECT_TRUE(compareShrinkable(shr, Shr(8).with(Str::of<Shr>(
+        Shr(6).with(Str::of<Shr>(
             Shr(5)
         )),
         Shr(7)
@@ -236,7 +236,7 @@ TEST(ShrinkableAny, with)
     auto shr2 = shr.with(Stream<ShrinkableAny>::one(ShrinkableAny(Shrinkable<int>(200))));
     EXPECT_EQ(shr2.getAny().getRef<int>(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
-    EXPECT_EQ(shr2.getShrinks().getHeadRef().getAny().getRef<int>(), 200);
+    EXPECT_EQ(shr2.getShrinks().getHeadRef<ShrinkableAny>().getAny().getRef<int>(), 200);
     EXPECT_EQ(serializeShrinkableAny<int>(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkableAny<int>(shr2), "{value: 100, shrinks: [{value: 200}]}");
 }

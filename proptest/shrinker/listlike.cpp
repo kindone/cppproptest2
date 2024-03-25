@@ -36,7 +36,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
                 newVec[i + frompos] = ancestorVec[i + frompos];
                 newElemStreams->push_back(e_stream_t::empty());  // [1] -> []
             } else {
-                newVec[i + frompos] = (*elemStreams)[i].getHeadRef();
+                newVec[i + frompos] = (*elemStreams)[i].getHeadRef<ShrinkableAny>();
                 newElemStreams->push_back((*elemStreams)[i].getTail());  // [0,4,6,7] -> [4,6,7]
                 nothingToDo = false;
             }
@@ -171,8 +171,8 @@ Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<S
     return util::VectorShrinker::shrinkFrontAndThenMid(shr, minSize, 0);
 }
 
-Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise) {
-    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
+Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise) {
+    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef();
     // membershipwise shrinking
     Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shrinkAnyVecShr);
 
@@ -187,7 +187,9 @@ Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(Shrinkable<vector<ShrinkableAn
 
 
 template struct Shrinkable<vector<ShrinkableAny>>;
+#ifndef PROPTEST_UNTYPED_STREAM
 template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
 template struct Stream<ShrinkableAny>;
+#endif
 
 } // namespace proptest

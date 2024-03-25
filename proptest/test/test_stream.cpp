@@ -10,7 +10,7 @@ using namespace proptest;
 template <typename T>
 void outStream(ostream& ostr, const Stream<T>& stream) {
     ostr << "[";
-    for (auto itr = stream.iterator(); itr.hasNext();) {
+    for (auto itr = stream.iterator<T>(); itr.hasNext();) {
         stream << proptest::Show<T>(itr.next());
         if(itr.hasNext())
             ostr << ", ";
@@ -35,7 +35,7 @@ template <typename T>
 string serializeStream(const Stream<T>& stream)
 {
     stringstream ostr;
-    outStream(ostr, stream);
+    outStream<T>(ostr, stream);
     return ostr.str();
 }
 
@@ -60,7 +60,7 @@ TEST(Stream, one)
     auto stream = Stream<int>::one(100);
     EXPECT_EQ(stream.isEmpty(), false);
 
-    StreamIterator<int> itr = stream.iterator();
+    StreamIterator<int> itr = stream.iterator<int>();
     ASSERT_EQ(itr.hasNext(), true);
 
     auto value = itr.next();
@@ -77,7 +77,7 @@ TEST(Stream, two)
     auto stream = Stream<int>::two(100, 200);
     EXPECT_EQ(stream.isEmpty(), false);
 
-    StreamIterator<int> itr = stream.iterator();
+    StreamIterator<int> itr = stream.iterator<int>();
     ASSERT_EQ(itr.hasNext(), true);
 
     int value = itr.next();
@@ -91,9 +91,9 @@ TEST(Stream, two)
 
 TEST(Stream, values)
 {
-    auto stream = Stream<int>::of(1,2,3,4,5,6,7,8);
+    auto stream = Stream<int>::of<int>(1,2,3,4,5,6,7,8);
     vector<int> values;
-    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -105,7 +105,7 @@ TEST(Stream, values2)
 {
     auto stream = Stream<int>::values({1,2,3,4,5,6,7,8});
     vector<int> values;
-    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -119,7 +119,7 @@ TEST(Stream, iterator)
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<int> values;
-    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -129,11 +129,11 @@ TEST(Stream, iterator)
 
 TEST(Stream, string)
 {
-    auto stream = Stream<string>::two("hello", "world");
+    auto stream = Stream<string>::two<string>("hello", "world");
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<string> values;
-    for(StreamIterator<string> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<string> itr = stream.iterator<string>(); itr.hasNext(); ) {
         string value = itr.next();
         values.push_back(value);
     }
@@ -147,10 +147,10 @@ TEST(Stream, transform)
 {
     auto stream = Stream<int>::two(100, 200);
 
-    auto stream2 = stream.transform<string>([](const int& value) { return to_string(value); });
+    auto stream2 = stream.transform<string,int>([](const int& value) { return to_string(value); });
 
     vector<string> values;
-    for(StreamIterator<string> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<string> itr = stream2.iterator<string>(); itr.hasNext(); ) {
         string value = itr.next();
         values.push_back(value);
     }
@@ -162,10 +162,10 @@ TEST(Stream, transform)
 TEST(Stream, filter)
 {
     auto stream = Stream<int>::two(100, 200);
-    auto stream2 = stream.filter([](const int& value) { return value > 100; });
+    auto stream2 = stream.filter<int>([](const int& value) { return value > 100; });
 
     vector<int> values;
-    for(StreamIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream2.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -173,9 +173,9 @@ TEST(Stream, filter)
     EXPECT_EQ(values[0], 200);
 
     values.clear();
-    auto stream3 = stream.filter([](const int& value) { return value < 200; });
+    auto stream3 = stream.filter<int>([](const int& value) { return value < 200; });
 
-    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -190,7 +190,7 @@ TEST(Stream, concat)
     auto stream3 = stream.concat(stream2);
 
     vector<int> values;
-    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -207,7 +207,7 @@ TEST(Stream, take)
     auto stream2 = stream.take(1);
 
     vector<int> values;
-    for(StreamIterator<int> itr = stream2.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream2.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -216,7 +216,7 @@ TEST(Stream, take)
 
     auto stream3 = stream.take(3); // taking exceeding size is ok
     values.clear();
-    for(StreamIterator<int> itr = stream3.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream3.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }
@@ -234,7 +234,7 @@ TEST(Stream, performance)
         stream = stream.concat(stream);
 
     vector<int> values;
-    for(StreamIterator<int> itr = stream.iterator(); itr.hasNext(); ) {
+    for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
         values.push_back(value);
     }

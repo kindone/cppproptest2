@@ -16,7 +16,7 @@ TEST(AnyShrinkable, with) {
     auto shr2 = shr.with(Stream<AnyShrinkable>::one(AnyShrinkable(Shrinkable<int>(200))));
     EXPECT_EQ(shr2.getAny().getRef<int>(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
-    EXPECT_EQ(shr2.getShrinks().getHeadRef().getAny().getRef<int>(), 200);
+    EXPECT_EQ(shr2.getShrinks().getHeadRef<AnyShrinkable>().getAny().getRef<int>(), 200);
     EXPECT_EQ(serializeAnyShrinkable<int>(shr), "{value: 100}");
     EXPECT_EQ(serializeAnyShrinkable<int>(shr2), "{value: 100, shrinks: [{value: 200}]}");
 }

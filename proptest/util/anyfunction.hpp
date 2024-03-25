@@ -252,34 +252,14 @@ struct PROPTEST_API Function<RET(ARGS...)> {
     using RetType = RET;
     static constexpr size_t Arity = sizeof...(ARGS);
 
-    Function() {}
+    Function() = default;
 
-    //explicit Function(shared_ptr<FunctionHolder> h) : holder(h) {
-    //    // proptest::cout << "Function shared_ptr constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
-    //}
-
-    Function(const Function& other) : holder(other.holder) {
-        // proptest::cout << "Function copy constructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  " <- " << &other << ")" << proptest::endl;
-    }
-
-    // Function(const AnyFunction& otherAnyFunction);
-
-    ~Function() {
-        // proptest::cout << "Function destructor for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
-    }
 
     template<typename Callable>
-        requires (!is_base_of_v<Function, decay_t<Callable>> && is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
+        requires (!is_base_of_v<Function, decay_t<Callable>>)// && is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
     Function(Callable&& c) : holder(util::make_shared<std::function<RET(ARGS...)>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
         // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" <<  proptest::endl;
-    }
-
-    template<typename Callable>
-        requires (!is_base_of_v<Function, decay_t<Callable>> && !is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
-    Function(Callable&& c) : holder(util::make_shared<std::function<RET(ARGS...)>>(util::forward<Callable>(c))) {
-        static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
-        // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" << proptest::endl;
     }
 
     operator bool() const {

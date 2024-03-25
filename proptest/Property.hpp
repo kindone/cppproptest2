@@ -336,7 +336,7 @@ private:
             auto shrinks = shrinksVec[N];
             while (!shrinks.isEmpty()) {
                 // printShrinks(shrinks);
-                auto iter = shrinks.iterator();
+                auto iter = shrinks.iterator<ShrinkableAny>();
                 bool shrinkFound = false;
                 PropertyContext context;
                 // keep trying until failure is reproduced

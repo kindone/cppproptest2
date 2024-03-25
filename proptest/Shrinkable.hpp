@@ -72,7 +72,8 @@ struct PROPTEST_API Shrinkable
 
     template <typename U>
     Shrinkable<U> map(Function<U(const T&)> transformer) const {
-        return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
+        return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> Stream<Shrinkable<U>> {
+            return shrinks->template transform<Shrinkable<U>,Shrinkable<T>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U> {
                     return shr.map<U>(transformer);
                 });
             }
@@ -81,7 +82,7 @@ struct PROPTEST_API Shrinkable
 
     template <typename U>
     Shrinkable<U> flatMap(Function<Shrinkable<U>(const T&)> transformer) const {
-        return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
+        return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>,Shrinkable<T>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
                     return shr.flatMap<U>(transformer);
                 });
             }
@@ -97,9 +98,9 @@ struct PROPTEST_API Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
         else
-            return with(shrinks->filter([criteria](const Shrinkable& shr) -> bool {
+            return with(shrinks->template filter<Shrinkable<T>>([criteria](const Shrinkable& shr) -> bool {
                 return criteria(shr.getRef());
-            }).template transform<Shrinkable<T>>([criteria](const Shrinkable& shr) {
+            }).template transform<Shrinkable<T>,Shrinkable<T>>([criteria](const Shrinkable& shr) {
                 return shr.filter(criteria);
             }));
     }
@@ -111,7 +112,7 @@ struct PROPTEST_API Shrinkable
             if(stream.isEmpty())
                 return StreamType::empty();
             else {
-                for(auto itr = stream.iterator(); itr.hasNext();) {
+                for(auto itr = stream.template iterator<Shrinkable<T>>(); itr.hasNext();) {
                     auto shr = itr.next();
                     auto tail = itr.stream;
                     if(_criteria(shr.getRef())) {
@@ -129,14 +130,14 @@ struct PROPTEST_API Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
-        return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
+        return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable,Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
             return shr.filter(criteria, tolerance);
         }));
     }
 
     // concat: continues with then after horizontal dead end
     Shrinkable<T> concatStatic(const StreamType& then) const {
-        auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+        auto shrinksWithThen = shrinks->template transform<Shrinkable<T>,Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
             return shr.concatStatic(then);
         });
         return with(shrinksWithThen.concat(then));
@@ -145,7 +146,7 @@ struct PROPTEST_API Shrinkable
     // concat: extend shrinks stream with function taking parent as argument
     Shrinkable<T> concat(Function<StreamType(const Shrinkable<T>&)> then) const {
         return with([copy = *this, shrinks = this->shrinks, then]() {
-            auto shrinksWithThen = shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+            auto shrinksWithThen = shrinks->template transform<Shrinkable<T>,Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
                 return shr.concat(then);
             });
             return shrinksWithThen.concat([=]() { return then(copy); });
@@ -157,7 +158,7 @@ struct PROPTEST_API Shrinkable
         if(shrinks->isEmpty())
             return with(then);
         else
-            return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+            return with(shrinks->template transform<Shrinkable<T>,Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
                 return shr.andThenStatic(then);
             }));
     }
@@ -166,13 +167,13 @@ struct PROPTEST_API Shrinkable
         if(shrinks->isEmpty())
             return with(then(*this));
         else
-            return with(shrinks->template transform<Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
+            return with(shrinks->template transform<Shrinkable<T>,Shrinkable<T>>([then](const Shrinkable<T>& shr) -> Shrinkable<T> {
                 return shr.andThen(then);
             }));
     }
 
     Shrinkable<T> take(int n) const {
-        return with(shrinks->template transform<Shrinkable<T>>([n](const Shrinkable<T>& shr) -> Shrinkable<T> {
+        return with(shrinks->template transform<Shrinkable<T>,Shrinkable<T>>([n](const Shrinkable<T>& shr) -> Shrinkable<T> {
             return shr.take(n);
         }));
     }
@@ -208,7 +209,9 @@ using ShrinkableAny = Shrinkable<Any>;
 
 // explicit instantiation of Shrinkable<Any>
 extern template struct PROPTEST_API Shrinkable<Any>;
+#ifndef PROPTEST_UNTYPED_STREAM
 extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
+#endif
 
 } // namespace proptest
 
