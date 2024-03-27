@@ -5,8 +5,6 @@
 
 namespace proptest {
 
-template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
-
 // based on Shrinkable<Any>
 struct AnyShrinkable {
     using stream_t = Stream<AnyShrinkable>;

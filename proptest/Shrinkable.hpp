@@ -11,18 +11,24 @@
 
 namespace proptest {
 
+#ifndef PROPTEST_UNTYPED_SHRINKABLE
+namespace typed {
 template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
-
+}
 
 template <typename T, typename... Args>
-Shrinkable<T> make_shrinkable(Args&&... args);
+typed::Shrinkable<T> make_shrinkable(Args&&... args);
+
+#endif
+
+namespace typed {
 
 template <typename T>
     requires (!std::is_const_v<T>)
 struct PROPTEST_API Shrinkable
 {
     using type = T;
-    using StreamType = Stream<Shrinkable<T>>;
+    using StreamType = ::proptest::Stream<Shrinkable<T>>;
 
     // for Shrinkable<Any> a.k.a. ShrinkableAny
     template <typename U>
@@ -72,7 +78,7 @@ struct PROPTEST_API Shrinkable
 
     template <typename U>
     Shrinkable<U> map(Function<U(const T&)> transformer) const {
-        return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> Stream<Shrinkable<U>> {
+        return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<Shrinkable<U>> {
             return shrinks->template transform<Shrinkable<U>,Shrinkable<T>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U> {
                     return shr.map<U>(transformer);
                 });
@@ -192,12 +198,30 @@ private:
 public:
 
     template <typename U, typename... ARGS>
-    friend Shrinkable<U> make_shrinkable(ARGS&&... args);
+    friend Shrinkable<U> proptest::make_shrinkable(ARGS&&... args);
 
     template <typename U>
         requires (!std::is_const_v<U>)
     friend struct Shrinkable;
 };
+
+} // namespace typed
+
+
+
+#ifndef PROPTEST_UNTYPED_SHRINKABLE
+
+template <typename T> using Shrinkable = typed::Shrinkable<T>;
+
+// explicit instantiation of Shrinkable<Any>
+namespace typed {
+extern template struct PROPTEST_API Shrinkable<Any>;
+}
+
+#endif // PROPTEST_UNTYPED_SHRINKABLE
+
+using ShrinkableAny = Shrinkable<Any>;
+
 
 template <typename T, typename... ARGS>
 Shrinkable<T> make_shrinkable(ARGS&&... args)
@@ -205,17 +229,16 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
     return Shrinkable<T>{util::make_any<T>(util::forward<ARGS>(args)...)};
 }
 
-using ShrinkableAny = Shrinkable<Any>;
 
-// explicit instantiation of Shrinkable<Any>
-extern template struct PROPTEST_API Shrinkable<Any>;
 #ifndef PROPTEST_UNTYPED_STREAM
 namespace typed {
 extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
 }
-#endif
+#endif // PROPTEST_UNTYPED_STREAM
 
 } // namespace proptest
+
+
 
 // compare function
 namespace std {

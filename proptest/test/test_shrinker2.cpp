@@ -141,11 +141,11 @@ TEST(shrinkContainer, string)
         return str;
     };
 
-    auto shr1 = shrinkContainer<vector, uint32_t>(Shrinkable(fwd_converter("abc")), 0, false, true).map<string>(back_converter);
+    auto shr1 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, false, true).map<string>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr1), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"c\" (63)}, {value: \"ac\" (61 63)}, {value: \"bc\" (62 63)}]}");
-    auto shr2 = shrinkContainer<vector, uint32_t>(Shrinkable(fwd_converter("abc")), 0, true, false).map<string>(back_converter);
+    auto shr2 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, false).map<string>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr2), "{value: \"abc\" (61 62 63)}");
-    auto shr3 = shrinkContainer<vector, uint32_t>(Shrinkable(fwd_converter("abc")), 0, true, true).map<string>(back_converter);
+    auto shr3 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, true).map<string>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr3), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"c\" (63)}, {value: \"ac\" (61 63)}, {value: \"bc\" (62 63)}]}");
 }
 

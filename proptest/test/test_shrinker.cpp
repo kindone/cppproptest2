@@ -94,7 +94,7 @@ TEST(TupleShrinker, basic)
     auto shr1 = shrinkIntegral(2);
     auto shr2 = shrinkString("ab", 0);
     auto shr3 = shrinkBool(true);
-    auto shr = shrinkTuple(Shrinkable(util::make_tuple(shr1, shr2, shr3)));
+    auto shr = shrinkTuple(Shrinkable<tuple<Shrinkable<int>,Shrinkable<string>,Shrinkable<bool>>>(util::make_tuple(shr1, shr2, shr3)));
     EXPECT_EQ(serializeShrinkable(shr),
         "{value: { 2, \"ab\" (61 62), true }, shrinks: "
             "[{value: { 0, \"ab\" (61 62), true }, shrinks: "

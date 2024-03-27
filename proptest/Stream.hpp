@@ -14,8 +14,6 @@ namespace proptest {
 template<typename T, typename... ARGS>
     concept AllT = (is_same_v<ARGS, T> && ...);
 
-
-
 //struct AnyStream;
 //struct AnyStreamIterator;
 

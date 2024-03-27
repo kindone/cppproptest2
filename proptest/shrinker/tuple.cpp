@@ -33,6 +33,10 @@ Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<Shrin
 
 } // namespace util
 
+#ifndef PROPTEST_UNTYPED_SHRINKABLE
+namespace typed {
 template struct Shrinkable<vector<ShrinkableAny>>;
+}
+#endif // PROPTEST_UNTYPED_SHRINKABLE
 
 } // namespace proptest

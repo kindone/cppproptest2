@@ -13,9 +13,6 @@ template <typename T> struct AnyRef;
 template <typename T> struct AnyVal;
 struct Any;
 
-// Shrinkable.hpp
-template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
-
 // stateful.hpp
 namespace stateful {
 template <typename ObjectType, typename ModelType>
