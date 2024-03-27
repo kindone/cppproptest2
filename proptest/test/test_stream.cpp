@@ -10,7 +10,7 @@ using namespace proptest;
 template <typename T>
 void outStream(ostream& ostr, const Stream<T>& stream) {
     ostr << "[";
-    for (auto itr = stream.iterator<T>(); itr.hasNext();) {
+    for (auto itr = stream.template iterator<T>(); itr.hasNext();) {
         stream << proptest::Show<T>(itr.next());
         if(itr.hasNext())
             ostr << ", ";

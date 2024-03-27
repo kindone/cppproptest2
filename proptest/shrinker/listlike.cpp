@@ -188,8 +188,10 @@ Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<Shrink
 
 template struct Shrinkable<vector<ShrinkableAny>>;
 #ifndef PROPTEST_UNTYPED_STREAM
+namespace typed {
 template struct Stream<Shrinkable<vector<ShrinkableAny>>>;
 template struct Stream<ShrinkableAny>;
+}
 #endif
 
 } // namespace proptest

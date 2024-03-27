@@ -320,8 +320,8 @@ template <typename T> using StreamIterator = untyped::StreamIterator<T>;
 
 #else
 
-template <typename T> using Stream = typed::Stream;
-template <typename T> using StreamIterator = typed::StreamIterator;
+template <typename T> using Stream = typed::Stream<T>;
+template <typename T> using StreamIterator = typed::StreamIterator<T>;
 
 #endif
 

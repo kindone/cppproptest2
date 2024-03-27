@@ -210,7 +210,9 @@ using ShrinkableAny = Shrinkable<Any>;
 // explicit instantiation of Shrinkable<Any>
 extern template struct PROPTEST_API Shrinkable<Any>;
 #ifndef PROPTEST_UNTYPED_STREAM
+namespace typed {
 extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
+}
 #endif
 
 } // namespace proptest
