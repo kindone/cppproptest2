@@ -29,6 +29,12 @@ struct PROPTEST_API Stream
     Stream(const Any& _head);
     Stream(const Any& _head, const Function<Stream()>& _tailGen);
 
+    Stream& operator=(const Stream& other) {
+        head = other.head;
+        tailGen = other.tailGen;
+        return *this;
+    }
+
     bool isEmpty() const;
 
     template <typename T>
@@ -59,7 +65,7 @@ struct PROPTEST_API Stream
                 const T& value = itr.next();
                 if(criteria(value)) {
                     auto stream = itr.stream;
-                    return Stream(value, [stream, criteria]() -> Stream { return stream.filter(criteria); });
+                    return Stream(value, [stream, criteria]() -> Stream { return stream.template filter<T>(criteria); });
                 }
             }
         }
@@ -88,13 +94,12 @@ public:
     template <typename T>
     static Stream two(const T& value1, const T& value2) {
         Any value2Any(value2);
-        return Stream(Any(value1), [value2Any]() -> Stream { return Stream::one(value2Any.getRef<T>()); });
+        return Stream(Any(value1), [value2Any]() -> Stream { return Stream::one<T>(value2Any.getRef<T>()); });
     }
 
-    template <typename T, typename...ARGS>
-        requires (AllT<T, ARGS...>)
+    template <typename T, constructible_from<T>... ARGS>
     static Stream of(ARGS&&...args) {
-        return values({args...});
+        return values<T>({args...});
     }
 
     template <typename T>
@@ -102,10 +107,10 @@ public:
         if(list.size() == 0)
             return empty();
         else if(list.size() == 1)
-            return one(*list.begin());
+            return one<T>(*list.begin());
 
         auto vec = util::make_shared<vector<T>>(list);
-        return Stream(Any(vec->front()), [vec]() -> Stream { return values(vec, 1);});
+        return Stream(Any(vec->front()), [vec]() -> Stream { return values<T>(vec, 1);});
     }
 
 private:
@@ -114,8 +119,8 @@ private:
         if(vec->size() == beginIdx)
             return empty();
         else if(vec->size() == beginIdx+1)
-            return one((*vec)[beginIdx]);
-        return Stream(Any((*vec)[beginIdx]), [vec, beginIdx]() -> Stream { return values(vec, beginIdx+1);});
+            return one<T>((*vec)[beginIdx]);
+        return Stream(Any((*vec)[beginIdx]), [vec, beginIdx]() -> Stream { return values<T>(vec, beginIdx+1);});
     }
 
     static Function<Stream()> emptyTailGen;
@@ -190,7 +195,7 @@ struct PROPTEST_API Stream
         return head.isEmpty();
     };
 
-    template <same_as<T> TT = T>
+    template <constructible_from<T> TT = T>
     const T& getHeadRef() const {
         return head.getRef<T>();
     }
@@ -204,7 +209,7 @@ struct PROPTEST_API Stream
         return StreamIterator<T>{*this};
     }
 
-    template <typename U, same_as<T> TT = T>
+    template <typename U, constructible_from<T> TT = T>
     Stream<U> transform(Function<U(const T&)> transformer) const {
         if(isEmpty())
             return Stream<U>::empty();
@@ -271,8 +276,7 @@ public:
         return Stream(Any(value1), [value2Any]() -> Stream { return Stream::one(value2Any.getRef<T>()); });
     }
 
-    template <same_as<T> TT = T, typename...ARGS>
-        requires (AllT<T, ARGS...>)
+    template <same_as<T> TT = T, constructible_from<T>... ARGS>
     static Stream<T> of(ARGS&&...args) {
         return values({args...});
     }

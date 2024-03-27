@@ -7,7 +7,7 @@ namespace util {
 Function<PairShrinker::stream_t(const PairShrinker::shrinkable_t&)> PairShrinker::shrinkFirst()
 {
     using e_shrinkable_t = Shrinkable<ARG1>;
-    using element_t = typename e_shrinkable_t::type;
+    using element_t = ARG1;
 
     return +[](const shrinkable_t& parent) -> stream_t {
         const e_shrinkable_t& elem = parent.getRef().first;
@@ -23,7 +23,7 @@ Function<PairShrinker::stream_t(const PairShrinker::shrinkable_t&)> PairShrinker
 Function<PairShrinker::stream_t(const PairShrinker::shrinkable_t&)> PairShrinker::shrinkSecond()
 {
     using e_shrinkable_t = Shrinkable<ARG2>;
-    using element_t = typename e_shrinkable_t::type;
+    using element_t = ARG2;
 
     return +[](const shrinkable_t& parent) -> stream_t {
         const e_shrinkable_t& elem = parent.getRef().second;

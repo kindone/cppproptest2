@@ -28,14 +28,15 @@ double composeFloat<double>(double value, int exp);
 }  // namespace util
 
 template <typename FLOATTYPE>
-PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
+PROPTEST_API Shrinkable<FLOATTYPE>::StreamType floatShrinks(FLOATTYPE value)
 {
-    using Stream = Stream<Shrinkable<FLOATTYPE>>;
+    using Stream = Shrinkable<FLOATTYPE>::StreamType;
+    using Elem = Shrinkable<FLOATTYPE>::StreamElementType;
     int exp = 0;
     if (value == 0.0f) {
         return Stream::empty();
     } else if (isnan(value)) {
-        return Stream::one(make_shrinkable<FLOATTYPE>(0.0f));
+        return Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(0.0f));
     } else {
         FLOATTYPE fraction = 0.0f;
         if (isinf(value)) {
@@ -53,10 +54,10 @@ PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
         auto expShrinkable = shrinkIntegral<int64_t>(exp);
         // shrink exponent
         auto floatShrinkable =
-            expShrinkable.map<FLOATTYPE>([fraction](const int& exp) { return util::composeFloat(fraction, exp); });
+            expShrinkable.map<FLOATTYPE>([fraction](const int64_t& exp) { return util::composeFloat(fraction, exp); });
 
         // prepend 0.0
-        floatShrinkable = floatShrinkable.with(Stream::one(make_shrinkable<FLOATTYPE>(0.0f)).concat(floatShrinkable.getShrinks()));
+        floatShrinkable = floatShrinkable.with(Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(0.0f)).concat(floatShrinkable.getShrinks()));
 
         // shrink fraction within (0.0 and 0.5)
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
@@ -66,9 +67,9 @@ PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
             if (value == 0.0f)
                 return Stream::empty();
             else if (value > 0) {
-                return Stream::one(make_shrinkable<FLOATTYPE>(util::composeFloat(0.5f, exp)));
+                return Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(util::composeFloat(0.5f, exp)));
             } else {
-                return Stream::one(make_shrinkable<FLOATTYPE>(util::composeFloat(-0.5f, exp)));
+                return Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(util::composeFloat(-0.5f, exp)));
             }
         });
 
@@ -77,7 +78,7 @@ PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
             auto value = shr.get();
             auto intValue = static_cast<int>(value);
             if (intValue != 0 && abs(intValue) < abs(value)) {
-                return Stream::one(make_shrinkable<FLOATTYPE>(static_cast<FLOATTYPE>(intValue)));
+                return Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(static_cast<FLOATTYPE>(intValue)));
             } else
                 return Stream::empty();
         });

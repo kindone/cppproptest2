@@ -25,7 +25,7 @@ TYPED_TEST(IntegralTest, shrinkIntegral_signed)
 
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned)
 {
-    auto shr = shrinkIntegral<TypeParam>(-8);
+    Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8);
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: "
         "[{value: 0}, "
         "{value: -4, shrinks: "
@@ -40,10 +40,13 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned)
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned2)
 {
     // concat with positive signed number
-    auto shr = shrinkIntegral<TypeParam>(-8).concat([](const Shrinkable<TypeParam>& shr) {
-        if(shr.get() == 0)
-            return Stream<Shrinkable<TypeParam>>::empty();
-        return Stream<Shrinkable<TypeParam>>::one(Shrinkable<TypeParam>(-shr.get()));
+    using StreamType = Shrinkable<TypeParam>::StreamType;
+    using Elem = Shrinkable<TypeParam>::StreamElementType;
+    Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8).concat([](const Elem& shr) {
+        Shrinkable<TypeParam> inShr = shr;
+        if(inShr.get() == 0)
+            return StreamType::empty();
+        return StreamType::template one<Elem>(Shrinkable<TypeParam>(-inShr.get()));
     });
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: [{value: 0}, {value: -4, shrinks: [{value: -2, shrinks: [{value: -1, shrinks: [{value: 1}]}, {value: 2}]}, {value: -3, shrinks: [{value: 3}]}, {value: 4}]}, {value: -6, shrinks: [{value: -5, shrinks: [{value: 5}]}, {value: 6}]}, {value: -7, shrinks: [{value: 7}]}, {value: 8}]}");
 }

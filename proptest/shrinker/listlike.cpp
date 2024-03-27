@@ -5,24 +5,38 @@ namespace proptest {
 
 namespace util {
 
-Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrinkable<vector<ShrinkableAny>>& ancestor, size_t power, size_t offset)
+VectorShrinker::stream_t VectorShrinker::shrinkBulk(const VectorShrinker::shrinkable_t& ancestor, size_t power, size_t offset)
 {
-    static Function<Stream<Shrinkable<vector<ShrinkableAny>>>(const Shrinkable<vector<ShrinkableAny>>&, size_t, size_t, const Shrinkable<vector<ShrinkableAny>>&, size_t, size_t,
-                                shared_ptr<vector<Stream<ShrinkableAny>>>)>
-        genStream = +[](const Shrinkable<vector<ShrinkableAny>>& _ancestor, size_t _power, size_t _offset, const Shrinkable<vector<ShrinkableAny>>& parent,
-                        size_t frompos, size_t topos, shared_ptr<vector<e_stream_t>> elemStreams) -> Stream<Shrinkable<vector<ShrinkableAny>>> {
+    /*
+    using elem_t = ShrinkableAny;
+    using vector_t = vector<ShrinkableAny>;
+
+    using shrinkable_t = Shrinkable<shrinkable_vector_t>;
+    using stream_t = shrinkable_t::StreamType;
+    using stream_element_t = shrinkable_t::StreamElementType;
+
+    using elem_stream_t = ShrinkableAny::StreamType;
+    using elem_stream_element_t = ShrinkableAny::StreamElementType
+    */
+
+    // static_assert(is_same_v<elem_stream_element_t, stream_element_t>, "elem_stream_element_t should be stream_element_t");
+
+    static Function<stream_t(const shrinkable_t&, size_t, size_t, const shrinkable_t&, size_t, size_t,
+                                shared_ptr<vector<elem_stream_t>>)>
+        genStream = +[](const shrinkable_t& _ancestor, size_t _power, size_t _offset, const shrinkable_t& parent,
+                        size_t frompos, size_t topos, shared_ptr<vector<elem_stream_t>> elemStreams) -> stream_t {
         const size_t size = topos - frompos;
         if (size == 0)
-            return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
+            return stream_t::empty();
 
         if (elemStreams->size() != size)
             throw runtime_error(__FILE__, __LINE__, "element streams size error");
 
-        shared_ptr<vector<e_stream_t>> newElemStreams = util::make_shared<vector<e_stream_t>>();
+        shared_ptr<vector<elem_stream_t>> newElemStreams = util::make_shared<vector<elem_stream_t>>();
         newElemStreams->reserve(size);
 
-        vector<ShrinkableAny> newVec = parent.getRef();
-        const vector<ShrinkableAny>& ancestorVec = _ancestor.getRef();
+        vector_t newVec = parent.getRef();
+        const vector_t& ancestorVec = _ancestor.getRef();
 
         if (newVec.size() != ancestorVec.size())
             throw runtime_error(__FILE__, __LINE__, "list size error: " + to_string(newVec.size()) +
@@ -34,21 +48,21 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         for (size_t i = 0; i < elemStreams->size(); i++) {
             if ((*elemStreams)[i].isEmpty()) {
                 newVec[i + frompos] = ancestorVec[i + frompos];
-                newElemStreams->push_back(e_stream_t::empty());  // [1] -> []
+                newElemStreams->push_back(elem_stream_t::empty());  // [1] -> []
             } else {
-                newVec[i + frompos] = (*elemStreams)[i].getHeadRef<ShrinkableAny>();
+                newVec[i + frompos] = (*elemStreams)[i].getHeadRef<elem_stream_element_t>();
                 newElemStreams->push_back((*elemStreams)[i].getTail());  // [0,4,6,7] -> [4,6,7]
                 nothingToDo = false;
             }
         }
         if (nothingToDo)
-            return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
+            return stream_t::empty();
 
-        auto newShrinkable = make_shrinkable<vector<ShrinkableAny>>(newVec);
+        shrinkable_t newShrinkable = make_shrinkable<vector_t>(newVec);
         newShrinkable = newShrinkable.with(
-            [newShrinkable, _power, _offset]() -> Stream<Shrinkable<vector<ShrinkableAny>>> { return shrinkBulk(newShrinkable, _power, _offset); });
-        return Stream<Shrinkable<vector<ShrinkableAny>>>(newShrinkable,
-                        [_ancestor, _power, _offset, newShrinkable, frompos, topos, newElemStreams]() -> Stream<Shrinkable<vector<ShrinkableAny>>> {
+            [newShrinkable, _power, _offset]() -> stream_t { return shrinkBulk(newShrinkable, _power, _offset); });
+        return stream_t(stream_element_t(newShrinkable),
+                        [_ancestor, _power, _offset, newShrinkable, frompos, topos, newElemStreams]() -> stream_t {
                             return genStream(_ancestor, _power, _offset, newShrinkable, frompos, topos,
                                                 newElemStreams);
                         });
@@ -57,7 +71,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
     size_t parentSize = ancestor.getRef().size();
     size_t numSplits = static_cast<size_t>(pow(2, power));
     if (parentSize / numSplits < 1)
-        return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
+        return stream_t::empty();
 
     if (offset >= numSplits)
         throw runtime_error(__FILE__, __LINE__, "offset should not reach numSplits");
@@ -69,20 +83,20 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         throw runtime_error(__FILE__, __LINE__, "topos error: " + to_string(topos) + " != " + to_string(parentSize));
 
     const size_t size = topos - frompos;
-    const vector<ShrinkableAny>& parentVec = ancestor.getRef();
-    shared_ptr<vector<e_stream_t>> elemStreams = util::make_shared<vector<e_stream_t>>();
+    const vector_t& parentVec = ancestor.getRef();
+    shared_ptr<vector<elem_stream_t>> elemStreams = util::make_shared<vector<elem_stream_t>>();
     elemStreams->reserve(size);
 
     bool nothingToDo = true;
     for (size_t i = frompos; i < topos; i++) {
-        auto shrinks = parentVec[i].getShrinks();
+        elem_stream_t shrinks = parentVec[i].getShrinks();
         elemStreams->push_back(shrinks);
         if (!shrinks.isEmpty())
             nothingToDo = false;
     }
 
     if (nothingToDo)
-        return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
+        return stream_t::empty();
 
     return genStream(ancestor, power, offset, ancestor, frompos, topos, elemStreams);
 }
@@ -97,7 +111,8 @@ VectorShrinker::stream_t VectorShrinker::shrinkElementwise(const VectorShrinker:
     if (vecSize / numSplits < 1 || offset >= numSplits)
         return stream_t::empty();
     // entirety
-    shrinkable_t newShrinkable = shrinkable.concat([power, offset](const shrinkable_t& shr) -> stream_t {
+    shrinkable_t newShrinkable = shrinkable.concat([power, offset](const stream_element_t& elem) -> stream_t {
+        shrinkable_t shr = elem;
         size_t _vecSize = shr.getRef().size();
         size_t _numSplits = static_cast<size_t>(pow(2, power));
         if (_vecSize / _numSplits < 1 || offset >= _numSplits)
@@ -123,7 +138,8 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkMid(const Shrinkable<vector<S
         auto& contRef = cont.getMutableRef<vector<ShrinkableAny>>();
         contRef.insert(contRef.end(), shrinkableCont.begin() + (contRef.size()-rearSize), shrinkableCont.end());
         return Shrinkable<vector<ShrinkableAny>>(cont);
-    }).concat([minSize, frontSize, rearSize](const shrinkable_t& parent) -> stream_t {
+    }).concat([minSize, frontSize, rearSize](const stream_element_t& parentElem) -> stream_t {
+        shrinkable_t parent = parentElem;
         size_t parentSize = parent.getRef().size();
         // no further shrinking possible
         if(parentSize <= minSize || parentSize <= frontSize)
@@ -172,14 +188,14 @@ Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<S
 }
 
 Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise) {
-    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef();
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shrinkAnyVecShr);
+    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVecShr, minSize) : shrinkAnyVecShr);
 
     // elementwise shrinking
     if(elementwise)
-        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const Shrinkable<vector<ShrinkableAny>>& parent) {
-            return util::VectorShrinker::shrinkElementwise(parent, 0, 0);
+        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const Shrinkable<vector<ShrinkableAny>>::StreamElementType& parent) -> Shrinkable<vector<ShrinkableAny>>::StreamType {
+            Shrinkable<vector<ShrinkableAny>> shr = parent;
+            return util::VectorShrinker::shrinkElementwise(shr, 0, 0);
         });
 
     return shrinkableElemsShr;

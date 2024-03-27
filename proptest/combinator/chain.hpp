@@ -21,7 +21,7 @@ namespace util {
 template <typename U, typename T>
 Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
 {
-    return generator([gen1, gen2gen](Random& rand) {
+    return generator([gen1, gen2gen](Random& rand) -> Shrinkable<Chain<T, U>> {
         // generate T
         Shrinkable<T> shrinkableTs = gen1(rand);
         using Intermediate = pair<T, Shrinkable<U>>;
@@ -37,7 +37,7 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Stream<Shrinkable<Intermediate>> {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Shrinkable<Intermediate>::StreamType {
                 // assume interShr has no shrinks
                 const Intermediate& interpair = interShr.getRef();
                 const Shrinkable<U>& shrinkableU = interpair.second;
@@ -74,7 +74,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
         // shrink strategy 1: expand Shrinkable<tuple<Ts...>>
         Shrinkable<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>> intermediate =
-            shrinkableTs.template flatMap<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>>(
+            shrinkableTs.template flatMap<pair<Chain<T0, T1, Ts...>,Shrinkable<U>>>(
                 [&rand, gen2genFunc](const Chain<T0, T1, Ts...>& ts) {
                     // generate U
                     auto gen2 = gen2genFunc(ts);
@@ -84,7 +84,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Shrinkable<Intermediate>::StreamType {
                 // assume interShr has no shrinks
                 const Shrinkable<U>& shrinkableU = interShr.getRef().second;
                 Shrinkable<Intermediate> newShrinkableU =

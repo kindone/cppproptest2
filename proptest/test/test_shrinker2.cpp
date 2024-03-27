@@ -19,6 +19,8 @@ TEST(ListLikeShrinker, ints3)
         ShrinkableAny(shrinkIntegral<int>(2)),
         ShrinkableAny(shrinkIntegral<int>(3))});
 
+    // EXPECT_EQ(serializeShrinkable(baseShr), "");
+
     Shrinkable<vector<int>> shr0 = shrinkListLike<vector, int>(baseShr, 0, false, false);
     Shrinkable<vector<int>> shr1 = shrinkListLike<vector, int>(baseShr, 0, true, false);
     Shrinkable<vector<int>> shr2 = shrinkListLike<vector, int>(baseShr, 0, false, true);

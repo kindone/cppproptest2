@@ -40,7 +40,7 @@ TEST(Just, Any)
     Random rand(getCurrentTime());
     auto gen = just<Any>(Any(1339));
     auto result = gen(rand);
-    EXPECT_EQ(result.get().getRef<int>(), 1339);
+    EXPECT_EQ(result.getAny().getRef<int>(), 1339);
 }
 
 TEST(OneOf, basic)

@@ -86,8 +86,8 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level = 0)
     printShrinkable(shrinkable, level);
 
     auto shrinks = shrinkable.getShrinks();
-    for (auto itr = shrinks.template iterator<proptest::Shrinkable<T>>(); itr.hasNext();) {
-        auto shrinkable2 = itr.next();
+    for (auto itr = shrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(); itr.hasNext();) {
+        proptest::Shrinkable<T> shrinkable2 = itr.next();
         printExhaustive(shrinkable2, level + 1);
     }
 }
@@ -98,8 +98,8 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, propt
     func(shrinkable, level);
 
     auto shrinks = shrinkable.shrinks();
-    for (auto itr = shrinks.template iterator<proptest::Shrinkable<T>>(); itr.hasNext();) {
-        auto shrinkable2 = itr.next();
+    for (auto itr = shrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(); itr.hasNext();) {
+        proptest::Shrinkable<T> shrinkable2 = itr.next();
         printExhaustive(shrinkable2, level + 1, func);
     }
 }
@@ -115,11 +115,15 @@ bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrin
     auto lhsShrinks = lhs.getShrinks();
     auto rhsShrinks = rhs.getShrinks();
 
-    for(auto litr = lhsShrinks.template iterator<proptest::Shrinkable<T>>(), ritr = lhsShrinks.template iterator<proptest::Shrinkable<T>>() ; litr.hasNext() || ritr.hasNext();)
+    for(auto litr = lhsShrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(),
+             ritr = lhsShrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>() ; litr.hasNext() || ritr.hasNext();)
     {
         if(litr.hasNext() != ritr.hasNext())
             return false;
-        if(!compareShrinkable(litr.next(), ritr.next(), maxElements))
+
+        proptest::Shrinkable<T> left = litr.next();
+        proptest::Shrinkable<T> right = ritr.next();
+        if(!compareShrinkable<T>(left, right, maxElements))
             return false;
         maxElements --;
     }
@@ -132,9 +136,9 @@ void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shr
     auto shrinks = shrinkable.getShrinks();
     if(!shrinks.isEmpty()) {
         stream << ", shrinks: [";
-        for (auto itr = shrinks.template iterator<proptest::Shrinkable<T>>(); itr.hasNext();) {
-            auto shrinkable2 = itr.next();
-            outShrinkable(stream, shrinkable2);
+        for (auto itr = shrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(); itr.hasNext();) {
+            proptest::Shrinkable<T> shrinkable2 = itr.next();
+            outShrinkable<T>(stream, shrinkable2);
             if(itr.hasNext())
                 stream << ", ";
         }
@@ -147,7 +151,7 @@ template <typename T>
 proptest::string serializeShrinkable(const proptest::Shrinkable<T>& shr)
 {
     proptest::stringstream stream;
-    outShrinkable(stream, shr);
+    outShrinkable<T>(stream, shr);
     return stream.str();
 }
 

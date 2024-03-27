@@ -23,7 +23,7 @@ namespace proptest {
 template <typename T, typename U>
 Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
 {
-    return generator([gen1, gen2gen](Random& rand) {
+    return generator([gen1, gen2gen](Random& rand) -> Shrinkable<pair<T, U>> {
         // generate T
         Shrinkable<T> shrinkableT = gen1(rand);
         using Intermediate = pair<T, Shrinkable<U>>;
@@ -39,7 +39,7 @@ Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(co
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Shrinkable<Intermediate>::StreamType {
                 // assume interShr has no shrinks
                 const Intermediate& interpair = interShr.get();
                 const Shrinkable<U>& shrinkableU = interpair.second;

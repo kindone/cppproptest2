@@ -140,7 +140,10 @@ struct Show<ShrinkableAny, U>
     Show(const ShrinkableAny& _value) : value(_value) {}
     friend ostream& operator<<(ostream& os, const Show<ShrinkableAny, U>& sh)
     {
-        show(os, sh.value.getAny().template getRef<U>());
+        if constexpr(is_same_v<U, void>)
+            show(os, "<Any:\?\?\?>");
+        else
+            show(os, sh.value.getAny().template getRef<U>());
         return os;
     }
     const ShrinkableAny& value;

@@ -5,7 +5,7 @@ namespace proptest {
 
 Shrinkable<bool> shrinkBool(bool value) {
     if (value) {
-        return make_shrinkable<bool>(value).with(Stream<Shrinkable<bool>>::one(make_shrinkable<bool>(false)));
+        return make_shrinkable<bool>(value).with(Shrinkable<bool>::StreamType::one<Shrinkable<bool>::StreamElementType>(make_shrinkable<bool>(false)));
     } else {
         return make_shrinkable<bool>(value);
     }

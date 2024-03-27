@@ -19,7 +19,7 @@ Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, s
         auto& str = shr.getRef();
         size_t maxSizeCopy = str.charsize();
         if (maxSizeCopy <= minSize)
-            return Stream<Shrinkable<StringLike>>::empty();
+            return Shrinkable<StringLike>::StreamType::empty();
         auto newShrinkable =
             shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
                 .map<StringLike>([str, minSize, maxSizeCopy, bytePositions](const uint64_t& value) {

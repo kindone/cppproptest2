@@ -31,7 +31,7 @@ Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2
 
         // shrink strategy 2: expand Shrinkable<U>
         intermediate =
-            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
+            intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Shrinkable<Intermediate>::StreamType {
                 // assume interShr has no shrinks
                 const Shrinkable<U>& shrinkableU = interShr.getRef().second;
                 Shrinkable<Intermediate> newShrinkableU =

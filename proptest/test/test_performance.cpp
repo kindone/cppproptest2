@@ -328,7 +328,7 @@ TEST(Performance, ShrinkableConcatStatic)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<int>(i);
-        shr = shr.concatStatic(Stream<Shrinkable<int>>::one(make_shrinkable<int>(i+1)));
+        shr = shr.concatStatic(Shrinkable<int>::StreamType::one(make_shrinkable<int>(i+1)));
         EXPECT_EQ(shr.getRef(), i);
     }
 }
@@ -339,7 +339,7 @@ TEST(Performance, ShrinkableConcat)
     {
         auto shr = make_shrinkable<int>(i);
         shr = shr.concat([](const Shrinkable<int>& s) {
-            return Stream<Shrinkable<int>>::one(s);
+            return Shrinkable<int>::StreamType::one(s);
         });
         EXPECT_EQ(shr.getRef(), i);
     }
@@ -351,7 +351,7 @@ TEST(Performance, ShrinkableAndThenStatic)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<int>(i);
-        shr = shr.andThenStatic(Stream<Shrinkable<int>>::one(make_shrinkable<int>(i+1)));
+        shr = shr.andThenStatic(Shrinkable<int>::StreamType::one(make_shrinkable<int>(i+1)));
         EXPECT_EQ(shr.getRef(), i);
     }
 }
@@ -362,7 +362,7 @@ TEST(Performance, ShrinkableAndthen)
     {
         auto shr = make_shrinkable<int>(i);
         shr = shr.andThen([](const Shrinkable<int>& s) {
-            return Stream<Shrinkable<int>>::one(s);
+            return Shrinkable<int>::StreamType::one(s);
         });
         EXPECT_EQ(shr.getRef(), i);
     }

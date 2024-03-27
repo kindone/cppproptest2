@@ -6,7 +6,7 @@ namespace util {
 Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr) {
     const size_t Size = vectorAnyShr.getRef().size();
     for(size_t N = 0; N < Size; N++) {
-        vectorAnyShr = vectorAnyShr.concat([N](const Shrinkable<vector<ShrinkableAny>>& parent) -> Stream<Shrinkable<vector<ShrinkableAny>>> {
+        vectorAnyShr = vectorAnyShr.concat([N](const Shrinkable<vector<ShrinkableAny>>& parent) -> Shrinkable<vector<ShrinkableAny>>::StreamType {
             const ShrinkableAny& elemShr = parent.getRef()[N];
             // need a mutable clone
             const auto& parentVec = parent.getRef();
