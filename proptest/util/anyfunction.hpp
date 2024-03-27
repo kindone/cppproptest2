@@ -239,12 +239,50 @@ struct FunctionNHolderMutable : public FunctionNHolder<TARGET_RET, RET(ARGS...)>
 };
 */
 
+namespace util {
+
+/* const T& should be turned into compatible type T accordingly*/
+template <typename T>
+T toCallableArg(const decay_t<T>& value) {
+	if constexpr (std::is_reference_v<T>) {
+		if constexpr (std::is_const_v<std::remove_reference_t<T>>) {
+			return static_cast<T>(value);
+		} else {
+			return static_cast<T>(const_cast<decay_t<T>&>(value));
+		}
+	} else {
+		return static_cast<T>(value);
+	}
+}
+
+} // namespace util
+
+
+template <typename RET, typename...ARGS>
+struct CallableHolderBase {
+    virtual RET operator()(const decay_t<ARGS>&... args) = 0;
+};
+
+template <typename Callable, typename RET, typename...ARGS>
+struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
+    explicit CallableHolder(const Callable& c) : callable(c) {}
+
+    RET operator()(const decay_t<ARGS>&... args) override {
+        if constexpr(is_void_v<RET>) {
+            callable(util::toCallableArg<ARGS>(args)...);
+            return;
+        }
+        else
+            return callable(util::toCallableArg<ARGS>(args)...);
+    }
+
+    decay_t<Callable> callable;
+};
+
 template <typename Callable, typename RET, typename...ARGS>
 concept isCallableOf = (invocable<Callable, ARGS...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, ARGS...>>));
 
-template <typename F>
-//   requires (is_function_v<F>)
-struct Function;
+template <typename F> struct Function;
 
 template <typename RET, typename...ARGS>
 struct PROPTEST_API Function<RET(ARGS...)> {
@@ -254,12 +292,12 @@ struct PROPTEST_API Function<RET(ARGS...)> {
 
     Function() = default;
 
+    Function(const Function& other) : holder(other.holder) {}
 
-    template<typename Callable>
-        requires (!is_base_of_v<Function, decay_t<Callable>>)// && is_const_v<Callable> && isCallableOf<Callable, RET, ARGS...>)
-    Function(Callable&& c) : holder(util::make_shared<std::function<RET(ARGS...)>>(util::forward<Callable>(c))) {
+    template <typename Callable>
+        requires (!is_base_of_v<Function, decay_t<Callable>>)
+    Function(Callable&& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
         static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
-        // proptest::cout << "Function constructor: " << typeid(Callable).name() << " for " << typeid(RET(ARGS...)).name() << "(" << this <<  ")" <<  proptest::endl;
     }
 
     operator bool() const {
@@ -278,20 +316,7 @@ struct PROPTEST_API Function<RET(ARGS...)> {
             return holder->operator()(util::forward<Args>(args)...);
     }
 
-    /*
-    RET operator()(ARGS... arg) {
-        if(!holder)
-            throw runtime_error(__FILE__, __LINE__, "Function not initialized");
-        if constexpr(is_void_v<RET>) {
-            holder->apply({util::make_any<ARGS>(arg)...});
-            return;
-        }
-        else
-            return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
-    }
-    */
-
-    mutable shared_ptr<std::function<RET(ARGS...)>> holder;
+    mutable shared_ptr<CallableHolderBase<RET, ARGS...>> holder;
 };
 
 /*

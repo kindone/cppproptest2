@@ -25,6 +25,7 @@ using std::is_fundamental_v;
 using std::is_lvalue_reference;
 using std::is_lvalue_reference_v;
 using std::is_pointer;
+using std::is_pointer_v;
 using std::is_const_v;
 using std::is_function_v;
 using std::is_same;

@@ -114,7 +114,7 @@ TEST(PropTest, TestTranform2)
     int64_t seed = getCurrentTime();
     Random rand(seed);
     static auto gen = transform<uint8_t, uint8_t>(
-        Arbi<uint8_t>(), +[](const uint8_t& vbit) { return (1 << 0) & vbit; });
+        Arbi<uint8_t>(), +[](const uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
 
     for (int i = 0; i < 10; i++)
         cout << gen(rand).get() << endl;
