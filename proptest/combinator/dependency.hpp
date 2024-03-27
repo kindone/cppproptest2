@@ -41,19 +41,19 @@ Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(co
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Intermediate& interpair = interShr.get();
+                const Intermediate& interpair = interShr.get<Intermediate>();
                 const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
-                    shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {
+                    shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
                         return make_shrinkable<pair<T, Shrinkable<U>>>(
-                            util::make_pair(interShr.get().first, make_shrinkable<U>(u)));
+                            util::make_pair(interShr.get<Intermediate>().first, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
             });
 
         // reformat pair<T, Shrinkable<U>> to pair<T, U>
-        return intermediate.template flatMap<pair<T, U>>(+[](const Intermediate& interpair) -> Shrinkable<pair<T, U>> {
-            return make_shrinkable<pair<T, U>>(util::make_pair(interpair.first, interpair.second.getRef()));
+        return intermediate.template flatMap<pair<T, U>, Intermediate>(+[](const Intermediate& interpair) -> Shrinkable<pair<T, U>> {
+            return make_shrinkable<pair<T, U>>(util::make_pair(interpair.first, interpair.second.template getRef<U>()));
         });
     });
 }

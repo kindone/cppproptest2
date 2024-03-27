@@ -39,18 +39,18 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Intermediate& interpair = interShr.getRef();
+                const Intermediate& interpair = interShr.getRef<Intermediate>();
                 const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
-                    shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {
-                        const T& t = interShr.getRef().first;
+                    shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
+                        const T& t = interShr.getRef<Intermediate>().first;
                         return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
             });
 
         // reformat pair<T, Shrinkable<U>> to Chain<T, U>
-        return intermediate.template flatMap<Chain<T, U>>(
+        return intermediate.template flatMap<Chain<T, U>, Intermediate>(
             +[](const Intermediate& interpair) -> Shrinkable<tuple<T, U>> {
                 const T& t = interpair.first;
                 return make_shrinkable<Chain<T, U>>(
@@ -86,20 +86,20 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Shrinkable<U>& shrinkableU = interShr.getRef().second;
+                const Shrinkable<U>& shrinkableU = interShr.getRef<Intermediate>().second;
                 Shrinkable<Intermediate> newShrinkableU =
-                    shrinkableU.template flatMap<Intermediate>([interShr](const U& u) mutable {
+                    shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
                         return make_shrinkable<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>>(
-                            util::make_pair(interShr.getRef().first, make_shrinkable<U>(u)));
+                            util::make_pair(interShr.getRef<Intermediate>().first, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
             });
 
         // reformat pair<Chain<T0, T1, Ts...>, Shrinkable<U>> to Chain<T0, T1, Ts..., U>
-        return intermediate.template flatMap<Chain<T0, T1, Ts..., U>>(
+        return intermediate.template flatMap<Chain<T0, T1, Ts..., U>, Intermediate>(
             +[](const Intermediate& interpair) -> Shrinkable<tuple<T0, T1, Ts..., U>> {
                 const Chain<T0, T1, Ts...>& ts = interpair.first;
-                return make_shrinkable<Chain<T0, T1, Ts..., U>>(tuple_cat(ts, tuple<U>(interpair.second.getRef())));
+                return make_shrinkable<Chain<T0, T1, Ts..., U>>(tuple_cat(ts, tuple<U>(interpair.second.template getRef<U>())));
             });
     };
 
