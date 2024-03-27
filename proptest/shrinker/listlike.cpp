@@ -21,8 +21,8 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         shared_ptr<vector<e_stream_t>> newElemStreams = util::make_shared<vector<e_stream_t>>();
         newElemStreams->reserve(size);
 
-        vector<ShrinkableAny> newVec = parent.getRef();
-        const vector<ShrinkableAny>& ancestorVec = _ancestor.getRef();
+        vector<ShrinkableAny> newVec = parent.getRef<vector<ShrinkableAny>>();
+        const vector<ShrinkableAny>& ancestorVec = _ancestor.getRef<vector<ShrinkableAny>>();
 
         if (newVec.size() != ancestorVec.size())
             throw runtime_error(__FILE__, __LINE__, "list size error: " + to_string(newVec.size()) +
@@ -54,7 +54,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
                         });
     };
 
-    size_t parentSize = ancestor.getRef().size();
+    size_t parentSize = ancestor.getRef<vector<ShrinkableAny>>().size();
     size_t numSplits = static_cast<size_t>(pow(2, power));
     if (parentSize / numSplits < 1)
         return Stream<Shrinkable<vector<ShrinkableAny>>>::empty();
@@ -69,7 +69,7 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
         throw runtime_error(__FILE__, __LINE__, "topos error: " + to_string(topos) + " != " + to_string(parentSize));
 
     const size_t size = topos - frompos;
-    const vector<ShrinkableAny>& parentVec = ancestor.getRef();
+    const vector<ShrinkableAny>& parentVec = ancestor.getRef<vector<ShrinkableAny>>();
     shared_ptr<vector<e_stream_t>> elemStreams = util::make_shared<vector<e_stream_t>>();
     elemStreams->reserve(size);
 
@@ -89,16 +89,16 @@ Stream<Shrinkable<vector<ShrinkableAny>>> VectorShrinker::shrinkBulk(const Shrin
 
 VectorShrinker::stream_t VectorShrinker::shrinkElementwise(const VectorShrinker::shrinkable_t& shrinkable, size_t power, size_t offset)
 {
-    if (shrinkable.getRef().empty())
+    if (shrinkable.getRef<shrinkable_vector_t>().empty())
         return stream_t::empty();
 
-    size_t vecSize = shrinkable.getRef().size();
+    size_t vecSize = shrinkable.getRef<shrinkable_vector_t>().size();
     size_t numSplits = static_cast<size_t>(pow(2, power));
     if (vecSize / numSplits < 1 || offset >= numSplits)
         return stream_t::empty();
     // entirety
     shrinkable_t newShrinkable = shrinkable.concat([power, offset](const shrinkable_t& shr) -> stream_t {
-        size_t _vecSize = shr.getRef().size();
+        size_t _vecSize = shr.getRef<shrinkable_vector_t>().size();
         size_t _numSplits = static_cast<size_t>(pow(2, power));
         if (_vecSize / _numSplits < 1 || offset >= _numSplits)
             return stream_t::empty();
@@ -110,21 +110,21 @@ VectorShrinker::stream_t VectorShrinker::shrinkElementwise(const VectorShrinker:
 }
 
 VectorShrinker::shrinkable_t VectorShrinker::shrinkMid(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize, size_t frontSize, size_t rearSize) {
-    auto shrinkableCont = shr.getRef();
+    auto shrinkableCont = shr.getRef<vector<ShrinkableAny>>();
     // remove mid as much as possible
     size_t minRearSize = minSize >= frontSize ? minSize - frontSize : 0;
     size_t maxRearSize = shrinkableCont.size() - frontSize;
     // rear size within [minRearSize, minRearSize]
-    auto rangeShrinkable = shrinkIntegral<size_t>(maxRearSize - minRearSize).template map<size_t>([minRearSize](const size_t& s) { return s + minRearSize; });
-    return rangeShrinkable.template flatMap<vector<ShrinkableAny>>([shr, frontSize](const size_t& rearSize) {
+    auto rangeShrinkable = shrinkIntegral<size_t>(maxRearSize - minRearSize).template map<size_t,size_t>([minRearSize](const size_t& s) { return s + minRearSize; });
+    return rangeShrinkable.template flatMap<vector<ShrinkableAny>,size_t>([shr, frontSize](const size_t& rearSize) {
         // concat front and rear
-        auto shrinkableCont = shr.getRef();
+        auto shrinkableCont = shr.getRef<vector<ShrinkableAny>>();
         Any cont = Any(vector<ShrinkableAny>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize));
         auto& contRef = cont.getMutableRef<vector<ShrinkableAny>>();
         contRef.insert(contRef.end(), shrinkableCont.begin() + (contRef.size()-rearSize), shrinkableCont.end());
         return Shrinkable<vector<ShrinkableAny>>(cont);
     }).concat([minSize, frontSize, rearSize](const shrinkable_t& parent) -> stream_t {
-        size_t parentSize = parent.getRef().size();
+        size_t parentSize = parent.getRef<vector<ShrinkableAny>>().size();
         // no further shrinking possible
         if(parentSize <= minSize || parentSize <= frontSize)
             return stream_t::empty();
@@ -133,14 +133,14 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkMid(const Shrinkable<vector<S
 }
 
 VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize, size_t rearSize) {
-    const auto& shrinkableCont = shr.getRef();
+    const auto& shrinkableCont = shr.getRef<vector<ShrinkableAny>>();
     // remove front as much as possible
     size_t minFrontSize = minSize >= rearSize ? minSize - rearSize : 0;
     size_t maxFrontSize = shrinkableCont.size() - rearSize;
     // front size within [min,max]
-    auto rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
-    return rangeShrinkable.template flatMap<vector<ShrinkableAny>>([shr, maxFrontSize](const size_t& frontSize) {
-        const auto& shrinkableCont = shr.getRef();
+    auto rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t,size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
+    return rangeShrinkable.template flatMap<vector<ShrinkableAny>,size_t>([shr, maxFrontSize](const size_t& frontSize) {
+        const auto& shrinkableCont = shr.getRef<vector<ShrinkableAny>>();
         // concat front and rear
         Any cont = Any(vector<ShrinkableAny>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize));
         auto& contRef = cont.getMutableRef<vector<ShrinkableAny>>();
@@ -148,7 +148,7 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinka
         return Shrinkable<vector<ShrinkableAny>>(cont);
     }).concat([minSize, rearSize](const shrinkable_t& parent) -> stream_t {
         // reduce front [0,size-rearSize-1] as much possible
-        size_t parentSize = parent.getRef().size();
+        size_t parentSize = parent.getRef<vector<ShrinkableAny>>().size();
         // no further shrinking possible
         if(parentSize <= minSize || parentSize <= rearSize) {
             // try shrinking mid
@@ -172,9 +172,8 @@ Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<S
 }
 
 Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise) {
-    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef();
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVec, minSize) : shrinkAnyVecShr);
+    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = (membershipwise ? shrinkMembershipwise(shrinkAnyVecShr, minSize) : shrinkAnyVecShr);
 
     // elementwise shrinking
     if(elementwise)

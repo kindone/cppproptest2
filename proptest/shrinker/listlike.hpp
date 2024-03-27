@@ -42,7 +42,7 @@ template <template <typename...> class Container, typename T>
 Shrinkable<vector<ShrinkableAny>> toAnyVectorShrinkable(const Container<Shrinkable<T>>& shrinkableCont)
 {
     Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = make_shrinkable<vector<ShrinkableAny>>();
-    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
+    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef<vector<ShrinkableAny>>();
     shrinkAnyVec.reserve(shrinkableCont.size());
     util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), +[](const Shrinkable<T>& shr) -> ShrinkableAny {
         return shr;
@@ -58,7 +58,7 @@ Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<Shrinkab
             auto value = make_shrinkable<Container<T>>();
             Container<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.insert(valueCont.end(), itr->getRef().getRef<T>());
+                valueCont.insert(valueCont.end(), itr->getAny().getRef<T>());
             }
             return value;
         });
@@ -72,7 +72,7 @@ Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<Shrinkable
             auto value = make_shrinkable<ListLike<T>>();
             ListLike<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.push_back(itr->getRef().getRef<T>());
+                valueCont.push_back(itr->getAny().getRef<T>());
             }
             return value;
         });
@@ -92,7 +92,7 @@ Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<Shrinkable
 template <template <typename...> class Container, typename T>
 Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T>>>& shr, size_t minSize, bool elementwise = true, bool membershipwise = true)
 {
-    auto shrinkableCont = shr.getRef();
+    auto shrinkableCont = shr.getRef<Container<Shrinkable<T>>>();
     // change type to any
     Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = toAnyVectorShrinkable(shrinkableCont);
     // membershipwise shrinking
@@ -119,7 +119,7 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
 template <template <typename...> class ListLike, typename T>
 Shrinkable<ListLike<T>> shrinkListLike(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise = true, bool membershipwise = true)
 {
-    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef();
+    const vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getRef<vector<ShrinkableAny>>();
     // membershipwise shrinking
     Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
 
@@ -138,7 +138,7 @@ template <template <typename...> class ListLike, typename T>
 Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLike<Shrinkable<T>>>& shr,
                                                          size_t minSize)
 {
-    auto shrinkableElems = shr.getRef();
+    auto shrinkableElems = shr.getRef<ListLike<Shrinkable<T>>>();
     auto size = shrinkableElems.size();
     auto rangeShrinkable =
         shrinkIntegral<size_t>(size - minSize).template map<size_t>([minSize](const size_t& s) { return s + minSize; });
@@ -146,7 +146,7 @@ Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLi
         if (newSize == 0)
             return ListLike<Shrinkable<T>>();
         else {
-            auto shrinkableElems = shr.getRef();
+            auto shrinkableElems = shr.getRef<ListLike<Shrinkable<T>>>();
             return ListLike<Shrinkable<T>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize);
         }
     });

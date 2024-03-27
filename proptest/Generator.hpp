@@ -142,7 +142,7 @@ struct PROPTEST_API AnyGenerator
 
     template <typename T>
     Shrinkable<T> generate(Random& rand) {
-        return anyGen(rand).getRef().getRef<T>();
+        return anyGen(rand).getAny().getRef<T>();
     }
 
 private:
