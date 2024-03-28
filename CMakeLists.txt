@@ -53,6 +53,7 @@ SET(proptest_sources
     proptest/combinator/intervals.cpp
     proptest/combinator/accumulate.cpp
     proptest/Stream.cpp
+    proptest/Shrinkable.cpp
     proptest/ShrinkableAny.cpp
     proptest/Generator.cpp
     proptest/Random.cpp

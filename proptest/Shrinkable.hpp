@@ -9,7 +9,7 @@
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
 
-//#define PROPTEST_UNTYPED_SHRINKABLE 1
+#define PROPTEST_UNTYPED_SHRINKABLE 1
 
 
 namespace proptest {
@@ -36,34 +36,25 @@ struct PROPTEST_API ShrinkableBase
 {
     using StreamType = ::proptest::Stream<ShrinkableBase>;
 
-    explicit ShrinkableBase(Any _value) : value(_value), shrinks(StreamType::empty()) {}
+    explicit ShrinkableBase(Any _value);
 
     template <typename T>
     ShrinkableBase(const Shrinkable<T>& other) : value(other.value), shrinks(other.shrinks) {}
 
-    ShrinkableBase clear() const {
-        return ShrinkableBase{value};
-    }
+    ShrinkableBase clear() const;
 
-    ShrinkableBase with(const StreamType& otherShrinks) const {
-        return ShrinkableBase(value, otherShrinks);
-    }
+    ShrinkableBase with(const StreamType& otherShrinks) const;
 
-    ShrinkableBase with(Function<StreamType()> otherStream) const {
-        return ShrinkableBase(value, Lazy<StreamType>(otherStream));
-    }
-
+    ShrinkableBase with(Function<StreamType()> otherStream) const;
 
     template <typename T> T get() const { return value.getRef<T>(); }
     template <typename T> const T& getRef() const { return value.getRef<T>(); }
     template <typename T> T& getMutableRef() { return value.getMutableRef<T>(); }
-    Any getAny() const { return value; }
+    Any getAny() const;
 
-    ShrinkableBase clone() const {
-        return ShrinkableBase(value.clone(), shrinks);
-    }
+    ShrinkableBase clone() const;
 
-    StreamType getShrinks() const { return *shrinks; }
+    StreamType getShrinks() const;
 
     template <typename U, typename T>
     ShrinkableBase map(Function<U(const T&)> transformer) const {
@@ -133,51 +124,20 @@ struct PROPTEST_API ShrinkableBase
     }
 
     // concat: continues with then after horizontal dead end
-    ShrinkableBase concatStatic(const StreamType& then) const {
-        auto shrinksWithThen = shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
-            return shr.concatStatic(then);
-        });
-        return with(shrinksWithThen.concat(then));
-    }
+    ShrinkableBase concatStatic(const StreamType& then) const;
 
     // concat: extend shrinks stream with function taking parent as argument
-    ShrinkableBase concat(Function<StreamType(const ShrinkableBase&)> then) const {
-        return with([copy = *this, shrinks = this->shrinks, then]() {
-            auto shrinksWithThen = shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
-                return shr.concat(then);
-            });
-            return shrinksWithThen.concat([=]() { return then(copy); });
-        });
-    }
+    ShrinkableBase concat(Function<StreamType(const ShrinkableBase&)> then) const;
 
     // andThen: continues with then after vertical dead end
-    ShrinkableBase andThenStatic(const StreamType& then) const {
-        if(shrinks->isEmpty())
-            return with(then);
-        else
-            return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
-                return shr.andThenStatic(then);
-            }));
-    }
+    ShrinkableBase andThenStatic(const StreamType& then) const;
 
-    ShrinkableBase andThen(Function<StreamType(const ShrinkableBase&)> then) const {
-        if(shrinks->isEmpty())
-            return with(then(*this));
-        else
-            return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
-                return shr.andThen(then);
-            }));
-    }
+    ShrinkableBase andThen(Function<StreamType(const ShrinkableBase&)> then) const;
 
-    ShrinkableBase take(int n) const {
-        return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([n](const ShrinkableBase& shr) -> ShrinkableBase {
-            return shr.take(n);
-        }));
-    }
+    ShrinkableBase take(int n) const;
 
 private:
-    ShrinkableBase(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
-    }
+    ShrinkableBase(const Any& _value, const Lazy<StreamType>& _shrinks);
 
     Any value;
     Lazy<StreamType> shrinks;
