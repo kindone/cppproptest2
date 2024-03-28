@@ -260,6 +260,7 @@ T toCallableArg(const decay_t<T>& value) {
 
 template <typename RET, typename...ARGS>
 struct CallableHolderBase {
+    virtual ~CallableHolderBase() {}
     virtual RET operator()(const decay_t<ARGS>&... args) = 0;
 };
 
