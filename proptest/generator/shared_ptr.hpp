@@ -26,7 +26,7 @@ public:
     {
         auto gen = Arbi<T>();
         Shrinkable<T> shrinkable = gen(rand);
-        return shrinkable.template map<shared_ptr<T>, T>(+[](const T& obj) { return util::make_shared<T>(obj); });
+        return shrinkable.template map<shared_ptr<T>>(+[](const T& obj) { return util::make_shared<T>(obj); });
     }
 
     shared_ptr<GeneratorBase<shared_ptr<T>>> clone() const override {

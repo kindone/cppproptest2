@@ -40,10 +40,10 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned)
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned2)
 {
     // concat with positive signed number
-    Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8).concat([](const Shrinkable<TypeParam>& shr) {
-        if(shr.template get<TypeParam>() == 0)
+    auto shr = shrinkIntegral<TypeParam>(-8).concat([](const Shrinkable<TypeParam>& shr) {
+        if(shr.get() == 0)
             return Stream<Shrinkable<TypeParam>>::empty();
-        return Stream<Shrinkable<TypeParam>>::one(Shrinkable<TypeParam>(-shr.template get<TypeParam>()));
+        return Stream<Shrinkable<TypeParam>>::one(Shrinkable<TypeParam>(-shr.get()));
     });
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: [{value: 0}, {value: -4, shrinks: [{value: -2, shrinks: [{value: -1, shrinks: [{value: 1}]}, {value: 2}]}, {value: -3, shrinks: [{value: 3}]}, {value: 4}]}, {value: -6, shrinks: [{value: -5, shrinks: [{value: 5}]}, {value: 6}]}, {value: -7, shrinks: [{value: 7}]}, {value: 8}]}");
 }
@@ -71,7 +71,7 @@ TEST(PairShrinker, ints)
 TEST(PairShrinker, double)
 {
     auto toDouble = +[](const int& i) { return (double)i; };
-    auto shr = shrinkPair<double, double>(shrinkIntegral<int>(1).map<double,int>(toDouble), shrinkIntegral<int>(2).map<double,int>(toDouble));
+    auto shr = shrinkPair<double, double>(shrinkIntegral<int>(1).map<double>(toDouble), shrinkIntegral<int>(2).map<double>(toDouble));
     EXPECT_EQ(serializeShrinkable(shr), "{value: (1, 2), shrinks: [{value: (0, 2), shrinks: [{value: (0, 0)}, {value: (0, 1)}]}, {value: (1, 0)}, {value: (1, 1)}]}");
     printExhaustive(shr);
 }
@@ -79,13 +79,13 @@ TEST(PairShrinker, double)
 TEST(PairShrinker, strings)
 {
     auto toString = +[](const int& i) { return to_string(i); };
-    auto shr = shrinkPair<string,string>(shrinkIntegral<int>(1).map<string,int>(toString), shrinkIntegral<int>(2).map<string,int>(toString));
+    auto shr = shrinkPair(shrinkIntegral<int>(1).map<string>(toString), shrinkIntegral<int>(2).map<string>(toString));
     EXPECT_EQ(serializeShrinkable(shr), "{value: (\"1\" (31), \"2\" (32)), shrinks: [{value: (\"0\" (30), \"2\" (32)), shrinks: [{value: (\"0\" (30), \"0\" (30))}, {value: (\"0\" (30), \"1\" (31))}]}, {value: (\"1\" (31), \"0\" (30))}, {value: (\"1\" (31), \"1\" (31))}]}");
 }
 
 TEST(PairShrinker, different_types)
 {
-    auto shr = shrinkPair<int, string>(shrinkIntegral<int>(1), shrinkIntegral<int>(2).map<string,int>([](int i) { return to_string(i); }));
+    auto shr = shrinkPair(shrinkIntegral<int>(1), shrinkIntegral<int>(2).map<string>([](int i) { return to_string(i); }));
     EXPECT_EQ(serializeShrinkable(shr), "{value: (1, \"2\" (32)), shrinks: [{value: (0, \"2\" (32)), shrinks: [{value: (0, \"0\" (30))}, {value: (0, \"1\" (31))}]}, {value: (1, \"0\" (30))}, {value: (1, \"1\" (31))}]}");
 }
 

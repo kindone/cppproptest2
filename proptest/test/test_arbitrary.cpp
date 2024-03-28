@@ -26,7 +26,7 @@ TEST(Arbitrary, bool)
     Random rand(getCurrentTime());
     auto arbi = Arbi<bool>();
     for(int i = 0; i < 5; i++)
-        cout << arbi(rand).get<bool>() << endl;
+        cout << arbi(rand).get() << endl;
     // TODO: validate
 }
 
@@ -50,8 +50,8 @@ TEST(Arbitrary, toGenFunction)
     auto arbi = Arbi<bool>();
     GenFunction<bool> gen = arbi;
     for(int i = 0; i < 5; i++)
-        cout << gen(rand).get<bool>() << endl;
-
+        cout << gen(rand).get() << endl;
+    
     // rvalue
     GenFunction<bool> gen2 = Arbi<bool>();
 }
@@ -60,9 +60,9 @@ TEST(Arbitrary, int)
 {
     Random rand(getCurrentTime());
     auto arbi = Arbi<int>();
-    auto val = arbi(rand).get<int>();
+    auto val = arbi(rand).get();
     for(int i = 0; i < 5; i++)
-        cout << arbi(rand).get<int>() << endl;
+        cout << arbi(rand).get() << endl;
     EXPECT_TRUE(val >= std::numeric_limits<int>::min());
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
 }
@@ -72,7 +72,7 @@ TEST(Arbitrary, double)
     Random rand(getCurrentTime());
     auto arbi = Arbi<double>();
     for(int i = 0; i < 5; i++)
-        cout << arbi(rand).get<double>() << endl;
+        cout << arbi(rand).get() << endl;
 }
 
 TEST(Arbitrary, list_int)
@@ -81,21 +81,21 @@ TEST(Arbitrary, list_int)
     auto arbi = Arbi<list<int>>();
     for(int i = 0; i < 2; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<list<int>>());
+        show(cout, shr.get());
         cout << endl;
-        EXPECT_LE(shr.get<list<int>>().size(), Arbi<list<int>>::defaultMaxSize);
+        EXPECT_LE(shr.get().size(), Arbi<list<int>>::defaultMaxSize);
     }
 
     auto arbi2 = Arbi<list<int>>(Arbi<int>());
     for(int i = 0; i < 2; i++) {
         auto shr = arbi2(rand);
-        EXPECT_LE(shr.get<list<int>>().size(), Arbi<list<int>>::defaultMaxSize);
+        EXPECT_LE(shr.get().size(), Arbi<list<int>>::defaultMaxSize);
     }
 
     auto arbi3 = Arbi<list<int>>(interval<int>(0, 9));
     for(int i = 0; i < 2; i++) {
         auto shr = arbi3(rand);
-        const auto& l = shr.get<list<int>>();
+        const auto& l = shr.get();
         EXPECT_LE(l.size(), Arbi<list<int>>::defaultMaxSize);
         for(auto val : l) {
             EXPECT_TRUE(0<= val && val <= 9);
@@ -109,21 +109,21 @@ TEST(Arbitrary, vector_int)
     auto arbi = Arbi<vector<int>>();
     for(int i = 0; i < 2; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<vector<int>>());
+        show(cout, shr.get());
         cout << endl;
-        EXPECT_LE(shr.get<vector<int>>().size(), Arbi<vector<int>>::defaultMaxSize);
+        EXPECT_LE(shr.get().size(), Arbi<vector<int>>::defaultMaxSize);
     }
 
     auto arbi2 = Arbi<vector<int>>(Arbi<int>());
     for(int i = 0; i < 2; i++) {
         auto shr = arbi2(rand);
-        EXPECT_LE(shr.get<vector<int>>().size(), Arbi<vector<int>>::defaultMaxSize);
+        EXPECT_LE(shr.get().size(), Arbi<vector<int>>::defaultMaxSize);
     }
 
     auto arbi3 = Arbi<vector<int>>(interval<int>(0, 9));
     for(int i = 0; i < 2; i++) {
         auto shr = arbi3(rand);
-        const auto& l = shr.get<vector<int>>();
+        const auto& l = shr.get();
         EXPECT_LE(l.size(), Arbi<vector<int>>::defaultMaxSize);
         for(auto val : l) {
             EXPECT_TRUE(0<= val && val <= 9);
@@ -137,9 +137,9 @@ TEST(Arbitrary, set_int)
     auto arbi = Arbi<set<int>>();
     for(int i = 0; i < 5; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<set<int>>());
+        show(cout, shr.get());
         cout << endl;
-        EXPECT_LE(shr.get<set<int>>().size(), (Arbi<set<int   >>::defaultMaxSize));
+        EXPECT_LE(shr.get().size(), (Arbi<set<int   >>::defaultMaxSize));
     }
 }
 
@@ -149,9 +149,9 @@ TEST(Arbitrary, map_int_int)
     auto arbi = Arbi<map<int,int>>();
     for(int i = 0; i < 2; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<map<int,int>>());
+        show(cout, shr.get());
         cout << endl;
-        EXPECT_LE((shr.get<map<int,int>>().size()), (Arbi<map<int,int>>::defaultMaxSize));
+        EXPECT_LE(shr.get().size(), (Arbi<map<int,int>>::defaultMaxSize));
     }
 }
 
@@ -161,9 +161,9 @@ TEST(Arbitrary, pair_int_string)
     auto arbi = Arbi<pair<int,string>>(interval(0,10), interval(0,10).map<string>([](int n) { return to_string(n); }));
     for(int i = 0; i < 10; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<pair<int,string>>());
+        show(cout, shr.get());
         cout << endl;
-        const auto& thePair = shr.get<pair<int,string>>();
+        const auto& thePair = shr.get();
         EXPECT_TRUE(0 <= thePair.first && thePair.first <= 10);
         EXPECT_TRUE(1 <= thePair.second.size() && thePair.second.size() <= 2);
     }
@@ -175,9 +175,9 @@ TEST(Arbitrary, tuple_int_string)
     auto arbi = Arbi<tuple<int,string>>(interval(0,10), interval(0,10).map<string>([](int n) { return to_string(n); }));
     for(int i = 0; i < 10; i++) {
         auto shr = arbi(rand);
-        show(cout, shr.get<tuple<int,string>>());
+        show(cout, shr.get());
         cout << endl;
-        const auto& tup = shr.get<tuple<int,string>>();
+        const auto& tup = shr.get();
         EXPECT_TRUE(0 <= get<0>(tup) && get<0>(tup) <= 10);
         EXPECT_TRUE(1 <= get<1>(tup).size() && get<1>(tup).size() <= 2);
     }
@@ -188,13 +188,13 @@ TEST(Arbitrary, string_default)
     Random rand(getCurrentTime());
     auto arbi = Arbi<string>();
     for(int i = 0; i < 100; i++) {
-        auto str = arbi(rand).get<string>();
+        auto str = arbi(rand).get();
         EXPECT_LE(str.size(), Arbi<string>::defaultMaxSize);
     }
 
     auto arbi2 = Arbi<string>(Arbi<char>());
     for(int i = 0; i < 100; i++) {
-        auto str = arbi2(rand).get<string>();
+        auto str = arbi2(rand).get();
         EXPECT_LE(str.size(), Arbi<string>::defaultMaxSize);
     }
 }
@@ -204,7 +204,7 @@ TEST(Arbitrary, string_customchars)
     Random rand(getCurrentTime());
     auto arbi = Arbi<string>(interval<char>('0','9'));
     for(int i = 0; i < 100; i++) {
-        auto str = arbi(rand).get<string>();
+        auto str = arbi(rand).get();
         for(auto c : str) {
             EXPECT_TRUE(c >= '0' && c<= '9');
         }
@@ -231,7 +231,7 @@ TYPED_TEST(StringLikeTest, Arbitrary)
     Random rand(getCurrentTime());
     auto arbi = Arbi<TypeParam>();
     for(int i = 0; i < 10; i++) {
-        auto str = arbi(rand).template get<TypeParam>();
+        auto str = arbi(rand).get();
         EXPECT_LE(str.charsize(), Arbi<TypeParam>::defaultMaxSize);
 
         vector<uint8_t> vec(str.begin(), str.end());
@@ -247,7 +247,7 @@ TYPED_TEST(StringLikeTest, Arbitrary_customchars)
     Random rand(getCurrentTime());
     auto arbi = Arbi<TypeParam>(interval<uint32_t>('0','9'));
     for(int i = 0; i < 10; i++) {
-        auto str = arbi(rand).template get<TypeParam>();
+        auto str = arbi(rand).get();
         for(auto c : str) {
             if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
                 EXPECT_TRUE(c >= '0' && c<= '9');
@@ -260,9 +260,9 @@ TEST(Arbitrary, basic)
 {
     Random rand(getCurrentTime());
     auto arbi = Arbi<int>();
-    auto val = arbi(rand).get<int>();
+    auto val = arbi(rand).get();
     for(int i = 0; i < 10; i++)
-        cout << arbi(rand).get<int>() << endl;
+        cout << arbi(rand).get() << endl;
     EXPECT_TRUE(val >= std::numeric_limits<int>::min());
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
 }
@@ -275,7 +275,7 @@ TEST(Arbitrary, monadic)
     auto gen2 = gen.filter([](const int& val) { return val > 0; });
 
     for(int i = 0; i < 10; i++) {
-        auto val = gen2(rand).get<int>();
+        auto val = gen2(rand).get();
         cout << val << endl;
         EXPECT_TRUE(val % 2 == 0 && val > 0);
     }

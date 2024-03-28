@@ -60,7 +60,7 @@ struct PROPTEST_API ShrinkableBase
     ShrinkableBase map(Function<U(const T&)> transformer) const {
         return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<ShrinkableBase> {
             return shrinks->template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> ShrinkableBase {
-                    return shr.map<U, T>(transformer);
+                    return shr.map<U>(transformer);
                 });
             }
         );
@@ -88,7 +88,7 @@ struct PROPTEST_API ShrinkableBase
             return with(shrinks->template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
                 return criteria(shr.getRef<T>());
             }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
-                return shr.filter<T>(criteria);
+                return shr.filter(criteria);
             }));
     }
 
@@ -119,7 +119,7 @@ struct PROPTEST_API ShrinkableBase
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
         return with(filterStream(getShrinks(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
-            return shr.filter<T>(criteria, tolerance);
+            return shr.filter(criteria, tolerance);
         }));
     }
 
@@ -157,6 +157,7 @@ template <typename T>
 struct Shrinkable : public ShrinkableBase
 {
     using type = T;
+    using TStreamType = ::proptest::Stream<Shrinkable>;
 
     Shrinkable(const ShrinkableBase& base) : ShrinkableBase(base) {}
 
@@ -178,9 +179,77 @@ struct Shrinkable : public ShrinkableBase
         return ShrinkableBase::with(otherStream);
     }
 
-    template <same_as<T> TT=T> T get() const { return ShrinkableBase::get<T>(); }
-    template <same_as<T> TT=T> const T& getRef() const { return ShrinkableBase::getRef<T>(); }
-    template <same_as<T> TT=T> T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
+    T get() const { return ShrinkableBase::get<T>(); }
+    const T& getRef() const { return ShrinkableBase::getRef<T>(); }
+    T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
+
+    Shrinkable clone() const { return ShrinkableBase::clone(); }
+
+    template <typename U>
+    Shrinkable<U> map(Function<U(const T&)> transformer) const {
+        return ShrinkableBase::map<U, T>(transformer);
+    }
+
+    template <typename U>
+    Shrinkable<U> flatMap(Function<ShrinkableBase(const T&)> transformer) const {
+        return ShrinkableBase::flatMap<U, T>(transformer);
+    }
+
+    template <typename U>
+    Shrinkable<U> mapShrinkable(Function<ShrinkableBase(const ShrinkableBase&)> transformer) const {
+        return ShrinkableBase::mapShrinkable<U, T>(transformer);
+    }
+
+    // provide filtered generation, shrinking
+    Shrinkable filter(Function<bool(const T&)> criteria) const {
+        return ShrinkableBase::filter<T>(criteria);
+    }
+
+    // provide filtered generation, shrinking
+    Shrinkable filter(Function<bool(const T&)> criteria, int tolerance) const {
+        return ShrinkableBase::filter<T>(criteria, tolerance);
+    }
+
+    // concat: continues with then after horizontal dead end
+    Shrinkable concatStatic(const StreamType& then) const { return ShrinkableBase::concatStatic(then); }
+    // concat: extend shrinks stream with function taking parent as argument
+    Shrinkable concat(Function<StreamType(const ShrinkableBase&)> then) const { return ShrinkableBase::concat(then); }
+    // andThen: continues with then after vertical dead end
+    Shrinkable andThenStatic(const StreamType& then) const { return ShrinkableBase::andThenStatic(then); }
+
+    Shrinkable andThen(Function<StreamType(const ShrinkableBase&)> then) const { return ShrinkableBase::andThen(then); }
+
+#ifndef PROPTEST_UNTYPED_STREAM
+    Shrinkable concatStatic(const TStreamType& then) const {
+        return ShrinkableBase::concatStatic(then.transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+            return shr;
+        ));
+    }
+
+    Shrinkable concat(Function<TStreamType(const Shrinkable&)> then) const {
+        return ShrinkableBase::concat([then](const ShrinkableBase& base) {
+            return then(Shrinkable(base)).transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+                return shr;
+            });
+        });
+    }
+
+    Shrinkable andThenStatic(const TStreamType& then) const {
+        return ShrinkableBase::andThenStatic(then.transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+            return shr;
+        ));
+    }
+
+    Shrinkable andThen(Function<TStreamType(const Shrinkable&)> then) const {
+        return ShrinkableBase::andThen([then](const ShrinkableBase& base) {
+            return then(Shrinkable(base)).transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+                return shr;
+            });
+        });
+    }
+#endif // PROPTEST_UNTYPED_STREAM
+
+    Shrinkable take(int n) const { return ShrinkableBase::take(n); }
 };
 
 
@@ -221,13 +290,8 @@ struct PROPTEST_API Shrinkable
         return Shrinkable(value, Lazy<StreamType>(otherStream));
     }
 
-    template <same_as<T> TT = T>
     T get() const { return value.getRef<T>(); }
-
-    template <same_as<T> TT = T>
     const T& getRef() const { return value.getRef<T>(); }
-
-    template <same_as<T> TT = T>
     T& getMutableRef() { return value.getMutableRef<T>(); }
 
     Any getAny() const { return value; }
@@ -238,7 +302,7 @@ struct PROPTEST_API Shrinkable
 
     StreamType getShrinks() const { return *shrinks; }
 
-    template <typename U, same_as<T> TT = T>
+    template <typename U>
     Shrinkable<U> map(Function<U(const T&)> transformer) const {
         return Shrinkable<U>(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<Shrinkable<U>> {
             return shrinks->template transform<Shrinkable<U>,Shrinkable<T>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U> {
@@ -248,7 +312,7 @@ struct PROPTEST_API Shrinkable
         );
     }
 
-    template <typename U, same_as<T> TT = T>
+    template <typename U>
     Shrinkable<U> flatMap(Function<Shrinkable<U>(const T&)> transformer) const {
         return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable<U>,Shrinkable<T>>([transformer](const Shrinkable<T>& shr) -> Shrinkable<U>{
                     return shr.flatMap<U>(transformer);
@@ -257,11 +321,10 @@ struct PROPTEST_API Shrinkable
         );
     }
 
-    template <typename U, same_as<T> TT = T>
+    template <typename U>
     Shrinkable<U> mapShrinkable(Function<Shrinkable<U>(const Shrinkable&)> transformer) const;
 
     // provide filtered generation, shrinking
-    template <same_as<T> TT = T>
     Shrinkable<T> filter(Function<bool(const T&)> criteria) const {
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
@@ -275,7 +338,6 @@ struct PROPTEST_API Shrinkable
     }
 
     // provide filtered generation, shrinking
-    template <same_as<T> TT = T>
     Shrinkable<T> filter(Function<bool(const T&)> criteria, int tolerance) const {
 
         static Function<StreamType(const StreamType&,Function<bool(const T&)>, int)> filterStream = +[](const StreamType& stream, Function<bool(const T&)> _criteria, int _tolerance) {
@@ -410,7 +472,7 @@ class less<proptest::Shrinkable<T>> {
 public:
     constexpr bool operator()(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs) const
     {
-        return lhs.template getRef<T>() < rhs.template getRef<T>();
+        return lhs.getRef() < rhs.getRef();
     }
 };
 
@@ -419,7 +481,7 @@ class less<proptest::Shrinkable<pair<T, U>>> {
 public:
     constexpr bool operator()(const proptest::Shrinkable<pair<T,U>>& lhs, const proptest::Shrinkable<pair<T,U>>& rhs) const
     {
-        return lhs.template getRef<pair<T,U>>().first < rhs.template getRef<pair<T,U>>().first;
+        return lhs.getRef().first < rhs.getRef().first;
     }
 };
 

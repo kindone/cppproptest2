@@ -158,7 +158,7 @@ TEST(Performance, StreamFilterLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto stream = Stream<LargeObject>::one(LargeObject(i));
-        stream = stream.filter<LargeObject>(+[](const LargeObject&) {
+        stream = stream.filter<int>(+[](const LargeObject&) {
             return true;
         });
         EXPECT_EQ(stream.getHeadRef<LargeObject>().array[0], i);
@@ -263,7 +263,7 @@ TEST(Performance, ShrinkableFilter)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<int>(i);
-        shr = shr.filter<int>(+[](const int&) {
+        shr = shr.filter(+[](const int&) {
             return true;
         });
         EXPECT_EQ(shr.getRef(), i);
@@ -275,7 +275,7 @@ TEST(Performance, ShrinkableMap)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<int>(i);
-        shr = shr.map<int,int>(+[](const int& n) {
+        shr = shr.map<int>(+[](const int& n) {
             return n + 1;
         });
         EXPECT_EQ(shr.getRef(), i+1);
@@ -288,7 +288,7 @@ TEST(Performance, ShrinkableMapMany)
     {
         auto shr = make_shrinkable<int>(i);
         for(int j = 0; j < 10; j++) {
-            shr = shr.map<int,int>(+[](const int& n) {
+            shr = shr.map<int>(+[](const int& n) {
                 return n + 1;
             });
             EXPECT_EQ(shr.getRef(), i+1+j);
@@ -301,7 +301,7 @@ TEST(Performance, ShrinkableFlatMap)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<int>(i);
-        shr = shr.flatMap<int,int>(+[](const int& n) {
+        shr = shr.flatMap<int>(+[](const int& n) {
             return make_shrinkable<int>(n + 1);
         });
         EXPECT_EQ(shr.getRef(), i+1);
@@ -314,7 +314,7 @@ TEST(Performance, ShrinkableFlatMapMany)
     {
         auto shr = make_shrinkable<int>(i);
         for(int j = 0; j < 10; j++) {
-            shr = shr.flatMap<int,int>(+[](const int& n) {
+            shr = shr.flatMap<int>(+[](const int& n) {
                 return make_shrinkable<int>(n + 1);
             });
             EXPECT_EQ(shr.getRef(), i+1+j);
@@ -409,7 +409,7 @@ TEST(Performance, ShrinkableFilterLarge)
     for(int i = 0; i < 10000; i++)
     {
         auto shr = make_shrinkable<LargeObject>(i);
-        shr = shr.filter<LargeObject>(+[](const LargeObject&) {
+        shr = shr.filter(+[](const LargeObject&) {
             return true;
         });
         EXPECT_EQ(shr.getRef().array[0], i);

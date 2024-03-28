@@ -24,7 +24,7 @@ TEST(Just, lvalue)
     Random rand(getCurrentTime());
     auto gen = just<int>(a);
     auto result = gen(rand);
-    EXPECT_EQ(result.get<int>(), 1339);
+    EXPECT_EQ(result.get(), 1339);
 }
 
 TEST(Just, rvalue)
@@ -32,7 +32,7 @@ TEST(Just, rvalue)
     Random rand(getCurrentTime());
     auto gen = just<int>(1339);
     auto result = gen(rand);
-    EXPECT_EQ(result.get<int>(), 1339);
+    EXPECT_EQ(result.get(), 1339);
 }
 
 TEST(Just, Any)
@@ -48,7 +48,7 @@ TEST(OneOf, basic)
     Random rand(getCurrentTime());
     auto gen = oneOf<int>(just<int>(1339), just<int>(42));
     auto result = gen(rand);
-    EXPECT_TRUE(result.get<int>() == 1339 || result.get<int>() == 42);
+    EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
 }
 
 TEST(OneOf, weighted)
@@ -58,11 +58,11 @@ TEST(OneOf, weighted)
     int num1339 = 0, num42 = 0;
     for(int i = 0; i < 1000; i++) {
         auto result = gen(rand);
-        if(result.get<int>() == 1339)
+        if(result.get() == 1339)
             num1339++;
-        else if(result.get<int>() == 42)
+        else if(result.get() == 42)
             num42++;
-        EXPECT_TRUE(result.get<int>() == 1339 || result.get<int>() == 42);
+        EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
     }
     EXPECT_GT(num1339, num42);
 }
@@ -72,7 +72,7 @@ TEST(ElementOf, basic)
     Random rand(getCurrentTime());
     auto gen = elementOf<int>(1339, 42);
     auto result = gen(rand);
-    EXPECT_TRUE(result.get<int>() == 1339 || result.get<int>() == 42);
+    EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
 }
 
 TEST(ElementOf, weighted)
@@ -82,11 +82,11 @@ TEST(ElementOf, weighted)
     int num1339 = 0, num42 = 0;
     for(int i = 0; i < 1000; i++) {
         auto result = gen(rand);
-        if(result.get<int>() == 1339)
+        if(result.get() == 1339)
             num1339++;
-        else if(result.get<int>() == 42)
+        else if(result.get() == 42)
             num42++;
-        EXPECT_TRUE(result.get<int>() == 1339 || result.get<int>() == 42);
+        EXPECT_TRUE(result.get() == 1339 || result.get() == 42);
     }
     EXPECT_GT(num1339, num42);
 }
@@ -100,7 +100,7 @@ TEST(Filter, basic)
     for(int i = 0; i < 100; i++)
     {
         auto result = filtered(rand);
-        EXPECT_TRUE(result.get<int>() % 2 == 0);
+        EXPECT_TRUE(result.get() % 2 == 0);
     }
 }
 
@@ -113,7 +113,7 @@ TEST(Transform, basic)
     for(int i = 0; i < 100; i++)
     {
         auto result = transformed(rand);
-        EXPECT_TRUE(result.get<int>() % 2 == 0);
+        EXPECT_TRUE(result.get() % 2 == 0);
     }
 }
 
@@ -126,7 +126,7 @@ TEST(Transform, basic2)
     for(int i = 0; i < 100; i++)
     {
         auto result = transformed(rand);
-        if(result.get<string>() == "8") {
+        if(result.get() == "8") {
             EXPECT_EQ(serializeShrinkable(result), "{value: \"8\" (38), shrinks: [{value: \"0\" (30)}, {value: \"4\" (34), shrinks: [{value: \"2\" (32), shrinks: [{value: \"1\" (31)}]}, {value: \"3\" (33)}]}, {value: \"6\" (36), shrinks: [{value: \"5\" (35)}]}, {value: \"7\" (37)}]}");
         }
     }
@@ -141,7 +141,7 @@ TEST(FilterTransform, basic)
     for(int i = 0; i < 10; i++)
     {
         auto result = transformed(rand);
-        EXPECT_EQ(result.get<string>(), "8");
+        EXPECT_EQ(result.get(), "8");
         EXPECT_EQ(serializeShrinkable(result), "{value: \"8\" (38)}"); // shrinks are also filtered
     }
 }
@@ -157,7 +157,7 @@ TEST(Derive, basic)
         // TODO validation
         auto result = derived(rand);
         cout << serializeShrinkable(result) << endl;
-        if(result.get<int>() == 8) {
+        if(result.get() == 8) {
             EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
         }
     }
@@ -252,7 +252,7 @@ TEST(Intervals, basic)
     for(int i = 0; i < 20; i++)
     {
         auto result = gen(rand);
-        EXPECT_TRUE(result.get<int64_t>() >= 0 && result.get<int64_t>() <= 22);
-        EXPECT_TRUE(!(result.get<int64_t>() > 2 && result.get<int64_t>() < 12));
+        EXPECT_TRUE(result.get() >= 0 && result.get() <= 22);
+        EXPECT_TRUE(!(result.get() > 2 && result.get() < 12));
     }
 }

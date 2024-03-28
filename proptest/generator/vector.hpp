@@ -40,9 +40,9 @@ public:
     {
         size_t size = rand.getRandomSize(minSize, maxSize + 1);
         auto shrinkVec = make_shrinkable<vector<ShrinkableAny>>();
-        shrinkVec.getMutableRef<vector<ShrinkableAny>>().reserve(size);
+        shrinkVec.getMutableRef().reserve(size);
         for (size_t i = 0; i < size; i++)
-            shrinkVec.getMutableRef<vector<ShrinkableAny>>().push_back(elemGen(rand));
+            shrinkVec.getMutableRef().push_back(elemGen(rand));
 
         return shrinkListLike<vector, T>(shrinkVec, minSize);
     }

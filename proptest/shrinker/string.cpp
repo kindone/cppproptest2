@@ -8,18 +8,18 @@ Shrinkable<string> shrinkString(const string& str, size_t minSize) {
 
     // "abc" -> ["", "a", "ab"]
     auto shrinkRear =
-        shrinkIntegral<uint64_t>(size - minSize).map<string,uint64_t>([str, minSize](const uint64_t& theSize) {
+        shrinkIntegral<uint64_t>(size - minSize).map<string>([str, minSize](const uint64_t& theSize) {
             return str.substr(0, theSize + minSize);
         });
 
     // shrink front
     return shrinkRear.concat([minSize = minSize + 1](const Shrinkable<string>& shr) {
-        auto& str = shr.getRef<string>();
+        auto& str = shr.getRef();
         size_t maxSizeCopy = str.size();
         if (str.size() <= minSize)
             return Stream<Shrinkable<string>>::empty();
         auto newShrinkable = shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
-                                 .map<string,uint64_t>([str, minSize, maxSizeCopy](const uint64_t& value) {
+                                 .map<string>([str, minSize, maxSizeCopy](const uint64_t& value) {
                                      return str.substr(minSize + value, maxSizeCopy - (minSize + value));
                                  });
         return newShrinkable.getShrinks();

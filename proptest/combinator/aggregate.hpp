@@ -22,7 +22,7 @@ Generator<T> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(const T&
         return Generator<T>([gen1, gen2gen, size](Random& rand) {
             Shrinkable<T> shr = gen1(rand);
             for (size_t i = 0; i < size; i++)
-                shr = gen2gen(shr.template getRef<T>())(rand);
+                shr = gen2gen(shr.getRef())(rand);
             return shr;
         });
     });

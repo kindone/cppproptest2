@@ -46,7 +46,7 @@ Shrinkable<pair<ARG1, ARG2>> shrinkPair(
     ShrinkableAny firstShrAny(firstShr), secondShrAny(secondShr);
     auto elemPair = util::make_pair(firstShrAny, secondShrAny);
     auto shrinkable = make_shrinkable<decltype(elemPair)>(elemPair);
-    return util::PairShrinker::shrink(shrinkable).map<pair<ARG1, ARG2>, pair<Any, Any>>(+[](const pair<Any, Any>& anyPair) {
+    return util::PairShrinker::shrink(shrinkable).map<pair<ARG1, ARG2>>(+[](const pair<Any, Any>& anyPair) {
         return util::make_pair(anyPair.first.getRef<ARG1>(), anyPair.second.getRef<ARG2>());
     });
 }

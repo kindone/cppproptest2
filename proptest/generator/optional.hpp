@@ -25,7 +25,7 @@ public:
     {
         if (rand.getRandomBool(nonEmptyProb)) {
             Shrinkable<T> shrinkable = elemGen(rand);
-            return shrinkable.template map<optional<T>,T>(
+            return shrinkable.template map<optional<T>>(
                 +[](const T& t) { return optional<T>(t); });
         } else {
             // null

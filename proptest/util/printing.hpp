@@ -105,7 +105,7 @@ ostream& show(ostream& os, const T& obj)
 template <typename T>
 ostream& show(ostream& os, const Shrinkable<T>& shrinkable)
 {
-    show(os, shrinkable.template getRef<T>());
+    show(os, shrinkable.getRef());
     return os;
 }
 

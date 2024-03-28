@@ -35,7 +35,7 @@ Generator<T> filter(GEN&& gen, Criteria&& criteria)
         // TODO: add some configurable termination criteria (e.g. maximum no. of attempts)
         while (true) {
             Shrinkable<T> shrinkable = genFunc(rand);
-            if (criteriaFunc(shrinkable.template getRef<T>())) {
+            if (criteriaFunc(shrinkable.getRef())) {
                 return shrinkable.filter(criteriaFunc, 1);  // 1: tolerance
             }
         }

@@ -134,11 +134,11 @@ struct FunctionNHolder<TARGET_RET, RET(ARGS...) const> : public AnyFunctionNHold
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) const override {
         if constexpr(is_void_v<TARGET_RET>) {
-            operator()(arg.template getRef<ARGS>(true)...);
+            operator()(arg.getRef(true)...);
             return Any();
         }
         else
-            return Any(static_cast<TARGET_RET>(operator()(arg.template getRef<ARGS>(true)...)));
+            return Any(static_cast<TARGET_RET>(operator()(arg.getRef(true)...)));
     }
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>...) override {
@@ -159,11 +159,11 @@ struct FunctionNHolder<TARGET_RET, RET(ARGS...)> : public AnyFunctionNHolder<siz
 
     Any invoke(conditional_t<is_same_v<ARGS, Any>, Any, Any>... arg) override {
         if constexpr(is_void_v<TARGET_RET>) {
-            operator()(arg.template getRef<ARGS>(true)...);
+            operator()(arg.getRef(true)...);
             return Any();
         }
         else
-            return Any(static_cast<TARGET_RET>(operator()(arg.template getRef<ARGS>()...)));
+            return Any(static_cast<TARGET_RET>(operator()(arg.getRef()...)));
     }
 };
 
@@ -334,12 +334,12 @@ struct AnyFunction {
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) const {
-        return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
+        return holder->apply({util::make_any<ARGS>(arg)...}).getRef();
     }
 
     template <typename RET, typename... ARGS>
     RET call(ARGS... arg) {
-        return holder->apply({util::make_any<ARGS>(arg)...}).template getRef<RET>();
+        return holder->apply({util::make_any<ARGS>(arg)...}).getRef();
     }
 
     shared_ptr<FunctionHolder> holder;
