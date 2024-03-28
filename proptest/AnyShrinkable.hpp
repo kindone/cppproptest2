@@ -12,7 +12,7 @@ struct AnyShrinkable {
     AnyShrinkable(const ShrinkableAny& shr)  : shrinkableAny(shr) {}
 
     template <typename T>
-    AnyShrinkable(const Shrinkable<T>& shr)  : shrinkableAny(shr.template map<Any>([](const T& value) { return Any(value); })) {}
+    AnyShrinkable(const Shrinkable<T>& shr)  : shrinkableAny(shr.template map<Any,T>([](const T& value) { return Any(value); })) {}
 
     AnyShrinkable clear() const { return AnyShrinkable(shrinkableAny.clear());}
 
@@ -31,13 +31,13 @@ struct AnyShrinkable {
     }
 
     template <typename T>
-    T get() const { return shrinkableAny.getRef().getRef<T>(); }
+    T get() const { return shrinkableAny.template getRef<Any>().getRef<T>(); }
 
     template <typename T>
-    const T& getRef() const { return shrinkableAny.getRef().getRef<T>();}
+    const T& getRef() const { return shrinkableAny.template getRef<Any>().getRef<T>();}
 
     Any getAny() const {
-        return shrinkableAny.getRef();
+        return shrinkableAny.template getRef<Any>();
     }
 
     stream_t getShrinks() const {

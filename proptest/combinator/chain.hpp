@@ -21,14 +21,14 @@ namespace util {
 template <typename U, typename T>
 Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
 {
-    return generator([gen1, gen2gen](Random& rand) {
+    return generator([gen1, gen2gen](Random& rand) -> Shrinkable<Chain<T, U>> {
         // generate T
         Shrinkable<T> shrinkableTs = gen1(rand);
         using Intermediate = pair<T, Shrinkable<U>>;
 
         // shrink strategy 1: expand Shrinkable<T>
         Shrinkable<pair<T, Shrinkable<U>>> intermediate =
-            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>>([&rand, gen2gen](const T& t) mutable {
+            shrinkableTs.template flatMap<pair<T, Shrinkable<U>>, T>([&rand, gen2gen](const T& t) mutable {
                 // generate U
                 auto gen2 = gen2gen(t);
                 Shrinkable<U> shrinkableU = gen2(rand);
@@ -39,11 +39,11 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) mutable -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Intermediate& interpair = interShr.getRef<Intermediate>();
+                const Intermediate& interpair = interShr.template getRef<Intermediate>();
                 const Shrinkable<U>& shrinkableU = interpair.second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
-                        const T& t = interShr.getRef<Intermediate>().first;
+                        const T& t = interShr.template getRef<Intermediate>().first;
                         return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(t, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
@@ -54,7 +54,7 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
             +[](const Intermediate& interpair) -> Shrinkable<tuple<T, U>> {
                 const T& t = interpair.first;
                 return make_shrinkable<Chain<T, U>>(
-                    tuple_cat(tuple<T>(t), util::make_tuple(interpair.second.getRef())));
+                    tuple_cat(tuple<T>(t), util::make_tuple(interpair.second.template getRef<U>())));
             });
     });
 }
@@ -74,7 +74,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
         // shrink strategy 1: expand Shrinkable<tuple<Ts...>>
         Shrinkable<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>> intermediate =
-            shrinkableTs.template flatMap<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>>(
+            shrinkableTs.template flatMap<pair<Chain<T0, T1, Ts...>,Shrinkable<U>>, Chain<T0, T1, Ts...>>(
                 [&rand, gen2genFunc](const Chain<T0, T1, Ts...>& ts) {
                     // generate U
                     auto gen2 = gen2genFunc(ts);
@@ -86,11 +86,11 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Shrinkable<U>& shrinkableU = interShr.getRef<Intermediate>().second;
+                const Shrinkable<U>& shrinkableU = interShr.template getRef<Intermediate>().second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
                         return make_shrinkable<pair<Chain<T0, T1, Ts...>, Shrinkable<U>>>(
-                            util::make_pair(interShr.getRef<Intermediate>().first, make_shrinkable<U>(u)));
+                            util::make_pair(interShr.template getRef<Intermediate>().first, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
             });

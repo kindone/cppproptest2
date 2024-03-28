@@ -33,10 +33,10 @@ Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2
         intermediate =
             intermediate.andThen(+[](const Shrinkable<Intermediate>& interShr) -> Stream<Shrinkable<Intermediate>> {
                 // assume interShr has no shrinks
-                const Shrinkable<U>& shrinkableU = interShr.getRef<Intermediate>().second;
+                const Shrinkable<U>& shrinkableU = interShr.template getRef<Intermediate>().second;
                 Shrinkable<Intermediate> newShrinkableU =
                     shrinkableU.template flatMap<Intermediate, U>([interShr](const U& u) mutable {
-                        return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(interShr.getRef<Intermediate>().first, make_shrinkable<U>(u)));
+                        return make_shrinkable<pair<T, Shrinkable<U>>>(util::make_pair(interShr.template getRef<Intermediate>().first, make_shrinkable<U>(u)));
                     });
                 return newShrinkableU.getShrinks();
             });

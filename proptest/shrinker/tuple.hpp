@@ -18,7 +18,7 @@ PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable
 template <typename... ARGS>
 PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
-    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.template map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.template map<vector<ShrinkableAny>, tuple<Shrinkable<ARGS>...>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
         vector<ShrinkableAny> anyVector;
         anyVector.reserve(sizeof...(ARGS));
         util::For([&] (auto index_sequence) {
@@ -28,7 +28,7 @@ PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrin
     });
 
     vectorAnyShr = util::shrinkTupleUsingVector(vectorAnyShr);
-    return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableAny>& shrAnyVec) {
+    return vectorAnyShr.map<tuple<ARGS...>, vector<ShrinkableAny>>([](const vector<ShrinkableAny>& shrAnyVec) {
         vector<Any> anyVec;
         anyVec.reserve(shrAnyVec.size());
         util::transform(shrAnyVec.begin(), shrAnyVec.end(), util::inserter(anyVec, anyVec.begin()), [](const ShrinkableAny& shr) -> Any {

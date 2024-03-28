@@ -26,13 +26,13 @@ Generator<vector<T>> accumulateImpl(GenFunction<T> gen1, Function<GenFunction<T>
 {
     // Convert gen1 to work with Any by wrapping its output
     GenFunction<Any> anyGen1 = [gen1](Random& rand) -> Shrinkable<Any> {
-        return gen1(rand).template map<Any>([](const T& value) { return Any(value); });
+        return gen1(rand).template map<Any,T>([](const T& value) { return Any(value); });
     };
 
     // Convert gen2gen to work with Any by adapting its input and output
     Function<GenFunction<Any>(const Any&)> anyGen2Gen = [gen2gen](const Any& any) -> GenFunction<Any> {
         return [any, gen2gen](Random& rand) -> Shrinkable<Any> {
-            return gen2gen(any.getRef<T>())(rand).template map<Any>([](const T& value) { return Any(value); });
+            return gen2gen(any.getRef<T>())(rand).template map<Any, T>([](const T& value) { return Any(value); });
         };
     };
 

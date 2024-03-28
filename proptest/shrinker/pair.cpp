@@ -12,7 +12,7 @@ Function<PairShrinker::stream_t(const PairShrinker::shrinkable_t&)> PairShrinker
     return +[](const shrinkable_t& parent) -> stream_t {
         const e_shrinkable_t& elem = parent.getRef<pair_t>().first;
         shrinkable_t pairWithElems = elem.template flatMap<pair_t,element_t>([parent](const element_t& val) {
-            auto copy = parent.get<pair_t>();
+            auto copy = parent.template get<pair_t>();
             copy.first = make_shrinkable<element_t>(val);
             return make_shrinkable<pair_t>(copy);
         });
@@ -28,7 +28,7 @@ Function<PairShrinker::stream_t(const PairShrinker::shrinkable_t&)> PairShrinker
     return +[](const shrinkable_t& parent) -> stream_t {
         const e_shrinkable_t& elem = parent.getRef<pair_t>().second;
         shrinkable_t pairWithElems = elem.template flatMap<pair_t,element_t>([parent](const element_t& val) {
-            auto copy = parent.get<pair_t>();
+            auto copy = parent.template get<pair_t>();
             copy.second = make_shrinkable<element_t>(val);
             return make_shrinkable<pair_t>(copy);
         });

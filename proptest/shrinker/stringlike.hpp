@@ -8,7 +8,7 @@ template <typename StringLike>
 Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, size_t charsize, const vector<int>& bytePositions) {
     auto shrinkRear =
         shrinkIntegral<uint64_t>(charsize - minSize)
-            .template map<StringLike>([str, minSize, bytePositions](const uint64_t& _size) -> StringLike {
+            .template map<StringLike,uint64_t>([str, minSize, bytePositions](const uint64_t& _size) -> StringLike {
                 if (bytePositions.empty())
                     return StringLike();
                 else
@@ -16,13 +16,13 @@ Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, s
             });
 
     return shrinkRear.concat([minSize = minSize + 1, bytePositions](const Shrinkable<StringLike>& shr) {
-        auto& str = shr.getRef();
+        auto& str = shr.template getRef<StringLike>();
         size_t maxSizeCopy = str.charsize();
         if (maxSizeCopy <= minSize)
             return Stream<Shrinkable<StringLike>>::empty();
         auto newShrinkable =
             shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
-                .map<StringLike>([str, minSize, maxSizeCopy, bytePositions](const uint64_t& value) {
+                .map<StringLike,uint64_t>([str, minSize, maxSizeCopy, bytePositions](const uint64_t& value) {
                     if (bytePositions.empty())
                         return StringLike();
                     else

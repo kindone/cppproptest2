@@ -91,8 +91,7 @@ public:
         return Stream(Any(value1), [value2Any]() -> Stream { return Stream::one(value2Any.getRef<T>()); });
     }
 
-    template <typename T, typename...ARGS>
-        requires (AllT<T, ARGS...>)
+    template <typename T, constructible_from<T>... ARGS>
     static Stream of(ARGS&&...args) {
         return values({args...});
     }
@@ -271,8 +270,7 @@ public:
         return Stream(Any(value1), [value2Any]() -> Stream { return Stream::one(value2Any.getRef<T>()); });
     }
 
-    template <same_as<T> TT = T, typename...ARGS>
-        requires (AllT<T, ARGS...>)
+    template <same_as<T> TT = T, constructible_from<T>... ARGS>
     static Stream<T> of(ARGS&&...args) {
         return values({args...});
     }

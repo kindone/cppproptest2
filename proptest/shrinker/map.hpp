@@ -12,7 +12,7 @@ namespace proptest {
 template <typename Key, typename Value>
 Shrinkable<map<Key, Value>> shrinkMapAny(const vector<ShrinkableAny>& pairShrVec, size_t minSize) {
     Shrinkable<vector<Any>> pairShrVecShr = shrinkListLike<vector, Any>(make_shrinkable<vector<Shrinkable<Any>>>(pairShrVec), minSize, /*elementwise*/true, /*membershipwise*/true);
-    return pairShrVecShr.template map<map<Key, Value>>([](const vector<Any>& anyVec) -> map<Key, Value> {
+    return pairShrVecShr.template map<map<Key, Value>, vector<Any>>([](const vector<Any>& anyVec) -> map<Key, Value> {
         map<Key, Value> m;
         for(const auto& any : anyVec) {
             const auto& thePair = any.getRef<pair<Key,Value>>();
@@ -25,7 +25,7 @@ Shrinkable<map<Key, Value>> shrinkMapAny(const vector<ShrinkableAny>& pairShrVec
 template <typename Key, typename Value>
 Shrinkable<map<Key, Value>> shrinkMap(const vector<Shrinkable<pair<Key,Value>>>& pairShrVec, size_t minSize) {
     Shrinkable<vector<pair<Key,Value>>> pairShrVecShr = shrinkContainer<vector, pair<Key,Value>>(make_shrinkable<vector<Shrinkable<pair<Key,Value>>>>(pairShrVec), minSize, /*elementwise*/true, /*membershipwise*/true);
-    return pairShrVecShr.template map<map<Key, Value>>([](const vector<pair<Key, Value>>& vec) -> map<Key, Value> {
+    return pairShrVecShr.template map<map<Key, Value>,vector<pair<Key, Value>>>([](const vector<pair<Key, Value>>& vec) -> map<Key, Value> {
         map<Key, Value> m;
         for(auto& pair : vec)
             m.insert(pair);
@@ -42,8 +42,8 @@ Shrinkable<map<Key, Value>> shrinkMap(const shared_ptr<vector<Shrinkable<Key>>> 
     vector<Shrinkable<pair<Key, Value>>> pairShrVec;
     pairShrVec.reserve(valShrVec->size());
     for(size_t i = 0; i < valShrVec->size(); i++) {
-        Shrinkable<pair<Key, Value>> pairShr = valShrVec->at(i).template map<pair<Key, Value>>([keyShrVec, i](const Value& val) -> pair<Key, Value> {
-            return util::make_pair(keyShrVec->at(i).getRef(), val);
+        Shrinkable<pair<Key, Value>> pairShr = valShrVec->at(i).template map<pair<Key, Value>,Value>([keyShrVec, i](const Value& val) -> pair<Key, Value> {
+            return util::make_pair(keyShrVec->at(i).template getRef<Key>(), val);
         });
         pairShrVec.push_back(pairShr);
     }

@@ -9,54 +9,48 @@
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
 
-#define PROPTEST_UNTYPED_SHRINKABLE 1
+//#define PROPTEST_UNTYPED_SHRINKABLE 1
 
 
 namespace proptest {
 
-#ifndef PROPTEST_UNTYPED_SHRINKABLE
-
 namespace typed {
-template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
+    template <typename T> requires (!std::is_const_v<T>) struct Shrinkable;
 }
-
-template <typename T, typename... Args> typed::Shrinkable<T> make_shrinkable(Args&&... args);
-
-#else
 
 namespace untyped {
-struct Shrinkable;
+    struct ShrinkableBase;
+    template <typename T> struct Shrinkable;
 }
 
-template <typename T, typename... Args> untyped::Shrinkable make_shrinkable(Args&&... args);
 
+#ifndef PROPTEST_UNTYPED_SHRINKABLE
+template <typename T, typename... Args> typed::Shrinkable<T> make_shrinkable(Args&&... args);
+#else
+template <typename T, typename... Args> untyped::Shrinkable<T> make_shrinkable(Args&&... args);
 #endif // PROPTEST_UNTYPED_SHRINKABLE
 
-
 namespace untyped {
 
-struct PROPTEST_API Shrinkable
+struct PROPTEST_API ShrinkableBase
 {
-    using StreamType = ::proptest::Stream<Shrinkable>;
+    using StreamType = ::proptest::Stream<ShrinkableBase>;
 
-    // for Shrinkable<Any> a.k.a. ShrinkableAny
+    explicit ShrinkableBase(Any _value) : value(_value), shrinks(StreamType::empty()) {}
 
-    template <typename U, typename T>
-        requires (!is_same_v<U, Any>)
-    Shrinkable(const T& _value) : Shrinkable(Any(_value)) {}
+    template <typename T>
+    ShrinkableBase(const Shrinkable<T>& other) : value(other.value), shrinks(other.shrinks) {}
 
-    explicit Shrinkable(Any _value) : value(_value), shrinks(StreamType::empty()) {}
-
-    Shrinkable clear() const {
-        return Shrinkable{value};
+    ShrinkableBase clear() const {
+        return ShrinkableBase{value};
     }
 
-    Shrinkable with(const StreamType& otherShrinks) const {
-        return Shrinkable(value, otherShrinks);
+    ShrinkableBase with(const StreamType& otherShrinks) const {
+        return ShrinkableBase(value, otherShrinks);
     }
 
-    Shrinkable with(Function<StreamType()> otherStream) const {
-        return Shrinkable(value, Lazy<StreamType>(otherStream));
+    ShrinkableBase with(Function<StreamType()> otherStream) const {
+        return ShrinkableBase(value, Lazy<StreamType>(otherStream));
     }
 
 
@@ -65,16 +59,16 @@ struct PROPTEST_API Shrinkable
     template <typename T> T& getMutableRef() { return value.getMutableRef<T>(); }
     Any getAny() const { return value; }
 
-    Shrinkable clone() const {
-        return Shrinkable(value.clone(), shrinks);
+    ShrinkableBase clone() const {
+        return ShrinkableBase(value.clone(), shrinks);
     }
 
     StreamType getShrinks() const { return *shrinks; }
 
     template <typename U, typename T>
-    Shrinkable map(Function<U(const T&)> transformer) const {
-        return Shrinkable(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<Shrinkable> {
-            return shrinks->template transform<Shrinkable,Shrinkable>([transformer](const Shrinkable& shr) -> Shrinkable {
+    ShrinkableBase map(Function<U(const T&)> transformer) const {
+        return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<ShrinkableBase> {
+            return shrinks->template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> ShrinkableBase {
                     return shr.map<U, T>(transformer);
                 });
             }
@@ -82,8 +76,8 @@ struct PROPTEST_API Shrinkable
     }
 
     template <typename U, typename T>
-    Shrinkable flatMap(Function<Shrinkable(const T&)> transformer) const {
-        return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<Shrinkable,Shrinkable>([transformer](const Shrinkable& shr) -> Shrinkable {
+    ShrinkableBase flatMap(Function<ShrinkableBase(const T&)> transformer) const {
+        return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> ShrinkableBase {
                     return shr.flatMap<U, T>(transformer);
                 });
             }
@@ -91,31 +85,31 @@ struct PROPTEST_API Shrinkable
     }
 
     template <typename U, typename T>
-    Shrinkable mapShrinkable(Function<Shrinkable(const Shrinkable&)> transformer) const;
+    ShrinkableBase mapShrinkable(Function<ShrinkableBase(const ShrinkableBase&)> transformer) const;
 
     // provide filtered generation, shrinking
     template <typename T>
-    Shrinkable filter(Function<bool(const T&)> criteria) const {
+    ShrinkableBase filter(Function<bool(const T&)> criteria) const {
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
         else
-            return with(shrinks->template filter<Shrinkable>([criteria](const Shrinkable& shr) -> bool {
+            return with(shrinks->template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
                 return criteria(shr.getRef<T>());
-            }).template transform<Shrinkable,Shrinkable>([criteria](const Shrinkable& shr) {
+            }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
                 return shr.filter<T>(criteria);
             }));
     }
 
     // provide filtered generation, shrinking
     template <typename T>
-    Shrinkable filter(Function<bool(const T&)> criteria, int tolerance) const {
+    ShrinkableBase filter(Function<bool(const T&)> criteria, int tolerance) const {
 
         static Function<StreamType(const StreamType&,Function<bool(const T&)>, int)> filterStream = +[](const StreamType& stream, Function<bool(const T&)> _criteria, int _tolerance) {
             if(stream.isEmpty())
                 return StreamType::empty();
             else {
-                for(auto itr = stream.template iterator<Shrinkable>(); itr.hasNext();) {
+                for(auto itr = stream.template iterator<ShrinkableBase>(); itr.hasNext();) {
                     auto shr = itr.next();
                     auto tail = itr.stream;
                     if(_criteria(shr.getRef<T>())) {
@@ -133,23 +127,23 @@ struct PROPTEST_API Shrinkable
         if(!criteria(value.getRef<T>()))
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
-        return with(filterStream(getShrinks(), criteria, tolerance).template transform<Shrinkable,Shrinkable>([criteria, tolerance](const Shrinkable& shr) {
+        return with(filterStream(getShrinks(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
             return shr.filter<T>(criteria, tolerance);
         }));
     }
 
     // concat: continues with then after horizontal dead end
-    Shrinkable concatStatic(const StreamType& then) const {
-        auto shrinksWithThen = shrinks->template transform<Shrinkable,Shrinkable>([then](const Shrinkable& shr) -> Shrinkable {
+    ShrinkableBase concatStatic(const StreamType& then) const {
+        auto shrinksWithThen = shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
             return shr.concatStatic(then);
         });
         return with(shrinksWithThen.concat(then));
     }
 
     // concat: extend shrinks stream with function taking parent as argument
-    Shrinkable concat(Function<StreamType(const Shrinkable&)> then) const {
+    ShrinkableBase concat(Function<StreamType(const ShrinkableBase&)> then) const {
         return with([copy = *this, shrinks = this->shrinks, then]() {
-            auto shrinksWithThen = shrinks->template transform<Shrinkable,Shrinkable>([then](const Shrinkable& shr) -> Shrinkable {
+            auto shrinksWithThen = shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
                 return shr.concat(then);
             });
             return shrinksWithThen.concat([=]() { return then(copy); });
@@ -157,32 +151,32 @@ struct PROPTEST_API Shrinkable
     }
 
     // andThen: continues with then after vertical dead end
-    Shrinkable andThenStatic(const StreamType& then) const {
+    ShrinkableBase andThenStatic(const StreamType& then) const {
         if(shrinks->isEmpty())
             return with(then);
         else
-            return with(shrinks->template transform<Shrinkable,Shrinkable>([then](const Shrinkable& shr) -> Shrinkable {
+            return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
                 return shr.andThenStatic(then);
             }));
     }
 
-    Shrinkable andThen(Function<StreamType(const Shrinkable&)> then) const {
+    ShrinkableBase andThen(Function<StreamType(const ShrinkableBase&)> then) const {
         if(shrinks->isEmpty())
             return with(then(*this));
         else
-            return with(shrinks->template transform<Shrinkable,Shrinkable>([then](const Shrinkable& shr) -> Shrinkable {
+            return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
                 return shr.andThen(then);
             }));
     }
 
-    Shrinkable take(int n) const {
-        return with(shrinks->template transform<Shrinkable,Shrinkable>([n](const Shrinkable& shr) -> Shrinkable {
+    ShrinkableBase take(int n) const {
+        return with(shrinks->template transform<ShrinkableBase,ShrinkableBase>([n](const ShrinkableBase& shr) -> ShrinkableBase {
             return shr.take(n);
         }));
     }
 
 private:
-    Shrinkable(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
+    ShrinkableBase(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) {
     }
 
     Any value;
@@ -190,11 +184,45 @@ private:
 
 public:
 
+    template <typename T>
+    friend struct Shrinkable;
+
 #ifdef PROPTEST_UNTYPED_SHRINKABLE
     template <typename T, typename... ARGS>
-    friend Shrinkable proptest::make_shrinkable(ARGS&&... args);
+    friend Shrinkable<T> proptest::make_shrinkable(ARGS&&... args);
 #endif
 };
+
+template <typename T>
+struct Shrinkable : public ShrinkableBase
+{
+    using type = T;
+
+    Shrinkable(const ShrinkableBase& base) : ShrinkableBase(base) {}
+
+    template <typename U>
+        requires (is_same_v<T, Any>)
+    Shrinkable(const Shrinkable<U>& otherShr) : ShrinkableBase(otherShr) {}
+
+    template <same_as<T> TT=T>
+        requires (!is_same_v<TT, Any>)
+    Shrinkable(const T& _value) : ShrinkableBase(Any(_value)) {}
+
+    explicit Shrinkable(Any _value) : ShrinkableBase(_value) {}
+
+    Shrinkable with(const StreamType& otherShrinks) const {
+        return ShrinkableBase::with(otherShrinks);
+    }
+
+    Shrinkable with(Function<StreamType()> otherStream) const {
+        return ShrinkableBase::with(otherStream);
+    }
+
+    template <same_as<T> TT=T> T get() const { return ShrinkableBase::get<T>(); }
+    template <same_as<T> TT=T> const T& getRef() const { return ShrinkableBase::getRef<T>(); }
+    template <same_as<T> TT=T> T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
+};
+
 
 } // namespace untyped
 
@@ -392,7 +420,7 @@ extern template struct PROPTEST_API Shrinkable<Any>;
 
 #else
 
-template <typename T> using Shrinkable = untyped::Shrinkable;
+template <typename T> using Shrinkable = untyped::Shrinkable<T>;
 
 #endif // PROPTEST_UNTYPED_SHRINKABLE
 
@@ -417,14 +445,12 @@ extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
 // compare function
 namespace std {
 
-#ifndef PROPTEST_UNTYPED_SHRINKABLE
-
 template <typename T>
 class less<proptest::Shrinkable<T>> {
 public:
     constexpr bool operator()(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs) const
     {
-        return lhs.getRef<T>() < rhs.getRef<T>();
+        return lhs.template getRef<T>() < rhs.template getRef<T>();
     }
 };
 
@@ -433,20 +459,9 @@ class less<proptest::Shrinkable<pair<T, U>>> {
 public:
     constexpr bool operator()(const proptest::Shrinkable<pair<T,U>>& lhs, const proptest::Shrinkable<pair<T,U>>& rhs) const
     {
-        return lhs.getRef<pair<T,U>>().first < rhs.getRef<pair<T,U>>().first;
+        return lhs.template getRef<pair<T,U>>().first < rhs.template getRef<pair<T,U>>().first;
     }
 };
 
-#else
-
-// class less<proptest::untyped::Shrinkable> {
-// public:
-//     constexpr bool operator()(const proptest::untyped::Shrinkable& lhs, const proptest::untyped::Shrinkable& rhs) const
-//     {
-//         return lhs.getRef<T>() < rhs.getRef<T>();
-//     }
-// };
-
-#endif // PROPTEST_UNTYPED_SHRINKABLE
 
 }  // namespace std

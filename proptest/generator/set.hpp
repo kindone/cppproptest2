@@ -36,9 +36,9 @@ public:
         size_t size = rand.getRandomSize(minSize, maxSize + 1);
         Shrinkable<set<Shrinkable<T>>> shrinkableSet = make_shrinkable<set<Shrinkable<T>>>();
 
-        while (shrinkableSet.getRef().size() < size) {
+        while (shrinkableSet.template getRef<set<Shrinkable<T>>>().size() < size) {
             auto elem = elemGen(rand);
-            shrinkableSet.getMutableRef().insert(elem);
+            shrinkableSet.template getMutableRef<set<Shrinkable<T>>>().insert(elem);
         }
         return shrinkSet(shrinkableSet, minSize);
     }

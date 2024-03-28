@@ -24,10 +24,10 @@ TEST(ListLikeShrinker, ints3)
     Shrinkable<vector<int>> shr2 = shrinkListLike<vector, int>(baseShr, 0, false, true);
     Shrinkable<vector<int>> shr3 = shrinkListLike<vector, int>(baseShr, 0, true, true);
 
-    EXPECT_EQ(shr0.getRef(), vector<int>({1,2,3}));
-    EXPECT_EQ(shr1.getRef(), vector<int>({1,2,3}));
-    EXPECT_EQ(shr2.getRef(), vector<int>({1,2,3}));
-    EXPECT_EQ(shr3.getRef(), vector<int>({1,2,3}));
+    EXPECT_EQ(shr0.template getRef<vector<int>>(), vector<int>({1,2,3}));
+    EXPECT_EQ(shr1.template getRef<vector<int>>(), vector<int>({1,2,3}));
+    EXPECT_EQ(shr2.template getRef<vector<int>>(), vector<int>({1,2,3}));
+    EXPECT_EQ(shr3.template getRef<vector<int>>(), vector<int>({1,2,3}));
 
     EXPECT_EQ(serializeShrinkable(shr0), "{value: [ 1, 2, 3 ]}");
     EXPECT_EQ(serializeShrinkable(shr1), "{value: [ 1, 2, 3 ], shrinks: [{value: [ 0, 0, 0 ]}, {value: [ 1, 1, 1 ], shrinks: [{value: [ 0, 1, 1 ]}]}, {value: [ 1, 2, 2 ], shrinks: [{value: [ 0, 0, 2 ]}, {value: [ 1, 1, 2 ], shrinks: [{value: [ 0, 1, 2 ]}]}]}]}");
@@ -52,10 +52,10 @@ TEST(ListLikeShrinker, ints8)
     Shrinkable<vector<int>> shr2 = shrinkListLike<vector, int>(baseShr, 0, false, true);
     Shrinkable<vector<int>> shr3 = shrinkListLike<vector, int>(baseShr, 0, true, true);
 
-    EXPECT_EQ(shr0.getRef(), vector<int>({1,2,3,4,5,6,7,8}));
-    EXPECT_EQ(shr1.getRef(), vector<int>({1,2,3,4,5,6,7,8}));
-    EXPECT_EQ(shr2.getRef(), vector<int>({1,2,3,4,5,6,7,8}));
-    EXPECT_EQ(shr3.getRef(), vector<int>({1,2,3,4,5,6,7,8}));
+    EXPECT_EQ(shr0.template getRef<vector<int>>(), vector<int>({1,2,3,4,5,6,7,8}));
+    EXPECT_EQ(shr1.template getRef<vector<int>>(), vector<int>({1,2,3,4,5,6,7,8}));
+    EXPECT_EQ(shr2.template getRef<vector<int>>(), vector<int>({1,2,3,4,5,6,7,8}));
+    EXPECT_EQ(shr3.template getRef<vector<int>>(), vector<int>({1,2,3,4,5,6,7,8}));
 
     EXPECT_EQ(serializeShrinkable(shr0), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ]}");
     EXPECT_EQ(serializeShrinkable(shr1), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ], shrinks: [{value: [ 0, 0, 0, 0, 0, 0, 0, 0 ]}, {value: [ 1, 1, 1, 2, 2, 3, 3, 4 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 2 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 1 ]}]}, {value: [ 1, 1, 1, 2, 2, 2, 2, 3 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 2, 2, 3 ]}]}]}, {value: [ 1, 2, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 0, 2, 3, 3, 4, 4, 5 ]}, {value: [ 1, 1, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 1, 2, 3, 3, 4, 4, 5 ]}]}]}, {value: [ 1, 2, 3, 4, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 0, 0, 4, 5, 6, 7 ]}, {value: [ 1, 1, 1, 2, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 1, 1, 4, 5, 6, 7 ]}]}, {value: [ 1, 2, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 2, 3, 4, 5, 6, 7 ]}, {value: [ 1, 1, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 2, 3, 4, 5, 6, 7 ]}]}]}]}]}");
@@ -71,7 +71,7 @@ TEST(SetShrinker, ints)
         shrinkIntegral<int>(2),
         shrinkIntegral<int>(3)});
     Shrinkable<set<int>> shr = shrinkSet<int>(baseShr, 0);
-    EXPECT_EQ(shr.getRef(), set<int>({ 1, 2, 3 }));
+    EXPECT_EQ(shr.getRef<set<int>>(), set<int>({ 1, 2, 3 }));
     EXPECT_EQ(serializeShrinkable(shr), "{value: { 1, 2, 3 }, shrinks: [{value: {  }}, {value: { 1 }}, {value: { 1, 2 }, shrinks: [{value: { 2 }}]}, {value: { 3 }}, {value: { 1, 3 }}, {value: { 2, 3 }}]}");
 }
 
@@ -141,11 +141,11 @@ TEST(shrinkContainer, string)
         return str;
     };
 
-    auto shr1 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, false, true).map<string>(back_converter);
+    Shrinkable<string> shr1 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, false, true).map<string,vector<uint32_t>>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr1), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"c\" (63)}, {value: \"ac\" (61 63)}, {value: \"bc\" (62 63)}]}");
-    auto shr2 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, false).map<string>(back_converter);
+    Shrinkable<string> shr2 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, false).map<string,vector<uint32_t>>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr2), "{value: \"abc\" (61 62 63)}");
-    auto shr3 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, true).map<string>(back_converter);
+    Shrinkable<string> shr3 = shrinkContainer<vector, uint32_t>(Shrinkable<vector<Shrinkable<uint32_t>>>(fwd_converter("abc")), 0, true, true).map<string,vector<uint32_t>>(back_converter);
     EXPECT_EQ(serializeShrinkable(shr3), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"c\" (63)}, {value: \"ac\" (61 63)}, {value: \"bc\" (62 63)}]}");
 }
 
@@ -153,6 +153,6 @@ TEST(shrinkContainer, string)
 TEST(StringLikeShrinker, basic)
 {
     vector<int> bytePositions({0,1,2,3}); // need 4 for 3 chars
-    auto shr = shrinkStringLike<UTF8String>("abc", 0, 3, bytePositions);
+    Shrinkable<UTF8String> shr = shrinkStringLike<UTF8String>("abc", 0, 3, bytePositions);
     EXPECT_EQ(serializeShrinkable(shr), "{value: \"abc\" (61 62 63), shrinks: [{value: \"\" ()}, {value: \"a\" (61)}, {value: \"ab\" (61 62), shrinks: [{value: \"b\" (62)}]}, {value: \"bc\" (62 63)}, {value: \"c\" (63)}]}");
 }

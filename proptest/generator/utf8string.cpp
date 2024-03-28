@@ -43,7 +43,7 @@ Shrinkable<UTF8String> Arbi<UTF8String>::operator()(Random& rand) const
     for (size_t i = 0; i < len; i++) {
         // U+D800..U+DFFF is forbidden for surrogate use
         Shrinkable<uint32_t> codeShr = elemGen(rand);
-        uint32_t code = codeShr.get();
+        uint32_t code = codeShr.get<uint32_t>();
 
         positions.push_back(chars.size());
         codes.push_back(code);

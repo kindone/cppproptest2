@@ -20,8 +20,8 @@ TEST(Compile, just)
 {
     Random rand(3);
     auto gen1 = just(1);
-    EXPECT_EQ(gen1(rand).get(), 1);
+    EXPECT_EQ(gen1(rand).get<int>(), 1);
 
     auto gen2 = just<NonCopyable>(util::make_any<NonCopyable>(2));
-    EXPECT_EQ(gen2(rand).getRef().a, 2);
+    EXPECT_EQ(gen2(rand).getRef<NonCopyable>().a, 2);
 }

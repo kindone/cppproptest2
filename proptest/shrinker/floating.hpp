@@ -53,14 +53,14 @@ PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
         auto expShrinkable = shrinkIntegral<int64_t>(exp);
         // shrink exponent
         auto floatShrinkable =
-            expShrinkable.map<FLOATTYPE, int>([fraction](const int& exp) { return util::composeFloat(fraction, exp); });
+            expShrinkable.map<FLOATTYPE, int64_t>([fraction](const int64_t& exp) { return util::composeFloat(fraction, exp); });
 
         // prepend 0.0
         floatShrinkable = floatShrinkable.with(Stream::one(make_shrinkable<FLOATTYPE>(0.0f)).concat(floatShrinkable.getShrinks()));
 
         // shrink fraction within (0.0 and 0.5)
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
-            auto value = shr.get<FLOATTYPE>();
+            auto value = shr.template get<FLOATTYPE>();
             int exp = 0;
             /*FLOATTYPE fraction = */ util::decomposeFloat(value, &exp);
             if (value == 0.0f)
@@ -74,7 +74,7 @@ PROPTEST_API Stream<Shrinkable<FLOATTYPE>> floatShrinks(FLOATTYPE value)
 
         // integerfy
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
-            auto value = shr.get<FLOATTYPE>();
+            auto value = shr.template get<FLOATTYPE>();
             auto intValue = static_cast<int>(value);
             if (intValue != 0 && abs(intValue) < abs(value)) {
                 return Stream::one(make_shrinkable<FLOATTYPE>(static_cast<FLOATTYPE>(intValue)));

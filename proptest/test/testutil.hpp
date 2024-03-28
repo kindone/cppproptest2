@@ -77,7 +77,7 @@ void printShrinkable(const proptest::Shrinkable<T>& shrinkable, int level) {
     for (int i = 0; i < level; i++)
         proptest::cout << "  ";
 
-    proptest::cout << "shrinkable: " << proptest::Show<T>(shrinkable.get()) << proptest::endl;
+    proptest::cout << "shrinkable: " << proptest::Show<T>(shrinkable.template get<T>()) << proptest::endl;
 }
 
 template <typename T>
@@ -107,7 +107,7 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, propt
 template <typename T>
 bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs, size_t maxElements = 1000)
 {
-    if(lhs.get() != rhs.get())
+    if(lhs.template get<T>() != rhs.template get<T>())
         return false;
 
     maxElements --;
@@ -128,7 +128,7 @@ bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrin
 
 template <typename T>
 void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shrinkable) {
-    stream << "{value: " << proptest::Show<T>(shrinkable.get());
+    stream << "{value: " << proptest::Show<T>(shrinkable.template get<T>());
     auto shrinks = shrinkable.getShrinks();
     if(!shrinks.isEmpty()) {
         stream << ", shrinks: [";
@@ -155,7 +155,7 @@ template <typename T>
 proptest::string serializeShrinkableAny(const proptest::ShrinkableAny& shr)
 {
     proptest::stringstream stream;
-    outShrinkable<T>(stream, shr.map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
+    outShrinkable<T>(stream, shr.map<T,proptest::Any>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
     return stream.str();
 }
 
@@ -163,7 +163,7 @@ template <typename T>
 proptest::string serializeAnyShrinkable(const proptest::AnyShrinkable& shr)
 {
     proptest::stringstream stream;
-    outShrinkable<T>(stream, shr.getShrinkableAny().map<T>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
+    outShrinkable<T>(stream, shr.getShrinkableAny().map<T,proptest::Any>([](const proptest::Any& any) -> T { return any.getRef<T>(); }));
     return stream.str();
 }
 
