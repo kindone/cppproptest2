@@ -17,7 +17,7 @@ Shrinkable<string> shrinkString(const string& str, size_t minSize) {
         auto& str = shr.getRef();
         size_t maxSizeCopy = str.size();
         if (str.size() <= minSize)
-            return Stream<Shrinkable<string>>::empty();
+            return Shrinkable<string>::StreamType::empty();
         auto newShrinkable = shrinkIntegral<uint64_t>(maxSizeCopy - minSize)
                                  .map<string>([str, minSize, maxSizeCopy](const uint64_t& value) {
                                      return str.substr(minSize + value, maxSizeCopy - (minSize + value));

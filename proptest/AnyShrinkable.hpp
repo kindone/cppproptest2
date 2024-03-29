@@ -7,7 +7,8 @@ namespace proptest {
 
 // based on Shrinkable<Any>
 struct AnyShrinkable {
-    using stream_t = Stream<AnyShrinkable>;
+    using StreamElementType = AnyShrinkable;
+    using StreamType = Stream<StreamElementType>;
 
     AnyShrinkable(const ShrinkableAny& shr)  : shrinkableAny(shr) {}
 
@@ -16,15 +17,15 @@ struct AnyShrinkable {
 
     AnyShrinkable clear() const { return AnyShrinkable(shrinkableAny.clear());}
 
-    AnyShrinkable with(const stream_t& otherShrinks) const {
-        return AnyShrinkable(shrinkableAny.with(otherShrinks.template transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable with(const StreamType& otherShrinks) const {
+        return AnyShrinkable(shrinkableAny.with(otherShrinks.template transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
             return shr.shrinkableAny;
         })));
     }
 
-    AnyShrinkable with(Function<stream_t()> otherStream) const {
-        return AnyShrinkable(shrinkableAny.with([otherStream]() {
-            return otherStream().template transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable with(Function<StreamType()> otherStream) const {
+        return AnyShrinkable(shrinkableAny.with([otherStream]() -> ShrinkableAny::StreamType {
+            return otherStream().template transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
                 return shr.shrinkableAny;
             });
         }));
@@ -40,8 +41,8 @@ struct AnyShrinkable {
         return shrinkableAny.getRef();
     }
 
-    stream_t getShrinks() const {
-        return shrinkableAny.getShrinks().template transform<AnyShrinkable,ShrinkableAny>([](const ShrinkableAny& shr) -> AnyShrinkable {
+    StreamType getShrinks() const {
+        return shrinkableAny.getShrinks().template transform<AnyShrinkable,ShrinkableAny::StreamElementType>([](const ShrinkableAny::StreamElementType& shr) -> AnyShrinkable {
             return AnyShrinkable(shr);
         });
     }
@@ -80,31 +81,31 @@ struct AnyShrinkable {
     }
 
     // concat: continues with then after horizontal dead end
-    AnyShrinkable concatStatic(const stream_t& then) const {
-        return AnyShrinkable(shrinkableAny.concatStatic(then.template transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable concatStatic(const StreamType& then) const {
+        return AnyShrinkable(shrinkableAny.concatStatic(then.template transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
             return shr.shrinkableAny;
         })));
     }
 
     // concat: extend shrinks stream with function taking parent as argument
-    AnyShrinkable concat(Function<stream_t(const AnyShrinkable&)> then) const {
-        return AnyShrinkable(shrinkableAny.concat([then](const ShrinkableAny& parent) -> proptest::Stream<ShrinkableAny> {
-            return then(AnyShrinkable(parent)).transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable concat(Function<StreamType(const AnyShrinkable&)> then) const {
+        return AnyShrinkable(shrinkableAny.concat([then](const ShrinkableAny& parent) -> ShrinkableAny::StreamType {
+            return then(AnyShrinkable(parent)).transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
                 return shr.shrinkableAny;
             });
         }));
     }
 
     // andThen: continues with then after vertical dead end
-    AnyShrinkable andThenStatic(const stream_t& then) const {
-        return AnyShrinkable(shrinkableAny.andThenStatic(then.template transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable andThenStatic(const StreamType& then) const {
+        return AnyShrinkable(shrinkableAny.andThenStatic(then.template transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
             return shr.shrinkableAny;
         })));
     }
 
-    AnyShrinkable andThen(Function<stream_t(const AnyShrinkable&)> then) const {
-        return AnyShrinkable(shrinkableAny.andThen([then](const ShrinkableAny& parent) -> proptest::Stream<ShrinkableAny> {
-            return then(AnyShrinkable(parent)).transform<ShrinkableAny,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny {
+    AnyShrinkable andThen(Function<StreamType(const AnyShrinkable&)> then) const {
+        return AnyShrinkable(shrinkableAny.andThen([then](const ShrinkableAny& parent) -> ShrinkableAny::StreamType {
+            return then(AnyShrinkable(parent)).transform<ShrinkableAny::StreamElementType,AnyShrinkable>([](const AnyShrinkable& shr) -> ShrinkableAny::StreamElementType {
                 return shr.shrinkableAny;
             });
         }));

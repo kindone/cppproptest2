@@ -34,7 +34,8 @@ namespace untyped {
 
 struct PROPTEST_API ShrinkableBase
 {
-    using StreamType = ::proptest::Stream<ShrinkableBase>;
+    using StreamElementType = ShrinkableBase;
+    using StreamType = ::proptest::Stream<StreamElementType>;
 
     explicit ShrinkableBase(Any _value);
 
@@ -58,8 +59,8 @@ struct PROPTEST_API ShrinkableBase
 
     template <typename U, typename T>
     ShrinkableBase map(Function<U(const T&)> transformer) const {
-        return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> ::proptest::Stream<ShrinkableBase> {
-            return shrinks->template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> ShrinkableBase {
+        return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> StreamType {
+            return shrinks->template transform<StreamElementType,StreamElementType>([transformer](const ShrinkableBase& shr) -> StreamElementType {
                     return shr.map<U>(transformer);
                 });
             }
@@ -88,7 +89,7 @@ struct PROPTEST_API ShrinkableBase
             return with(shrinks->template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
                 return criteria(shr.getRef<T>());
             }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
-                return shr.filter(criteria);
+                return shr.template filter<T>(criteria);
             }));
     }
 
@@ -179,6 +180,22 @@ struct Shrinkable : public ShrinkableBase
         return ShrinkableBase::with(otherStream);
     }
 
+// #ifndef PROPTEST_UNTYPED_STREAM
+//     Shrinkable with(const TStreamType& otherShrinks) const {
+//         return ShrinkableBase::with(otherShrinks.template transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+//             return shr;
+//         }));
+//     }
+
+//     // Shrinkable with(Function<TStreamType()> otherStream) const {
+//     //     return ShrinkableBase::with([otherStream]() {
+//     //         return otherStream().template transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+//     //             return shr;
+//     //         });
+//     //     });
+//     // }
+// #endif
+
     T get() const { return ShrinkableBase::get<T>(); }
     const T& getRef() const { return ShrinkableBase::getRef<T>(); }
     T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
@@ -220,33 +237,46 @@ struct Shrinkable : public ShrinkableBase
     Shrinkable andThen(Function<StreamType(const ShrinkableBase&)> then) const { return ShrinkableBase::andThen(then); }
 
 #ifndef PROPTEST_UNTYPED_STREAM
-    Shrinkable concatStatic(const TStreamType& then) const {
-        return ShrinkableBase::concatStatic(then.transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
-            return shr;
-        ));
-    }
 
-    Shrinkable concat(Function<TStreamType(const Shrinkable&)> then) const {
-        return ShrinkableBase::concat([then](const ShrinkableBase& base) {
-            return then(Shrinkable(base)).transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
-                return shr;
-            });
-        });
-    }
+    // Shrinkable concatStatic(const TStreamType& then) const {
+    //     return ShrinkableBase::concatStatic(then.template transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+    //         return shr;
+    //     }));
+    // }
 
-    Shrinkable andThenStatic(const TStreamType& then) const {
-        return ShrinkableBase::andThenStatic(then.transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
-            return shr;
-        ));
-    }
+    // Shrinkable concat(Function<StreamType(const Shrinkable&)> then) const {
+    //     return ShrinkableBase::concat([then](const ShrinkableBase& base) {
+    //         return then(Shrinkable(base));
+    //     });
+    // }
 
-    Shrinkable andThen(Function<TStreamType(const Shrinkable&)> then) const {
-        return ShrinkableBase::andThen([then](const ShrinkableBase& base) {
-            return then(Shrinkable(base)).transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
-                return shr;
-            });
-        });
-    }
+    // Shrinkable concat(Function<TStreamType(const Shrinkable&)> then) const {
+    //     return ShrinkableBase::concat([then](const ShrinkableBase& base) {
+    //         return then(Shrinkable(base)).template transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+    //             return shr;
+    //         });
+    //     });
+    // }
+
+    // Shrinkable andThenStatic(const TStreamType& then) const {
+    //     return ShrinkableBase::andThenStatic(then.template transform<ShrinkableBase, Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+    //         return shr;
+    //     }));
+    // }
+
+    // Shrinkable andThen(Function<StreamType(const Shrinkable&)> then) const {
+    //     return ShrinkableBase::andThen([then](const ShrinkableBase& base) {
+    //         return then(Shrinkable(base));
+    //     });
+    // }
+
+    // Shrinkable andThen(Function<TStreamType(const Shrinkable&)> then) const {
+    //     return ShrinkableBase::andThen([then](const ShrinkableBase& base) {
+    //         return then(Shrinkable(base)).template transform<ShrinkableBase,Shrinkable>(+[](const Shrinkable& shr) -> ShrinkableBase {
+    //             return shr;
+    //         });
+    //     });
+    // }
 #endif // PROPTEST_UNTYPED_STREAM
 
     Shrinkable take(int n) const { return ShrinkableBase::take(n); }
@@ -263,7 +293,8 @@ template <typename T>
 struct PROPTEST_API Shrinkable
 {
     using type = T;
-    using StreamType = ::proptest::Stream<Shrinkable<T>>;
+    using StreamElementType = Shrinkable;
+    using StreamType = ::proptest::Stream<StreamElementType>;
 
     // for Shrinkable<Any> a.k.a. ShrinkableAny
     template <typename U>

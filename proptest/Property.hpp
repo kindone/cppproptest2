@@ -35,7 +35,7 @@ private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
     using ValueTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
     using ShrTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
-    using ShrinksTuple = tuple<Stream<Shrinkable<decay_t<ARGS>>>...>;
+    using ShrinksTuple = tuple<typename Shrinkable<decay_t<ARGS>>::StreamType...>;
 
 public:
     Property(const Func& f, vector<AnyGenerator>&& gens) : func(f), genVec(util::move(gens)) {}
@@ -319,7 +319,7 @@ private:
     {
         // regenerate failed value tuple
         vector<ShrinkableAny> shrVec;
-        vector<Stream<ShrinkableAny>> shrinksVec;
+        vector<ShrinkableAny::StreamType> shrinksVec;
         shrVec.reserve(Arity);
         shrinksVec.reserve(Arity);
         for(size_t i = 0; i < Arity; i++) {
@@ -336,7 +336,7 @@ private:
             auto shrinks = shrinksVec[N];
             while (!shrinks.isEmpty()) {
                 // printShrinks(shrinks);
-                auto iter = shrinks.iterator<ShrinkableAny>();
+                auto iter = shrinks.iterator<ShrinkableAny::StreamElementType>();
                 bool shrinkFound = false;
                 PropertyContext context;
                 // keep trying until failure is reproduced

@@ -13,7 +13,8 @@ struct PROPTEST_API VectorShrinker
     using shrinkable_vector_t = vector<ShrinkableAny>;
     using shrinkable_t = Shrinkable<shrinkable_vector_t>;
     using stream_t = shrinkable_t::StreamType;
-    using e_stream_t = Stream<ShrinkableAny>;
+    using stream_element_t = shrinkable_t::StreamElementType;
+    using e_stream_t = ShrinkableAny::StreamType;
 
     static stream_t shrinkBulk(const shrinkable_t& ancestor, size_t power, size_t offset);
 
@@ -54,7 +55,7 @@ template <template <typename...> class Container, typename T>
 Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
 {
     return shrinkableAnyVecShr.template flatMap<Container<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<Container<T>> {
+        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<Container<T>>::StreamElementType {
             auto value = make_shrinkable<Container<T>>();
             Container<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
@@ -68,7 +69,7 @@ template <template <typename...> class ListLike, typename T>
 Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
 {
     return shrinkableAnyVecShr.template flatMap<ListLike<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<ListLike<T>> {
+        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Shrinkable<ListLike<T>>::StreamElementType {
             auto value = make_shrinkable<ListLike<T>>();
             ListLike<T>& valueCont = value.getMutableRef();
             for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {

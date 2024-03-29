@@ -25,13 +25,13 @@ Generator<vector<Any>> accumulateImplAny(GenFunction<Any> gen1, Function<GenFunc
                 .andThen([](const Shrinkable<vector<Shrinkable<Any>>>& parent) {
                     const vector<Shrinkable<Any>>& shrVec_ = parent.getRef();
                     if (shrVec_.size() == 0)
-                        return Stream<Shrinkable<vector<Shrinkable<Any>>>>::empty();
+                        return Shrinkable<vector<Shrinkable<Any>>>::StreamType::empty();
                     const Shrinkable<Any>& lastElemShr = shrVec_.back();
-                    Stream<Shrinkable<Any>> elemShrinks = lastElemShr.getShrinks();
+                    Shrinkable<Any>::StreamType elemShrinks = lastElemShr.getShrinks();
                     if (elemShrinks.isEmpty())
-                        return Stream<Shrinkable<vector<Shrinkable<Any>>>>::empty();
-                    return elemShrinks.template transform<Shrinkable<vector<Shrinkable<Any>>>,Shrinkable<Any>>(
-                        [copy = shrVec_](const Shrinkable<Any>& elem) mutable -> Shrinkable<vector<Shrinkable<Any>>> {
+                        return Shrinkable<vector<Shrinkable<Any>>>::StreamType::empty();
+                    return elemShrinks.template transform<Shrinkable<vector<Shrinkable<Any>>>::StreamElementType,Shrinkable<Any>>(
+                        [copy = shrVec_](const Shrinkable<Any>& elem) mutable -> Shrinkable<vector<Shrinkable<Any>>>::StreamElementType {
                             copy[copy.size() - 1] = Shrinkable<Any>(elem);
                             return make_shrinkable<vector<Shrinkable<Any>>>(copy);
                         });
