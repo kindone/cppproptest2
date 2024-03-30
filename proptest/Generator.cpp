@@ -8,6 +8,6 @@ ShrinkableAny AnyGenerator::operator()(Random& rand) const {
     return anyGen(rand);
 }
 
-template struct Function<ShrinkableAny(Random&)>;
+// template struct Function<ShrinkableAny(Random&)>;
 
 } // namespace proptest

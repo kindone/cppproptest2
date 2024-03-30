@@ -6,7 +6,7 @@
 
 namespace proptest {
 
-template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
+// template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
 
 #ifndef PROPTEST_UNTYPED_SHRINKABLE
 
