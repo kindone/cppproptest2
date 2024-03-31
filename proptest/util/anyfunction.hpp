@@ -257,6 +257,8 @@ T toCallableArg(const decay_t<T>& value) {
 
 } // namespace util
 
+template <typename Callable, typename RET, typename...ARGS>
+concept isCallableOf = (invocable<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...>>));
 
 template <typename RET, typename...ARGS>
 struct CallableHolderBase {
@@ -267,6 +269,8 @@ struct CallableHolderBase {
 template <typename Callable, typename RET, typename...ARGS>
 struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
     explicit CallableHolder(const Callable& c) : callable(c) {}
+
+    static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable has incompatible signature for RET(ARGS...)>");
 
     RET operator()(const decay_t<ARGS>&... args) override {
         if constexpr(is_void_v<RET>) {
@@ -279,9 +283,6 @@ struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
 
     decay_t<Callable> callable;
 };
-
-template <typename Callable, typename RET, typename...ARGS>
-concept isCallableOf = (invocable<Callable, ARGS...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, ARGS...>>));
 
 template <typename F> struct Function;
 
@@ -298,7 +299,6 @@ struct PROPTEST_API Function<RET(ARGS...)> {
     template <typename Callable>
         requires (!is_base_of_v<Function, decay_t<Callable>>)
     Function(Callable&& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
-        static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable does not match function signature");
     }
 
     operator bool() const {
