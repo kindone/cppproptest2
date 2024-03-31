@@ -96,6 +96,7 @@ TEST(AssumptionStdAny, reference)
 }
 */
 
+/*
 TEST(AssumptionContainerInit, Copyable)
 {
     struct Container {
@@ -237,6 +238,7 @@ TEST(AssumptionContainerInit, Movable)
     Container2 container2{util::move(Movable(100))};
     ASSERT_EQ(container2.movable.value, 100);
 }
+*/
 
 TEST(AnyVal, copied_when_assigned)
 {

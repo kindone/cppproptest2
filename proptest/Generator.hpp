@@ -41,7 +41,7 @@ public:
     template <typename U>
     Generator<U> map(Function<U(T&)> mapper);
 
-    template <invocable<const T&> F>
+    template <invocable<T&> F>
     auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
     {
         return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
