@@ -9,11 +9,11 @@ All generators, including the default ones, share the same base *function* type.
 // (Random&) -> Shrinkable<T>
 ```
 
-This can be represented as (or coerced to) a standard function type, `std::function<Shrinkable<T>(Random&)>`. In `cppproptest`, this function type is aliased as `GenFunction<T>`. We will use this term *GenFunction* throughout this page to refer the generator function type.
+This can be represented as (or coerced to) a function type, `Function<Shrinkable<T>(Random&)>` (a lightweight type-erased callable container). In `cppproptest`, this function type is aliased as `GenFunction<T>`. We will use this term *GenFunction* throughout this page to refer the generator function type.
 
 ```cpp
 template <typename T>
-using GenFunction = std::function<Shrinkable<T>(Random&);
+using GenFunction = Function<Shrinkable<T>(Random&);
 ```
 
 By the way, you may have noticed a strange template type `Shrinkable` in this signature. You can refer to [`Shrinkable`](Shrinking.md) for its further detail, but it can be treated as a wrapper for type `T` for now. So a generator (`Generator<T>`) basically generates a value of type `T` from a random number generator of `Random` type. A generator can be defined as function, functor, or lambda, as following:
@@ -52,7 +52,7 @@ auto myIntGen = Generator<int>([](Random& rand) {
 });
 
 // .filter and other utility methods can be used once the generator is decorated with Generator<T>
-auto evenGen = myIntGen.filter([](int& value) {
+auto evenGen = myIntGen.filter([](const int& value) {
     return value % 2 == 0;
 }); // generates even numbers only
 ```

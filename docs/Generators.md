@@ -154,7 +154,7 @@ namespace proptest { // you should define your Arbi<T> inside this namespace
 // by extending ArbiBase, you are decorating your arbitrary with standard methods (map, flatMap, filter, etc.)
 template <>
 struct Arbi<Car> : ArbiBase<Car> {
-  Shrinkable<Car> operator()(Random& rand) {
+  Shrinkable<Car> operator()(Random& rand) const {
     bool isAutomatic = rand.getRandomBool();
     return make_shrinkable<Car>(isAutomatic); // make_shrinkable creates a Car object by calling Car's constructor with 1 boolean parameter
   }
@@ -174,7 +174,7 @@ Although you can define an arbitrary as shown in this example, it's only require
 // generates any integers
 auto anyIntGen = Arbi<int>();
 // generates even integers
-auto evenGen = anyIntGen.filter([](int& num) {
+auto evenGen = anyIntGen.filter([](int num) {
     return num % 2 == 0;
 });
 ```

@@ -14,21 +14,21 @@ using namespace proptest::concurrent;
 
 // ...
 
-auto pushBackGen = Arbi<int>().map<SimpleAction<std::vector<int>>>([](int& value) {
-    return [value](std::vector<int>& obj) {
+auto pushBackGen = Arbi<int>().map<SimpleAction<std::vector<int>>>([](const int& value) {
+    return [value](const std::vector<int>& obj) {
         obj.push_back(value);
         return true;
     };
 });
 
-auto popBackGen = just<SimpleAction<std::vector<int>>>([](std::vector<int>& obj) {
+auto popBackGen = just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
     if (obj.empty())
         return true;
     obj.pop_back();
     return true;
 });
 
-auto clearGen = just<SimpleAction<std::vector<int>>>([](std::vector<int>& obj) {
+auto clearGen = just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
     obj.clear();
     return true;
 });

@@ -135,7 +135,7 @@ You can add a filtering condition to a generator to restrict the generated value
 
     ```cpp
     // generates even numbers
-    auto evenGen = filter<int>(Arbi<int>(),[](int& num) {
+    auto evenGen = filter<int>(Arbi<int>(),[](const int& num) {
         return num % 2 == 0;
     });
     ```
@@ -146,11 +146,11 @@ You can add a filtering condition to a generator to restrict the generated value
 
 You can transform an existing generator to create new generator by providing a transformer function. This is equivalent to *mapping* in functional programming context.
 
-* `transform<T,U>(gen, transformer)`: generates type `U` based on generator for type `T`, using `transformer` that transforms a value of type `T` to type `U`
+* `transform<T,U>(gen, transformer)`: generates type `U` based on generator for type `T`, using `transformer` that transforms a value of type `const T` to type `U`
 
     ```cpp
     // generates string from integers (e.g. "0", "1", ... , "-16384")
-    auto numStringGen = transform<int, std::string>(Arbi<int>(),[](int& num) {
+    auto numStringGen = transform<int, std::string>(Arbi<int>(),[](const int& num) {
         return std::string(num);
     });
     ```
@@ -163,7 +163,7 @@ Another combinator that resembles `transform` is `derive`. This is equivalent to
 
     ```cpp
     // generates a string something like "KOPZZFASF", "ghnpqpojv", or "49681002378", ... that consists of only uppercase/lowercase alphabets/numeric characters.
-    auto stringGen = derive<int, std::string>(integers(0, 2), [](int& num) {
+    auto stringGen = derive<int, std::string>(integers(0, 2), [](const int& num) {
         if(num == 0)
             return Arbi<std::string>(interval('A', 'Z'));
         else if(num == 1)
@@ -189,7 +189,7 @@ You may want to include dependency in the generated values. There are two varian
 * `dependency<T,U>(genT, genUgen)`: generates a `std::pair<T,U>` with a generator `genT` for type `T` and `genUgen`. `genUgen` receives a type `T` and returns a generator for type `U`. This can effectively create a generator for a pair where second item depends on the first one.
 
     ```cpp
-    auto sizeAndVectorGen = dependency<int, std::vector<bool>>(Arbi<bool>(), [](int& num) {
+    auto sizeAndVectorGen = dependency<int, std::vector<bool>>(Arbi<bool>(), [](const int& num) {
         auto vectorGen = Arbi<std::vector<int>>();
         vectorGen.maxLen = num;
         // generates a vector with maximum size of num
@@ -271,7 +271,7 @@ While `aggregate` generates a single value, accumulate generates a list of value
     // generate a value based on previous value
     auto gen = aggregate(
         gen1,
-        [](int& num) {
+        [](int num) {
             return interval(num/2, num*2);
         },
         2 /* min size */, 10 /* max size */);
@@ -283,7 +283,7 @@ While `aggregate` generates a single value, accumulate generates a list of value
     // generate list of values
     auto gen = accumulate(
         gen1,
-        [](int& num) {
+        [](int num) {
             return interval(num/2, num*2);
         },
         2 /* min size */, 10 /* max size */);
