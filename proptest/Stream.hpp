@@ -5,7 +5,7 @@
 #include "proptest/std/vector.hpp"
 #include "proptest/std/limits.hpp"
 #include "proptest/util/any.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 
 #include "proptest/typefwd.hpp"
 

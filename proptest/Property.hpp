@@ -2,7 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/Generator.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/PropertyContext.hpp"
 #include "proptest/PropertyBase.hpp"

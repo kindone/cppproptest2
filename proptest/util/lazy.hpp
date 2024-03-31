@@ -1,7 +1,7 @@
 #pragma once
 
 #include "proptest/std/optional.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 
 namespace proptest {
 

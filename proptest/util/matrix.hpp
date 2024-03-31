@@ -3,7 +3,7 @@
 #include "proptest/std/tuple.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/util/tuple.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 
 namespace proptest {
 namespace util {

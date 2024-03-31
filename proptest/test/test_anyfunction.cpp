@@ -1,4 +1,4 @@
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 #include "proptest/std/memory.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/test/gtest.hpp"

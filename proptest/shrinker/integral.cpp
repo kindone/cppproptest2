@@ -1,6 +1,6 @@
 #include "proptest/shrinker/integral.hpp"
 #include "proptest/Stream.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 
 
 namespace proptest {

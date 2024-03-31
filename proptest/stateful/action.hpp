@@ -1,6 +1,6 @@
 #pragma once
 
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/io.hpp"
 

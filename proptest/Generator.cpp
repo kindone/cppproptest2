@@ -1,5 +1,5 @@
 #include "proptest/Generator.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 #include "proptest/Shrinkable.hpp"
 
 namespace proptest {

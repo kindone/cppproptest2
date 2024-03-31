@@ -4,7 +4,7 @@
 #include "proptest/PropertyContext.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/std/optional.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 
 #define PROP_EXPECT_STREAM(condition, a, sign, b)                                            \
     ([&]() -> stringstream& {                                                           \

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "proptest/util/any.hpp"
-#include "proptest/util/anyfunction.hpp"
+#include "proptest/util/function.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/std/pair.hpp"
