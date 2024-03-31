@@ -47,10 +47,6 @@ public:
         return shrinkListLike<vector, T>(shrinkVec, minSize);
     }
 
-    shared_ptr<GeneratorBase<vector<T>>> clone() const override {
-        return util::make_shared<Arbi>(elemGen, minSize, maxSize);
-    }
-
 private:
     GenFunction<T> elemGen;
 };

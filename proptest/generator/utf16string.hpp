@@ -27,10 +27,6 @@ public:
 
     Shrinkable<UTF16BEString> operator()(Random& rand) const override;
 
-    shared_ptr<GeneratorBase> clone() const override {
-        return util::make_shared<Arbi>(elemGen, minSize, maxSize);
-    }
-
 private:
     GenFunction<uint32_t> elemGen;
 };
@@ -51,10 +47,6 @@ public:
     Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
 
     Shrinkable<UTF16LEString> operator()(Random& rand) const override;
-
-    shared_ptr<GeneratorBase> clone() const override {
-        return util::make_shared<Arbi>(elemGen, minSize, maxSize);
-    }
 
 private:
     GenFunction<uint32_t> elemGen;

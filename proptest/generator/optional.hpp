@@ -33,10 +33,6 @@ public:
         }
     }
 
-    shared_ptr<GeneratorBase<optional<T>>> clone() const override {
-        return util::make_shared<Arbi>(*this);
-    }
-
     GenFunction<T> elemGen;
     double nonEmptyProb; // probability of providing a nonEmpty value
 };

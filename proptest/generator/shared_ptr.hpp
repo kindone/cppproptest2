@@ -29,10 +29,6 @@ public:
         return shrinkable.template map<shared_ptr<T>>(+[](const T& obj) { return util::make_shared<T>(obj); });
     }
 
-    shared_ptr<GeneratorBase<shared_ptr<T>>> clone() const override {
-        return util::make_shared<Arbi>(elemGen);
-    }
-
 private:
     GenFunction<T> elemGen;
 };

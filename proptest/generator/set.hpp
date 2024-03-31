@@ -43,9 +43,6 @@ public:
         return shrinkSet(shrinkableSet, minSize);
     }
 
-    shared_ptr<GeneratorBase<Set>> clone() const override {
-        return util::make_shared<Arbi>(elemGen, minSize, maxSize);
-    }
 private:
     GenFunction<T> elemGen;
 };

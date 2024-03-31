@@ -54,10 +54,6 @@ public:
         return shrinkTuple(make_shrinkable<decltype(shrTup)>(shrTup));
     }
 
-    shared_ptr<GeneratorBase<Tuple>> clone() const override {
-        return util::make_shared<Arbi>(genTup);
-    }
-
 private:
     tuple<GenFunction<ARGS>...> genTup;
 };

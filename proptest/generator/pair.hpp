@@ -44,10 +44,6 @@ public:
         return shrinkPair(arg1Gen(rand), arg2Gen(rand));
     }
 
-    shared_ptr<GeneratorBase<Pair>> clone() const override {
-        return util::make_shared<Arbi>(arg1Gen, arg2Gen);
-    }
-
 private:
     GenFunction<ARG1> arg1Gen;
     GenFunction<ARG2> arg2Gen;
