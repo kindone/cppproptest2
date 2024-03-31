@@ -5,6 +5,7 @@
 #include "proptest/Generator.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/std/list.hpp"
 
 namespace proptest {
 

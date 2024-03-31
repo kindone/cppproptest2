@@ -67,7 +67,7 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
     };
 
     static genfunc_t genneg = +[](uint64_t min, uint64_t max) {
-        uint64_t mid = static_cast<uint64_t>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? -1 : 0));
+        uint64_t mid = (min % 2 != 0 && max % 2 != 0) ? (min / 2 + max / 2 - 1) : (min / 2 + max / 2);
 
         if (min + 1 >= max) {
             return stream_t::empty();
@@ -82,9 +82,9 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genpos(0, value));
+            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genpos(0U, value));
         else
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genneg(value, 0));
+            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genneg(value, 0U));
     });
 }
 

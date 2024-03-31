@@ -22,7 +22,7 @@ ostream& decodeUTF16BE(ostream& os, const string& str)
     vector<uint8_t> chars;
     chars.reserve(str.size());
     for (size_t i = 0; i < str.size(); i++) {
-        chars.push_back(str[i]);
+        chars.push_back(static_cast<uint8_t>(str[i]));
     }
     return decodeUTF16BE(os, chars);
 }
@@ -32,7 +32,7 @@ ostream& decodeUTF16BE(ostream& os, const UTF16BEString& str)
     vector<uint8_t> chars;
     chars.reserve(str.size());
     for (size_t i = 0; i < str.size(); i++) {
-        chars.push_back(str[i]);
+        chars.push_back(static_cast<uint8_t>(str[i]));
     }
     return decodeUTF16BE(os, chars);
 }
@@ -42,7 +42,7 @@ ostream& decodeUTF16LE(ostream& os, const string& str)
     vector<uint8_t> chars;
     chars.reserve(str.size());
     for (size_t i = 0; i < str.size(); i++) {
-        chars.push_back(str[i]);
+        chars.push_back(static_cast<uint8_t>(str[i]));
     }
     return decodeUTF16LE(os, chars);
 }
@@ -52,7 +52,7 @@ ostream& decodeUTF16LE(ostream& os, const UTF16LEString& str)
     vector<uint8_t> chars;
     chars.reserve(str.size());
     for (size_t i = 0; i < str.size(); i++) {
-        chars.push_back(str[i]);
+        chars.push_back(static_cast<uint8_t>(str[i]));
     }
     return decodeUTF16LE(os, chars);
 }

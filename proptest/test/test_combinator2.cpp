@@ -384,7 +384,7 @@ TEST(PropTest, TestAccumulate)
     auto gen1 = interval<int>(0, 1);
 
     [[maybe_unused]] auto gen = accumulate(
-        gen1, [](const int& num) { return interval(num, num + 2); }, 2, 4);
+        gen1, [](int num) { return interval(num, num + 2); }, 2, 4);
 
     for (int i = 0; i < 10; i++) {
         [[maybe_unused]] auto shr = gen(rand);
