@@ -1,4 +1,4 @@
-#include "printing.hpp"
+#include "proptest/util/printing.hpp"
 #include "proptest/api.hpp"
 
 namespace proptest {

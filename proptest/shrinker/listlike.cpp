@@ -1,4 +1,4 @@
-#include "listlike.hpp"
+#include "proptest/shrinker/listlike.hpp"
 #include "proptest/shrinker/integral.hpp"
 
 namespace proptest {

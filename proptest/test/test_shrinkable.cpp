@@ -206,7 +206,7 @@ TEST(Shrinkable, map_exhaustive)
     EXPECT_EQ(serializeShrinkable(shr), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
     Shrinkable<int> shr2 = shr.map<int>([](const int64_t& val) -> int { return static_cast<int>(val + 1); });
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 9, shrinks: [{value: 1}, {value: 5, shrinks: [{value: 3, shrinks: [{value: 2}]}, {value: 4}]}, {value: 7, shrinks: [{value: 6}]}, {value: 8}]}");
-    Shrinkable<string> shr3 = shr.map<string>([](const int& val) -> string { return to_string(val); });
+    Shrinkable<string> shr3 = shr.map<string>([](const int64_t& val) -> string { return to_string(val); });
     EXPECT_EQ(serializeShrinkable(shr3), "{value: \"8\" (38), shrinks: [{value: \"0\" (30)}, {value: \"4\" (34), shrinks: [{value: \"2\" (32), shrinks: [{value: \"1\" (31)}]}, {value: \"3\" (33)}]}, {value: \"6\" (36), shrinks: [{value: \"5\" (35)}]}, {value: \"7\" (37)}]}");
 }
 
@@ -222,7 +222,7 @@ TEST(Shrinkable, map_exhaustive2)
     EXPECT_EQ(serializeShrinkable(shr), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
     Shrinkable<int> shr2 = shr.map<int>(Functor{5});
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 13, shrinks: [{value: 5}, {value: 9, shrinks: [{value: 7, shrinks: [{value: 6}]}, {value: 8}]}, {value: 11, shrinks: [{value: 10}]}, {value: 12}]}");
-    Shrinkable<string> shr3 = shr.map<string>([](const int& val) -> string { return to_string(val); });
+    Shrinkable<string> shr3 = shr.map<string>([](const int64_t& val) -> string { return to_string(val); });
     EXPECT_EQ(serializeShrinkable(shr3), "{value: \"8\" (38), shrinks: [{value: \"0\" (30)}, {value: \"4\" (34), shrinks: [{value: \"2\" (32), shrinks: [{value: \"1\" (31)}]}, {value: \"3\" (33)}]}, {value: \"6\" (36), shrinks: [{value: \"5\" (35)}]}, {value: \"7\" (37)}]}");
 }
 
