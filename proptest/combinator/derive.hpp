@@ -14,7 +14,7 @@
 namespace proptest {
 
 template <typename T, typename U>
-Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
+Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     Function<Shrinkable<U>(Random&)> genU = [gen1, gen2gen](Random& rand) {
         // generate T
@@ -74,7 +74,7 @@ decltype(auto) derive(GEN1&& gen1, GEN2GEN&& gen2gen)
     using GenType = invoke_result_t<GEN2GEN, T&>;             // GEN2GEN's return type
     using U = invoke_result_t<GenType, Random&>::type;
     GenFunction<T> funcGen1 = gen1;
-    Function<GenType(const T&)> funcGen2Gen = gen2gen;
+    Function<GenType(T&)> funcGen2Gen = gen2gen;
     return derive<T, U>(funcGen1, funcGen2Gen);
 }
 

@@ -25,7 +25,7 @@ struct Generator;
  * @param transformer transformation function T& -> U
  */
 template <typename T, typename U>
-Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(const T&)> transformer)
+Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(T&)> transformer)
 {
     return generator([gen, transformer](Random& rand) -> Shrinkable<U>{
         Shrinkable<T> shrinkable = gen(rand);

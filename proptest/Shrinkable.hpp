@@ -58,7 +58,7 @@ struct PROPTEST_API ShrinkableBase
     StreamType getShrinks() const;
 
     template <typename U, typename T>
-    ShrinkableBase map(Function<U(const T&)> transformer) const {
+    ShrinkableBase map(Function<U(T&)> transformer) const {
         return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> StreamType {
             return shrinks->template transform<StreamElementType,StreamElementType>([transformer](const ShrinkableBase& shr) -> StreamElementType {
                     return shr.map<U>(transformer);
@@ -68,7 +68,7 @@ struct PROPTEST_API ShrinkableBase
     }
 
     template <typename U, typename T>
-    ShrinkableBase flatMap(Function<ShrinkableBase(const T&)> transformer) const {
+    ShrinkableBase flatMap(Function<ShrinkableBase(T&)> transformer) const {
         return transformer(value.getRef<T>()).with([shrinks = this->shrinks, transformer]() { return shrinks->template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> ShrinkableBase {
                     return shr.flatMap<U, T>(transformer);
                 });
@@ -77,11 +77,11 @@ struct PROPTEST_API ShrinkableBase
     }
 
     template <typename U, typename T>
-    ShrinkableBase mapShrinkable(Function<ShrinkableBase(const ShrinkableBase&)> transformer) const;
+    ShrinkableBase mapShrinkable(Function<ShrinkableBase(ShrinkableBase&)> transformer) const;
 
     // provide filtered generation, shrinking
     template <typename T>
-    ShrinkableBase filter(Function<bool(const T&)> criteria) const {
+    ShrinkableBase filter(Function<bool(T&)> criteria) const {
         // criteria must be true for head
         if(!criteria(value.getRef<T>()))
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
@@ -95,9 +95,9 @@ struct PROPTEST_API ShrinkableBase
 
     // provide filtered generation, shrinking
     template <typename T>
-    ShrinkableBase filter(Function<bool(const T&)> criteria, int tolerance) const {
+    ShrinkableBase filter(Function<bool(T&)> criteria, int tolerance) const {
 
-        static Function<StreamType(const StreamType&,Function<bool(const T&)>, int)> filterStream = +[](const StreamType& stream, Function<bool(const T&)> _criteria, int _tolerance) {
+        static Function<StreamType(const StreamType&,Function<bool(T&)>, int)> filterStream = +[](const StreamType& stream, Function<bool(T&)> _criteria, int _tolerance) {
             if(stream.isEmpty())
                 return StreamType::empty();
             else {
@@ -203,38 +203,38 @@ struct Shrinkable : public ShrinkableBase
     Shrinkable clone() const { return ShrinkableBase::clone(); }
 
     template <typename U>
-    Shrinkable<U> map(Function<U(const T&)> transformer) const {
+    Shrinkable<U> map(Function<U(T&)> transformer) const {
         return ShrinkableBase::map<U, T>(transformer);
     }
 
     template <typename U>
-    Shrinkable<U> flatMap(Function<ShrinkableBase(const T&)> transformer) const {
+    Shrinkable<U> flatMap(Function<ShrinkableBase(T&)> transformer) const {
         return ShrinkableBase::flatMap<U, T>(transformer);
     }
 
     template <typename U>
-    Shrinkable<U> mapShrinkable(Function<ShrinkableBase(const ShrinkableBase&)> transformer) const {
+    Shrinkable<U> mapShrinkable(Function<ShrinkableBase(ShrinkableBase&)> transformer) const {
         return ShrinkableBase::mapShrinkable<U, T>(transformer);
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Function<bool(const T&)> criteria) const {
+    Shrinkable filter(Function<bool(T&)> criteria) const {
         return ShrinkableBase::filter<T>(criteria);
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Function<bool(const T&)> criteria, int tolerance) const {
+    Shrinkable filter(Function<bool(T&)> criteria, int tolerance) const {
         return ShrinkableBase::filter<T>(criteria, tolerance);
     }
 
     // concat: continues with then after horizontal dead end
     Shrinkable concatStatic(const StreamType& then) const { return ShrinkableBase::concatStatic(then); }
     // concat: extend shrinks stream with function taking parent as argument
-    Shrinkable concat(Function<StreamType(const ShrinkableBase&)> then) const { return ShrinkableBase::concat(then); }
+    Shrinkable concat(Function<StreamType(ShrinkableBase&)> then) const { return ShrinkableBase::concat(then); }
     // andThen: continues with then after vertical dead end
     Shrinkable andThenStatic(const StreamType& then) const { return ShrinkableBase::andThenStatic(then); }
 
-    Shrinkable andThen(Function<StreamType(const ShrinkableBase&)> then) const { return ShrinkableBase::andThen(then); }
+    Shrinkable andThen(Function<StreamType(ShrinkableBase&)> then) const { return ShrinkableBase::andThen(then); }
 
 #ifndef PROPTEST_UNTYPED_STREAM
 

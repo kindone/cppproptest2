@@ -39,7 +39,7 @@ public:
     virtual Shrinkable<T> operator()(Random& rand) const = 0;
 
     template <typename U>
-    Generator<U> map(Function<U(const T&)> mapper);
+    Generator<U> map(Function<U(T&)> mapper);
 
     template <invocable<const T&> F>
     auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>

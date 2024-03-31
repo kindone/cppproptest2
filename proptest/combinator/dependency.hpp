@@ -21,7 +21,7 @@ namespace proptest {
  */
 // returns a shrinkable pair of <T,U> where U depends on T
 template <typename T, typename U>
-Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
+Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     return generator([gen1, gen2gen](Random& rand) -> Shrinkable<pair<T, U>> {
         // generate T

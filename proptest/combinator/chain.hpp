@@ -19,7 +19,7 @@ using Chain = tuple<Ts...>;
 namespace util {
 
 template <typename U, typename T>
-Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(const T&)> gen2gen)
+Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     return generator([gen1, gen2gen](Random& rand) -> Shrinkable<Chain<T, U>> {
         // generate T
@@ -61,7 +61,7 @@ Generator<Chain<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(co
 
 template <typename U, typename T0, typename T1, typename... Ts>
 Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> gen1,
-                                             Function<GenFunction<U>(const Chain<T0, T1, Ts...>&)> gen2gen)
+                                             Function<GenFunction<U>(Chain<T0, T1, Ts...>&)> gen2gen)
 {
     auto gen1Ptr = util::make_shared<decltype(gen1)>(gen1);
     Function<GenFunction<U>(const Chain<T0, T1, Ts...>&)> gen2genFunc =
@@ -139,7 +139,7 @@ decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen)
     using U = typename invoke_result_t<RetType, Random&>::type;  // U from shrinkable<U>(Random&)
 
     GenFunction<CHAIN> funcGen1 = gen1;
-    Function<GenFunction<U>(const CHAIN&)> funcGen2Gen = gen2gen;
+    Function<GenFunction<U>(CHAIN&)> funcGen2Gen = gen2gen;
     return util::chainImpl(funcGen1, funcGen2Gen);
 }
 

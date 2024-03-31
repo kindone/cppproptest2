@@ -10,7 +10,7 @@ namespace proptest {
 
 template <typename T>
 template <typename U>
-Generator<U> GeneratorBase<T>::map(Function<U(const T&)> mapper)
+Generator<U> GeneratorBase<T>::map(Function<U(T&)> mapper)
 {
     return Generator<U>(proptest::transform<T, U>(this->asGenFunction(), mapper));
 }

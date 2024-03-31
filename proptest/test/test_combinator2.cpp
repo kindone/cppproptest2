@@ -246,7 +246,7 @@ TEST(PropTest, TestDependency4)
     Random rand(seed);
 
     auto intGen = elementOf<int>(0, 1, 2, 3);
-    auto intStringGen = dependency<int, string>(intGen, [](const int& value) {
+    auto intStringGen = dependency<int, string>(intGen, [](int& value) {
         auto gen = Arbi<string>();
         gen.setMaxSize(value);
         return gen;

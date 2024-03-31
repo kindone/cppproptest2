@@ -55,7 +55,7 @@ template <GenLike GEN, typename Criteria>
 Generator<typename invoke_result_t<GEN, Random&>::type> filter(GEN&& gen, Criteria&& criteria)
 {
     using T = typename invoke_result_t<GEN, Random&>::type;
-    static_assert(is_convertible_v<Criteria&&, function<bool(T&)>>, "criteria must be a callable of T& -> bool");
+    static_assert(is_convertible_v<Criteria&&, Function<bool(T&)>>, "criteria must be a callable of T& -> bool");
     static_assert(is_convertible_v<GEN&&, Function<Shrinkable<T>(Random&)>>,
                   "Gen must be a GenFunction<T> or a callable of Random& -> Shrinkable<T>");
 

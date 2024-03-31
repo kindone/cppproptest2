@@ -16,7 +16,7 @@ namespace proptest {
 namespace util {
 
 template <typename T>
-Generator<T> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(const T&)> gen2gen, size_t minSize, size_t maxSize)
+Generator<T> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(T&)> gen2gen, size_t minSize, size_t maxSize)
 {
     return interval<uint64_t>(minSize, maxSize).flatMap<T>([gen1, gen2gen](const uint64_t& size) {
         return Generator<T>([gen1, gen2gen, size](Random& rand) {
@@ -47,7 +47,7 @@ decltype(auto) aggregate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t 
     using T = typename invoke_result_t<GEN1, Random&>::type;  // get the T from shrinkable<T>(Random&)
     using RetType = invoke_result_t<GEN2GEN, T&>;             // GEN2GEN's return type
     GenFunction<T> funcGen1 = gen1;
-    Function<RetType(const T&)> funcGen2Gen = gen2gen;
+    Function<RetType(T&)> funcGen2Gen = gen2gen;
     return util::aggregateImpl<T>(funcGen1, funcGen2Gen, minSize, maxSize);
 }
 
