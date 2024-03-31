@@ -24,21 +24,21 @@ Generator<T> GeneratorBase<T>::filter(Criteria&& criteria)
 
 template <typename T>
 template <typename U>
-Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(const T&)> genFactory)
+Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(T&)> genFactory)
 {
     return proptest::dependency<T, U>(this->asGenFunction(), genFactory);
 }
 
 template <typename T>
 template <typename U>
-decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(const T&)> genFactory)
+decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(T&)> genFactory)
 {
     return proptest::chain(this->asGenFunction(), genFactory);
 }
 
 template <typename T>
 template <typename U>
-Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(const T&)> genFactory)
+Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
 {
     return Generator<U>(proptest::derive<T, U>(this->asGenFunction(), genFactory));
 }

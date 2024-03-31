@@ -51,7 +51,7 @@ public:
     Generator<T> filter(Criteria&& criteria);
 
     template <typename U>
-    Generator<pair<T, U>> pairWith(Function<GenFunction<U>(const T&)> genFactory);
+    Generator<pair<T, U>> pairWith(Function<GenFunction<U>(T&)> genFactory);
 
     template <invocable<T&> FACTORY>
     decltype(auto) pairWith(FACTORY&& genFactory)
@@ -62,7 +62,7 @@ public:
     }
 
     template <typename U>
-    decltype(auto) tupleWith(Function<GenFunction<U>(const T&)> genFactory);
+    decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
 
     template <typename FACTORY>
     decltype(auto) tupleWith(FACTORY&& genFactory)
@@ -72,9 +72,9 @@ public:
     }
 
     template <typename U>
-    Generator<U> flatMap(Function<GenFunction<U>(const T&)> genFactory);
+    Generator<U> flatMap(Function<GenFunction<U>(T&)> genFactory);
 
-    template <invocable<const T&> FACTORY>
+    template <invocable<T&> FACTORY>
     decltype(auto) flatMap(FACTORY&& genFactory)
     {
         using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
