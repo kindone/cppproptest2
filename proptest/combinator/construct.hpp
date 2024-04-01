@@ -1,4 +1,7 @@
 #pragma once
+
+#if 0 // disabled
+
 #include "proptest/Generator.hpp"
 #include "proptest/combinator/filter.hpp"
 #include "proptest/combinator/transform.hpp"
@@ -68,7 +71,7 @@ public:
 
     Construct(GenTuple g) : genTup(g) {}
 
-    Shrinkable<CLASS> operator()(Random& rand) override { return constructAccordingly(generateArgs(rand)); }
+    Shrinkable<CLASS> operator()(Random& rand) const override { return constructAccordingly(generateArgs(rand)); }
 
 private:
     template <size_t... index>
@@ -146,3 +149,5 @@ Construct<CLASS, ARGTYPES...> construct(EXPGEN0&& gen0, EXPGENS&&... gens)
 }
 
 }  // namespace proptest
+
+#endif // disabled

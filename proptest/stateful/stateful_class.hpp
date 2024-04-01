@@ -1,5 +1,7 @@
 #pragma once
 
+#if 0 // disabled
+
 #include "proptest/combinator/transform.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/Generator.hpp"
@@ -151,3 +153,5 @@ decltype(auto) statefulProperty(InitialGen&& initialGen, ModelFactory&& modelFac
 }  // namespace alt
 }  // namespace stateful
 }  // namespace proptest
+
+#endif // disabled

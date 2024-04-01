@@ -1,5 +1,7 @@
 #pragma once
 
+#if 0 // disabled
+
 #include "proptest/api.hpp"
 #include "proptest/stateful/stateful_class.hpp"
 #include "proptest/Random.hpp"
@@ -308,3 +310,5 @@ decltype(auto) concurrency(InitialGen&& initialGen, ModelFactory&& modelFactory,
 }  // namespace concurrent
 
 }  // namespace proptest
+
+#endif // disabled
