@@ -4,6 +4,7 @@
 #include "proptest/shrinker/map.hpp"
 #include "proptest/generator/pair.hpp"
 #include "proptest/std/map.hpp"
+#include "proptest/std/set.hpp"
 #include "proptest/std/memory.hpp"
 
 /**
