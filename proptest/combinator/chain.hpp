@@ -108,13 +108,6 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
 }  // namespace util
 
-
-template <typename F, typename GEN, typename T = typename invoke_result_t<GEN, Random&>::type>
-concept GenLikeGen = GenLike<GEN> && requires(F f, T& t) {
-    { f(t) }
-    -> GenLike;
-};
-
 /**
  * @ingroup Combinators
  * @brief Generator combinator for chaining two generators to generate a tuple of values, where the second generator

@@ -100,7 +100,7 @@ TEST(Filter, basic)
     for(int i = 0; i < 100; i++)
     {
         auto result = filtered(rand);
-        EXPECT_TRUE(result.get() % 2 == 0);
+        EXPECT_EQ(result.get() % 2, 0);
     }
 }
 
@@ -113,7 +113,7 @@ TEST(Transform, basic)
     for(int i = 0; i < 100; i++)
     {
         auto result = transformed(rand);
-        EXPECT_TRUE(result.get() % 2 == 0);
+        EXPECT_EQ(result.get() % 2, 0);
     }
 }
 

@@ -51,7 +51,7 @@ TEST(Arbitrary, toGenFunction)
     GenFunction<bool> gen = arbi;
     for(int i = 0; i < 5; i++)
         cout << gen(rand).get() << endl;
-    
+
     // rvalue
     GenFunction<bool> gen2 = Arbi<bool>();
 }
