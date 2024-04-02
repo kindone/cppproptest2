@@ -2,11 +2,13 @@
 #include "proptest/std/exception.hpp"
 #include "proptest/std/string.hpp"
 
-using namespace proptest;
+namespace proptest {
 
 const Any Any::empty;
 
 Any::Any(const Any& other) : ptr(other.ptr) {}
+
+Any::~Any() {}
 
 const type_info& Any::type() const {
     if(!ptr) {
@@ -35,6 +37,8 @@ Any::Any(const shared_ptr<AnyHolder>& holderPtr) : ptr(holderPtr) { }
 Any Any::clone() const
 {
     return Any(ptr->clone());
+}
+
 }
 
 // bool Any::operator==(const Any& other) {

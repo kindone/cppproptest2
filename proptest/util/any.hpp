@@ -135,7 +135,7 @@ struct PROPTEST_API Any {
     static const Any empty;
 
     Any() = default;
-    virtual ~Any() {}
+    virtual ~Any();
 
     Any(const Any& other);
 
