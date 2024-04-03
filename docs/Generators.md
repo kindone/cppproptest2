@@ -78,7 +78,7 @@ Here's quick reference for built-in arbitraries:
 
 * Boolean type:`bool`
 * Character type: `char`
-* Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
+* Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`, `long`, `unsigned long`
 * Floating point types: `float`, `double`
 * String types:
     * `std::string` (defaults to generate ASCII character strings in \[0x01, 0x7F\] range)

@@ -64,6 +64,9 @@ template <>
 int64_t Random::getRandom<int64_t>(int64_t min, int64_t max);
 
 template <>
+long Random::getRandom<long>(int64_t min, int64_t max);
+
+template <>
 char Random::getRandomU<char>(uint64_t min, uint64_t max);
 
 template <>
@@ -77,5 +80,8 @@ uint32_t Random::getRandomU<uint32_t>(uint64_t min, uint64_t max);
 
 template <>
 uint64_t Random::getRandomU<uint64_t>(uint64_t min, uint64_t max);
+
+template <>
+unsigned long Random::getRandomU<unsigned long>(uint64_t min, uint64_t max);
 
 }  // namespace proptest

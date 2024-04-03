@@ -23,7 +23,7 @@ TYPED_TEST(IntegralTest, shrinkIntegral_signed)
         "{value: 7}]}");
 }
 
-TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned)
+TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed)
 {
     Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8);
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: "
@@ -37,7 +37,7 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned)
         "{value: -7}]}");
 }
 
-TYPED_TEST(SignedIntegralTest, shrinkIntegral_unsigned2)
+TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed2)
 {
     // concat with positive signed number
     using StreamType = Shrinkable<TypeParam>::StreamType;

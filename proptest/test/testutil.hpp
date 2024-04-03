@@ -55,11 +55,13 @@ struct StringLikeTest : public testing::Test
 };
 
 using NumericTypes =
-    testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double>;
-using SignedNumericTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, float, double>;
-using IntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t>;
-using SignedIntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t>;
-using UnsignedIntegralTypes = testing::Types<uint8_t, uint16_t, uint32_t, uint64_t>;
+    testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t, float, double,
+        signed char, short, int, long, long long, unsigned char, unsigned short, unsigned int, unsigned long, unsigned long long, size_t, ptrdiff_t>;
+using SignedNumericTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, float, double, signed char, short, int, long, long long>;
+using IntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, uint8_t, uint16_t, uint32_t, uint64_t,
+        signed char, short, int, long, long long, unsigned char, unsigned short, unsigned int, unsigned long, unsigned long long, size_t, ptrdiff_t>;
+using SignedIntegralTypes = testing::Types<int8_t, int16_t, int32_t, int64_t, signed char, short, int, long, long long>;
+using UnsignedIntegralTypes = testing::Types<uint8_t, uint16_t, uint32_t, uint64_t, unsigned char, unsigned short, unsigned int, unsigned long, unsigned long long, size_t, ptrdiff_t>;
 using FloatingTypes = testing::Types<float, double>;
 using StringLikeTypes = testing::Types<proptest::UTF8String, proptest::CESU8String, proptest::UTF16BEString, proptest::UTF16LEString>;
 

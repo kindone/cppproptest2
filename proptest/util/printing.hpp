@@ -34,6 +34,8 @@ ostream& show(ostream& os, const int32_t&);
 ostream& show(ostream& os, const uint32_t&);
 ostream& show(ostream& os, const int64_t&);
 ostream& show(ostream& os, const uint64_t&);
+ostream& show(ostream& os, const long&);
+ostream& show(ostream& os, const unsigned long&);
 ostream& show(ostream& os, const float&);
 ostream& show(ostream& os, const double&);
 

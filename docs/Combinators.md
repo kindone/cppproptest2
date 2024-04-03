@@ -6,7 +6,7 @@ Generator combinators are provided for building a new generator based on existin
 While you can go through this document from top to the bottom, you might be want to find a suitable combinator for your use case using this table:
 
 | Purpose                                              | Related Generator/Combinator                                                                                           | Examples                                                                      |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+|------------------------------------------------------|------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
 | Generate just a constant                             | [`just<T>`](#constants)                                                                                                | `0` or `"1337"`                                                               |
 | Generate a value within constants                    | [`elementOf<T>`](#selecting-from-values)                                                                               | a prime number under 100                                                      |
 | Generate a list of unique values                     | [`Arbi<set<T>>`](Generators.md#built-in-arbitraries)                                                                   | `{3,5,1}` but not `{3,5,5}`                                                   |
@@ -177,7 +177,7 @@ Another combinator that resembles `transform` is `derive`. This is equivalent to
 Following table compares `transform` and `derive`:
 
 | Combinator       | transformer signature       | Result type    |
-| ---------------- | --------------------------- | -------------- |
+|------------------|-----------------------------|----------------|
 | `transform<T,U>` | `function<U(T)>`            | `Generator<U>` |
 | `derive<T,U>`    | `function<Generator<U>(T)>` | `Generator<U>` |
 
@@ -259,12 +259,12 @@ However, using `filter` for generating values with complex dependency may result
 You may want to generate values that are related to previously generated values. This can be achieved with `aggregate` or `accumulate`.
 Both of the combinators take base generator in the form of `Generator<T>` as the first argument and a factory that takes a value of type `T` and returns `Generator<T>`, as the second argument.
 
-While `accumulate` generates a single value, `aggregate` generates a list of values at each generation.
+While `accumulate` generates a single value, `aggregate` generates a vector of values at each generation.
 
-| Combinator                                                      | Result type          | Remark |
-| --------------------------------------------------------------- | -------------------- | ------ |
-| `accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)`  | `Generator<T>`       |        |
-| `aggregate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)` | `Generator<list<T>>` |        |
+| Combinator                                                      | Result type            | Remark |
+|-----------------------------------------------------------------|------------------------|--------|
+| `accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)` | `Generator<T>`         |        |
+| `aggregate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)`  | `Generator<vector<T>>` |        |
 
 ```cpp
     // generate initial value
@@ -295,7 +295,7 @@ While `accumulate` generates a single value, `aggregate` generates a list of val
 Standard generators and combinators (including `Arbi<T>` and `Construct<...>`) returns a `Generator<T>`, which is of the form `(Random&) -> Shrinkable<T>` (aliased as `GenFunction<T>`), but has additional combinator methods decorated for ease of use. They in fact have equivalent standalone counterparts. Following table shows this relationship:
 
 | Decorated method                             | Result type                      | Equivalent Standalone combinator |
-| -------------------------------------------- | -------------------------------- | -------------------------------- |
+|----------------------------------------------|----------------------------------|----------------------------------|
 | `Generator<T>::filter`                       | `Generator<T>`                   | `filter<T>`                      |
 | `Generator<T>::map<U>`                       | `Generator<U>`                   | `transform<T,U>`                 |
 | `Generator<T>::flatMap<U>`                   | `Generator<U>`                   | `derive<T,U>`                    |

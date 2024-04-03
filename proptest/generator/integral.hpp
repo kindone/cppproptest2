@@ -9,34 +9,62 @@
  * @brief Arbitrary for integers
  */
 
+#define DEFINE_FOR_ALL_INTTYPES(DEF) \
+    DEF(int8_t);\
+    DEF(int16_t);\
+    DEF(int32_t);\
+    DEF(int64_t);\
+    DEF(uint8_t);\
+    DEF(uint16_t);\
+    DEF(uint32_t);\
+    DEF(long);\
+    DEF(unsigned long);
+
 namespace proptest {
 
 template <typename GEN>
 decltype(auto) generator(GEN&& gen);
 
-
 // template declaration
 template <typename T>
 PROPTEST_API Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max());
 
-// template specialization
-template <> PROPTEST_API Shrinkable<char> generateInteger(Random& rand, char min, char max);
+#define SPECIALIZE_GENERATEINTEGER(TYPE) \
+    template <> PROPTEST_API Shrinkable<TYPE> generateInteger(Random& rand, TYPE min, TYPE max)
 
-template <> PROPTEST_API Shrinkable<int8_t> generateInteger(Random& rand, int8_t min, int8_t max);
+DEFINE_FOR_ALL_INTTYPES(SPECIALIZE_GENERATEINTEGER);
 
-template <> PROPTEST_API Shrinkable<int16_t> generateInteger(Random& rand, int16_t min, int16_t max);
+template <integral T>
+class PROPTEST_API Arbi<T> final : public ArbiBase<T> {
+public:
+    virtual Shrinkable<T> operator()(Random&) const override {
+        throw runtime_error(__FILE__, __LINE__, "Arbi for integral type not defined for this integral type");
+    }
+    static constexpr char boundaryValues[] = {0, -1 ,1, -2, 2,
+                                                numeric_limits<char>::min(),
+                                                numeric_limits<char>::max(),
+                                                numeric_limits<char>::min() + 1,
+                                                numeric_limits<char>::max() - 1,
+                                                ' ', '"', '\'', '\t', '\n', '\r'};
 
-template <> PROPTEST_API Shrinkable<int32_t> generateInteger(Random& rand, int32_t min, int32_t max);
+};
 
-template <> PROPTEST_API Shrinkable<int64_t> generateInteger(Random& rand, int64_t min, int64_t max);
+/**
+ * @ingroup Generators
+ * @brief Arbitrary for char
+ */
+template <>
+class PROPTEST_API Arbi<char> final : public ArbiBase<char> {
+public:
+    virtual Shrinkable<char> operator()(Random& rand) const override;
+    static constexpr char boundaryValues[] = {0, -1 ,1, -2, 2,
+                                                numeric_limits<char>::min(),
+                                                numeric_limits<char>::max(),
+                                                numeric_limits<char>::min() + 1,
+                                                numeric_limits<char>::max() - 1,
+                                                ' ', '"', '\'', '\t', '\n', '\r'};
 
-template <> PROPTEST_API Shrinkable<uint8_t> generateInteger(Random& rand, uint8_t min, uint8_t max);
-
-template <> PROPTEST_API Shrinkable<uint16_t> generateInteger(Random& rand, uint16_t min, uint16_t max);
-
-template <> PROPTEST_API Shrinkable<uint32_t> generateInteger(Random& rand, uint32_t min, uint32_t max);
-
-template <> PROPTEST_API Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max);
+};
 
 /**
  * @ingroup Generators
@@ -46,8 +74,12 @@ template <>
 class PROPTEST_API Arbi<int8_t> final : public ArbiBase<int8_t> {
 public:
     virtual Shrinkable<int8_t> operator()(Random& rand) const override;
-    static constexpr int8_t boundaryValues[] = {INT8_MIN,     0,   INT8_MAX, -1,   1,    -2,   2,   INT8_MIN + 1,
-                                                INT8_MAX - 1, ' ', '"',      '\'', '\t', '\n', '\r'};
+    static constexpr int8_t boundaryValues[] = {0, -1 ,1, -2, 2,
+                                                numeric_limits<int8_t>::min(),
+                                                numeric_limits<int8_t>::max(),
+                                                numeric_limits<int8_t>::min() + 1,
+                                                numeric_limits<int8_t>::max() - 1,
+                                                ' ', '"', '\'', '\t', '\n', '\r'};
 
 };
 
@@ -64,19 +96,19 @@ public:
                                                  1,
                                                  -2,
                                                  2,
-                                                 INT16_MIN,
-                                                 INT16_MAX,
-                                                 INT16_MIN + 1,
-                                                 INT16_MAX - 1,
-                                                 INT8_MIN,
-                                                 INT8_MAX,
-                                                 UINT8_MAX,
-                                                 INT8_MIN - 1,
-                                                 INT8_MIN + 1,
-                                                 INT8_MAX - 1,
-                                                 INT8_MAX + 1,
-                                                 UINT8_MAX - 1,
-                                                 UINT8_MAX + 1};
+                                                 numeric_limits<int16_t>::min(),
+                                                 numeric_limits<int16_t>::max(),
+                                                 numeric_limits<int16_t>::min() + 1,
+                                                 numeric_limits<int16_t>::max() - 1,
+                                                 numeric_limits<int8_t>::min(),
+                                                 numeric_limits<int8_t>::max(),
+                                                 numeric_limits<uint8_t>::max(),
+                                                 numeric_limits<int8_t>::min() - 1,
+                                                 numeric_limits<int8_t>::min() + 1,
+                                                 numeric_limits<int8_t>::max() - 1,
+                                                 numeric_limits<int8_t>::max() + 1,
+                                                 numeric_limits<uint8_t>::max() - 1,
+                                                 numeric_limits<uint8_t>::max() + 1};
 };
 
 /**
@@ -93,28 +125,28 @@ public:
                                                  1,
                                                  -2,
                                                  2,
-                                                 INT32_MIN,
-                                                 INT32_MAX,
-                                                 INT32_MIN + 1,
-                                                 INT32_MAX - 1,
-                                                 INT16_MIN,
-                                                 INT16_MAX,
-                                                 UINT16_MAX,
-                                                 INT16_MIN - 1,
-                                                 INT16_MIN + 1,
-                                                 INT16_MAX - 1,
-                                                 INT16_MAX + 1,
-                                                 UINT16_MAX - 1,
-                                                 UINT16_MAX + 1,
-                                                 INT8_MIN,
-                                                 INT8_MAX,
-                                                 UINT8_MAX,
-                                                 INT8_MIN - 1,
-                                                 INT8_MIN + 1,
-                                                 INT8_MAX - 1,
-                                                 INT8_MAX + 1,
-                                                 UINT8_MAX - 1,
-                                                 UINT8_MAX + 1};
+                                                 numeric_limits<int32_t>::min(),
+                                                 numeric_limits<int32_t>::max(),
+                                                 numeric_limits<int32_t>::min() + 1,
+                                                 numeric_limits<int32_t>::max() - 1,
+                                                 numeric_limits<int16_t>::min(),
+                                                 numeric_limits<int16_t>::max(),
+                                                 numeric_limits<uint16_t>::max(),
+                                                 numeric_limits<int16_t>::min() - 1,
+                                                 numeric_limits<int16_t>::min() + 1,
+                                                 numeric_limits<int16_t>::max() - 1,
+                                                 numeric_limits<int16_t>::max() + 1,
+                                                 numeric_limits<uint16_t>::max() - 1,
+                                                 numeric_limits<uint16_t>::max() + 1,
+                                                 numeric_limits<int8_t>::min(),
+                                                 numeric_limits<int8_t>::max(),
+                                                 numeric_limits<uint8_t>::max(),
+                                                 numeric_limits<int8_t>::min() - 1,
+                                                 numeric_limits<int8_t>::min() + 1,
+                                                 numeric_limits<int8_t>::max() - 1,
+                                                 numeric_limits<int8_t>::max() + 1,
+                                                 numeric_limits<uint8_t>::max() - 1,
+                                                 numeric_limits<uint8_t>::max() + 1};
 };
 
 /**
@@ -132,49 +164,37 @@ public:
                                                  1,
                                                  -2,
                                                  2,
-                                                 INT64_MIN,
-                                                 INT64_MAX,
-                                                 INT64_MIN + 1,
-                                                 INT64_MAX - 1,
-                                                 INT32_MIN,
-                                                 INT32_MAX,
-                                                 UINT32_MAX,
-                                                 static_cast<int64_t>(INT32_MIN) - 1,
-                                                 INT32_MIN + 1,
-                                                 INT32_MAX - 1,
-                                                 static_cast<int64_t>(INT32_MAX) + 1,
-                                                 UINT32_MAX - 1,
-                                                 static_cast<int64_t>(UINT32_MAX) + 1,
-                                                 INT16_MIN,
-                                                 INT16_MAX,
-                                                 UINT16_MAX,
-                                                 INT16_MIN - 1,
-                                                 INT16_MIN + 1,
-                                                 INT16_MAX - 1,
-                                                 INT16_MAX + 1,
-                                                 UINT16_MAX - 1,
-                                                 UINT16_MAX + 1,
-                                                 INT8_MIN,
-                                                 INT8_MAX,
-                                                 UINT8_MAX,
-                                                 INT8_MIN - 1,
-                                                 INT8_MIN + 1,
-                                                 INT8_MAX - 1,
-                                                 INT8_MAX + 1,
-                                                 UINT8_MAX - 1,
-                                                 UINT8_MAX + 1};
-};
-
-/**
- * @ingroup Generators
- * @brief Arbitrary for char
- */
-template <>
-class PROPTEST_API Arbi<char> final : public ArbiBase<char> {
-public:
-    Shrinkable<char> operator()(Random& rand) const override;
-
-    static constexpr char boundaryValues[] = {0};
+                                                 numeric_limits<int64_t>::min(),
+                                                 numeric_limits<int64_t>::max(),
+                                                 numeric_limits<int64_t>::min() + 1,
+                                                 numeric_limits<int64_t>::max() - 1,
+                                                 numeric_limits<int32_t>::min(),
+                                                 numeric_limits<int32_t>::max(),
+                                                 numeric_limits<uint32_t>::max(),
+                                                 static_cast<int64_t>(numeric_limits<int32_t>::min()) - 1,
+                                                 numeric_limits<int32_t>::min() + 1,
+                                                 numeric_limits<int32_t>::max() - 1,
+                                                 static_cast<int64_t>(numeric_limits<int32_t>::max()) + 1,
+                                                 numeric_limits<uint32_t>::max() - 1,
+                                                 static_cast<int64_t>(numeric_limits<uint32_t>::max()) + 1,
+                                                 numeric_limits<int16_t>::min(),
+                                                 numeric_limits<int16_t>::max(),
+                                                 numeric_limits<uint16_t>::max(),
+                                                 numeric_limits<int16_t>::min() - 1,
+                                                 numeric_limits<int16_t>::min() + 1,
+                                                 numeric_limits<int16_t>::max() - 1,
+                                                 numeric_limits<int16_t>::max() + 1,
+                                                 numeric_limits<uint16_t>::max() - 1,
+                                                 numeric_limits<uint16_t>::max() + 1,
+                                                 numeric_limits<int8_t>::min(),
+                                                 numeric_limits<int8_t>::max(),
+                                                 numeric_limits<uint8_t>::max(),
+                                                 numeric_limits<int8_t>::min() - 1,
+                                                 numeric_limits<int8_t>::min() + 1,
+                                                 numeric_limits<int8_t>::max() - 1,
+                                                 numeric_limits<int8_t>::max() + 1,
+                                                 numeric_limits<uint8_t>::max() - 1,
+                                                 numeric_limits<uint8_t>::max() + 1};
 };
 
 /**
@@ -186,8 +206,13 @@ class PROPTEST_API Arbi<uint8_t> final : public ArbiBase<uint8_t> {
 public:
     Shrinkable<uint8_t> operator()(Random& rand) const override;
 
-    static constexpr uint8_t boundaryValues[] = {
-        0, 1, 2, UINT8_MAX, UINT8_MAX - 1, INT8_MAX, INT8_MAX - 1, INT8_MAX + 1, ' ', '"', '\'', '\t', '\n', '\r'};
+    static constexpr uint8_t boundaryValues[] = {0, 1, 2,
+                                                numeric_limits<uint8_t>::max(),
+                                                numeric_limits<uint8_t>::max() - 1,
+                                                numeric_limits<int8_t>::max(),
+                                                numeric_limits<int8_t>::max() - 1,
+                                                numeric_limits<int8_t>::max() + 1,
+                                                ' ', '"', '\'', '\t', '\n', '\r'};
 };
 
 /**
@@ -202,17 +227,17 @@ public:
     static constexpr uint16_t boundaryValues[] = {0,
                                                   1,
                                                   2,
-                                                  UINT16_MAX,
-                                                  UINT16_MAX - 1,
-                                                  INT16_MAX,
-                                                  INT16_MAX - 1,
-                                                  INT16_MAX + 1,
-                                                  INT8_MAX,
-                                                  UINT8_MAX,
-                                                  INT8_MAX + 1,
-                                                  INT8_MAX - 1,
-                                                  UINT8_MAX - 1,
-                                                  UINT8_MAX + 1};
+                                                  numeric_limits<uint16_t>::max(),
+                                                  numeric_limits<uint16_t>::max() - 1,
+                                                  numeric_limits<int16_t>::max(),
+                                                  numeric_limits<int16_t>::max() - 1,
+                                                  numeric_limits<int16_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max(),
+                                                  numeric_limits<uint8_t>::max(),
+                                                  numeric_limits<int8_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() + 1};
 };
 
 /**
@@ -228,23 +253,23 @@ public:
     static constexpr uint32_t boundaryValues[] = {0,
                                                   1,
                                                   2,
-                                                  UINT32_MAX,
-                                                  UINT32_MAX - 1,
-                                                  INT32_MAX,
-                                                  INT32_MAX - 1,
-                                                  static_cast<uint32_t>(INT32_MAX) + 1,
-                                                  INT16_MAX,
-                                                  UINT16_MAX,
-                                                  INT16_MAX - 1,
-                                                  INT16_MAX + 1,
-                                                  UINT16_MAX - 1,
-                                                  UINT16_MAX + 1,
-                                                  INT8_MAX,
-                                                  UINT8_MAX,
-                                                  INT8_MAX + 1,
-                                                  INT8_MAX - 1,
-                                                  UINT8_MAX - 1,
-                                                  UINT8_MAX + 1};
+                                                  numeric_limits<uint32_t>::max(),
+                                                  numeric_limits<uint32_t>::max() - 1,
+                                                  numeric_limits<int32_t>::max(),
+                                                  numeric_limits<int32_t>::max() - 1,
+                                                  static_cast<uint32_t>(numeric_limits<int32_t>::max()) + 1,
+                                                  numeric_limits<int16_t>::max(),
+                                                  numeric_limits<uint16_t>::max(),
+                                                  numeric_limits<int16_t>::max() - 1,
+                                                  numeric_limits<int16_t>::max() + 1,
+                                                  numeric_limits<uint16_t>::max() - 1,
+                                                  numeric_limits<uint16_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max(),
+                                                  numeric_limits<uint8_t>::max(),
+                                                  numeric_limits<int8_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() + 1};
 };
 
 /**
@@ -260,27 +285,111 @@ public:
     static constexpr uint64_t boundaryValues[] = {0,
                                                   1,
                                                   2,
-                                                  UINT64_MAX,
-                                                  UINT64_MAX - 1,
-                                                  INT32_MAX,
-                                                  UINT32_MAX,
-                                                  INT32_MAX - 1,
-                                                  static_cast<int64_t>(INT32_MAX) + 1,
-                                                  UINT32_MAX - 1,
-                                                  static_cast<int64_t>(UINT32_MAX) + 1,
-                                                  INT16_MAX,
-                                                  UINT16_MAX,
-                                                  INT16_MAX - 1,
-                                                  INT16_MAX + 1,
-                                                  UINT16_MAX - 1,
-                                                  UINT16_MAX + 1,
-                                                  INT8_MAX,
-                                                  UINT8_MAX,
-                                                  INT8_MAX + 1,
-                                                  INT8_MAX - 1,
-                                                  UINT8_MAX - 1,
-                                                  UINT8_MAX + 1};
+                                                  numeric_limits<uint64_t>::max(),
+                                                  numeric_limits<uint64_t>::max() - 1,
+                                                  numeric_limits<int32_t>::max(),
+                                                  numeric_limits<uint32_t>::max(),
+                                                  numeric_limits<int32_t>::max() - 1,
+                                                  static_cast<int64_t>(numeric_limits<int32_t>::max()) + 1,
+                                                  numeric_limits<uint32_t>::max() - 1,
+                                                  static_cast<int64_t>(numeric_limits<uint32_t>::max()) + 1,
+                                                  numeric_limits<int16_t>::max(),
+                                                  numeric_limits<uint16_t>::max(),
+                                                  numeric_limits<int16_t>::max() - 1,
+                                                  numeric_limits<int16_t>::max() + 1,
+                                                  numeric_limits<uint16_t>::max() - 1,
+                                                  numeric_limits<uint16_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max(),
+                                                  numeric_limits<uint8_t>::max(),
+                                                  numeric_limits<int8_t>::max() + 1,
+                                                  numeric_limits<int8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() - 1,
+                                                  numeric_limits<uint8_t>::max() + 1};
 };
+
+/**
+ * @ingroup Generators
+ * @brief Arbitrary for long
+ */
+template <>
+struct PROPTEST_API Arbi<long> final : public ArbiBase<long>
+{
+public:
+    Shrinkable<long> operator()(Random& rand) const override;
+
+    static constexpr long boundaryValues[] = {0,
+                                                 -1,
+                                                 1,
+                                                 -2,
+                                                 2,
+                                                 numeric_limits<long>::min(),
+                                                 numeric_limits<long>::min() + 1,
+                                                 numeric_limits<long>::max(),
+                                                 numeric_limits<long>::max() - 1,
+                                                 numeric_limits<int>::min(),
+                                                 numeric_limits<int>::min() + 1,
+                                                 static_cast<long>(numeric_limits<int>::min()) - 1,
+                                                 numeric_limits<int>::max(),
+                                                 numeric_limits<int>::max() - 1,
+                                                 static_cast<long>(numeric_limits<int>::max()) + 1,
+                                                 numeric_limits<unsigned int>::max(),
+                                                 numeric_limits<unsigned int>::max() - 1,
+                                                 static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
+                                                 numeric_limits<short>::min(),
+                                                 numeric_limits<short>::min() - 1,
+                                                 numeric_limits<short>::min() + 1,
+                                                 numeric_limits<short>::max(),
+                                                 numeric_limits<short>::max() - 1,
+                                                 numeric_limits<short>::max() + 1,
+                                                 numeric_limits<unsigned short>::max(),
+                                                 numeric_limits<unsigned short>::max() - 1,
+                                                 numeric_limits<unsigned short>::max() + 1,
+                                                 numeric_limits<signed char>::min(),
+                                                 numeric_limits<signed char>::min() - 1,
+                                                 numeric_limits<signed char>::min() + 1,
+                                                 numeric_limits<signed char>::max(),
+                                                 numeric_limits<signed char>::max() - 1,
+                                                 numeric_limits<signed char>::max() + 1,
+                                                 numeric_limits<unsigned char>::max(),
+                                                 numeric_limits<unsigned char>::max() - 1,
+                                                 numeric_limits<unsigned char>::max() + 1};
+};
+
+/**
+ * @ingroup Generators
+ * @brief Arbitrary for unsigned long
+ */
+template <>
+struct PROPTEST_API Arbi<unsigned long> : public ArbiBase<unsigned long>
+{
+public:
+    Shrinkable<unsigned long> operator()(Random& rand) const override;
+
+    static constexpr unsigned long boundaryValues[] = {0,
+                                                  1,
+                                                  2,
+                                                  numeric_limits<unsigned long>::max(),
+                                                  numeric_limits<unsigned long>::max() - 1,
+                                                  numeric_limits<int>::max(),
+                                                  numeric_limits<unsigned int>::max(),
+                                                  numeric_limits<int>::max() - 1,
+                                                  static_cast<long>(numeric_limits<int>::max()) + 1,
+                                                  numeric_limits<unsigned int>::max() - 1,
+                                                  static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
+                                                  numeric_limits<short>::max(),
+                                                  numeric_limits<unsigned short>::max(),
+                                                  numeric_limits<short>::max() - 1,
+                                                  numeric_limits<short>::max() + 1,
+                                                  numeric_limits<unsigned short>::max() - 1,
+                                                  numeric_limits<unsigned short>::max() + 1,
+                                                  numeric_limits<signed char>::max(),
+                                                  numeric_limits<unsigned char>::max(),
+                                                  numeric_limits<signed char>::max() + 1,
+                                                  numeric_limits<signed char>::max() - 1,
+                                                  numeric_limits<unsigned char>::max() - 1,
+                                                  numeric_limits<unsigned char>::max() + 1};
+};
+
 
 namespace util {
 
@@ -417,17 +526,6 @@ PROPTEST_API Generator<T> integers(T start, T count)
 
 #define DEFINE_INTEGERS(TYPE) \
     template proptest::Generator<TYPE> integers(TYPE start, TYPE count)
-
-#define DEFINE_FOR_ALL_INTTYPES(DEF) \
-    DEF(int8_t);\
-    DEF(int16_t);\
-    DEF(int32_t);\
-    DEF(int64_t);\
-    DEF(uint8_t);\
-    DEF(uint16_t);\
-    DEF(uint32_t);\
-    DEF(uint64_t)
-
 
 namespace proptest {
 // template instantiation

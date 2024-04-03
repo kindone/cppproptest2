@@ -90,13 +90,57 @@ Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
 
 }  // namespace util
 
-template Shrinkable<int8_t> shrinkIntegral<int8_t>(int8_t);
-template Shrinkable<uint8_t> shrinkIntegral<uint8_t>(uint8_t);
-template Shrinkable<int16_t> shrinkIntegral<int16_t>(int16_t);
-template Shrinkable<uint16_t> shrinkIntegral<uint16_t>(uint16_t);
-template Shrinkable<int32_t> shrinkIntegral<int32_t>(int32_t);
-template Shrinkable<uint32_t> shrinkIntegral<uint32_t>(uint32_t);
-template Shrinkable<int64_t> shrinkIntegral<int64_t>(int64_t);
-template Shrinkable<uint64_t> shrinkIntegral<uint64_t>(uint64_t);
+
+template <typename T>
+    requires is_integral_v<T>
+Shrinkable<T> shrinkIntegralImpl(T value)
+{
+    if constexpr(is_same_v<T, int64_t>)
+        return util::binarySearchShrinkable(value);
+    else if constexpr(is_signed<T>::value)
+        return util::binarySearchShrinkable(static_cast<int64_t>(value)).map<T>([](const int64_t& val) { return static_cast<T>(val); });
+    else
+        return util::binarySearchShrinkableU(static_cast<uint64_t>(value)).map<T>([](const uint64_t& val) { return static_cast<T>(val); });
+}
+
+template<> Shrinkable<int8_t> shrinkIntegral<int8_t>(int8_t value) {
+    return shrinkIntegralImpl<int8_t>(value);
+}
+
+template<> Shrinkable<uint8_t> shrinkIntegral<uint8_t>(uint8_t value) {
+    return shrinkIntegralImpl<uint8_t>(value);
+}
+
+template<> Shrinkable<int16_t> shrinkIntegral<int16_t>(int16_t value) {
+    return shrinkIntegralImpl<int16_t>(value);
+}
+
+template<> Shrinkable<uint16_t> shrinkIntegral<uint16_t>(uint16_t value) {
+    return shrinkIntegralImpl<uint16_t>(value);
+}
+
+template<> Shrinkable<int32_t> shrinkIntegral<int32_t>(int32_t value) {
+    return shrinkIntegralImpl<int32_t>(value);
+}
+
+template<> Shrinkable<uint32_t> shrinkIntegral<uint32_t>(uint32_t value) {
+    return shrinkIntegralImpl<uint32_t>(value);
+}
+
+template<> Shrinkable<int64_t> shrinkIntegral<int64_t>(int64_t value) {
+    return shrinkIntegralImpl<int64_t>(value);
+}
+
+template<> Shrinkable<uint64_t> shrinkIntegral<uint64_t>(uint64_t value) {
+    return shrinkIntegralImpl<uint64_t>(value);
+}
+
+template<> Shrinkable<long> shrinkIntegral<long>(long value) {
+    return shrinkIntegralImpl<long>(value);
+}
+
+template<> Shrinkable<unsigned long> shrinkIntegral<unsigned long>(unsigned long value) {
+    return shrinkIntegralImpl<unsigned long>(value);
+}
 
 }  // namespace proptest
