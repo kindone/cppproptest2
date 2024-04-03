@@ -19,7 +19,7 @@ template <typename T, typename... Args> Shrinkable<T> make_shrinkable(Args&&... 
 struct PROPTEST_API ShrinkableBase
 {
     using StreamElementType = ShrinkableBase;
-    using StreamType = ::proptest::Stream<StreamElementType>;
+    using StreamType = ::proptest::Stream;
 
     explicit ShrinkableBase(Any _value);
 
@@ -140,7 +140,7 @@ template <typename T>
 struct Shrinkable : public ShrinkableBase
 {
     using type = T;
-    using TStreamType = ::proptest::Stream<Shrinkable>;
+    using TStreamType = ::proptest::Stream;
 
     Shrinkable(const ShrinkableBase& base) : ShrinkableBase(base) {}
 
@@ -212,12 +212,6 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
 {
     return Shrinkable<T>{util::make_any<T>(util::forward<ARGS>(args)...)};
 }
-
-#ifndef PROPTEST_UNTYPED_STREAM
-namespace typed {
-extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
-}
-#endif // PROPTEST_UNTYPED_STREAM
 
 } // namespace proptest
 

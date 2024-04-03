@@ -13,7 +13,7 @@ TEST(AnyShrinkable, basic) {
 TEST(AnyShrinkable, with) {
     AnyShrinkable shr(Shrinkable<int>(100));
     EXPECT_EQ(shr.getAny().getRef<int>(), 100);
-    auto shr2 = shr.with(Stream<AnyShrinkable>::one(AnyShrinkable(Shrinkable<int>(200))));
+    auto shr2 = shr.with(Stream::one(AnyShrinkable(Shrinkable<int>(200))));
     EXPECT_EQ(shr2.getAny().getRef<int>(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
     EXPECT_EQ(shr2.getShrinks().getHeadRef<AnyShrinkable>().getAny().getRef<int>(), 200);

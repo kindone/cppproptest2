@@ -8,7 +8,7 @@
 using namespace proptest;
 
 template <typename T>
-void outStream(ostream& ostr, const Stream<T>& stream) {
+void outStream(ostream& ostr, const Stream& stream) {
     ostr << "[";
     for (auto itr = stream.template iterator<T>(); itr.hasNext();) {
         stream << proptest::Show<T>(itr.next());
@@ -32,7 +32,7 @@ void outAnyStream(ostream& ostr, const AnyStream& stream) {
 */
 
 template <typename T>
-string serializeStream(const Stream<T>& stream)
+string serializeStream(const Stream& stream)
 {
     stringstream ostr;
     outStream<T>(ostr, stream);
@@ -51,13 +51,13 @@ string serializeAnyStream(const AnyStream& stream)
 
 TEST(Stream, empty)
 {
-    auto stream = Stream<int>::empty(); // empty stream
+    auto stream = Stream::empty(); // empty stream
     EXPECT_EQ(stream.isEmpty(), true);
 }
 
 TEST(Stream, one)
 {
-    auto stream = Stream<int>::one(100);
+    auto stream = Stream::one(100);
     EXPECT_EQ(stream.isEmpty(), false);
 
     StreamIterator<int> itr = stream.iterator<int>();
@@ -68,13 +68,13 @@ TEST(Stream, one)
     ASSERT_EQ(itr.hasNext(), false);
 
     // copy
-    Stream<int> streamCopy = stream;
+    Stream streamCopy = stream;
     EXPECT_EQ(streamCopy.isEmpty(), false);
 }
 
 TEST(Stream, two)
 {
-    auto stream = Stream<int>::two(100, 200);
+    auto stream = Stream::two(100, 200);
     EXPECT_EQ(stream.isEmpty(), false);
 
     StreamIterator<int> itr = stream.iterator<int>();
@@ -91,7 +91,7 @@ TEST(Stream, two)
 
 TEST(Stream, values)
 {
-    auto stream = Stream<int>::of<int>(1,2,3,4,5,6,7,8);
+    auto stream = Stream::of<int>(1,2,3,4,5,6,7,8);
     vector<int> values;
     for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
@@ -103,7 +103,7 @@ TEST(Stream, values)
 
 TEST(Stream, values2)
 {
-    auto stream = Stream<int>::values({1,2,3,4,5,6,7,8});
+    auto stream = Stream::values({1,2,3,4,5,6,7,8});
     vector<int> values;
     for(StreamIterator<int> itr = stream.iterator<int>(); itr.hasNext(); ) {
         int value = itr.next();
@@ -115,7 +115,7 @@ TEST(Stream, values2)
 
 TEST(Stream, iterator)
 {
-    auto stream = Stream<int>::two(100, 200);
+    auto stream = Stream::two(100, 200);
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<int> values;
@@ -129,7 +129,7 @@ TEST(Stream, iterator)
 
 TEST(Stream, string)
 {
-    auto stream = Stream<string>::two<string>("hello", "world");
+    auto stream = Stream::two<string>("hello", "world");
     EXPECT_EQ(stream.isEmpty(), false);
 
     vector<string> values;
@@ -145,7 +145,7 @@ TEST(Stream, string)
 
 TEST(Stream, transform)
 {
-    auto stream = Stream<int>::two(100, 200);
+    auto stream = Stream::two(100, 200);
 
     auto stream2 = stream.transform<string,int>([](const int& value) { return to_string(value); });
 
@@ -161,7 +161,7 @@ TEST(Stream, transform)
 
 TEST(Stream, filter)
 {
-    auto stream = Stream<int>::two(100, 200);
+    auto stream = Stream::two(100, 200);
     auto stream2 = stream.filter<int>([](const int& value) { return value > 100; });
 
     vector<int> values;
@@ -185,8 +185,8 @@ TEST(Stream, filter)
 
 TEST(Stream, concat)
 {
-    auto stream = Stream<int>::two(100, 200);
-    auto stream2 = Stream<int>::two(300, 400);
+    auto stream = Stream::two(100, 200);
+    auto stream2 = Stream::two(300, 400);
     auto stream3 = stream.concat(stream2);
 
     vector<int> values;
@@ -203,7 +203,7 @@ TEST(Stream, concat)
 
 TEST(Stream, take)
 {
-    auto stream = Stream<int>::two(100, 200);
+    auto stream = Stream::two(100, 200);
     auto stream2 = stream.take(1);
 
     vector<int> values;
@@ -229,7 +229,7 @@ TEST(Stream, take)
 TEST(Stream, performance)
 {
     const int N = 12;
-    auto stream = Stream<int>::one(100);
+    auto stream = Stream::one(100);
     for(int i = 0; i < N; i++)
         stream = stream.concat(stream);
 
@@ -245,12 +245,12 @@ TEST(Stream, performance)
 /*
 TEST(AnyStream, basic)
 {
-    AnyStream anyStream(Any(100), util::make_anyfunction([]() -> Stream<int> { return Stream<int>::empty(); }));
+    AnyStream anyStream(Any(100), util::make_anyfunction([]() -> Stream { return Stream::empty(); }));
 }
 
 TEST(AnyStream, from_TypedStream)
 {
-    auto stream = Stream<int>::empty(); // empty stream
+    auto stream = Stream::empty(); // empty stream
     EXPECT_EQ(stream.isEmpty(), true);
     AnyStream anyStream = stream;
     EXPECT_EQ(anyStream.isEmpty(), true);
@@ -258,7 +258,7 @@ TEST(AnyStream, from_TypedStream)
 
 TEST(AnyStream, iterator)
 {
-    AnyStream anyStream = Stream<int>::two(100, 200);
+    AnyStream anyStream = Stream::two(100, 200);
     EXPECT_EQ(anyStream.isEmpty(), false);
 
     vector<int> values;
@@ -273,7 +273,7 @@ TEST(AnyStream, iterator)
 
 TEST(AnyStream, transform)
 {
-    AnyStream stream = Stream<int>::of(1,2,3,4,5,6,7,8);
+    AnyStream stream = Stream::of(1,2,3,4,5,6,7,8);
     auto stream2 = stream.transform(util::make_function([](const Any& value) -> Any { return to_string(value.getRef<int>()); }));
     EXPECT_EQ(serializeAnyStream<int>(stream), "[1, 2, 3, 4, 5, 6, 7, 8]");
     EXPECT_EQ(serializeAnyStream<string>(stream2), "[\"1\" (31), \"2\" (32), \"3\" (33), \"4\" (34), \"5\" (35), \"6\" (36), \"7\" (37), \"8\" (38)]");
@@ -281,7 +281,7 @@ TEST(AnyStream, transform)
 
 TEST(AnyStream, filter)
 {
-    AnyStream stream = Stream<int>::of(1,2,3,4,5,6,7,8);
+    AnyStream stream = Stream::of(1,2,3,4,5,6,7,8);
     auto stream2 = stream.filter(util::make_function([](const Any& value) -> bool { return value.getRef<int>() > 3; }));
     EXPECT_EQ(serializeAnyStream<int>(stream2), "[4, 5, 6, 7, 8]");
 
@@ -291,15 +291,15 @@ TEST(AnyStream, filter)
 
 TEST(AnyStream, concat)
 {
-    AnyStream anyStream = Stream<int>::two(100, 200);
-    auto stream2 = Stream<int>::two(300, 400);
+    AnyStream anyStream = Stream::two(100, 200);
+    auto stream2 = Stream::two(300, 400);
     auto stream3 = anyStream.concat(stream2);
     EXPECT_EQ(serializeAnyStream<int>(stream3), "[100, 200, 300, 400]");
 }
 
 TEST(AnyStream, take)
 {
-    AnyStream anyStream = Stream<int>::of(1,2,3,4,5,6,7,8);
+    AnyStream anyStream = Stream::of(1,2,3,4,5,6,7,8);
     auto stream1 = anyStream.take(0);
     EXPECT_EQ(serializeAnyStream<int>(stream1), "[]");
     auto stream2 = anyStream.take(1);
@@ -315,7 +315,7 @@ TEST(AnyStream, take)
 TEST(AnyStream, performance)
 {
     const int N = 12;
-    auto stream = Stream<int>::one(100);
+    auto stream = Stream::one(100);
     for(int i = 0; i < N; i++)
         stream = stream.concat(stream);
 

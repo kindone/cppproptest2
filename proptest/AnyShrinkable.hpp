@@ -8,7 +8,7 @@ namespace proptest {
 // based on Shrinkable<Any>
 struct AnyShrinkable {
     using StreamElementType = AnyShrinkable;
-    using StreamType = Stream<StreamElementType>;
+    using StreamType = Stream;
 
     AnyShrinkable(const ShrinkableAny& shr)  : shrinkableAny(shr) {}
 

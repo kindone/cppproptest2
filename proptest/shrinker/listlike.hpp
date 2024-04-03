@@ -32,12 +32,6 @@ struct PROPTEST_API VectorShrinker
 }  // namespace util
 
 //extern template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
-#ifndef PROPTEST_UNTYPED_STREAM
-namespace typed {
-extern template struct PROPTEST_API Stream<Shrinkable<vector<Shrinkable<Any>>>>;
-extern template struct PROPTEST_API Stream<Shrinkable<Any>>;
-}
-#endif
 
 PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize);
 

@@ -2,8 +2,6 @@
 
 namespace proptest {
 
-namespace untyped {
-
 Stream::Stream(const Any& _head) : head(_head), tailGen(emptyTailGen) {}
 Stream::Stream(const Any& _head, const Function<Stream()>& _tailGen) : head(_head), tailGen(_tailGen) {}
 
@@ -48,26 +46,5 @@ Stream Stream::empty() {
 
 
 Function<Stream()> Stream::emptyTailGen = +[]() -> Stream { return Stream::empty(); };
-
-} // namespace untyped
-
-/*
-AnyStreamIterator::AnyStreamIterator(const Stream<Any>& stream) : stream(stream) {}
-
-AnyStreamIterator::AnyStreamIterator(const AnyStream& stream) : stream(stream) {}
-
-bool AnyStreamIterator::hasNext() {
-    return !stream.isEmpty();
-}
-
-Any AnyStreamIterator::nextAny() {
-    if(!hasNext())
-        throw runtime_error(__FILE__, __LINE__, "no more elements in stream");
-
-    Any value = stream.getHeadRef();
-    stream = stream.getTail();
-    return value;
-}
-*/
 
 } // namespace proptest

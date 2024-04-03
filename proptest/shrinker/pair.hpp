@@ -26,12 +26,6 @@ public:
 
 } // namespace util
 
-#ifndef PROPTEST_UNTYPED_STREAM
-namespace typed {
-extern template struct PROPTEST_API Stream<Shrinkable<pair<Any, Any>>>;
-}
-#endif
-
 template <typename ARG1, typename ARG2>
 Shrinkable<pair<ARG1, ARG2>> shrinkPair(
     const Shrinkable<ARG1>& firstShr, const Shrinkable<ARG2>& secondShr)
