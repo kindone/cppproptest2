@@ -71,54 +71,6 @@ PROPTEST_API ostream& show(ostream& os, const uint8_t& val)
     return os;
 }
 
-PROPTEST_API ostream& show(ostream& os, const int16_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const uint16_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const int32_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const uint32_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const int64_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const uint64_t& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const long& val)
-{
-    os << val;
-    return os;
-}
-
-PROPTEST_API ostream& show(ostream& os, const unsigned long& val)
-{
-    os << val;
-    return os;
-}
-
 PROPTEST_API ostream& show(ostream& os, const float& val)
 {
     os << val;

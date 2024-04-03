@@ -28,20 +28,25 @@ ostream& show(ostream& os, const bool&);
 ostream& show(ostream& os, const char&);
 ostream& show(ostream& os, const int8_t&);
 ostream& show(ostream& os, const uint8_t&);
-ostream& show(ostream& os, const int16_t&);
-ostream& show(ostream& os, const uint16_t&);
-ostream& show(ostream& os, const int32_t&);
-ostream& show(ostream& os, const uint32_t&);
-ostream& show(ostream& os, const int64_t&);
-ostream& show(ostream& os, const uint64_t&);
-ostream& show(ostream& os, const long&);
-ostream& show(ostream& os, const unsigned long&);
+// ostream& show(ostream& os, const int16_t&);
+// ostream& show(ostream& os, const uint16_t&);
+// ostream& show(ostream& os, const int32_t&);
+// ostream& show(ostream& os, const uint32_t&);
+// ostream& show(ostream& os, const int64_t&);
+// ostream& show(ostream& os, const uint64_t&);
+// ostream& show(ostream& os, const long&);
+// ostream& show(ostream& os, const unsigned long&);
 ostream& show(ostream& os, const float&);
 ostream& show(ostream& os, const double&);
 
 // forward declaration is needed to be available at call sites
 template <typename T>
 ostream& show(ostream& os, const T& obj);
+template <integral T>
+ostream& show(ostream& os, const T& obj) {
+    os << obj;
+    return os;
+}
 template <typename T>
 ostream& show(ostream& os, const Shrinkable<T>& shrinkable);
 template <typename... ARGS>
