@@ -2,6 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/std/random.hpp"
+#include "proptest/std/concepts.hpp"
 #include "proptest/std/exception.hpp"
 
 namespace proptest {
@@ -30,15 +31,19 @@ public:
     Random& operator=(const Random& other);
 
     template <typename T>
-    T getRandom(int64_t /*min*/, int64_t /*max*/)
+    T getRandom(int64_t min, int64_t max)
     {
-        throw runtime_error(__FILE__, __LINE__, "getRandom for type not defined");
+        if constexpr(!is_signed_v<T>) {
+            throw runtime_error(__FILE__, __LINE__, "getRandom<T> unsigned type not defined. Use getRandomU<T> instead");}
+        return static_cast<T>(getRandomInt64(min, max));
     }
 
     template <typename T>
-    T getRandomU(uint64_t /*min*/, uint64_t /*max*/)
+    T getRandomU(uint64_t min, uint64_t max)
     {
-        throw runtime_error(__FILE__, __LINE__, "getRandom for type not defined");
+        if constexpr(is_signed_v<T>) {
+            throw runtime_error(__FILE__, __LINE__, "getRandomU<T> for signed type not defined. Use getRandom<T> instead");}
+        return static_cast<T>(getRandomUInt64(min, max));
     }
 
 private:
@@ -64,9 +69,6 @@ template <>
 int64_t Random::getRandom<int64_t>(int64_t min, int64_t max);
 
 template <>
-long Random::getRandom<long>(int64_t min, int64_t max);
-
-template <>
 char Random::getRandomU<char>(uint64_t min, uint64_t max);
 
 template <>
@@ -81,7 +83,5 @@ uint32_t Random::getRandomU<uint32_t>(uint64_t min, uint64_t max);
 template <>
 uint64_t Random::getRandomU<uint64_t>(uint64_t min, uint64_t max);
 
-template <>
-unsigned long Random::getRandomU<unsigned long>(uint64_t min, uint64_t max);
 
 }  // namespace proptest

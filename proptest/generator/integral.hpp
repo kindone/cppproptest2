@@ -19,6 +19,7 @@
     DEF(uint16_t);\
     DEF(uint32_t);\
     DEF(uint64_t);
+
     // DEF(long);\
     // DEF(unsigned long);
 
@@ -333,89 +334,6 @@ public:
                                                   numeric_limits<uint8_t>::max() - 1,
                                                   numeric_limits<uint8_t>::max() + 1};
 };
-
-// /**
-//  * @ingroup Generators
-//  * @brief Arbitrary for long
-//  */
-// template <>
-// struct PROPTEST_API Arbi<long> final : public ArbiBase<long>
-// {
-// public:
-//     Shrinkable<long> operator()(Random& rand) const override;
-
-//     static constexpr long boundaryValues[] = {0,
-//                                                  -1,
-//                                                  1,
-//                                                  -2,
-//                                                  2,
-//                                                  numeric_limits<long>::min(),
-//                                                  numeric_limits<long>::min() + 1,
-//                                                  numeric_limits<long>::max(),
-//                                                  numeric_limits<long>::max() - 1,
-//                                                  numeric_limits<int>::min(),
-//                                                  numeric_limits<int>::min() + 1,
-//                                                  static_cast<long>(numeric_limits<int>::min()) - 1,
-//                                                  numeric_limits<int>::max(),
-//                                                  numeric_limits<int>::max() - 1,
-//                                                  static_cast<long>(numeric_limits<int>::max()) + 1,
-//                                                  numeric_limits<unsigned int>::max(),
-//                                                  numeric_limits<unsigned int>::max() - 1,
-//                                                  static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
-//                                                  numeric_limits<short>::min(),
-//                                                  numeric_limits<short>::min() - 1,
-//                                                  numeric_limits<short>::min() + 1,
-//                                                  numeric_limits<short>::max(),
-//                                                  numeric_limits<short>::max() - 1,
-//                                                  numeric_limits<short>::max() + 1,
-//                                                  numeric_limits<unsigned short>::max(),
-//                                                  numeric_limits<unsigned short>::max() - 1,
-//                                                  numeric_limits<unsigned short>::max() + 1,
-//                                                  numeric_limits<signed char>::min(),
-//                                                  numeric_limits<signed char>::min() - 1,
-//                                                  numeric_limits<signed char>::min() + 1,
-//                                                  numeric_limits<signed char>::max(),
-//                                                  numeric_limits<signed char>::max() - 1,
-//                                                  numeric_limits<signed char>::max() + 1,
-//                                                  numeric_limits<unsigned char>::max(),
-//                                                  numeric_limits<unsigned char>::max() - 1,
-//                                                  numeric_limits<unsigned char>::max() + 1};
-// };
-
-// /**
-//  * @ingroup Generators
-//  * @brief Arbitrary for unsigned long
-//  */
-// template <>
-// struct PROPTEST_API Arbi<unsigned long> : public ArbiBase<unsigned long>
-// {
-// public:
-//     Shrinkable<unsigned long> operator()(Random& rand) const override;
-
-//     static constexpr unsigned long boundaryValues[] = {0,
-//                                                   1,
-//                                                   2,
-//                                                   numeric_limits<unsigned long>::max(),
-//                                                   numeric_limits<unsigned long>::max() - 1,
-//                                                   numeric_limits<int>::max(),
-//                                                   numeric_limits<unsigned int>::max(),
-//                                                   numeric_limits<int>::max() - 1,
-//                                                   static_cast<long>(numeric_limits<int>::max()) + 1,
-//                                                   numeric_limits<unsigned int>::max() - 1,
-//                                                   static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
-//                                                   numeric_limits<short>::max(),
-//                                                   numeric_limits<unsigned short>::max(),
-//                                                   numeric_limits<short>::max() - 1,
-//                                                   numeric_limits<short>::max() + 1,
-//                                                   numeric_limits<unsigned short>::max() - 1,
-//                                                   numeric_limits<unsigned short>::max() + 1,
-//                                                   numeric_limits<signed char>::max(),
-//                                                   numeric_limits<unsigned char>::max(),
-//                                                   numeric_limits<signed char>::max() + 1,
-//                                                   numeric_limits<signed char>::max() - 1,
-//                                                   numeric_limits<unsigned char>::max() - 1,
-//                                                   numeric_limits<unsigned char>::max() + 1};
-// };
 
 
 namespace util {
