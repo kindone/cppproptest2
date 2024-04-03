@@ -135,12 +135,4 @@ template<> Shrinkable<uint64_t> shrinkIntegral<uint64_t>(uint64_t value) {
     return shrinkIntegralImpl<uint64_t>(value);
 }
 
-// template<> Shrinkable<long> shrinkIntegral<long>(long value) {
-//     return shrinkIntegralImpl<long>(value);
-// }
-
-// template<> Shrinkable<unsigned long> shrinkIntegral<unsigned long>(unsigned long value) {
-//     return shrinkIntegralImpl<unsigned long>(value);
-// }
-
 }  // namespace proptest

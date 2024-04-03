@@ -85,7 +85,7 @@ template <>
 class PROPTEST_API Arbi<char> final : public ArbiBase<char> {
 public:
     virtual Shrinkable<char> operator()(Random& rand) const override;
-    static constexpr char boundaryValues[] = {0, -1 ,1, -2, 2,
+    static constexpr char boundaryValues[] = {0, 1, 2,
                                                 numeric_limits<char>::min(),
                                                 numeric_limits<char>::max(),
                                                 numeric_limits<char>::min() + 1,

@@ -145,15 +145,6 @@ int64_t Random::getRandom<int64_t>(int64_t min, int64_t max)
 }
 
 template <>
-long Random::getRandom<long>(int64_t min, int64_t max)
-{
-    if constexpr (sizeof(long) == 4)
-        return getRandomInt32(min, max);
-    else
-        return getRandomInt64(min, max);
-}
-
-template <>
 char Random::getRandomU<char>(uint64_t min, uint64_t max)
 {
     return static_cast<char>(getRandomUInt8(static_cast<uint8_t>(min), static_cast<uint8_t>(max)));
@@ -181,15 +172,6 @@ template <>
 uint64_t Random::getRandomU<uint64_t>(uint64_t min, uint64_t max)
 {
     return getRandomUInt64(min, max);
-}
-
-template <>
-unsigned long Random::getRandomU<unsigned long>(uint64_t min, uint64_t max)
-{
-    if constexpr (sizeof(unsigned long) == 4)
-        return getRandomUInt32(min, max);
-    else
-        return getRandomUInt64(min, max);
 }
 
 }  // namespace proptest
