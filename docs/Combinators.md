@@ -14,7 +14,6 @@ While you can go through this document from top to the bottom, you might be want
 | Generate a pair or a tuple of different types        | [`pairOf<T1,T2>`, `tupleOf<Ts...>`](#pair-and-tuples)                                                                  | a `pair<int, string>`                                                         |
 | Union multiple generators                            | [`unionOf<T>` (`oneOf<T>`)](#selecting-from-generators)                                                                | `20~39` or `60~79` combined                                                   |
 | Transform into another type or a value               | [`transform<T,U>`](#transforming-or-mapping)                                                                           | `"0"` or `"1.4"` (a number as string).                                        |
-| Generate a struct or a class object                  | [`construct<T,ARGS...>`](#constructing-an-object)                                                                      | a `Rectangle` object with width and height                                    |
 | Apply constraints in generated values                | [`filter` (`suchThat`)](#applying-constraints)                                                                         | an even natural number (`n % 2 == 0`)                                         |
 | Generate values with dependencies or relationships   | [`dependency`, `chain`](#values-with-dependencies), [`pairWith`, `tupleWith`](#utility-methods-in-standard-generators) | a rectangle where `width == height * 2`                                       |
 | Generate a value based on previously generated value | [`aggregate`, `accumulate`](#aggregation-or-accumulation-of-values)                                                    | a sequence of numbers where each one is between 0.5x and 1.5x of its previous |
@@ -110,6 +109,7 @@ You can combine generators to a single generator that can generate each of them 
 
 * `unionOf<T>` is an alias of `oneOf<T>`
 
+<!--
 ### Constructing an object
 
 You can generate an object of a class or a struct type `T`, by calling a matching constructor of `T`.
@@ -126,6 +126,7 @@ You can generate an object of a class or a struct type `T`, by calling a matchin
     auto coordinateGen1 = construct<Coordinate, int, int>(interval(-10, 10), interval(-20, 20));
     auto coordinateGen2 = construct<Coordinate, int, int>(interval(-10, 10)); // y is generated with Arbi<int>
     ```
+-->
 
 ### Applying constraints
 
