@@ -10,6 +10,7 @@
  */
 
 #define DEFINE_FOR_ALL_INTTYPES(DEF) \
+    DEF(char);\
     DEF(int8_t);\
     DEF(int16_t);\
     DEF(int32_t);\
@@ -17,8 +18,9 @@
     DEF(uint8_t);\
     DEF(uint16_t);\
     DEF(uint32_t);\
-    DEF(long);\
-    DEF(unsigned long);
+    DEF(uint64_t);
+    // DEF(long);\
+    // DEF(unsigned long);
 
 namespace proptest {
 
@@ -27,7 +29,29 @@ decltype(auto) generator(GEN&& gen);
 
 // template declaration
 template <typename T>
-PROPTEST_API Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max());
+PROPTEST_API Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max()) {
+    // default implementation
+    if constexpr (is_signed_v<T>) {
+        if constexpr (sizeof(T) == 1)
+            return generateInteger<int8_t>(rand, min, max).template map<T>([](int8_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 2)
+            return generateInteger<int16_t>(rand, min, max).template map<T>([](int16_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 4)
+            return generateInteger<int32_t>(rand, min, max).template map<T>([](int32_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 8)
+            return generateInteger<int64_t>(rand, min, max).template map<T>([](int64_t value) { return static_cast<T>(value); });
+    }
+    else {
+        if constexpr (sizeof(T) == 1)
+            return generateInteger<uint8_t>(rand, min, max).template map<T>([](uint8_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 2)
+            return generateInteger<uint16_t>(rand, min, max).template map<T>([](uint16_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 4)
+            return generateInteger<uint32_t>(rand, min, max).template map<T>([](uint32_t value) { return static_cast<T>(value); });
+        else if constexpr (sizeof(T) == 8)
+            return generateInteger<uint64_t>(rand, min, max).template map<T>([](uint64_t value) { return static_cast<T>(value); });
+    }
+}
 
 #define SPECIALIZE_GENERATEINTEGER(TYPE) \
     template <> PROPTEST_API Shrinkable<TYPE> generateInteger(Random& rand, TYPE min, TYPE max)
@@ -37,8 +61,11 @@ DEFINE_FOR_ALL_INTTYPES(SPECIALIZE_GENERATEINTEGER);
 template <integral T>
 class PROPTEST_API Arbi<T> final : public ArbiBase<T> {
 public:
-    virtual Shrinkable<T> operator()(Random&) const override {
-        throw runtime_error(__FILE__, __LINE__, "Arbi for integral type not defined for this integral type");
+    virtual Shrinkable<T> operator()(Random& rand) const override {
+        if constexpr (is_signed_v<T>)
+            return generateInteger<T>(rand, numeric_limits<T>::min(), numeric_limits<T>::max());
+        else
+            return generateInteger<T>(rand, 0, numeric_limits<T>::max());
     }
     static constexpr char boundaryValues[] = {0, -1 ,1, -2, 2,
                                                 numeric_limits<char>::min(),
@@ -307,88 +334,88 @@ public:
                                                   numeric_limits<uint8_t>::max() + 1};
 };
 
-/**
- * @ingroup Generators
- * @brief Arbitrary for long
- */
-template <>
-struct PROPTEST_API Arbi<long> final : public ArbiBase<long>
-{
-public:
-    Shrinkable<long> operator()(Random& rand) const override;
+// /**
+//  * @ingroup Generators
+//  * @brief Arbitrary for long
+//  */
+// template <>
+// struct PROPTEST_API Arbi<long> final : public ArbiBase<long>
+// {
+// public:
+//     Shrinkable<long> operator()(Random& rand) const override;
 
-    static constexpr long boundaryValues[] = {0,
-                                                 -1,
-                                                 1,
-                                                 -2,
-                                                 2,
-                                                 numeric_limits<long>::min(),
-                                                 numeric_limits<long>::min() + 1,
-                                                 numeric_limits<long>::max(),
-                                                 numeric_limits<long>::max() - 1,
-                                                 numeric_limits<int>::min(),
-                                                 numeric_limits<int>::min() + 1,
-                                                 static_cast<long>(numeric_limits<int>::min()) - 1,
-                                                 numeric_limits<int>::max(),
-                                                 numeric_limits<int>::max() - 1,
-                                                 static_cast<long>(numeric_limits<int>::max()) + 1,
-                                                 numeric_limits<unsigned int>::max(),
-                                                 numeric_limits<unsigned int>::max() - 1,
-                                                 static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
-                                                 numeric_limits<short>::min(),
-                                                 numeric_limits<short>::min() - 1,
-                                                 numeric_limits<short>::min() + 1,
-                                                 numeric_limits<short>::max(),
-                                                 numeric_limits<short>::max() - 1,
-                                                 numeric_limits<short>::max() + 1,
-                                                 numeric_limits<unsigned short>::max(),
-                                                 numeric_limits<unsigned short>::max() - 1,
-                                                 numeric_limits<unsigned short>::max() + 1,
-                                                 numeric_limits<signed char>::min(),
-                                                 numeric_limits<signed char>::min() - 1,
-                                                 numeric_limits<signed char>::min() + 1,
-                                                 numeric_limits<signed char>::max(),
-                                                 numeric_limits<signed char>::max() - 1,
-                                                 numeric_limits<signed char>::max() + 1,
-                                                 numeric_limits<unsigned char>::max(),
-                                                 numeric_limits<unsigned char>::max() - 1,
-                                                 numeric_limits<unsigned char>::max() + 1};
-};
+//     static constexpr long boundaryValues[] = {0,
+//                                                  -1,
+//                                                  1,
+//                                                  -2,
+//                                                  2,
+//                                                  numeric_limits<long>::min(),
+//                                                  numeric_limits<long>::min() + 1,
+//                                                  numeric_limits<long>::max(),
+//                                                  numeric_limits<long>::max() - 1,
+//                                                  numeric_limits<int>::min(),
+//                                                  numeric_limits<int>::min() + 1,
+//                                                  static_cast<long>(numeric_limits<int>::min()) - 1,
+//                                                  numeric_limits<int>::max(),
+//                                                  numeric_limits<int>::max() - 1,
+//                                                  static_cast<long>(numeric_limits<int>::max()) + 1,
+//                                                  numeric_limits<unsigned int>::max(),
+//                                                  numeric_limits<unsigned int>::max() - 1,
+//                                                  static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
+//                                                  numeric_limits<short>::min(),
+//                                                  numeric_limits<short>::min() - 1,
+//                                                  numeric_limits<short>::min() + 1,
+//                                                  numeric_limits<short>::max(),
+//                                                  numeric_limits<short>::max() - 1,
+//                                                  numeric_limits<short>::max() + 1,
+//                                                  numeric_limits<unsigned short>::max(),
+//                                                  numeric_limits<unsigned short>::max() - 1,
+//                                                  numeric_limits<unsigned short>::max() + 1,
+//                                                  numeric_limits<signed char>::min(),
+//                                                  numeric_limits<signed char>::min() - 1,
+//                                                  numeric_limits<signed char>::min() + 1,
+//                                                  numeric_limits<signed char>::max(),
+//                                                  numeric_limits<signed char>::max() - 1,
+//                                                  numeric_limits<signed char>::max() + 1,
+//                                                  numeric_limits<unsigned char>::max(),
+//                                                  numeric_limits<unsigned char>::max() - 1,
+//                                                  numeric_limits<unsigned char>::max() + 1};
+// };
 
-/**
- * @ingroup Generators
- * @brief Arbitrary for unsigned long
- */
-template <>
-struct PROPTEST_API Arbi<unsigned long> : public ArbiBase<unsigned long>
-{
-public:
-    Shrinkable<unsigned long> operator()(Random& rand) const override;
+// /**
+//  * @ingroup Generators
+//  * @brief Arbitrary for unsigned long
+//  */
+// template <>
+// struct PROPTEST_API Arbi<unsigned long> : public ArbiBase<unsigned long>
+// {
+// public:
+//     Shrinkable<unsigned long> operator()(Random& rand) const override;
 
-    static constexpr unsigned long boundaryValues[] = {0,
-                                                  1,
-                                                  2,
-                                                  numeric_limits<unsigned long>::max(),
-                                                  numeric_limits<unsigned long>::max() - 1,
-                                                  numeric_limits<int>::max(),
-                                                  numeric_limits<unsigned int>::max(),
-                                                  numeric_limits<int>::max() - 1,
-                                                  static_cast<long>(numeric_limits<int>::max()) + 1,
-                                                  numeric_limits<unsigned int>::max() - 1,
-                                                  static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
-                                                  numeric_limits<short>::max(),
-                                                  numeric_limits<unsigned short>::max(),
-                                                  numeric_limits<short>::max() - 1,
-                                                  numeric_limits<short>::max() + 1,
-                                                  numeric_limits<unsigned short>::max() - 1,
-                                                  numeric_limits<unsigned short>::max() + 1,
-                                                  numeric_limits<signed char>::max(),
-                                                  numeric_limits<unsigned char>::max(),
-                                                  numeric_limits<signed char>::max() + 1,
-                                                  numeric_limits<signed char>::max() - 1,
-                                                  numeric_limits<unsigned char>::max() - 1,
-                                                  numeric_limits<unsigned char>::max() + 1};
-};
+//     static constexpr unsigned long boundaryValues[] = {0,
+//                                                   1,
+//                                                   2,
+//                                                   numeric_limits<unsigned long>::max(),
+//                                                   numeric_limits<unsigned long>::max() - 1,
+//                                                   numeric_limits<int>::max(),
+//                                                   numeric_limits<unsigned int>::max(),
+//                                                   numeric_limits<int>::max() - 1,
+//                                                   static_cast<long>(numeric_limits<int>::max()) + 1,
+//                                                   numeric_limits<unsigned int>::max() - 1,
+//                                                   static_cast<long>(numeric_limits<unsigned int>::max()) + 1,
+//                                                   numeric_limits<short>::max(),
+//                                                   numeric_limits<unsigned short>::max(),
+//                                                   numeric_limits<short>::max() - 1,
+//                                                   numeric_limits<short>::max() + 1,
+//                                                   numeric_limits<unsigned short>::max() - 1,
+//                                                   numeric_limits<unsigned short>::max() + 1,
+//                                                   numeric_limits<signed char>::max(),
+//                                                   numeric_limits<unsigned char>::max(),
+//                                                   numeric_limits<signed char>::max() + 1,
+//                                                   numeric_limits<signed char>::max() - 1,
+//                                                   numeric_limits<unsigned char>::max() - 1,
+//                                                   numeric_limits<unsigned char>::max() + 1};
+// };
 
 
 namespace util {

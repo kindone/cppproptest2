@@ -78,15 +78,15 @@ Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max) {
     return generateIntegerImpl<uint64_t>(rand, min, max);
 }
 
-template <>
-Shrinkable<long> generateInteger(Random& rand, long min, long max) {
-    return generateIntegerImpl<long>(rand, min, max);
-}
+// template <>
+// Shrinkable<long> generateInteger(Random& rand, long min, long max) {
+//     return generateIntegerImpl<long>(rand, min, max);
+// }
 
-template <>
-Shrinkable<unsigned long> generateInteger(Random& rand, unsigned long min, unsigned long max) {
-    return generateIntegerImpl<unsigned long>(rand, min, max);
-}
+// template <>
+// Shrinkable<unsigned long> generateInteger(Random& rand, unsigned long min, unsigned long max) {
+//     return generateIntegerImpl<unsigned long>(rand, min, max);
+// }
 
 
 DEFINE_FOR_ALL_INTTYPES(DEFINE_INTEGERS);
@@ -136,15 +136,15 @@ Shrinkable<uint64_t> Arbi<uint64_t>::operator()(Random& rand) const
     return generateInteger<uint64_t>(rand);
 }
 
-Shrinkable<long> Arbi<long>::operator()(Random& rand) const
-{
-    return generateInteger<long>(rand);
-}
+// Shrinkable<long> Arbi<long>::operator()(Random& rand) const
+// {
+//     return generateInteger<long>(rand);
+// }
 
-Shrinkable<unsigned long> Arbi<unsigned long>::operator()(Random& rand) const
-{
-    return generateInteger<unsigned long>(rand);
-}
+// Shrinkable<unsigned long> Arbi<unsigned long>::operator()(Random& rand) const
+// {
+//     return generateInteger<unsigned long>(rand);
+// }
 
 // template instantiation
 // DEFINE_FOR_ALL_INTTYPES(DEFINE_GENERATEINTEGER);

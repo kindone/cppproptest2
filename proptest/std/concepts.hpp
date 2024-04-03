@@ -8,6 +8,7 @@ using std::same_as;
 using std::invocable;
 using std::copy_constructible;
 using std::integral;
+using std::is_signed_v;
 using std::constructible_from;
 
 } // namespace proptest
