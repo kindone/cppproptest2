@@ -17,26 +17,26 @@ decltype(auto) generator(GEN&& gen);
 
 // template declaration
 template <typename T>
-Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max());
+PROPTEST_API Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max());
 
 // template specialization
-template <> Shrinkable<char> generateInteger(Random& rand, char min, char max);
+template <> PROPTEST_API Shrinkable<char> generateInteger(Random& rand, char min, char max);
 
-template <> Shrinkable<int8_t> generateInteger(Random& rand, int8_t min, int8_t max);
+template <> PROPTEST_API Shrinkable<int8_t> generateInteger(Random& rand, int8_t min, int8_t max);
 
-template <> Shrinkable<int16_t> generateInteger(Random& rand, int16_t min, int16_t max);
+template <> PROPTEST_API Shrinkable<int16_t> generateInteger(Random& rand, int16_t min, int16_t max);
 
-template <> Shrinkable<int32_t> generateInteger(Random& rand, int32_t min, int32_t max);
+template <> PROPTEST_API Shrinkable<int32_t> generateInteger(Random& rand, int32_t min, int32_t max);
 
-template <> Shrinkable<int64_t> generateInteger(Random& rand, int64_t min, int64_t max);
+template <> PROPTEST_API Shrinkable<int64_t> generateInteger(Random& rand, int64_t min, int64_t max);
 
-template <> Shrinkable<uint8_t> generateInteger(Random& rand, uint8_t min, uint8_t max);
+template <> PROPTEST_API Shrinkable<uint8_t> generateInteger(Random& rand, uint8_t min, uint8_t max);
 
-template <> Shrinkable<uint16_t> generateInteger(Random& rand, uint16_t min, uint16_t max);
+template <> PROPTEST_API Shrinkable<uint16_t> generateInteger(Random& rand, uint16_t min, uint16_t max);
 
-template <> Shrinkable<uint32_t> generateInteger(Random& rand, uint32_t min, uint32_t max);
+template <> PROPTEST_API Shrinkable<uint32_t> generateInteger(Random& rand, uint32_t min, uint32_t max);
 
-template <> Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max);
+template <> PROPTEST_API Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max);
 
 /**
  * @ingroup Generators
