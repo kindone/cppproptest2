@@ -5,47 +5,71 @@
 #include "proptest/Generator.hpp"
 #include "proptest/util/function_traits.hpp"
 #include "proptest/generator/integral.hpp"
+#include "proptest/shrinker/listlike.hpp"
 
 /**
  * @file aggregate.hpp
- * @brief Generator combinator for aggregating sequentially generated values into a value with a generator generator
+ * @brief Generator combinator for aggregating values into a vector where each value is generated from a given
+ * generator generator
  */
 
 namespace proptest {
 
 namespace util {
 
+PROPTEST_API Generator<vector<Any>> aggregateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
+                                    size_t maxSize);
+
 template <typename T>
-Generator<T> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(T&)> gen2gen, size_t minSize, size_t maxSize)
+Generator<vector<T>> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(const T&)> gen2gen, size_t minSize,
+                                    size_t maxSize)
 {
-    return interval<uint64_t>(minSize, maxSize).flatMap<T>([gen1, gen2gen](const uint64_t& size) {
-        return Generator<T>([gen1, gen2gen, size](Random& rand) {
-            Shrinkable<T> shr = gen1(rand);
-            for (size_t i = 0; i < size; i++)
-                shr = gen2gen(shr.getRef())(rand);
-            return shr;
-        });
+    // Convert gen1 to work with Any by wrapping its output
+    GenFunction<Any> anyGen1 = [gen1](Random& rand) -> Shrinkable<Any> {
+        return gen1(rand).template map<Any>([](const T& value) { return Any(value); });
+    };
+
+    // Convert gen2gen to work with Any by adapting its input and output
+    Function<GenFunction<Any>(const Any&)> anyGen2Gen = [gen2gen](const Any& any) -> GenFunction<Any> {
+        return [any, gen2gen](Random& rand) -> Shrinkable<Any> {
+            return gen2gen(any.getRef<T>())(rand).template map<Any>([](const T& value) { return Any(value); });
+        };
+    };
+
+    // Call aggregateImplAny with Any type
+    auto anyVecGen = aggregateImplAny(anyGen1, anyGen2Gen, minSize, maxSize);
+
+    // Convert the generated vector<Any> back to vector<T>
+    return anyVecGen.template map<vector<T>>([](const vector<Any>& anyVec) -> vector<T> {
+        vector<T> tVec;
+        tVec.reserve(anyVec.size());
+        for (const Any& any : anyVec) {
+            tVec.push_back(any.getRef<T>()); // Assuming Any has a get<T>() method
+        }
+        return tVec;
     });
 }
 
 }  // namespace util
+
 /**
  * @ingroup Combinators
- * @brief Generator combinator for aggregating a value of type T from a generator generator
+ * @brief Generator combinator for aggregating values into a vector where each value is generated from a given
+ * generator generator
  * @tparam GEN1 Generator type of (Random&) -> Shrinkable<T>
  * @tparam GEN2GEN (T&) -> ((Random&) -> Shrinkable<T>) (Generator for T)
  * @param gen1 base generator for type T
  * @param gen2gen function that returns a generator for type T based on previously generated value of the same type
- * @param minSize minimum size of the aggregate steps
- * @param maxSize maximum size of the aggregate steps
- * @return last generated value of T throughout the aggregation
+ * @param minSize minimum size of the aggregate
+ * @param maxSize maximum size of the aggregate
+ * @return vector of generated values of type T
  */
 template <GenLike GEN1, typename GEN2GEN>
     requires FunctionLike<GEN2GEN, invoke_result_t<GEN2GEN, typename invoke_result_t<GEN1, Random&>::type&>, typename invoke_result_t<GEN1, Random&>::type&>
 decltype(auto) aggregate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t maxSize)
 {
     using T = typename invoke_result_t<GEN1, Random&>::type;  // get the T from shrinkable<T>(Random&)
-    using RetType = invoke_result_t<GEN2GEN, T&>;             // GEN2GEN's return type
+    using RetType = invoke_result_t<GEN2GEN, T&>;
     GenFunction<T> funcGen1 = gen1;
     Function<RetType(T&)> funcGen2Gen = gen2gen;
     return util::aggregateImpl<T>(funcGen1, funcGen2Gen, minSize, maxSize);

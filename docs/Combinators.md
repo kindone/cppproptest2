@@ -258,18 +258,18 @@ However, using `filter` for generating values with complex dependency may result
 You may want to generate values that are related to previously generated values. This can be achieved with `aggregate` or `accumulate`.
 Both of the combinators take base generator in the form of `Generator<T>` as the first argument and a factory that takes a value of type `T` and returns `Generator<T>`, as the second argument.
 
-While `aggregate` generates a single value, accumulate generates a list of values at each generation.
+While `accumulate` generates a single value, `aggregate` generates a list of values at each generation.
 
 | Combinator                                                      | Result type          | Remark |
 | --------------------------------------------------------------- | -------------------- | ------ |
-| `aggregate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)`  | `Generator<T>`       |        |
-| `accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)` | `Generator<list<T>>` |        |
+| `accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)`  | `Generator<T>`       |        |
+| `aggregate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)` | `Generator<list<T>>` |        |
 
 ```cpp
     // generate initial value
     auto baseGen = interval(0, 1000);
     // generate a value based on previous value
-    auto gen = aggregate(
+    auto gen = accumulate(
         gen1,
         [](int num) {
             return interval(num/2, num*2);
@@ -281,7 +281,7 @@ While `aggregate` generates a single value, accumulate generates a list of value
     // generate initial value
     auto baseGen = interval(0, 1000);
     // generate list of values
-    auto gen = accumulate(
+    auto gen = aggregate(
         gen1,
         [](int num) {
             return interval(num/2, num*2);

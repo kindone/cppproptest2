@@ -1,11 +1,11 @@
-#include "proptest/combinator/accumulate.hpp"
+#include "proptest/combinator/aggregate.hpp"
 
 
 namespace proptest {
 
 namespace util {
 
-Generator<vector<Any>> accumulateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
+Generator<vector<Any>> aggregateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
                                     size_t maxSize)
 {
     return interval<uint64_t>(minSize, maxSize).flatMap<vector<Any>>([gen1, gen2gen, minSize](const uint64_t& size) {

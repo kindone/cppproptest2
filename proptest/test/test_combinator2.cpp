@@ -351,14 +351,14 @@ TEST(PropTest, TestDerive2)
     }
 }
 
-TEST(PropTest, TestAggregate)
+TEST(PropTest, TestAccumulate)
 {
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
     auto gen1 = interval<int>(0, 1).map([](const int& num) { return list<int>{num}; });
 
-    [[maybe_unused]] auto gen = aggregate(
+    [[maybe_unused]] auto gen = accumulate(
         gen1,
         [](const list<int>& nums) {
             auto last = nums.back();
@@ -371,24 +371,24 @@ TEST(PropTest, TestAggregate)
         2, 4);
 
     for (int i = 0; i < 10; i++) {
-        [[maybe_unused]] auto shr = gen(rand);
+        Shrinkable<list<int>> shr = gen(rand);
         serializeShrinkable<list<int>>(shr);
         //exhaustive(shr, 0);
     }
 }
 
-TEST(PropTest, TestAccumulate)
+TEST(PropTest, TestAggregate)
 {
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
     auto gen1 = interval<int>(0, 1);
 
-    [[maybe_unused]] auto gen = accumulate(
+    [[maybe_unused]] auto gen = aggregate(
         gen1, [](int num) { return interval(num, num + 2); }, 2, 4);
 
     for (int i = 0; i < 10; i++) {
-        [[maybe_unused]] auto shr = gen(rand);
+        Shrinkable<vector<int>> shr = gen(rand);
         serializeShrinkable<vector<int>>(shr);
         // exhaustive(shr, 0);
     }
