@@ -201,12 +201,6 @@ Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<Shrink
     return shrinkableElemsShr;
 }
 
-#ifndef PROPTEST_UNTYPED_SHRINKABLE
-namespace typed {
-template struct Shrinkable<vector<ShrinkableAny>>;
-}
-#endif // PROPTEST_UNTYPED_SHRINKABLE
-
 #ifndef PROPTEST_UNTYPED_STREAM
 namespace typed {
 template struct Stream<Shrinkable<vector<ShrinkableAny>>>;

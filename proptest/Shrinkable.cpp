@@ -2,8 +2,6 @@
 
 namespace proptest {
 
-namespace untyped {
-
 ShrinkableBase::ShrinkableBase(Any _value) : value(_value), shrinks(StreamType::empty()) {}
 
 ShrinkableBase::ShrinkableBase(const Any& _value, const Lazy<StreamType>& _shrinks) : value(_value), shrinks(_shrinks) { }
@@ -70,7 +68,5 @@ ShrinkableBase ShrinkableBase::take(int n) const {
         return shr.take(n);
     }));
 }
-
-} // namespace typed
 
 } // namespace proptest
