@@ -372,6 +372,7 @@ TEST(PropTest, TestAggregate)
 
     for (int i = 0; i < 10; i++) {
         [[maybe_unused]] auto shr = gen(rand);
+        serializeShrinkable<list<int>>(shr);
         //exhaustive(shr, 0);
     }
 }
@@ -388,6 +389,7 @@ TEST(PropTest, TestAccumulate)
 
     for (int i = 0; i < 10; i++) {
         [[maybe_unused]] auto shr = gen(rand);
+        serializeShrinkable<vector<int>>(shr);
         // exhaustive(shr, 0);
     }
 }

@@ -16,6 +16,7 @@ struct TypeList {
 template <class First, class... Ts>
 struct TypeList<First, Ts...>
 {
+    using head = First;
     using tail = TypeList<Ts...>;
 
     template <typename... Prefix>

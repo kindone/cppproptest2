@@ -439,11 +439,9 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     vector<AnyGenerator> genVec;
     genVec.reserve(NumArgs);
     // fill with gens
-    if constexpr(NumGens > 0) {
-        util::For<NumGens>([&](auto index_sequence) {
-            genVec.push_back(get<index_sequence.value>(genTuple));
-        });
-    }
+    util::For<NumGens>([&](auto index_sequence) {
+        genVec.push_back(get<index_sequence.value>(genTuple));
+    });
     // fill the rest with arbitraries
     util::For<NumArgs-NumGens>([&genVec](auto index_sequence) {
         using T = decay_t<tuple_element_t<NumGens + index_sequence.value, ArgTuple>>;
