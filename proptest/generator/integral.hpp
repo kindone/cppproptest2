@@ -14,34 +14,29 @@ namespace proptest {
 template <typename GEN>
 decltype(auto) generator(GEN&& gen);
 
+
+// template declaration
 template <typename T>
-Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max())
-{
-    T value = 0;
-    if (min == numeric_limits<T>::min() && max == numeric_limits<T>::max() && rand.getRandomBool()) {
-        uint32_t i = rand.getRandomSize(0, sizeof(Arbi<T>::boundaryValues) / sizeof(Arbi<T>::boundaryValues[0]));
-        value = Arbi<T>::boundaryValues[i];
-    } else if (numeric_limits<T>::min() < 0)
-        value = rand.getRandom<T>(min, max);
-    else
-        value = rand.getRandomU<T>(min, max);
+Shrinkable<T> generateInteger(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max());
 
-    if (value < min || max < value)
-        throw runtime_error(__FILE__, __LINE__, "invalid range");
+// template specialization
+template <> Shrinkable<char> generateInteger(Random& rand, char min, char max);
 
-    if (min >= 0)  // [3,5] -> [0,2] -> [3,5]
-    {
-        return util::binarySearchShrinkableU(static_cast<T>(value - min))
-            .template map<T>([min](const uint64_t& _value) { return static_cast<T>(_value + min); });
-    } else if (max <= 0)  // [-5,-3] -> [-2,0] -> [-5,-3]
-    {
-        return util::binarySearchShrinkable(static_cast<T>(value - max)).template map<T>([max](const int64_t& _value) { return static_cast<T>(_value + max); });
-    } else  // [-2, 2]
-    {
-        auto transformer = +[](const int64_t& _value) { return static_cast<T>(_value); };
-        return util::binarySearchShrinkable(value).template map<T>(transformer);
-    }
-}
+template <> Shrinkable<int8_t> generateInteger(Random& rand, int8_t min, int8_t max);
+
+template <> Shrinkable<int16_t> generateInteger(Random& rand, int16_t min, int16_t max);
+
+template <> Shrinkable<int32_t> generateInteger(Random& rand, int32_t min, int32_t max);
+
+template <> Shrinkable<int64_t> generateInteger(Random& rand, int64_t min, int64_t max);
+
+template <> Shrinkable<uint8_t> generateInteger(Random& rand, uint8_t min, uint8_t max);
+
+template <> Shrinkable<uint16_t> generateInteger(Random& rand, uint16_t min, uint16_t max);
+
+template <> Shrinkable<uint32_t> generateInteger(Random& rand, uint32_t min, uint32_t max);
+
+template <> Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max);
 
 /**
  * @ingroup Generators
@@ -289,7 +284,7 @@ public:
 
 namespace util {
 
-// would've been simpler with lambdas, but optimzing for compilation performance
+// would've been simpler with lambdas, but optimizing for compilation performance
 
 template <typename T>
 struct NaturalFunctor {
@@ -437,7 +432,7 @@ PROPTEST_API Generator<T> integers(T start, T count)
 namespace proptest {
 // template instantiation
 DEFINE_FOR_ALL_INTTYPES(EXTERN_INTEGERS);
-DEFINE_FOR_ALL_INTTYPES(EXTERN_GENERATEINTEGER);
+// DEFINE_FOR_ALL_INTTYPES(EXTERN_GENERATEINTEGER);
 DEFINE_FOR_ALL_INTTYPES(EXTERN_NATURAL);
 DEFINE_FOR_ALL_INTTYPES(EXTERN_NONNEGATIVE);
 DEFINE_FOR_ALL_INTTYPES(EXTERN_INTERVAL);
