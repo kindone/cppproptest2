@@ -68,7 +68,7 @@ public:
         else
             return generateInteger<T>(rand, 0, numeric_limits<T>::max());
     }
-    static constexpr char boundaryValues[] = {0, -1 ,1, -2, 2,
+    static constexpr T boundaryValues[] = {0, -1 ,1, -2, 2,
                                                 numeric_limits<char>::min(),
                                                 numeric_limits<char>::max(),
                                                 numeric_limits<char>::min() + 1,
