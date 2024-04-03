@@ -20,9 +20,6 @@
     DEF(uint32_t);\
     DEF(uint64_t);
 
-    // DEF(long);\
-    // DEF(unsigned long);
-
 namespace proptest {
 
 template <typename GEN>
