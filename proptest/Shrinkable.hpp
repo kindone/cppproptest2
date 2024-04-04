@@ -64,31 +64,29 @@ struct PROPTEST_API ShrinkableBase
     ShrinkableBase mapShrinkable(Function<ShrinkableBase(ShrinkableBase&)> transformer) const;
 
     // provide filtered generation, shrinking
-    template <typename T>
-    ShrinkableBase filter(Func1<bool(T&)> criteria) const {
+    ShrinkableBase filter(Function1 criteria) const {
         // criteria must be true for head
-        if(!criteria(value.getRef<T>()).template getRef<bool>())
+        if(!criteria(value).template getRef<bool>())
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
         else
             return with(shrinks->template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
-                return criteria(shr.getRef<T>()).template getRef<bool>();
+                return criteria(shr.getAny()).template getRef<bool>();
             }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
-                return shr.template filter<T>(criteria);
+                return shr.filter(criteria);
             }));
     }
 
     // provide filtered generation, shrinking
-    template <typename T>
-    ShrinkableBase filter(Func1<bool(T&)> criteria, int tolerance) const {
+    ShrinkableBase filter(Function1 criteria, int tolerance) const {
 
-        static Function<StreamType(const StreamType&,Func1<bool(T&)>, int)> filterStream = +[](const StreamType& stream, Func1<bool(T&)> _criteria, int _tolerance) {
+        static Function<StreamType(const StreamType&, Function1, int)> filterStream = +[](const StreamType& stream, Function1 _criteria, int _tolerance) {
             if(stream.isEmpty())
                 return StreamType::empty();
             else {
                 for(auto itr = stream.template iterator<ShrinkableBase>(); itr.hasNext();) {
                     auto shr = itr.next();
                     auto tail = itr.stream;
-                    if(_criteria(shr.getRef<T>()).template getRef<bool>()) {
+                    if(_criteria(shr.getAny()).template getRef<bool>()) {
                         return StreamType{shr, [tail, _criteria, _tolerance]() { return filterStream(tail, _criteria, _tolerance);}};
                     }
                     // extract from shr's children
@@ -100,11 +98,11 @@ struct PROPTEST_API ShrinkableBase
             }
         };
         // criteria must be true for head
-        if(!criteria(value.getRef<T>()).template getRef<bool>())
+        if(!criteria(value).template getRef<bool>())
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
         return with(filterStream(getShrinks(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
-            return shr.filter<T>(criteria, tolerance);
+            return shr.filter(criteria, tolerance);
         }));
     }
 
@@ -185,12 +183,12 @@ struct Shrinkable : public ShrinkableBase
 
     // provide filtered generation, shrinking
     Shrinkable filter(Func1<bool(T&)> criteria) const {
-        return ShrinkableBase::filter<T>(criteria);
+        return ShrinkableBase::filter(criteria);
     }
 
     // provide filtered generation, shrinking
     Shrinkable filter(Func1<bool(T&)> criteria, int tolerance) const {
-        return ShrinkableBase::filter<T>(criteria, tolerance);
+        return ShrinkableBase::filter(criteria, tolerance);
     }
 
     // concat: continues with then after horizontal dead end
