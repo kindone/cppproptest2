@@ -89,6 +89,8 @@ struct Shrinkable : public ShrinkableBase
     using type = T;
     using TStreamType = ::proptest::Stream;
 
+    static_assert(sizeof(ShrinkableBase) == sizeof(Shrinkable<T>), "Shrinkable<T> must have same size as ShrinkableBase");
+
     Shrinkable(const ShrinkableBase& base) : ShrinkableBase(base) {}
 
     template <typename U>
