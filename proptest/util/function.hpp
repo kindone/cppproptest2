@@ -21,12 +21,12 @@ template <typename T>
 T toCallableArg(const decay_t<T>& value) {
 	if constexpr (std::is_reference_v<T>) {
 		if constexpr (std::is_const_v<std::remove_reference_t<T>>) {
-			return static_cast<T>(value);
+			return value;
 		} else {
-			return static_cast<T>(const_cast<decay_t<T>&>(value));
+			return const_cast<decay_t<T>&>(value);
 		}
 	} else {
-		return static_cast<T>(value);
+		return value;
 	}
 }
 
@@ -80,16 +80,15 @@ struct PROPTEST_API Function<RET(ARGS...)> {
         return static_cast<bool>(holder);
     }
 
-    template <typename...Args>
-    RET operator()(Args&&... args) const {
+    RET operator()(const decay_t<ARGS>&... args) const {
         if(!holder)
             throw runtime_error(__FILE__, __LINE__, "Function not initialized");
         if constexpr(is_void_v<RET>) {
-            holder->operator()(util::forward<Args>(args)...);
+            holder->operator()(args...);
             return;
         }
         else
-            return holder->operator()(util::forward<Args>(args)...);
+            return holder->operator()(args...);
     }
 
     mutable shared_ptr<CallableHolderBase<RET, ARGS...>> holder;
