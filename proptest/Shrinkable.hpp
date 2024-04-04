@@ -5,6 +5,7 @@
 #include "proptest/typefwd.hpp"
 #include "proptest/util/any.hpp"
 #include "proptest/util/function.hpp"
+#include "proptest/util/anyfunction.hpp"
 #include "proptest/util/lazy.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
@@ -41,11 +42,10 @@ struct PROPTEST_API ShrinkableBase
 
     StreamType getShrinks() const;
 
-    template <typename U, typename T>
-    ShrinkableBase map(Function<U(T&)> transformer) const {
-        return ShrinkableBase(transformer(value.getRef<T>())).with([shrinks = this->shrinks, transformer]() -> StreamType {
+    ShrinkableBase map(Function1 transformer) const {
+        return ShrinkableBase(transformer(value)).with([shrinks = this->shrinks, transformer]() -> StreamType {
             return shrinks->template transform<StreamElementType,StreamElementType>([transformer](const ShrinkableBase& shr) -> StreamElementType {
-                    return shr.map<U>(transformer);
+                    return shr.map(transformer);
                 });
             }
         );
@@ -65,13 +65,13 @@ struct PROPTEST_API ShrinkableBase
 
     // provide filtered generation, shrinking
     template <typename T>
-    ShrinkableBase filter(Function<bool(T&)> criteria) const {
+    ShrinkableBase filter(Func1<bool(T&)> criteria) const {
         // criteria must be true for head
-        if(!criteria(value.getRef<T>()))
+        if(!criteria(value.getRef<T>()).template getRef<bool>())
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
         else
             return with(shrinks->template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
-                return criteria(shr.getRef<T>());
+                return criteria(shr.getRef<T>()).template getRef<bool>();
             }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
                 return shr.template filter<T>(criteria);
             }));
@@ -79,16 +79,16 @@ struct PROPTEST_API ShrinkableBase
 
     // provide filtered generation, shrinking
     template <typename T>
-    ShrinkableBase filter(Function<bool(T&)> criteria, int tolerance) const {
+    ShrinkableBase filter(Func1<bool(T&)> criteria, int tolerance) const {
 
-        static Function<StreamType(const StreamType&,Function<bool(T&)>, int)> filterStream = +[](const StreamType& stream, Function<bool(T&)> _criteria, int _tolerance) {
+        static Function<StreamType(const StreamType&,Func1<bool(T&)>, int)> filterStream = +[](const StreamType& stream, Func1<bool(T&)> _criteria, int _tolerance) {
             if(stream.isEmpty())
                 return StreamType::empty();
             else {
                 for(auto itr = stream.template iterator<ShrinkableBase>(); itr.hasNext();) {
                     auto shr = itr.next();
                     auto tail = itr.stream;
-                    if(_criteria(shr.getRef<T>())) {
+                    if(_criteria(shr.getRef<T>()).template getRef<bool>()) {
                         return StreamType{shr, [tail, _criteria, _tolerance]() { return filterStream(tail, _criteria, _tolerance);}};
                     }
                     // extract from shr's children
@@ -100,11 +100,11 @@ struct PROPTEST_API ShrinkableBase
             }
         };
         // criteria must be true for head
-        if(!criteria(value.getRef<T>()))
+        if(!criteria(value.getRef<T>()).template getRef<bool>())
             throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
         return with(filterStream(getShrinks(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
-            return shr.filter(criteria, tolerance);
+            return shr.filter<T>(criteria, tolerance);
         }));
     }
 
@@ -169,8 +169,8 @@ struct Shrinkable : public ShrinkableBase
     Shrinkable clone() const { return ShrinkableBase::clone(); }
 
     template <typename U>
-    Shrinkable<U> map(Function<U(T&)> transformer) const {
-        return ShrinkableBase::map<U, T>(transformer);
+    Shrinkable<U> map(Func1<U(T&)> transformer) const {
+        return ShrinkableBase::map(transformer);
     }
 
     template <typename U>
@@ -184,12 +184,12 @@ struct Shrinkable : public ShrinkableBase
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Function<bool(T&)> criteria) const {
+    Shrinkable filter(Func1<bool(T&)> criteria) const {
         return ShrinkableBase::filter<T>(criteria);
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Function<bool(T&)> criteria, int tolerance) const {
+    Shrinkable filter(Func1<bool(T&)> criteria, int tolerance) const {
         return ShrinkableBase::filter<T>(criteria, tolerance);
     }
 
