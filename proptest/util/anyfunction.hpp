@@ -58,4 +58,7 @@ struct Function1Impl : Function1
 };
 
 
+template <typename F>
+using Func1 = Function1;
+
 } // namespace proptest
