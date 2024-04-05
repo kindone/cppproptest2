@@ -422,7 +422,7 @@ decltype(auto) createProperty(Function<bool(ARGS...)> func, vector<AnyGenerator>
  * @tparam Callable property callable type in either `(ARGS...) -> bool` (success/fail by boolean return value) or
  * `(ARGS...) -> void` (fail if exception is thrown, success eitherwise)
  * @tparam ExplicitGens Explicit generator callable types for each `ARG` in `(Random&) -> Shrinkable<ARG>`
- * @param callable passed as any either `std::function`, functor object, function pointer
+ * @param callable passed as any callable such as `std::function`, functor object, function pointer
  * @param gens variadic list of generators for `ARG`s (optional if `Arbitrary<ARG>` is preferred)
  */
 template <typename Callable, typename... ExplicitGens>
@@ -460,7 +460,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
  * @tparam Callable property callable type in either `(ARGS...) -> bool` (success/fail by boolean return value) or
  * `(ARGS...) -> void` (fail if exception is thrown, success eitherwise)
  * @tparam ExplicitGens Explicit generator callable types for `ARG` in `(Random&) -> Shrinkable<ARG>`
- * @param callable passed as any either `std::function`, functor object, function pointer
+ * @param callable passed as any callable such as `std::function`, functor object, function pointer
  * @param gens variadic list of generators for `ARG`s (optional if `Arbitrary<ARG>` is preferred)
  * @return true if all the cases succeed
  * @return false if any one of the cases fails
@@ -491,7 +491,7 @@ lists
 * @tparam Callable property callable type in either `(ARGS...) -> bool` (success/fail by boolean return value) or
 * `(ARGS...) -> void` (fail if exception is thrown, success eitherwise)
 * @tparam ARGS variadic types for callable and the initializer_lists
-* @param callable passed as any either `std::function`, functor object, function pointer
+* @param callable passed as any callable such as `std::function`, functor object, function pointer
 * @param lists Lists of valid arguments (types must be in same order as in parameters of the callable)
 * @return true if all the cases succeed
 * @return false if any one of the cases fails

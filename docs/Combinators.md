@@ -25,7 +25,7 @@ While you can go through this document from top to the bottom, you might be want
 ### Constants
 
 * `just<T>(T*)`, `just<T>(T)`, `just<T>(shared_ptr<T>)`: always generates a specific value. A shared pointer can be used for non-copyable types.
-* `lazy<T>(std::function<T()>)`: generates a value by calling a function
+* `lazy<T>(function<T()>)`: generates a value by calling a function
     ```cpp
     auto zeroGen = just(0); // template argument is optional if type is deducible
     auto oneGen = lazy<int>([]() { return 1; });

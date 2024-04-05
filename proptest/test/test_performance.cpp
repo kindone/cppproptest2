@@ -421,7 +421,7 @@ constexpr uint64_t seed = 1709963283213UL;
 TEST(Performance, ArbiBool)
 {
     Random rand(seed);
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 100000; i++)
     {
         auto gen = Arbi<bool>();
         gen(rand);
@@ -431,7 +431,7 @@ TEST(Performance, ArbiBool)
 TEST(Performance, ArbiInt)
 {
     Random rand(seed);
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 100000; i++)
     {
         auto gen = Arbi<int>();
         gen(rand);
@@ -441,7 +441,7 @@ TEST(Performance, ArbiInt)
 TEST(Performance, ArbiString)
 {
     Random rand(seed);
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 100000; i++)
     {
         auto gen = Arbi<string>();
         gen(rand);
@@ -451,9 +451,49 @@ TEST(Performance, ArbiString)
 TEST(Performance, ArbiList)
 {
     Random rand(seed);
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 100000; i++)
     {
         auto gen = Arbi<list<int>>(1, 2);;
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiVector)
+{
+    Random rand(seed);
+    for(int i = 0; i < 100000; i++)
+    {
+        auto gen = Arbi<vector<int>>(1, 2);;
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiPair)
+{
+    Random rand(seed);
+    for(int i = 0; i < 100000; i++)
+    {
+        auto gen = Arbi<pair<int,int>>();
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiTuple)
+{
+    Random rand(seed);
+    for(int i = 0; i < 100000; i++)
+    {
+        auto gen = Arbi<tuple<int,int>>();
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiSet)
+{
+    Random rand(seed);
+    for(int i = 0; i < 100000; i++)
+    {
+        auto gen = Arbi<set<int>>();
         gen(rand);
     }
 }

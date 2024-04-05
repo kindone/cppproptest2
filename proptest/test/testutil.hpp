@@ -95,7 +95,7 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level = 0)
 }
 
 template <typename T>
-void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, proptest::function<void(const proptest::Shrinkable<T>&, int)> func)
+void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, proptest::Function<void(const proptest::Shrinkable<T>&, int)> func)
 {
     func(shrinkable, level);
 
