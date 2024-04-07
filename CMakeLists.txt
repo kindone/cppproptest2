@@ -29,6 +29,11 @@ include_directories(.)
 SET(proptest_sources
     proptest/util/any.cpp
     proptest/util/misc.cpp
+    proptest/Stream.cpp
+    proptest/Shrinkable.cpp
+    proptest/ShrinkableAny.cpp
+    proptest/Generator.cpp
+    proptest/Random.cpp
     proptest/util/unicode.cpp
     proptest/util/utf8string.cpp
     proptest/util/utf16string.cpp
@@ -52,11 +57,6 @@ SET(proptest_sources
     proptest/generator/cesu8string.cpp
     proptest/combinator/intervals.cpp
     proptest/combinator/aggregate.cpp
-    proptest/Stream.cpp
-    proptest/Shrinkable.cpp
-    proptest/ShrinkableAny.cpp
-    proptest/Generator.cpp
-    proptest/Random.cpp
     proptest/PropertyContext.cpp
     proptest/PropertyBase.cpp
     proptest/util/bitmap.cpp
