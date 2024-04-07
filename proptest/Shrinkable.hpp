@@ -25,7 +25,7 @@ struct PROPTEST_API ShrinkableBase
     explicit ShrinkableBase(Any _value);
 
     template <typename T>
-    ShrinkableBase(const Shrinkable<T>& other) : value(other.value), shrinks(other.shrinks) {}
+    ShrinkableBase(const Shrinkable<T>& other) : value(other.value), shrinksGen(other.shrinksGen) {}
 
     ShrinkableBase clear() const;
 
@@ -69,10 +69,10 @@ struct PROPTEST_API ShrinkableBase
     ShrinkableBase take(int n) const;
 
 private:
-    ShrinkableBase(const Any& _value, const Lazy<StreamType>& _shrinks);
+    ShrinkableBase(const Any& _value, const Function<StreamType()>& _shrinksGen);
 
     Any value;
-    Lazy<StreamType> shrinks;
+    Function<StreamType()> shrinksGen;
 
 public:
 
