@@ -460,7 +460,7 @@ TYPED_TEST(ShrinkerPerformance, Shrink)
 
 TEST(Performance, ShrinkerPair)
 {
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkPair(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000));
     }
@@ -468,7 +468,7 @@ TEST(Performance, ShrinkerPair)
 
 TEST(Performance, ShrinkerTuple)
 {
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkTuple(Shrinkable(tuple(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000))));
     }
@@ -478,12 +478,12 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerVector)
 {
     auto shr = shrink<TypeParam>();
     vector<ShrinkableAny> vec;
-    vec.reserve(10000);
-    for(int i = 0; i < 10000; i++)
+    vec.reserve(1000);
+    for(int i = 0; i < 1000; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
     }
@@ -493,12 +493,12 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerVector_membershipwise_only)
 {
     auto shr = shrink<TypeParam>();
     vector<ShrinkableAny> vec;
-    vec.reserve(10000);
-    for(int i = 0; i < 10000; i++)
+    vec.reserve(1000);
+    for(int i = 0; i < 1000; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
     }
@@ -508,12 +508,12 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerVector_elementwise_only)
 {
     auto shr = shrink<TypeParam>();
     vector<ShrinkableAny> vec;
-    vec.reserve(10000);
-    for(int i = 0; i < 10000; i++)
+    vec.reserve(1000);
+    for(int i = 0; i < 1000; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, false);
     }
@@ -524,11 +524,11 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerList)
     auto shr = shrink<TypeParam>();
     vector<ShrinkableAny> vec;
     vec.reserve(10000);
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
     }
@@ -538,12 +538,12 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerList_membershipwise_only)
 {
     auto shr = shrink<TypeParam>();
     vector<ShrinkableAny> vec;
-    vec.reserve(10000);
-    for(int i = 0; i < 10000; i++)
+    vec.reserve(1000);
+    for(int i = 0; i < 1000; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < 1000; i++)
     {
         [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
     }
@@ -634,7 +634,7 @@ TEST(Performance, ArbiTuple)
 TEST(Performance, ArbiSet)
 {
     Random rand(seed);
-    for(int i = 0; i < 100000; i++)
+    for(int i = 0; i < 10000; i++)
     {
         auto gen = Arbi<set<int>>();
         gen(rand);

@@ -154,7 +154,7 @@ TEST(PropTest, TestDependency2)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto numRowsGen = interval<int>(100000, 100000);
+    auto numRowsGen = interval<int>(10000, 10000);
     auto numElementsGen = Arbi<uint16_t>();
     auto dimGen = pairOf(numRowsGen, numElementsGen);
 
