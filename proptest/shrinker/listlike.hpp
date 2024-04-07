@@ -52,26 +52,26 @@ Shrinkable<vector<ShrinkableAny>> toAnyVectorShrinkable(const Container<Shrinkab
 template <template <typename...> class Container, typename T>
 Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
 {
-    return shrinkableAnyVecShr.template map<Container<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) -> Container<T> {
-            Container<T> valueCont;
-            for(auto itr = _shrinkableVector.begin(); itr != _shrinkableVector.end(); ++itr) {
-                valueCont.insert(valueCont.end(), itr->getAny().getRef<T>());
-            }
-            return valueCont;
+    return shrinkableAnyVecShr.template flatMap<Container<T>>(
+        +[](const vector<ShrinkableAny>& _shrinkableVector) {
+            auto valueContPtr = util::make_shared<Container<T>>();
+            util::transform(
+                _shrinkableVector.begin(), _shrinkableVector.end(), util::inserter(*valueContPtr, valueContPtr->begin()),
+                +[](const ShrinkableAny& shr) -> T { return shr.getAny().getRef<T>(); });
+            return Shrinkable<Container<T>>(util::make_any<Container<T>>(valueContPtr));
         });
 }
 
 template <template <typename...> class ListLike, typename T>
 Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
 {
-    return shrinkableAnyVecShr.template map<ListLike<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) -> ListLike<T> {
-            ListLike<T> valueCont;
+    return shrinkableAnyVecShr.template flatMap<ListLike<T>>(
+        +[](const vector<ShrinkableAny>& _shrinkableVector) {
+            auto valueContPtr = util::make_shared<ListLike<T>>();
             util::transform(
-                _shrinkableVector.begin(), _shrinkableVector.end(), util::back_inserter(valueCont),
+                _shrinkableVector.begin(), _shrinkableVector.end(), util::back_inserter(*valueContPtr),
                 +[](const ShrinkableAny& shr) -> T { return shr.getAny().getRef<T>(); });
-            return valueCont;
+            return Shrinkable<ListLike<T>>(util::make_any<ListLike<T>>(valueContPtr));
         });
 }
 
@@ -138,12 +138,13 @@ Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLi
     auto size = shrinkableElems.size();
     auto rangeShrinkable =
         shrinkIntegral<size_t>(size - minSize).template map<size_t>([minSize](const size_t& s) { return s + minSize; });
-    return rangeShrinkable.template map<ListLike<Shrinkable<T>>>([shr](const size_t& newSize) {
+    return rangeShrinkable.template flatMap<ListLike<Shrinkable<T>>>([shr](const size_t& newSize) {
         if (newSize == 0)
-            return ListLike<Shrinkable<T>>();
+            return Shrinkable<ListLike<Shrinkable<T>>>(ListLike<Shrinkable<T>>());
         else {
             auto shrinkableElems = shr.getRef();
-            return ListLike<Shrinkable<T>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize);
+            return Shrinkable<ListLike<Shrinkable<T>>>(
+                util::make_any<ListLike<Shrinkable<T>>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize));
         }
     });
 }

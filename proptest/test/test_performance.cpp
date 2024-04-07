@@ -504,6 +504,20 @@ TYPED_TEST(ShrinkerPerformance, ShrinkerVector_membershipwise_only)
     }
 }
 
+TYPED_TEST(ShrinkerPerformance, ShrinkerVector_elementwise_only)
+{
+    auto shr = shrink<TypeParam>();
+    vector<ShrinkableAny> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        vec.push_back(shr);
+    }
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, false);
+    }
+}
 
 TYPED_TEST(ShrinkerPerformance, ShrinkerList)
 {

@@ -224,6 +224,8 @@ AnyVal<T> make_anyval(T value)
 template <typename T, typename... Args>
 Any make_any(Args&&... args)
 {
+    // static_assert((!is_same_v<decay_t<Args, shared_ptr<T>> && ...), "shared_ptr<T> must not be passed as argument");
+
     if constexpr (is_same_v<Any, decay_t<T>>) {
         static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
         return Any{args...};
@@ -235,17 +237,14 @@ Any make_any(Args&&... args)
     else if constexpr (is_fundamental_v<T>) {
         return Any{util::make_shared<AnyVal<T>>(T{args...})};
     }
+    else if constexpr (sizeof...(Args) == 1 && (is_same_v<decay_t<Args>, shared_ptr<T>> && ...)) {
+        return Any(util::make_shared<AnyRef<T>>(args...));
+    }
     else {
         return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(util::forward<Args>(args)...)));
     }
 }
 
-template <typename T>
-shared_ptr<Any> make_shared_any(const shared_ptr<T>& ptr)
-{
-    auto anyPtr = util::make_shared<Any>(ptr);
-    return anyPtr;
-}
 
 }
 

@@ -117,11 +117,12 @@ ShrinkableBase ShrinkableBase::andThenStatic(const StreamType& then) const {
 
 ShrinkableBase ShrinkableBase::andThen(Function<StreamType(const ShrinkableBase&)> then) const {
     if(shrinksGen().isEmpty())
-        return with(then(*this));
+        return with([copy = *this, then]() { return then(copy); });
     else
-        return with(shrinksGen().template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
-            return shr.andThen(then);
-        }));
+        return with([shrinksGen = this->shrinksGen, then]() { return shrinksGen().template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
+                return shr.andThen(then);
+            });
+        });
 }
 
 ShrinkableBase ShrinkableBase::take(int n) const {
