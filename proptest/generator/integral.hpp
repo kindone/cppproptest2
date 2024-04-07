@@ -1,7 +1,6 @@
 #pragma once
 #include "proptest/Stream.hpp"
 #include "proptest/Arbitrary.hpp"
-#include "proptest/shrinker/integral.hpp"
 #include "proptest/std/concepts.hpp"
 
 /**

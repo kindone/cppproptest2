@@ -1,5 +1,12 @@
 #include "proptest/proptest.hpp"
 #include "proptest/test/testutil.hpp"
+#include "proptest/shrinker/integral.hpp"
+#include "proptest/shrinker/string.hpp"
+#include "proptest/shrinker/floating.hpp"
+#include "proptest/shrinker/bool.hpp"
+#include "proptest/shrinker/pair.hpp"
+#include "proptest/shrinker/tuple.hpp"
+#include "proptest/shrinker/listlike.hpp"
 
 using namespace proptest;
 
@@ -416,6 +423,118 @@ TEST(Performance, ShrinkableFilterLarge)
     }
 }
 
+template <typename T>
+struct ShrinkerPerformance : public testing::Test
+{
+    using Type = T;
+};
+
+using ShrinkerBasicTypes =
+    testing::Types<bool, int, float, string>;
+
+TYPED_TEST_SUITE(ShrinkerPerformance, ShrinkerBasicTypes);
+
+template <typename T>
+decltype(auto) shrink()
+{
+    if constexpr (is_same_v<T, bool>)
+        return shrinkBool(true);
+    else if constexpr (is_integral_v<T>)
+        return shrinkIntegral<T>(100000);
+    else if constexpr (is_same_v<T, double> || is_same_v<T, float>)
+        return shrinkFloat<T>(1.0e6);
+    else if constexpr (is_same_v<T, string>)
+        return shrinkString("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa");
+
+    throw runtime_error(__FILE__, __LINE__, "unsupported type");
+}
+
+
+TYPED_TEST(ShrinkerPerformance, Shrink)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] volatile auto shr = shrink<TypeParam>();
+    }
+}
+
+TEST(Performance, ShrinkerPair)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkPair(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000));
+    }
+}
+
+TEST(Performance, ShrinkerTuple)
+{
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkTuple(Shrinkable(tuple(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000))));
+    }
+}
+
+TYPED_TEST(ShrinkerPerformance, ShrinkerVector)
+{
+    auto shr = shrink<TypeParam>();
+    vector<ShrinkableAny> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        vec.push_back(shr);
+    }
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
+    }
+}
+
+TYPED_TEST(ShrinkerPerformance, ShrinkerVector_membershipwise_only)
+{
+    auto shr = shrink<TypeParam>();
+    vector<ShrinkableAny> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        vec.push_back(shr);
+    }
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
+    }
+}
+
+
+TYPED_TEST(ShrinkerPerformance, ShrinkerList)
+{
+    auto shr = shrink<TypeParam>();
+    vector<ShrinkableAny> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        vec.push_back(shr);
+    }
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
+    }
+}
+
+TYPED_TEST(ShrinkerPerformance, ShrinkerList_membershipwise_only)
+{
+    auto shr = shrink<TypeParam>();
+    vector<ShrinkableAny> vec;
+    vec.reserve(10000);
+    for(int i = 0; i < 10000; i++)
+    {
+        vec.push_back(shr);
+    }
+    for(int i = 0; i < 10000; i++)
+    {
+        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
+    }
+}
+
 constexpr uint64_t seed = 1709963283213UL;
 
 TEST(Performance, ArbiBool)
@@ -453,17 +572,27 @@ TEST(Performance, ArbiList)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<list<int>>(1, 2);;
+        auto gen = Arbi<list<int>>(1, 2);
         gen(rand);
     }
 }
 
-TEST(Performance, ArbiVector)
+TEST(Performance, ArbiVectorInt)
 {
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<vector<int>>(1, 2);;
+        auto gen = Arbi<vector<int>>(1, 2);
+        gen(rand);
+    }
+}
+
+TEST(Performance, ArbiVectorBool)
+{
+    Random rand(seed);
+    for(int i = 0; i < 100000; i++)
+    {
+        auto gen = Arbi<vector<bool>>(1, 2);
         gen(rand);
     }
 }

@@ -1,4 +1,5 @@
 #include "proptest/generator/integral.hpp"
+#include "proptest/shrinker/integral.hpp"
 
 
 namespace proptest {
