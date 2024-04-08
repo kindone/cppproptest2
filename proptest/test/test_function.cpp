@@ -31,6 +31,13 @@ TEST(Function, lambda)
     EXPECT_EQ(function(1,2), 3);
 }
 
+TEST(Function, return_type_to_void)
+{
+    auto lambda = [](int a, int b) { return a + b; };
+    Function<void(int,int)> function(lambda);
+    function(1,2);
+}
+
 TEST(Function, ptr_args_mutable)
 {
     auto lambda = [](int* a, int b) { return *a+b; };

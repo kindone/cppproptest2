@@ -2,6 +2,7 @@
 
 #include "proptest/std/optional.hpp"
 #include "proptest/util/function.hpp"
+#include "proptest/std/variant.hpp"
 
 namespace proptest {
 
@@ -9,15 +10,15 @@ template <typename T>
 struct Lazy {
 
     struct LazyBody {
-        LazyBody(const T& _value) : value(_value) {}
-        LazyBody(Function<T()> _eval) : eval(_eval) {}
+        LazyBody(const T& _value) : data(_value) {}
+        LazyBody(Function<T()> _eval) : data(_eval) {}
 
         T& getRef() const {
-            if(!value.has_value())
+            if(!std::holds_alternative<T>(data))
             {
-                value = eval();
+                data = std::get<Function<T()>>(data)();
             }
-            return *value;
+            return std::get<T>(data);
         }
 
         T& operator*() const {
@@ -28,8 +29,9 @@ struct Lazy {
             return &getRef();
         }
 
-        mutable optional<T> value;
-        Function<T()> eval;
+        mutable std::variant<T, Function<T()>> data;
+        // mutable optional<T> value;
+        // Function<T()> eval;
     };
 
     Lazy(const T& _value) : body(util::make_shared<LazyBody>(_value)) {}

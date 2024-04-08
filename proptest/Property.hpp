@@ -33,9 +33,6 @@ public:
 
 private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
-    using ValueTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
-    using ShrTuple = tuple<Shrinkable<decay_t<ARGS>>...>;
-    using ShrinksTuple = tuple<typename Shrinkable<decay_t<ARGS>>::StreamType...>;
 
 public:
     Property(const Func& f, vector<AnyGenerator>&& gens) : func(f), genVec(util::move(gens)) {}

@@ -29,13 +29,15 @@ Generator<T> filter(GEN&& gen, Criteria&& criteria)
     static_assert(is_convertible_v<Criteria&&, Function<bool(T&)>>, "criteria must be a callable of T& -> bool");
     static_assert(is_convertible_v<GEN&&, Function<Shrinkable<T>(Random&)>>,
                   "Gen must be a GenFunction<T> or a callable of Random& -> Shrinkable<T>");
+    // Function<Shrinkable<T>(Random&)> genFunc = gen;
+    // Function<bool(const T&)> criteriaFunc = criteria;
     Function<Shrinkable<T>(Random&)> genFunc = gen;
-    Function<bool(const T&)> criteriaFunc = criteria;
+    Func1<bool(const T&)> criteriaFunc = criteria;
     return Generator<T>([genFunc, criteriaFunc](Random& rand) {
         // TODO: add some configurable termination criteria (e.g. maximum no. of attempts)
         while (true) {
             Shrinkable<T> shrinkable = genFunc(rand);
-            if (criteriaFunc(shrinkable.getRef())) {
+            if (criteriaFunc(shrinkable.getAny()).template getRef<bool>()) {
                 return shrinkable.filter(criteriaFunc, 1);  // 1: tolerance
             }
         }

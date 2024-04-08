@@ -6,7 +6,6 @@
 #include "proptest/util/any.hpp"
 #include "proptest/util/function.hpp"
 #include "proptest/util/anyfunction.hpp"
-#include "proptest/util/lazy.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
 

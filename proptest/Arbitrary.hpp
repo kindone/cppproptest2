@@ -77,7 +77,7 @@ using ArbitraryContainer = ArbiContainer<ARGS...>;
     template <>                                                                                             \
     struct Arbi<TYPE> : ArbiBase<TYPE>                                                                      \
     {                                                                                                       \
-        ::proptest::Shrinkable<TYPE> operator()(::proptest::Random& rand) { return (__VA_ARGS__)()(rand); } \
+        ::proptest::Shrinkable<TYPE> operator()(::proptest::Random& rand) const { return (__VA_ARGS__)()(rand); } \
     }
 
 } // namespace proptest
