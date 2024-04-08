@@ -1,3 +1,4 @@
+#pragma once
 #include "proptest/api.hpp"
 #include "proptest/util/function.hpp"
 #include "proptest/util/any.hpp"
