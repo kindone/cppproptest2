@@ -49,6 +49,8 @@ Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
     return genU;
 }
 
+GeneratorCommon derive(Function1 gen1, Function1 gen2gen);
+
 
 // returns a shrinkable pair of <T,U> where U depends on T
 /**

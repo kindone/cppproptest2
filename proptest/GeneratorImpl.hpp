@@ -59,4 +59,13 @@ Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
     return Generator<U>(proptest::derive<T, U>(this->asGenFunction(), genFactory));
 }
 
+// Generator
+
+template <typename T>
+template <typename U>
+decltype(auto) Generator<T>::tupleWith(Function<GenFunction<U>(T&)> genFactory)
+{
+    return proptest::chain(this->asGenFunction(), genFactory);
+}
+
 }  // namespace proptest

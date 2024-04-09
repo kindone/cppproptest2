@@ -55,6 +55,10 @@ SET(proptest_sources
     proptest/generator/utf8string.cpp
     proptest/generator/utf16string.cpp
     proptest/generator/cesu8string.cpp
+    proptest/combinator/filter.cpp
+    proptest/combinator/transform.cpp
+    proptest/combinator/dependency.cpp
+    proptest/combinator/derive.cpp
     proptest/combinator/intervals.cpp
     proptest/combinator/aggregate.cpp
     proptest/PropertyContext.cpp

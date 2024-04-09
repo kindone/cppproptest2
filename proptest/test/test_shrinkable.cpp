@@ -99,9 +99,11 @@ TEST(Shrinkable, filter)
     shr = shr.with(Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200)));
     Shrinkable<int> shr2 = shr.filter([](const int& val) { return val == 100; });
     Shrinkable<int> shr3 = shr.filter([](const int& val) { return val <= 200; });
+    Shrinkable<int> shr4 = shr.filter([](int val) { return val <= 100; });
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100, shrinks: [{value: 200}]}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr3), "{value: 100, shrinks: [{value: 200}]}");
+    EXPECT_EQ(serializeShrinkable(shr4), "{value: 100}");
 }
 
 TEST(Shrinkable, map)

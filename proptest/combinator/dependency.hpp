@@ -58,4 +58,7 @@ Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(T&
     });
 }
 
+
+GeneratorCommon dependency(Function1 gen1, Function1 gen2gen);
+
 }  // namespace proptest

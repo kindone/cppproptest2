@@ -16,6 +16,7 @@ template <typename GEN>
 decltype(auto) generator(GEN&& gen);
 template <typename T>
 struct Generator;
+struct GeneratorCommon;
 
 /**
  * @ingroup Combinators
@@ -32,5 +33,7 @@ Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(T&)> tra
         return shrinkable.template map<U>(transformer);
     });
 }
+
+GeneratorCommon transform(Function1 gen, Function1 transformer);
 
 }  // namespace proptest

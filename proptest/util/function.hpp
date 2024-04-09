@@ -59,21 +59,29 @@ struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
     decay_t<Callable> callable;
 };
 
+struct FunctionBase {
+    FunctionBase() = default;
+    FunctionBase(const shared_ptr<void>& _holder) : holder(_holder) {}
+    virtual ~FunctionBase() {}
+
+    mutable shared_ptr<void> holder;
+};
+
 template <typename F> struct Function;
 
 template <typename RET, typename...ARGS>
-struct PROPTEST_API Function<RET(ARGS...)> {
+struct PROPTEST_API Function<RET(ARGS...)> : FunctionBase{
     using ArgTuple = tuple<ARGS...>;
     using RetType = RET;
     static constexpr size_t Arity = sizeof...(ARGS);
 
     Function() = default;
 
-    Function(const Function& other) : holder(other.holder) {}
+    Function(const Function& other) : FunctionBase(other.holder) {}
 
     template <typename Callable>
         requires (!is_base_of_v<Function, decay_t<Callable>>)
-    Function(Callable&& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
+    Function(Callable&& c) : FunctionBase(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
     }
 
     operator bool() const {
@@ -84,14 +92,16 @@ struct PROPTEST_API Function<RET(ARGS...)> {
         if(!holder)
             throw runtime_error(__FILE__, __LINE__, "Function not initialized");
         if constexpr(is_void_v<RET>) {
-            holder->operator()(args...);
+            getHolder()->operator()(args...);
             return;
         }
         else
-            return holder->operator()(args...);
+            return getHolder()->operator()(args...);
     }
 
-    mutable shared_ptr<CallableHolderBase<RET, ARGS...>> holder;
+    shared_ptr<CallableHolderBase<RET, ARGS...>> getHolder() const {
+        return static_pointer_cast<CallableHolderBase<RET, ARGS...>>(holder);
+    }
 };
 
 

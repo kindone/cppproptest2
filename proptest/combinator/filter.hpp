@@ -44,6 +44,8 @@ Generator<T> filter(GEN&& gen, Criteria&& criteria)
     });
 }
 
+PROPTEST_API GeneratorCommon filter(Function1 gen, Function1 criteria);
+
 /**
  * @brief You can add a filtering condition to a generator to restrict the generated values to have certain constraint
  * @tparam T generated type (deduced)

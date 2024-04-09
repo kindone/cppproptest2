@@ -23,6 +23,32 @@ TYPED_TEST(IntegralTest, shrinkIntegral_signed)
         "{value: 7}]}");
 }
 
+TYPED_TEST(IntegralTest, shrinkIntegral_signed2)
+{
+    auto shr = shrinkIntegral<TypeParam>(20);
+    EXPECT_EQ(serializeShrinkable(shr), "{value: 20, shrinks: "
+        "[{value: 0}, "
+        "{value: 10, shrinks: "
+            "[{value: 5, shrinks: "
+                "[{value: 2, shrinks: "
+                    "[{value: 1}]}, "
+                "{value: 3}, "
+                "{value: 4}]}, "
+            "{value: 7, shrinks: "
+                "[{value: 6}]}, "
+            "{value: 8}, "
+            "{value: 9}]}, "
+        "{value: 15, shrinks: "
+            "[{value: 12, shrinks: "
+                "[{value: 11}]}, "
+            "{value: 13}, "
+            "{value: 14}]}, "
+        "{value: 17, shrinks: "
+            "[{value: 16}]}, "
+        "{value: 18}, "
+        "{value: 19}]}");
+}
+
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed)
 {
     Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8);
@@ -35,6 +61,32 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed)
         "{value: -6, shrinks: "
             "[{value: -5}]}, "
         "{value: -7}]}");
+}
+
+TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed_20)
+{
+    Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-20);
+    EXPECT_EQ(serializeShrinkable(shr), "{value: -20, shrinks: "
+        "[{value: 0}, "
+        "{value: -10, shrinks: "
+            "[{value: -5, shrinks: "
+                "[{value: -2, shrinks: "
+                    "[{value: -1}]}, "
+                "{value: -3}, "
+                "{value: -4}]}, "
+            "{value: -7, shrinks: "
+                "[{value: -6}]}, "
+            "{value: -8}, "
+            "{value: -9}]}, "
+        "{value: -15, shrinks: "
+            "[{value: -12, shrinks: "
+                "[{value: -11}]}, "
+            "{value: -13}, "
+            "{value: -14}]}, "
+        "{value: -17, shrinks: "
+            "[{value: -16}]}, "
+        "{value: -18}, "
+        "{value: -19}]}");
 }
 
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed2)

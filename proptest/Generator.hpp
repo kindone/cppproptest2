@@ -2,6 +2,7 @@
 
 #include "proptest/util/any.hpp"
 #include "proptest/util/function.hpp"
+#include "proptest/util/anyfunction.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/std/pair.hpp"
@@ -34,6 +35,7 @@ concept GenLikeGen = GenLike<GEN> && requires(F f, T& t) {
 };
 
 // forward-declarations
+struct GeneratorCommon;
 template <typename T> struct Generator;
 template <typename T> struct Arbi;
 
@@ -158,20 +160,102 @@ public:
     }
 };
 
-template <typename T>
-struct PROPTEST_API Generator : public GeneratorBase<T>
-{
-public:
-    Generator(Function<Shrinkable<T>(Random&)> _func) : func(_func) {}
 
-    Shrinkable<T> operator()(Random& rand) const override { return this->func(rand); }
 
-    shared_ptr<GeneratorBase<T>> clone() const override {
-        return util::make_shared<Generator>(func);
+struct GeneratorCommon {
+    GeneratorCommon(const GeneratorCommon& other) : func(other.func) {}
+    template <typename T>
+    GeneratorCommon(const Generator<T>& gen) : func(gen.func) {}
+    GeneratorCommon(Function1 _func) : func(_func) {}
+    virtual ~GeneratorCommon();
+
+    GeneratorCommon map(Function1 gen, Function1 mapper);
+
+    GeneratorCommon filter(Function1 gen, Function1 criteria);
+
+    GeneratorCommon pairWith(Function1 gen, Function1 genFactory);
+
+    GeneratorCommon tupleWith(Function1 genFactory);
+
+    GeneratorCommon flatMap(Function1 gen, Function1 genFactory);
+
+    virtual shared_ptr<GeneratorCommon> clone() const {
+        return util::make_shared<GeneratorCommon>(*this);
     }
 
-private:
-    Function<Shrinkable<T>(Random&)> func;
+    virtual ShrinkableBase generate(Random& rand) const {
+        return this->func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+    }
+
+    Function1 func;
+};
+
+template <typename T>
+struct PROPTEST_API Generator : public GeneratorCommon
+{
+public:
+    Generator(const GeneratorCommon& other) : GeneratorCommon(other) {}
+    Generator(Function<Shrinkable<T>(Random&)> _func) : GeneratorCommon(Function1(_func)) {}
+
+    virtual Shrinkable<T> operator()(Random& rand) const { return generate(rand); }
+
+    template <typename U>
+    Generator<U> map(Function<U(T&)> mapper) {
+        return GeneratorCommon::map(asGenFunction(), mapper);
+    }
+
+    template <invocable<T&> F>
+    auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
+    {
+        return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
+    }
+
+    template <typename Criteria>
+    Generator<T> filter(Criteria&& criteria) {
+        return GeneratorCommon::filter(asGenFunction(), util::forward<Criteria>(criteria));
+    }
+
+    template <typename U>
+    Generator<pair<T, U>> pairWith(Function<GenFunction<U>(T&)> genFactory) {
+        return GeneratorCommon::pairWith(asGenFunction(), genFactory);
+    }
+
+    template <invocable<T&> FACTORY>
+    decltype(auto) pairWith(FACTORY&& genFactory)
+    {
+        using GEN = invoke_result_t<FACTORY, T&>;
+        using RetType = typename invoke_result_t<GEN, Random&>::type;
+        return pairWith<RetType>(util::forward<FACTORY>(genFactory));
+    }
+
+    template <typename U>
+    decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
+
+    template <typename FACTORY>
+    decltype(auto) tupleWith(FACTORY&& genFactory)
+    {
+        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
+        return tupleWith<U>(util::forward<FACTORY>(genFactory));
+    }
+
+    template <typename U>
+    Generator<U> flatMap(Function<GenFunction<U>(T&)> genFactory) {
+        return GeneratorCommon::flatMap(asGenFunction(), [=](T& t) { return Function1(genFactory(t));} );
+    }
+
+    template <invocable<T&> FACTORY>
+    decltype(auto) flatMap(FACTORY&& genFactory)
+    {
+        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
+        return flatMap<U>(util::forward<FACTORY>(genFactory));
+    }
+
+    GenFunction<T> asGenFunction() {
+        auto thisClone = this->clone();
+        return [thisClone](Random& rand) -> Shrinkable<T> {
+            return thisClone->generate(rand);
+        };
+    }
 };
 
 /**

@@ -49,11 +49,13 @@ ShrinkableBase ShrinkableBase::filter(Function1 criteria) const {
     if(!criteria(value).template getRef<bool>())
         throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
     else
-        return with(shrinksGen().template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
-            return criteria(shr.getAny()).template getRef<bool>();
-        }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
-            return shr.filter(criteria);
-        }));
+        return with([shrinksGen = this->shrinksGen, criteria]() {
+            return shrinksGen().template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
+                return criteria(shr.getAny()).template getRef<bool>();
+            }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
+                return shr.filter(criteria);
+            });
+        });
 }
 
 ShrinkableBase ShrinkableBase::filter(Function1 criteria, int tolerance) const {
