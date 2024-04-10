@@ -7,43 +7,33 @@
 #include "proptest/Random.hpp"
 #include "proptest/std/pair.hpp"
 #include "proptest/std/tuple.hpp"
+#include "proptest/GenType.hpp"
 
 namespace proptest {
 
-template <typename F, typename RET = typename invoke_result_t<F, Random&>::type, typename...ARGS>
-concept FunctionLike = requires(F f, ARGS... args) {
-    { f(args...) }
-    -> same_as<RET>;
+/* Type-erased type */
+struct GeneratorCommon {
+    GeneratorCommon(const GeneratorCommon& other) : func(other.func) {}
+
+    GeneratorCommon(Function1 _func) : func(_func) {}
+
+    template <typename T>
+    GeneratorCommon(const Generator<T>& gen) : func(gen.func) {}
+
+    template <typename T>
+    GeneratorCommon(const Arbi<T>& arbi) : func([arbi](Random& rand) { return arbi(rand); }) {}
+
+    virtual ~GeneratorCommon();
+
+    Function1 func;
 };
-
-template <typename F, typename T = typename invoke_result_t<F, Random&>::type, typename S = T>
-concept GenLike = requires(F f, Random& rand) {
-    { f(rand) }
-    -> same_as<Shrinkable<S>>;
-};
-
-template <typename F, typename T>
-concept Gen = GenLike<F, T, T>;
-
-template <typename T>
-using GenFunction = Function<Shrinkable<T>(Random&)>;
-
-template <typename F, typename GEN, typename T = typename invoke_result_t<GEN, Random&>::type>
-concept GenLikeGen = GenLike<GEN> && requires(F f, T& t) {
-    { f(t) }
-    -> GenLike;
-};
-
-// forward-declarations
-struct GeneratorCommon;
-template <typename T> struct Generator;
-template <typename T> struct Arbi;
 
 template <typename T>
 struct PROPTEST_API GeneratorBase
 {
 public:
     virtual ~GeneratorBase() {}
+
     virtual Shrinkable<T> operator()(Random& rand) const = 0;
 
     /**
@@ -152,7 +142,14 @@ public:
 
     virtual shared_ptr<GeneratorBase> clone() const = 0;
 
-    GenFunction<T> asGenFunction() {
+    virtual GenFunction<T> asGenFunction() {
+        auto thisClone = clone();
+        return [thisClone](Random& rand) -> Shrinkable<T> {
+            return thisClone->operator()(rand);
+        };
+    }
+
+    virtual Function1 asGenFunction1() {
         auto thisClone = clone();
         return [thisClone](Random& rand) -> Shrinkable<T> {
             return thisClone->operator()(rand);
@@ -160,102 +157,36 @@ public:
     }
 };
 
+/* Wrapping a Function */
+template <typename T>
+struct PROPTEST_API Generator : public GeneratorBase<T>
+{
+public:
+    Generator(const Generator& other) : func(other.func) {}
+    Generator(const GeneratorCommon& common) : func(common.func) {}
+    Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}
+    Generator(const Function1 _func) : func(_func) {}
+    Generator(const Arbi<T>& arbi) : Generator(GeneratorCommon(arbi)) {}
 
-
-struct GeneratorCommon {
-    GeneratorCommon(const GeneratorCommon& other) : func(other.func) {}
-    template <typename T>
-    GeneratorCommon(const Generator<T>& gen) : func(gen.func) {}
-    GeneratorCommon(Function1 _func) : func(_func) {}
-    virtual ~GeneratorCommon();
-
-    GeneratorCommon map(Function1 gen, Function1 mapper);
-
-    GeneratorCommon filter(Function1 gen, Function1 criteria);
-
-    GeneratorCommon pairWith(Function1 gen, Function1 genFactory);
-
-    GeneratorCommon tupleWith(Function1 genFactory);
-
-    GeneratorCommon flatMap(Function1 gen, Function1 genFactory);
-
-    virtual shared_ptr<GeneratorCommon> clone() const {
-        return util::make_shared<GeneratorCommon>(*this);
+    virtual Shrinkable<T> operator()(Random& rand) const override {
+        return func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
     }
 
-    virtual ShrinkableBase generate(Random& rand) const {
-        return this->func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+    virtual shared_ptr<GeneratorBase<T>> clone() const override {
+        return util::make_shared<Generator<T>>(*this);
+    }
+
+    GenFunction<T> asGenFunction() override {
+        return GenFunction<T>([func = this->func](Random& rand) {
+            return Shrinkable<T>(func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true));
+        });
+    }
+
+    Function1 asGenFunction1() override {
+        return func;
     }
 
     Function1 func;
-};
-
-template <typename T>
-struct PROPTEST_API Generator : public GeneratorCommon
-{
-public:
-    Generator(const GeneratorCommon& other) : GeneratorCommon(other) {}
-    Generator(Function<Shrinkable<T>(Random&)> _func) : GeneratorCommon(Function1(_func)) {}
-
-    virtual Shrinkable<T> operator()(Random& rand) const { return generate(rand); }
-
-    template <typename U>
-    Generator<U> map(Function<U(T&)> mapper) {
-        return GeneratorCommon::map(asGenFunction(), mapper);
-    }
-
-    template <invocable<T&> F>
-    auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
-    {
-        return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
-    }
-
-    template <typename Criteria>
-    Generator<T> filter(Criteria&& criteria) {
-        return GeneratorCommon::filter(asGenFunction(), util::forward<Criteria>(criteria));
-    }
-
-    template <typename U>
-    Generator<pair<T, U>> pairWith(Function<GenFunction<U>(T&)> genFactory) {
-        return GeneratorCommon::pairWith(asGenFunction(), genFactory);
-    }
-
-    template <invocable<T&> FACTORY>
-    decltype(auto) pairWith(FACTORY&& genFactory)
-    {
-        using GEN = invoke_result_t<FACTORY, T&>;
-        using RetType = typename invoke_result_t<GEN, Random&>::type;
-        return pairWith<RetType>(util::forward<FACTORY>(genFactory));
-    }
-
-    template <typename U>
-    decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
-
-    template <typename FACTORY>
-    decltype(auto) tupleWith(FACTORY&& genFactory)
-    {
-        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
-        return tupleWith<U>(util::forward<FACTORY>(genFactory));
-    }
-
-    template <typename U>
-    Generator<U> flatMap(Function<GenFunction<U>(T&)> genFactory) {
-        return GeneratorCommon::flatMap(asGenFunction(), [=](T& t) { return Function1(genFactory(t));} );
-    }
-
-    template <invocable<T&> FACTORY>
-    decltype(auto) flatMap(FACTORY&& genFactory)
-    {
-        using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
-        return flatMap<U>(util::forward<FACTORY>(genFactory));
-    }
-
-    GenFunction<T> asGenFunction() {
-        auto thisClone = this->clone();
-        return [thisClone](Random& rand) -> Shrinkable<T> {
-            return thisClone->generate(rand);
-        };
-    }
 };
 
 /**
@@ -266,7 +197,7 @@ template <GenLike GEN>
 decltype(auto) generator(GEN&& gen)
 {
     using RetType = typename function_traits<GEN>::return_type::type;  // cast Shrinkable<T>(Random&) -> T
-    return Generator<RetType>(util::forward<GEN>(gen));
+    return Generator<RetType>(Function1(util::forward<GEN>(gen)));
 }
 
 template <GenLike GEN>

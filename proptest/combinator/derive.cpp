@@ -1,8 +1,11 @@
 #include "proptest/combinator/derive.hpp"
+#include "proptest/Generator.hpp"
 
 namespace proptest {
 
-GeneratorCommon derive(Function1 gen1, Function1 gen2gen)
+namespace util {
+
+GeneratorCommon deriveImpl(Function1 gen1, Function1 gen2gen)
 {
     Function1 genU = [gen1, gen2gen](Random& rand) {
         // generate T
@@ -36,5 +39,7 @@ GeneratorCommon derive(Function1 gen1, Function1 gen2gen)
 
     return genU;
 }
+
+} // namespace util
 
 } // namespace proptest

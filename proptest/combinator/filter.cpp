@@ -2,7 +2,9 @@
 
 namespace proptest {
 
-GeneratorCommon filter(Function1 gen, Function1 criteria)
+namespace util {
+
+GeneratorCommon filterImpl(Function1 gen, Function1 criteria)
 {
     return GeneratorCommon([gen, criteria](Random& rand) {
         // TODO: add some configurable termination criteria (e.g. maximum no. of attempts)
@@ -14,5 +16,7 @@ GeneratorCommon filter(Function1 gen, Function1 criteria)
         }
     });
 }
+
+} // namespace util
 
 } // namespace proptest

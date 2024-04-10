@@ -24,12 +24,12 @@ public:
     static size_t defaultMaxSize;
 
     Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
-    Arbi(GenFunction<char> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
+    Arbi(Generator<char> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
 
     Shrinkable<string> operator()(Random& rand) const override;
 
 private:
-    GenFunction<char> elemGen;
+    Generator<char> elemGen;
 };
 
 }  // namespace proptest

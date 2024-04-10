@@ -8,10 +8,10 @@ namespace util {
 Generator<vector<Any>> aggregateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
                                     size_t maxSize)
 {
-    return interval<uint64_t>(minSize, maxSize).flatMap<vector<Any>>([gen1, gen2gen, minSize](const uint64_t& size) {
+    return interval<uint64_t>(minSize, maxSize).flatMap<vector<Any>>([gen1, gen2gen, minSize](const uint64_t& size) -> Generator<vector<Any>> {
         if (size == 0)
-            return Generator<vector<Any>>([](Random&) { return make_shrinkable<vector<Any>>(); });
-        return Generator<vector<Any>>([gen1, gen2gen, size, minSize](Random& rand) {
+            return Function1([](Random&) { return make_shrinkable<vector<Any>>(); });
+        return Function1([gen1, gen2gen, size, minSize](Random& rand) {
             Shrinkable<Any> shr = gen1(rand);
             auto shrVec = make_shrinkable<vector<Shrinkable<Any>>>();
             auto& vec = shrVec.getMutableRef();

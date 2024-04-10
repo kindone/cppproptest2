@@ -3,7 +3,9 @@
 
 namespace proptest {
 
-GeneratorCommon transform(Function1 gen, Function1 transformer)
+namespace util {
+
+GeneratorCommon transformImpl(Function1 gen, Function1 transformer)
 {
     return GeneratorCommon([gen, transformer](Random& rand) {
         ShrinkableBase shrinkable = gen(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
@@ -11,4 +13,6 @@ GeneratorCommon transform(Function1 gen, Function1 transformer)
     });
 }
 
-}  // namespace proptest
+} // namespace util
+
+} // namespace proptest

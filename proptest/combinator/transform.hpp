@@ -25,15 +25,23 @@ struct GeneratorCommon;
  * @param gen generator for type T
  * @param transformer transformation function T& -> U
  */
+// template <typename T, typename U>
+// Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(T&)> transformer)
+// {
+//     return generator([gen, transformer](Random& rand) -> Shrinkable<U>{
+//         Shrinkable<T> shrinkable = gen(rand);
+//         return shrinkable.template map<U>(transformer);
+//     });
+// }
+
+namespace util {
+GeneratorCommon transformImpl(Function1 gen, Function1 transformer);
+} // namespace util
+
 template <typename T, typename U>
 Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(T&)> transformer)
 {
-    return generator([gen, transformer](Random& rand) -> Shrinkable<U>{
-        Shrinkable<T> shrinkable = gen(rand);
-        return shrinkable.template map<U>(transformer);
-    });
+    return util::transformImpl(gen, transformer);
 }
-
-GeneratorCommon transform(Function1 gen, Function1 transformer);
 
 }  // namespace proptest

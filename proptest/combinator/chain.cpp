@@ -1,4 +1,5 @@
 #include "proptest/combinator/chain.hpp"
+#include "proptest/util/tupleorvector.hpp"
 
 namespace proptest {
 namespace util {
@@ -78,7 +79,7 @@ GeneratorCommon chainImpl(Function1 gen1, Function1 gen2gen)
             });
 
         // reformat pair<Chain<T0, T1, Ts...>, Shrinkable<U>> to Chain<T0, T1, Ts..., U>
-        return intermediate.template flatMap<NextChainType>(
+        return intermediate.template flatMap<TupleOrVector>(
             +[](const Intermediate& interpair) -> Shrinkable<NextChainType> {
                 const ChainType& ts = interpair.first;
                 return make_shrinkable<NextChainType>(tuple_cat(ts, tuple<U>(interpair.second.getRef())));

@@ -51,7 +51,7 @@ TEST(PropTest, TestTransform)
     Arbi<int> gen;
 
     {
-        auto stringGen = transform<int, string>(
+        Generator<string> stringGen = transform<int,string>(
             gen, +[](const int& value) { return "(" + to_string(value) + ")"; });
 
         for (int i = 0; i < 10; i++) {
@@ -68,7 +68,7 @@ TEST(PropTest, TestTransform)
             }
         }
 
-        auto vectorGen = transform<string, vector<string>>(
+        Generator<vector<string>> vectorGen = transform<string, vector<string>>(
             stringGen, +[](const string& value) {
                 vector<string> vec;
                 vec.push_back(value);
@@ -97,7 +97,7 @@ TEST(PropTest, TestTransform)
             }
         }
 
-        auto vectorGen = stringGen.map<vector<string>>(+[](const string& value) {
+        Generator<vector<string>> vectorGen = stringGen.map<vector<string>>(+[](const string& value) {
             vector<string> vec;
             vec.push_back(value);
             return vec;
@@ -113,7 +113,7 @@ TEST(PropTest, TestTranform2)
 {
     int64_t seed = getCurrentTime();
     Random rand(seed);
-    static auto gen = transform<uint8_t, uint8_t>(
+    static Generator<uint8_t> gen = transform<uint8_t, uint8_t>(
         Arbi<uint8_t>(), +[](const uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
 
     for (int i = 0; i < 10; i++)
@@ -224,7 +224,7 @@ TEST(PropTest, TestDependency3)
                 return interval<int>(10, 20);
         });
 
-    Arbi<bool>().pairWith<int>(+[](const bool& value) {
+    auto gen = Arbi<bool>().pairWith<int>(+[](const bool& value) {
         if (value)
             return interval(0, 10);
         else
@@ -236,6 +236,13 @@ TEST(PropTest, TestDependency3)
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto pairShr = nullableIntegers(rand);
+        serializeShrinkable(pairShr);
+        // exhaustive(pairShr, 0);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        [[maybe_unused]] auto pairShr = gen(rand);
+        serializeShrinkable(pairShr);
         // exhaustive(pairShr, 0);
     }
 }
@@ -258,11 +265,13 @@ TEST(PropTest, TestDependency4)
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto shr = intStringGen(rand);
+        serializeShrinkable(shr);
         //exhaustive(shr, 0);
     }
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto shr = stringGen(saveRand);
+        serializeShrinkable(shr);
         // exhaustive(shr, 0);
     }
 }
@@ -301,16 +310,19 @@ TEST(PropTest, TestChain2)
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto tupleShr = tuple2Gen(rand);
+        serializeShrinkable(tupleShr);
         // exhaustive(tupleShr, 0);
     }
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto tupleShr = tuple3Gen(rand);
+        serializeShrinkable(tupleShr);
         // exhaustive(tupleShr, 0);
     }
 
     for (int i = 0; i < 3; i++) {
         [[maybe_unused]] auto tupleShr = tuple3Gen2(rand);
+        serializeShrinkable(tupleShr);
         //exhaustive(tupleShr, 0);
     }
 }
@@ -347,6 +359,7 @@ TEST(PropTest, TestDerive2)
 
     for (int i = 0; i < 10; i++) {
         [[maybe_unused]] auto shr = stringGen(rand);
+        serializeShrinkable(shr);
         //exhaustive(shr, 0);
     }
 }

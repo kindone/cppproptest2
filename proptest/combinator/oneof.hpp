@@ -56,7 +56,7 @@ Weighted<T>& GenToWeighted(Weighted<T>& weighted)
 }
 
 template <typename T>
-decltype(auto) oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPtr)
+Generator<T> oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPtr)
 {
     // calculate and assign unassigned weights
     double sum = 0.0;
@@ -80,7 +80,7 @@ decltype(auto) oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPt
                 weight = (1.0 - sum) / static_cast<double>(numUnassigned);
         }
 
-    return generator([genVecPtr](Random& rand) {
+    return Function1([genVecPtr](Random& rand) {
         while (true) {
             auto dice = rand.getRandomSize(0, genVecPtr->size());
             const util::Weighted<T>& weighted = (*genVecPtr)[dice];
@@ -130,7 +130,7 @@ auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_res
  */
 template <typename T, typename... GENS>
     requires ((GenLike<GENS, T> || is_same_v<decay_t<GENS>, util::Weighted<T>>) && ...)
-decltype(auto) oneOf(GENS&&... gens)
+Generator<T> oneOf(GENS&&... gens)
 {
     /*static_assert(
         conjunction_v<bool_constant<(is_convertible_v<GENS, function<Shrinkable<T>(Random&)>> ||

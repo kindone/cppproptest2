@@ -95,7 +95,7 @@ TEST(Filter, basic)
 {
     Random rand(getCurrentTime());
     auto gen = interval<int>(0, 100);
-    auto filtered = filter(gen, [](int i) { return i % 2 == 0; });
+    auto filtered = filter<int>(gen, [](int i) { return i % 2 == 0; });
 
     for(int i = 0; i < 100; i++)
     {
@@ -135,7 +135,7 @@ TEST(Transform, basic2)
 TEST(FilterTransform, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = filter(interval<int>(0, 8), [](int i) { return i == 8; });
+    auto gen = filter<int>(interval<int>(0, 8), [](int i) { return i == 8; });
     auto transformed = transform<int, string>(gen, [](const int& i) { return to_string(i); });
 
     for(int i = 0; i < 10; i++)

@@ -18,8 +18,8 @@ namespace util {
 template <typename T>
 Generator<T> accumulateImpl(GenFunction<T> gen1, Function<GenFunction<T>(T&)> gen2gen, size_t minSize, size_t maxSize)
 {
-    return interval<uint64_t>(minSize, maxSize).flatMap<T>([gen1, gen2gen](const uint64_t& size) {
-        return Generator<T>([gen1, gen2gen, size](Random& rand) {
+    return interval<uint64_t>(minSize, maxSize).flatMap<T>([gen1, gen2gen](const uint64_t& size) -> Generator<T> {
+        return Function1([gen1, gen2gen, size](Random& rand) {
             Shrinkable<T> shr = gen1(rand);
             for (size_t i = 0; i < size; i++)
                 shr = gen2gen(shr.getRef())(rand);

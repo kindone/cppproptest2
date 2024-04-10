@@ -29,20 +29,18 @@ struct Callable1Holder : public Callable1HolderBase {
 };
 
 
-struct PROPTEST_API Function1 : public FunctionBase
+struct PROPTEST_API Function1
 {
     template <typename Callable>
         requires (!is_base_of_v<Function1, decay_t<Callable>>)
-    Function1(Callable&& c) : FunctionBase(util::make_shared<Callable1Holder<Callable, typename function_traits<Callable>::return_type, typename function_traits<Callable>::argument_type_list::head>>(util::forward<Callable>(c))) {
+    Function1(Callable&& c) : holder(util::make_shared<Callable1Holder<Callable, typename function_traits<Callable>::return_type, typename function_traits<Callable>::argument_type_list::head>>(util::forward<Callable>(c))) {
     }
 
     Any operator()(const Any& arg) const {
-        return getHolder()->operator()(arg);
+        return holder->operator()(arg);
     }
 
-    shared_ptr<Callable1HolderBase> getHolder() const {
-        return static_pointer_cast<Callable1HolderBase>(holder);
-    }
+    shared_ptr<Callable1HolderBase> holder;
 };
 
 template <typename RET, typename ARG>
@@ -52,11 +50,11 @@ struct Function1Impl : Function1
 
     RET operator()(const ARG& arg) const {
         if constexpr(is_void_v<RET>) {
-            getHolder()->operator()(util::toCallableArg<ARG>(arg));
+            holder->operator()(util::toCallableArg<ARG>(arg));
             return;
         }
         else
-            return getHolder()->operator()(util::toCallableArg<ARG>(arg)).template getRef<RET>();
+            return holder->operator()(util::toCallableArg<ARG>(arg)).template getRef<RET>();
     }
 };
 

@@ -2,11 +2,13 @@
 
 namespace proptest {
 
-GeneratorCommon dependency(Function1 gen1, Function1 gen2gen)
+namespace util {
+
+GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen)
 {
     return GeneratorCommon([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableT = gen1(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>();
+        ShrinkableBase shrinkableT = gen1(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<T>
@@ -14,7 +16,7 @@ GeneratorCommon dependency(Function1 gen1, Function1 gen2gen)
             shrinkableT.flatMap([&rand, gen2gen](const Any& t) mutable {
                 // generate U
                 auto gen2 = gen2gen(t).template getRef<Function1>();
-                ShrinkableBase shrinkableU = gen2(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>();
+                ShrinkableBase shrinkableU = gen2(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
                 return ShrinkableBase(util::make_pair(t, shrinkableU));
             });
 
@@ -27,16 +29,16 @@ GeneratorCommon dependency(Function1 gen1, Function1 gen2gen)
                 ShrinkableBase newShrinkableU =
                     shrinkableU.flatMap([interShr](const Any& u) mutable {
                         return ShrinkableBase(
-                            util::make_pair(interShr.get<Intermediate>().first, ShrinkableBase(u)));
+                            util::make_pair<Any, ShrinkableBase>(interShr.get<Intermediate>().first, ShrinkableBase(u)));
                     });
                 return newShrinkableU.getShrinks();
             });
 
-        // reformat pair<T, Shrinkable<U>> to pair<T, U>
-        return intermediate.flatMap(+[](const Intermediate& interpair) -> ShrinkableBase {
-            return ShrinkableBase(util::make_pair(interpair.first, interpair.second.getAny()));
-        });
+        // to be reformated to pair<T, Shrinkable<U>> to pair<T, U>
+        return intermediate;
     });
 }
+
+} // namespace util
 
 } // namespace proptest

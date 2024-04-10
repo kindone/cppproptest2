@@ -383,7 +383,7 @@ struct IntegersFunctor {
 template <proptest::integral T>
 PROPTEST_API Generator<T> natural(T max = numeric_limits<T>::max())
 {
-    return Generator<T>(util::NaturalFunctor<T>(max));
+    return Function1(util::NaturalFunctor<T>(max));
 }
 
 /**
@@ -393,7 +393,7 @@ PROPTEST_API Generator<T> natural(T max = numeric_limits<T>::max())
 template <proptest::integral T>
 PROPTEST_API Generator<T> nonNegative(T max = numeric_limits<T>::max())
 {
-    return Generator<T>(util::NonNegativeFunctor<T>(max));
+    return Function1(util::NonNegativeFunctor<T>(max));
 }
 
 /**
@@ -403,7 +403,7 @@ PROPTEST_API Generator<T> nonNegative(T max = numeric_limits<T>::max())
 template <proptest::integral T>
 PROPTEST_API Generator<T> interval(T min, T max)
 {
-    return Generator<T>([min, max](Random& rand) { return generateInteger<T>(rand, min, max); });
+    return Function1([min, max](Random& rand) { return generateInteger<T>(rand, min, max); });
 }
 
 /**
@@ -413,7 +413,7 @@ PROPTEST_API Generator<T> interval(T min, T max)
 template <proptest::integral T>
 PROPTEST_API Generator<T> inRange(T from, T to)
 {
-    return Generator<T>(util::InRangeFunctor(from, to));
+    return Function1(util::InRangeFunctor(from, to));
 }
 
 /**
@@ -423,7 +423,7 @@ PROPTEST_API Generator<T> inRange(T from, T to)
 template <proptest::integral T>
 PROPTEST_API Generator<T> integers(T start, T count)
 {
-    return Generator<T>(util::IntegersFunctor<T>(start, count));
+    return Function1(util::IntegersFunctor<T>(start, count));
 }
 
 }  // namespace proptest
