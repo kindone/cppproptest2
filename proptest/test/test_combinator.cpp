@@ -188,6 +188,7 @@ TEST(Chain, basic)
     {
         // TODO validation
         [[maybe_unused]] auto result = gen(rand);
+        serializeShrinkable(result);
         // if(get<0>(result.get()) == 8) {
         //     EXPECT_EQ(serializeShrinkable(result), "{value: 8, shrinks: [{value: 0}, {value: 4, shrinks: [{value: 2, shrinks: [{value: 1}]}, {value: 3}]}, {value: 6, shrinks: [{value: 5}]}, {value: 7}]}");
         // }

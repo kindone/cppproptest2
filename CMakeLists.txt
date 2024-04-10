@@ -59,6 +59,7 @@ SET(proptest_sources
     proptest/combinator/transform.cpp
     proptest/combinator/dependency.cpp
     proptest/combinator/derive.cpp
+    proptest/combinator/chain.cpp
     proptest/combinator/intervals.cpp
     proptest/combinator/aggregate.cpp
     proptest/PropertyContext.cpp

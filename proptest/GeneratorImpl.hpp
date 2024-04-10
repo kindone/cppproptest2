@@ -14,10 +14,9 @@ namespace util {
 PROPTEST_API GeneratorCommon filterImpl(Function1 gen, Function1 criteria);
 PROPTEST_API GeneratorCommon dependencyImpl(Function1 gen, Function1 criteria);
 PROPTEST_API GeneratorCommon transformImpl(Function1 gen, Function1 criteria);
+PROPTEST_API GeneratorCommon chainImpl1(Function1 gen, Function1 criteria);
+PROPTEST_API GeneratorCommon chainImplN(Function1 gen, Function1 criteria);
 } // namespace util
-
-template <GenLike GEN1, GenLikeGen<GEN1> GEN2GEN>
-decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen);
 
 template <typename T>
 template <typename U>
@@ -48,11 +47,32 @@ Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(T&)> ge
     });
 }
 
+template<typename T>
+concept TupleLike =
+requires (T a) {
+    tuple_size<T>::value;
+    get<0>(a);
+};
+
 template <typename T>
 template <typename U>
 decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(T&)> genFactory)
 {
-    return proptest::chain(this->asGenFunction(), genFactory);
+    if constexpr (TupleLike<T>) {
+        using Intermediate = pair<Any, ShrinkableBase>;
+        Generator<Intermediate> intermediateGen = util::chainImplN(asGenFunction1(), [genFactory](T& c) { return Function1(genFactory(c)); });
+        return intermediateGen.map(+[](const Intermediate& interpair) {
+            const T& ts = interpair.first.getRef<T>();
+            return tuple_cat(ts, tuple<U>(interpair.second.getRef<U>()));
+        });
+    } else {
+        using Intermediate = pair<Any, ShrinkableBase>;
+        Generator<Intermediate> intermediateGen = util::chainImpl1(asGenFunction1(), [genFactory](T& t) { return Function1(genFactory(t)); });
+        return intermediateGen.map(+[](const Intermediate& interpair) -> tuple<T, U> {
+            return tuple<T, U>(interpair.first.getRef<T>(), interpair.second.getRef<U>());
+        });
+    }
+    // return proptest::chain(this->asGenFunction(), genFactory);
 }
 
 template <typename T>
