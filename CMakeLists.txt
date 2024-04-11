@@ -62,6 +62,8 @@ SET(proptest_sources
     proptest/combinator/chain.cpp
     proptest/combinator/intervals.cpp
     proptest/combinator/aggregate.cpp
+    proptest/combinator/oneof.cpp
+    proptest/combinator/accumulate.cpp
     proptest/PropertyContext.cpp
     proptest/PropertyBase.cpp
     proptest/util/bitmap.cpp
