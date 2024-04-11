@@ -24,79 +24,39 @@ auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_res
 
 namespace util {
 
-template <typename T>
-struct Weighted
+struct WeightedBase
 {
-    using type = T;
-    using FuncType = GenFunction<T>;
+    WeightedBase(const Function1& _func, double _weight) : func(_func), weight(_weight) {}
+    template <typename T>
+    WeightedBase(const Weighted<T>& weighted) : func(weighted.func), weight(weighted.weight) {}
 
-    Weighted(const FuncType& _func, double _weight) : func(_func), weight(_weight) {}
-
-    FuncType func;
+    Function1 func;
     double weight;
 };
 
-template <typename T, typename GEN>
-    requires (!is_same_v<decay_t<GEN>, Weighted<T>>)
+
+template <typename T>
+struct Weighted : WeightedBase
+{
+    using type = T;
+
+    Weighted(const WeightedBase& base) : WeightedBase(base) {}
+    Weighted(const Function1& _func, double _weight) : WeightedBase(_func, _weight) {}
+};
+
+template <typename T, GenLike<T> GEN>
 Weighted<T> GenToWeighted(GEN&& gen)
 {
     return weightedGen<T>(util::forward<GEN>(gen), 0.0);
 }
 
 template <typename T>
-Weighted<T> GenToWeighted(Weighted<T>&& weighted)
-{
-    return util::forward<Weighted<T>>(weighted);
-}
-
-template <typename T>
-Weighted<T>& GenToWeighted(Weighted<T>& weighted)
+Weighted<T> GenToWeighted(const Weighted<T>& weighted)
 {
     return weighted;
 }
 
-template <typename T>
-Generator<T> oneOfHelper(const shared_ptr<vector<util::Weighted<T>>>& genVecPtr)
-{
-    // calculate and assign unassigned weights
-    double sum = 0.0;
-    int numUnassigned = 0;
-    for (size_t i = 0; i < genVecPtr->size(); i++) {
-        double weight = (*genVecPtr)[i].weight;
-        if (weight < 0.0 || weight > 1.0)
-            throw runtime_error(__FILE__, __LINE__, "invalid weight: " + to_string(weight));
-        sum += weight;
-        if (weight == 0.0)
-            numUnassigned++;
-    }
-
-    if (sum > 1.0)
-        throw runtime_error(__FILE__, __LINE__, "sum of weight exceeds 1.0");
-
-    if (numUnassigned > 0 && sum < 1.0)
-        for (size_t i = 0; i < genVecPtr->size(); i++) {
-            double& weight = (*genVecPtr)[i].weight;
-            if (weight == 0.0)
-                weight = (1.0 - sum) / static_cast<double>(numUnassigned);
-        }
-
-    return Function1([genVecPtr](Random& rand) {
-        while (true) {
-            auto dice = rand.getRandomSize(0, genVecPtr->size());
-            const util::Weighted<T>& weighted = (*genVecPtr)[dice];
-            if (rand.getRandomBool(weighted.weight)) {
-                // retry the same generator if an exception is thrown
-                while (true) {
-                    try {
-                        return weighted.func(rand);
-                    } catch (const Discard&) {
-                        // TODO: trace level low
-                    }
-                }
-            }
-        };
-    });
-}
+GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPtr);
 
 }  // namespace util
 
@@ -132,15 +92,10 @@ template <typename T, typename... GENS>
     requires ((GenLike<GENS, T> || is_same_v<decay_t<GENS>, util::Weighted<T>>) && ...)
 Generator<T> oneOf(GENS&&... gens)
 {
-    /*static_assert(
-        conjunction_v<bool_constant<(is_convertible_v<GENS, function<Shrinkable<T>(Random&)>> ||
-                                          is_convertible_v<GENS, util::Weighted<T>>)>...>,
-        "A GENS must be a generator callable for T (GenFunction<T> or Random& -> Shrinkable<T>) or a WeightGen<T>");
-    */
-    using WeightedVec = vector<util::Weighted<T>>;
-    shared_ptr<WeightedVec> genVecPtr(new WeightedVec{util::GenToWeighted<T>(util::forward<GENS>(gens))...});
+    using WeightedVec = vector<util::WeightedBase>;
+    shared_ptr<WeightedVec> genVecPtr(new WeightedVec{util::WeightedBase(util::GenToWeighted<T>(util::forward<GENS>(gens)))...});
 
-    return util::oneOfHelper<T>(genVecPtr);
+    return util::oneOfImpl(genVecPtr);
 }
 
 /**

@@ -6,7 +6,7 @@ namespace proptest {
 
 Generator<int64_t> intervals(initializer_list<Interval> intervals)
 {
-    using WeightedVec = vector<util::Weighted<int64_t>>;
+    using WeightedVec = vector<util::WeightedBase>;
 
     uint64_t sum = 0;
     for (auto interval : intervals) {
@@ -16,21 +16,19 @@ Generator<int64_t> intervals(initializer_list<Interval> intervals)
         sum += interval.size();
     }
 
-    WeightedVec* genVec = new WeightedVec();
+    auto genVec = util::make_shared<WeightedVec>();
     genVec->reserve(intervals.size());
     for (auto interval : intervals) {
         genVec->push_back(weightedGen(proptest::interval<int64_t>(interval.min, interval.max),
                                                static_cast<double>(interval.size()) / sum));
     }
 
-    shared_ptr<WeightedVec> genVecPtr(genVec);
-
-    return util::oneOfHelper<int64_t>(genVecPtr);
+    return util::oneOfImpl(genVec);
 }
 
 Generator<uint64_t> uintervals(initializer_list<UInterval> intervals)
 {
-    using WeightedVec = vector<util::Weighted<uint64_t>>;
+    using WeightedVec = vector<util::WeightedBase>;
 
     uint64_t sum = 0;
 
@@ -41,16 +39,15 @@ Generator<uint64_t> uintervals(initializer_list<UInterval> intervals)
         sum += interval.size();
     }
 
-    WeightedVec* genVec = new WeightedVec();
+    auto genVec = util::make_shared<WeightedVec>();
+
     genVec->reserve(intervals.size());
     for (auto interval : intervals) {
         genVec->push_back(weightedGen(proptest::interval<uint64_t>(interval.min, interval.max),
                                                 static_cast<double>(interval.size()) / sum));
     }
 
-    shared_ptr<WeightedVec> genVecPtr(genVec);
-
-    return util::oneOfHelper<uint64_t>(genVecPtr);
+    return util::oneOfImpl(genVec);
 }
 
 }  // namespace proptest

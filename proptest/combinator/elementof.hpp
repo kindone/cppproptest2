@@ -22,13 +22,21 @@ util::WeightedValue<T> weightedVal(Impl&& value, double weight);
 
 namespace util {
 
-template <typename T>
-struct WeightedValue
+struct WeightedValueBase
 {
-    WeightedValue(const Any& _value, double _weight) : value(_value), weight(_weight) {}
+    template <typename T>
+    WeightedValueBase(const WeightedValue<T>& weighted) : value(weighted.value), weight(weighted.weight) {}
+    WeightedValueBase(const Any& _value, double _weight) : value(_value), weight(_weight) {}
 
     Any value;
     double weight;
+};
+
+template <typename T>
+struct WeightedValue : WeightedValueBase
+{
+    WeightedValue(const WeightedValueBase& base) : WeightedValueBase(base) {}
+    WeightedValue(const Any& _value, double _weight) : WeightedValueBase(_value, _weight) {}
 };
 
 template <typename T>
@@ -39,13 +47,7 @@ WeightedValue<T> ValueToWeighted(T&& value)
 }
 
 template <typename T>
-WeightedValue<T> ValueToWeighted(WeightedValue<T>&& weighted)
-{
-    return util::forward<WeightedValue<T>>(weighted);
-}
-
-template <typename T>
-WeightedValue<T>& ValueToWeighted(WeightedValue<T>& weighted)
+WeightedValue<T> ValueToWeighted(const WeightedValue<T>& weighted)
 {
     return weighted;
 }
@@ -55,8 +57,7 @@ WeightedValue<T>& ValueToWeighted(WeightedValue<T>& weighted)
 template <typename Impl, typename T>
 util::WeightedValue<T> weightedVal(Impl&& value, double weight)
 {
-    Any anyVal = util::make_any<T>(util::forward<Impl>(value));
-    return util::WeightedValue<T>(anyVal, weight);
+    return util::WeightedValue<T>(Any(util::forward<Impl>(value)), weight);
 }
 
 // a value can be a raw Impl or a weightedVal(Impl, weight)
@@ -73,16 +74,16 @@ template <typename T, typename... Impl>
 decltype(auto) elementOf(Impl&&... values)
 {
     using WeightedValueVec = vector<util::WeightedValue<T>>;
-    using WeightedVec = vector<util::Weighted<T>>;
+    using WeightedVec = vector<util::WeightedBase>;
     WeightedValueVec wvaluevec{util::ValueToWeighted<T>(util::forward<Impl>(values))...};
 
     auto genVecPtr = util::make_shared<WeightedVec>();
 
     transform(
         wvaluevec.begin(), wvaluevec.end(), util::back_inserter(*genVecPtr),
-        +[](const util::WeightedValue<T>& wvalue) { return weightedGen<T>(just<T>(wvalue.value), wvalue.weight); });
+        +[](const util::WeightedValue<T>& wvalue) -> util::WeightedBase { return weightedGen<T>(just<T>(wvalue.value), wvalue.weight); });
 
-    return util::oneOfHelper<T>(genVecPtr);
+    return Generator<T>(util::oneOfImpl(genVecPtr));
 }
 
 }  // namespace proptest
