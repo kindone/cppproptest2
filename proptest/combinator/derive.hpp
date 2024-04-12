@@ -4,6 +4,7 @@
 #include "proptest/Random.hpp"
 #include "proptest/std/pair.hpp"
 #include "proptest/GenType.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file derive.hpp
@@ -16,12 +17,6 @@ namespace proptest {
 
 template <typename T> struct Generator;
 struct GeneratorCommon;
-
-namespace util {
-
-GeneratorCommon deriveImpl(Function1 gen1, Function1 gen2gen);
-
-} // namespace util
 
 /**
  * @ingroup Combinators

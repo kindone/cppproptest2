@@ -3,6 +3,7 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Generator.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file filter.hpp
@@ -10,10 +11,6 @@
  */
 
 namespace proptest {
-
-namespace util {
-PROPTEST_API GeneratorCommon filterImpl(Function1 gen, Function1 criteria);
-} // namespace util
 
 /**
  * @ingroup Combinators

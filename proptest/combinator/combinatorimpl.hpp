@@ -13,6 +13,7 @@ namespace util {
 PROPTEST_API GeneratorCommon filterImpl(Function1 gen, Function1 criteria);
 PROPTEST_API GeneratorCommon dependencyImpl(Function1 gen, Function1 criteria);
 PROPTEST_API GeneratorCommon transformImpl(Function1 gen, Function1 criteria);
+PROPTEST_API GeneratorCommon deriveImpl(Function1 gen1, Function1 gen2gen);
 PROPTEST_API GeneratorCommon chainImpl1(Function1 gen, Function1 criteria);
 PROPTEST_API GeneratorCommon chainImplN(Function1 gen, Function1 criteria);
 

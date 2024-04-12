@@ -5,18 +5,10 @@
 #include "proptest/combinator/derive.hpp"
 #include "proptest/combinator/dependency.hpp"
 #include "proptest/combinator/chain.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
+
 
 namespace proptest {
-
-/* fwd-declaration of combinators */
-
-namespace util {
-PROPTEST_API GeneratorCommon filterImpl(Function1 gen, Function1 criteria);
-PROPTEST_API GeneratorCommon dependencyImpl(Function1 gen, Function1 criteria);
-PROPTEST_API GeneratorCommon transformImpl(Function1 gen, Function1 criteria);
-PROPTEST_API GeneratorCommon chainImpl1(Function1 gen, Function1 criteria);
-PROPTEST_API GeneratorCommon chainImplN(Function1 gen, Function1 criteria);
-} // namespace util
 
 template <typename T>
 template <typename U>

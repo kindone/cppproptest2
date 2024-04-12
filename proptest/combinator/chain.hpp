@@ -4,6 +4,7 @@
 #include "proptest/Random.hpp"
 #include "proptest/Generator.hpp"
 #include "proptest/std/tuple.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file chain.hpp
@@ -17,9 +18,6 @@ template <class... Ts>
 using Chain = tuple<Ts...>;
 
 namespace util {
-
-GeneratorCommon chainImpl1(Function1 gen1, Function1 gen2gen);
-GeneratorCommon chainImplN(Function1 gen1, Function1 gen2gen);
 
 template <typename U, typename T>
 Generator<tuple<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)

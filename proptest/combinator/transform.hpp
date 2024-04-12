@@ -3,6 +3,7 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/std/type.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file transform.hpp
@@ -17,10 +18,6 @@ decltype(auto) generator(GEN&& gen);
 template <typename T>
 struct Generator;
 struct GeneratorCommon;
-
-namespace util {
-GeneratorCommon transformImpl(Function1 gen, Function1 transformer);
-} // namespace util
 
 /**
  * @ingroup Combinators

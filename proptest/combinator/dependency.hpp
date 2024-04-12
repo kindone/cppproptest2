@@ -4,6 +4,7 @@
 #include "proptest/Random.hpp"
 #include "proptest/Generator.hpp"
 #include "proptest/std/pair.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file dependency.hpp
@@ -11,10 +12,6 @@
  */
 
 namespace proptest {
-
-namespace util {
-GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen);
-} // namespace util
 
 /**
  * @ingroup Combinators
