@@ -96,8 +96,8 @@ Property-based testing often provides with the convenient out-of-box **generator
 
 Following example shows how certain input domain of string type can be specified using a built-in generator and generator combinators:
 
-![Custom Generator](images/customgenerator.svg)
-<!--
+
+
 ```kroki-d2
 generator: "Custom Generator"{
 
@@ -106,16 +106,16 @@ generator: "Custom Generator"{
     |
 
     filter: |cpp
-    .filter([] (int& num) { return num % 2 == 0; })
+    .filter([] (int num) { return num % 2 == 0; })
     |
 
     map: |cpp
-    .map([] (int& num) {
-        return "<" + std::to_string(numStr) + ">";
+    .map([] (int num) {
+        return "<" + std::to_string(num) + ">";
     });
     |
 
-arbitrary -> filter : filter even numers only
+arbitrary -> filter : filter even numbers only
 filter -> map : map to string enclosed with < and >
 
 }
@@ -151,7 +151,7 @@ generator -> result3: generate {
 }
 
 ```
--->
+
 
 ```cpp
 // a tailored string generator
