@@ -17,38 +17,24 @@ namespace proptest {
 
 namespace util {
 
-PROPTEST_API Generator<vector<Any>> aggregateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
-                                    size_t maxSize);
-
 template <typename T>
-Generator<vector<T>> aggregateImpl(GenFunction<T> gen1, Function<GenFunction<T>(const T&)> gen2gen, size_t minSize,
+Generator<vector<T>> aggregateHelper(GenFunction<T> gen1, Function<GenFunction<T>(const T&)> gen2gen, size_t minSize,
                                     size_t maxSize)
 {
-    // Convert gen1 to work with Any by wrapping its output
-    GenFunction<Any> anyGen1 = [gen1](Random& rand) -> Shrinkable<Any> {
-        return gen1(rand).template map<Any>([](const T& value) { return Any(value); });
-    };
-
-    // Convert gen2gen to work with Any by adapting its input and output
-    Function<GenFunction<Any>(const Any&)> anyGen2Gen = [gen2gen](const Any& any) -> GenFunction<Any> {
-        return [any, gen2gen](Random& rand) -> Shrinkable<Any> {
-            return gen2gen(any.getRef<T>())(rand).template map<Any>([](const T& value) { return Any(value); });
-        };
-    };
-
     // Call aggregateImplAny with Any type
-    auto anyVecGen = aggregateImplAny(anyGen1, anyGen2Gen, minSize, maxSize);
+    Generator<vector<ShrinkableAny>> anyVecGen = aggregateImpl(gen1, [gen2gen](const Any& t) -> Function1 { return gen2gen(t.getRef<T>()); }, minSize, maxSize);
 
     // Convert the generated vector<Any> back to vector<T>
-    return anyVecGen.template map<vector<T>>([](const vector<Any>& anyVec) -> vector<T> {
+    return anyVecGen.template map<vector<T>>([](const vector<ShrinkableAny>& anyShrVec) -> vector<T> {
         vector<T> tVec;
-        tVec.reserve(anyVec.size());
-        for (const Any& any : anyVec) {
-            tVec.push_back(any.getRef<T>()); // Assuming Any has a get<T>() method
+        tVec.reserve(anyShrVec.size());
+        for (const ShrinkableAny& shrAny : anyShrVec) {
+            tVec.push_back(shrAny.getAny().getRef<T>()); // Assuming Any has a get<T>() method
         }
         return tVec;
     });
 }
+
 
 }  // namespace util
 
@@ -72,7 +58,7 @@ decltype(auto) aggregate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t 
     using RetType = invoke_result_t<GEN2GEN, T&>;
     GenFunction<T> funcGen1 = gen1;
     Function<RetType(T&)> funcGen2Gen = gen2gen;
-    return util::aggregateImpl<T>(funcGen1, funcGen2Gen, minSize, maxSize);
+    return util::aggregateHelper<T>(funcGen1, funcGen2Gen, minSize, maxSize);
 }
 
 }  // namespace proptest

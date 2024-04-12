@@ -5,46 +5,43 @@ namespace proptest {
 
 namespace util {
 
-Generator<vector<Any>> aggregateImplAny(GenFunction<Any> gen1, Function<GenFunction<Any>(Any&)> gen2gen, size_t minSize,
-                                    size_t maxSize)
+GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize, size_t maxSize)
 {
-    return interval<uint64_t>(minSize, maxSize).flatMap<vector<Any>>([gen1, gen2gen, minSize](const uint64_t& size) -> Generator<vector<Any>> {
+    auto intervalGen = interval<uint64_t>(minSize, maxSize);
+
+    auto deriveAggregate = [gen1, gen2gen, minSize](const uint64_t& size) {
         if (size == 0)
-            return Function1([](Random&) { return make_shrinkable<vector<Any>>(); });
+            return Function1([](Random&) { return make_shrinkable<vector<ShrinkableAny>>(); });
         return Function1([gen1, gen2gen, size, minSize](Random& rand) {
-            Shrinkable<Any> shr = gen1(rand);
-            auto shrVec = make_shrinkable<vector<Shrinkable<Any>>>();
+            ShrinkableBase shr = gen1(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
+            auto shrVec = make_shrinkable<vector<ShrinkableAny>>();
             auto& vec = shrVec.getMutableRef();
             vec.reserve(size);
             vec.push_back(shr);
             for (size_t i = 1; i < size; i++) {
-                shr = gen2gen(shr.getAny())(rand);
+                shr = gen2gen(shr.getAny()).getRef<Function1>()(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
                 vec.push_back(shr);
             }
-            return shrinkListLikeLength<vector, Any>(shrVec, minSize)
-                .andThen([](const Shrinkable<vector<Shrinkable<Any>>>::StreamElementType& parent) {
-                    const vector<Shrinkable<Any>>& shrVec_ = Shrinkable<vector<Shrinkable<Any>>>(parent).getRef();
+            return shrinkListLikeLength<vector, Any>(shrVec, minSize) // -> Shrinkable<vector<Shrinkable<Any>>>
+                .andThen([](const ShrinkableBase& parent) {
+                    const vector<ShrinkableAny>& shrVec_ = parent.getRef<vector<ShrinkableAny>>();
                     if (shrVec_.size() == 0)
-                        return Shrinkable<vector<Shrinkable<Any>>>::StreamType::empty();
-                    const Shrinkable<Any>& lastElemShr = shrVec_.back();
-                    Shrinkable<Any>::StreamType elemShrinks = lastElemShr.getShrinks();
+                        return ShrinkableBase::StreamType::empty();
+                    const ShrinkableAny& lastElemShr = shrVec_.back();
+                    ShrinkableBase::StreamType elemShrinks = lastElemShr.getShrinks();
                     if (elemShrinks.isEmpty())
-                        return Shrinkable<vector<Shrinkable<Any>>>::StreamType::empty();
-                    return elemShrinks.template transform<Shrinkable<vector<Shrinkable<Any>>>::StreamElementType, Shrinkable<Any>::StreamElementType>(
-                        [copy = shrVec_](const Shrinkable<Any>::StreamElementType& elem) mutable -> Shrinkable<vector<Shrinkable<Any>>>::StreamElementType {
-                            copy[copy.size() - 1] = Shrinkable<Any>(elem);
-                            return make_shrinkable<vector<Shrinkable<Any>>>(copy);
+                        return ShrinkableBase::StreamType::empty();
+                    return elemShrinks.template transform<ShrinkableBase, ShrinkableBase>(
+                        [copy = shrVec_](const ShrinkableBase& elem) mutable -> ShrinkableBase {
+                            copy[copy.size() - 1] = ShrinkableAny(elem);
+                            return make_shrinkable<vector<ShrinkableAny>>(copy);
                         });
-                })
-                .template map<vector<Any>>([](const vector<Shrinkable<Any>>& shrVec) {
-                    vector<Any> valVec;
-                    valVec.reserve(shrVec.size());
-                    util::transform(shrVec.begin(), shrVec.end(), util::back_inserter(valVec),
-                                    [](const Shrinkable<Any>& shr) { return shr.getAny(); });
-                    return valVec;
                 });
         });
-    });
+    };
+
+    // Generator<vector<ShrinkableAny>>
+    return deriveImpl(intervalGen, [deriveAggregate](const Any& sizeAny) -> Function1 { return deriveAggregate(sizeAny.getRef<uint64_t>()); });
 }
 
 } // namespace util
