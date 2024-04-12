@@ -14,11 +14,11 @@ struct Lazy {
         LazyBody(Function<T()> _eval) : data(_eval) {}
 
         T& getRef() const {
-            if(!std::holds_alternative<T>(data))
+            if(!holds_alternative<T>(data))
             {
-                data = std::get<Function<T()>>(data)();
+                data = get<Function<T()>>(data)();
             }
-            return std::get<T>(data);
+            return get<T>(data);
         }
 
         T& operator*() const {
@@ -29,7 +29,7 @@ struct Lazy {
             return &getRef();
         }
 
-        mutable std::variant<T, Function<T()>> data;
+        mutable variant<T, Function<T()>> data;
         // mutable optional<T> value;
         // Function<T()> eval;
     };

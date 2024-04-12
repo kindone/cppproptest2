@@ -56,7 +56,7 @@ Weighted<T> GenToWeighted(const Weighted<T>& weighted)
     return weighted;
 }
 
-GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPtr);
+PROPTEST_API GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPtr);
 
 }  // namespace util
 

@@ -15,7 +15,7 @@ namespace proptest {
 
 namespace util {
 
-GeneratorCommon accumulateImpl(Function1 gen1, Function1 gen2gen, size_t minSize, size_t maxSize);
+PROPTEST_API GeneratorCommon accumulateImpl(Function1 gen1, Function1 gen2gen, size_t minSize, size_t maxSize);
 
 }  // namespace util
 /**
