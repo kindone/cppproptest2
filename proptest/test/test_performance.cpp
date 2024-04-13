@@ -471,7 +471,7 @@ TEST(Performance, ShrinkerTuple)
 {
     for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkTuple(Shrinkable(tuple(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000))));
+        [[maybe_unused]] auto shr = shrinkTuple<int, int>(Shrinkable(vector<ShrinkableBase>{shrinkIntegral<int>(100000), shrinkIntegral<int>(100000)}));
     }
 }
 

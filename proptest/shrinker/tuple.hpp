@@ -6,6 +6,7 @@
 #include "proptest/util/tupleorvector.hpp"
 #include "proptest/std/algorithm.hpp"
 #include "proptest/std/map.hpp"
+#include "proptest/util/typelist.hpp"
 
 namespace proptest {
 
@@ -14,20 +15,11 @@ PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkTupleUsingVector(Shrinkabl
 } // namespace util
 
 template <typename... ARGS>
-PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
+PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<vector<ShrinkableBase>>& shrinkable)
 {
     constexpr size_t NumArgs = sizeof...(ARGS);
-    Shrinkable<vector<ShrinkableBase>> vectorAnyShr = shrinkable.template map<vector<ShrinkableBase>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
-        vector<ShrinkableBase> anyVector;
-        anyVector.reserve(NumArgs);
-        util::For<NumArgs>([&] (auto index_sequence) {
-            anyVector.push_back(get<index_sequence.value>(tuple));
-        });
-        return anyVector;
-    });
 
-    vectorAnyShr = util::shrinkTupleUsingVector(vectorAnyShr);
-    return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableBase>& shrAnyVec) {
+    return util::shrinkTupleUsingVector(shrinkable).map<tuple<ARGS...>>([](const vector<ShrinkableBase>& shrAnyVec) {
         vector<Any> anyVec;
         anyVec.reserve(shrAnyVec.size());
         util::transform(shrAnyVec.begin(), shrAnyVec.end(), util::inserter(anyVec, anyVec.begin()), [](const ShrinkableBase& shr) -> Any {
@@ -36,5 +28,12 @@ PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrin
         return util::vectorToTuple<ARGS...>(anyVec);
     });
 }
+
+template <typename... ARGS>
+PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(util::TypeList<ARGS...>, const Shrinkable<vector<ShrinkableBase>>& shrinkable)
+{
+    return shrinkTuple<ARGS...>(shrinkable);
+}
+
 
 } // namespace proptest
