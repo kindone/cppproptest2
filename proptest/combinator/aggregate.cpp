@@ -22,7 +22,7 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
                 shr = gen2gen(shr.getAny()).getRef<Function1>()(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
                 vec.push_back(shr);
             }
-            return shrinkVectorLength(shrVec, minSize) // -> Shrinkable<vector<Shrinkable<Any>>>
+            return shrinkVectorLength(shrVec, minSize) // -> Shrinkable<vector<ShrinkableBase>>
                 .andThen([](const ShrinkableBase& parent) {
                     const vector<ShrinkableBase>& shrVec_ = parent.getRef<vector<ShrinkableBase>>();
                     if (shrVec_.size() == 0)
@@ -40,7 +40,6 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
         });
     };
 
-    // Generator<vector<ShrinkableAny>>
     return deriveImpl(intervalGen, [deriveAggregate](const Any& sizeAny) -> Function1 { return deriveAggregate(sizeAny.getRef<uint64_t>()); });
 }
 

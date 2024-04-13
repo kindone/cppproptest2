@@ -18,7 +18,7 @@ Shrinkable<vector<ShrinkableBase>> shrinkTupleUsingVector(Shrinkable<vector<Shri
             // rebuild full vector from an element
             // {0,2,3} to {[x,x,x,0], ...,[x,x,x,3]}
             // make sure {1} shrunk from 2 is also transformed to [x,x,x,1]
-            // ShrinkableAny -> Shrinkable<vector<ShrinkableAny>>
+            // ShrinkableBase -> Shrinkable<vector<ShrinkableBase>>
             Shrinkable<vector<ShrinkableBase>> vecWithElems = elemShr.map([N,parentVecCopy](const Any& val) -> Any {
                 // create a copy
                 (*parentVecCopy)[N] = ShrinkableBase(val); // replace parent copy with val at tuple position N

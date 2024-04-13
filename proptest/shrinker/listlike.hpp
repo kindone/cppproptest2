@@ -31,8 +31,6 @@ struct PROPTEST_API VectorShrinker
 
 }  // namespace util
 
-//extern template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
-
 PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableBase>>& shr, size_t minSize);
 
 PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkAnyVector(const Shrinkable<vector<ShrinkableBase>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);

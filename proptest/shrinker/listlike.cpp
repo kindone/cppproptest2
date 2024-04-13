@@ -7,17 +7,6 @@ namespace util {
 
 VectorShrinker::stream_t VectorShrinker::shrinkBulk(const VectorShrinker::shrinkable_t& ancestor, size_t power, size_t offset)
 {
-    /*
-    using elem_t = ShrinkableAny;
-    using vector_t = vector<ShrinkableAny>;
-
-    using shrinkable_t = Shrinkable<shrinkable_vector_t>;
-    using stream_t = shrinkable_t::StreamType;
-    using stream_element_t = shrinkable_t::StreamElementType;
-
-    using elem_stream_t = ShrinkableAny::StreamType;
-    using elem_stream_element_t = ShrinkableAny::StreamElementType
-    */
 
     // static_assert(is_same_v<elem_stream_element_t, stream_element_t>, "elem_stream_element_t should be stream_element_t");
 
@@ -191,7 +180,7 @@ Shrinkable<vector<ShrinkableBase>> shrinkAnyVector(const Shrinkable<vector<Shrin
 
     // elementwise shrinking
     if(elementwise)
-        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const ShrinkableBase& parent) -> Shrinkable<vector<ShrinkableAny>>::StreamType {
+        shrinkableElemsShr = shrinkableElemsShr.andThen(+[](const ShrinkableBase& parent) -> Shrinkable<vector<ShrinkableBase>>::StreamType {
             Shrinkable<vector<ShrinkableBase>> shr = parent;
             return util::VectorShrinker::shrinkElementwise(shr, 0, 0);
         });

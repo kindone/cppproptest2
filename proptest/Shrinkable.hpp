@@ -93,8 +93,8 @@ struct Shrinkable : public ShrinkableBase
     }
 
     template <typename U>
-        requires (is_same_v<T, Any>)
-    Shrinkable(const Shrinkable<U>& otherShr) : ShrinkableBase(otherShr) {}
+    Shrinkable(const Shrinkable<U>& otherShr) : ShrinkableBase(otherShr) {
+    }
 
     template <same_as<T> TT=T>
         requires (!is_same_v<TT, Any>)
@@ -152,8 +152,6 @@ struct Shrinkable : public ShrinkableBase
 
     Shrinkable take(int n) const { return ShrinkableBase::take(n); }
 };
-
-using ShrinkableAny = Shrinkable<Any>;
 
 template <typename T, typename... ARGS>
 Shrinkable<T> make_shrinkable(ARGS&&... args)

@@ -28,7 +28,7 @@ Generator<vector<T>> aggregateHelper(GenFunction<T> gen1, Function<GenFunction<T
     return anyVecGen.template map<vector<T>>([](const vector<ShrinkableBase>& shrBaseVec) -> vector<T> {
         vector<T> tVec;
         tVec.reserve(shrBaseVec.size());
-        for (const ShrinkableAny& shrBase : shrBaseVec) {
+        for (const ShrinkableBase& shrBase : shrBaseVec) {
             tVec.push_back(shrBase.getAny().getRef<T>()); // Assuming Any has a get<T>() method
         }
         return tVec;

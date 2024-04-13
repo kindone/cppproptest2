@@ -231,8 +231,6 @@ private:
     Function<ShrinkableBase(Random&)> anyGen;
 };
 
-// extern template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;
-
 }  // namespace proptest
 
 

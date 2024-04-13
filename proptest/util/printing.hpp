@@ -142,21 +142,6 @@ struct Show<char*>
 };
 
 template <typename U>
-struct Show<ShrinkableAny, U>
-{
-    Show(const ShrinkableAny& _value) : value(_value) {}
-    friend ostream& operator<<(ostream& os, const Show<ShrinkableAny, U>& sh)
-    {
-        if constexpr(is_same_v<U, void>)
-            show(os, "<Any:\?\?\?>");
-        else
-            show(os, sh.value.getAny().template getRef<U>());
-        return os;
-    }
-    const ShrinkableAny& value;
-};
-
-template <typename U>
 struct Show<ShrinkableBase, U>
 {
     Show(const ShrinkableBase& _value) : value(_value) {}

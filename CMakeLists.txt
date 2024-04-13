@@ -31,7 +31,6 @@ SET(proptest_sources
     proptest/util/misc.cpp
     proptest/Stream.cpp
     proptest/Shrinkable.cpp
-    proptest/ShrinkableAny.cpp
     proptest/Generator.cpp
     proptest/Random.cpp
     proptest/util/unicode.cpp
@@ -102,7 +101,6 @@ SET(proptest_testsources
     proptest/test/test_shrinkable.cpp
     proptest/test/test_shrinker.cpp
     proptest/test/test_shrinker2.cpp
-    proptest/test/test_anyshrinkable.cpp
     proptest/test/test_printing.cpp
     proptest/test/test_random.cpp
     proptest/test/test_arbitrary.cpp

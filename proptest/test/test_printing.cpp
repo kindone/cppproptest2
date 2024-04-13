@@ -37,10 +37,3 @@ TEST(Printing, Shrinkable)
     os << Show(Shrinkable<int>(5));
     EXPECT_EQ(os.str(), "5");
 }
-
-TEST(Printing, ShrinkableAny)
-{
-    stringstream os;
-    os << Show<ShrinkableAny, int>(ShrinkableAny(Shrinkable<int>(5)));
-    EXPECT_EQ(os.str(), "5");
-}
