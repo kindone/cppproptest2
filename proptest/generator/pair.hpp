@@ -17,14 +17,22 @@ namespace proptest {
  * @brief Generator combinator for pair<T1, T2>
  * @details shrinking is done by one parameter and then continues to the next
  */
+template <typename T1, typename T2>
+Generator<pair<T1,T2>> pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2)
+{
+    // generator
+    return generator(
+        [gen1, gen2](Random& rand) mutable -> Shrinkable<pair<T1,T2>>{
+            return shrinkPair<T1,T2>(gen1(rand), gen2(rand));
+        });
+}
+
 template <GenLike GEN1, GenLike GEN2>
 decltype(auto) pairOf(GEN1&& gen1, GEN2&& gen2)
 {
-    auto genPairPtr =
-        util::make_shared<pair<decay_t<GEN1>, decay_t<GEN2>>>(util::forward<GEN1>(gen1), util::forward<GEN2>(gen2));
-    // generator
-    return generator(
-        [genPairPtr](Random& rand) mutable { return shrinkPair(genPairPtr->first(rand), genPairPtr->second(rand)); });
+    using T1 = typename function_traits<GEN1>::return_type::type;
+    using T2 = typename function_traits<GEN2>::return_type::type;
+    return pairOf<T1,T2>(util::forward<GEN1>(gen1), util::forward<GEN2>(gen2));
 }
 
 /**
@@ -41,7 +49,7 @@ public:
     Arbi(GenFunction<ARG1> _arg1Gen, GenFunction<ARG2> _arg2Gen) : arg1Gen(_arg1Gen), arg2Gen(_arg2Gen) {}
 
     Shrinkable<pair<ARG1, ARG2>> operator()(Random& rand) const override {
-        return shrinkPair(arg1Gen(rand), arg2Gen(rand));
+        return shrinkPair<ARG1, ARG2>(arg1Gen(rand), arg2Gen(rand));
     }
 
 private:

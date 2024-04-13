@@ -42,9 +42,9 @@ public:
             pairShrSet.insert(pairShr);
         }
 
-        auto pairShrVecShr = Shrinkable<vector<ShrinkableAny>>(util::make_any<vector<ShrinkableAny>>(pairShrSet.begin(), pairShrSet.end()));
+        auto pairShrVecShr = Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(pairShrSet.begin(), pairShrSet.end()));
 
-        return shrinkMapAny<Key, Value>(pairShrVecShr, minSize);
+        return shrinkMap<Key, Value>(pairShrVecShr, minSize);
     }
 
     Arbi<Map> setPairGen(GenFunction<Pair> _pairGen)

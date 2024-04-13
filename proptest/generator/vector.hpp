@@ -39,7 +39,7 @@ public:
     Shrinkable<vector<T>> operator()(Random& rand) const override
     {
         size_t size = rand.getRandomSize(minSize, maxSize + 1);
-        auto shrinkVec = make_shrinkable<vector<ShrinkableAny>>();
+        auto shrinkVec = make_shrinkable<vector<ShrinkableBase>>();
         shrinkVec.getMutableRef().reserve(size);
         for (size_t i = 0; i < size; i++)
             shrinkVec.getMutableRef().push_back(elemGen(rand));

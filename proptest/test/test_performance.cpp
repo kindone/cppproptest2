@@ -449,10 +449,11 @@ decltype(auto) shrink()
     throw runtime_error(__FILE__, __LINE__, "unsupported type");
 }
 
+constexpr int TEST_SIZE = 1000;
 
 TYPED_TEST(ShrinkerPerformance, Shrink)
 {
-    for(int i = 0; i < 10000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         [[maybe_unused]] volatile auto shr = shrink<TypeParam>();
     }
@@ -460,7 +461,7 @@ TYPED_TEST(ShrinkerPerformance, Shrink)
 
 TEST(Performance, ShrinkerPair)
 {
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         [[maybe_unused]] auto shr = shrinkPair(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000));
     }
@@ -468,7 +469,7 @@ TEST(Performance, ShrinkerPair)
 
 TEST(Performance, ShrinkerTuple)
 {
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         [[maybe_unused]] auto shr = shrinkTuple(Shrinkable(tuple(shrinkIntegral<int>(100000), shrinkIntegral<int>(100000))));
     }
@@ -477,75 +478,75 @@ TEST(Performance, ShrinkerTuple)
 TYPED_TEST(ShrinkerPerformance, ShrinkerVector)
 {
     auto shr = shrink<TypeParam>();
-    vector<ShrinkableAny> vec;
-    vec.reserve(1000);
-    for(int i = 0; i < 1000; i++)
+    vector<ShrinkableBase> vec;
+    vec.reserve(TEST_SIZE);
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableBase>>(vec), 1, true, true);
     }
 }
 
 TYPED_TEST(ShrinkerPerformance, ShrinkerVector_membershipwise_only)
 {
     auto shr = shrink<TypeParam>();
-    vector<ShrinkableAny> vec;
-    vec.reserve(1000);
-    for(int i = 0; i < 1000; i++)
+    vector<ShrinkableBase> vec;
+    vec.reserve(TEST_SIZE);
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableBase>>(vec), 1, false, true);
     }
 }
 
 TYPED_TEST(ShrinkerPerformance, ShrinkerVector_elementwise_only)
 {
     auto shr = shrink<TypeParam>();
-    vector<ShrinkableAny> vec;
-    vec.reserve(1000);
-    for(int i = 0; i < 1000; i++)
+    vector<ShrinkableBase> vec;
+    vec.reserve(TEST_SIZE);
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, false);
+        [[maybe_unused]] auto shr = shrinkListLike<vector, TypeParam>(Shrinkable<vector<ShrinkableBase>>(vec), 1, true, false);
     }
 }
 
 TYPED_TEST(ShrinkerPerformance, ShrinkerList)
 {
     auto shr = shrink<TypeParam>();
-    vector<ShrinkableAny> vec;
-    vec.reserve(10000);
-    for(int i = 0; i < 1000; i++)
+    vector<ShrinkableBase> vec;
+    vec.reserve(TEST_SIZE);
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, true, true);
+        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableBase>>(vec), 1, true, true);
     }
 }
 
 TYPED_TEST(ShrinkerPerformance, ShrinkerList_membershipwise_only)
 {
     auto shr = shrink<TypeParam>();
-    vector<ShrinkableAny> vec;
-    vec.reserve(1000);
-    for(int i = 0; i < 1000; i++)
+    vector<ShrinkableBase> vec;
+    vec.reserve(TEST_SIZE);
+    for(int i = 0; i < TEST_SIZE; i++)
     {
         vec.push_back(shr);
     }
-    for(int i = 0; i < 1000; i++)
+    for(int i = 0; i < TEST_SIZE; i++)
     {
-        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableAny>>(vec), 1, false, true);
+        [[maybe_unused]] auto shr = shrinkListLike<list, TypeParam>(Shrinkable<vector<ShrinkableBase>>(vec), 1, false, true);
     }
 }
 

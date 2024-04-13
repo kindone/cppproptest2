@@ -14,10 +14,10 @@ using namespace proptest;
 
 TEST(ListLikeShrinker, ints3)
 {
-    Shrinkable<vector<ShrinkableAny>> baseShr = make_shrinkable<vector<ShrinkableAny>, initializer_list<ShrinkableAny>>({
-        ShrinkableAny(shrinkIntegral<int>(1)),
-        ShrinkableAny(shrinkIntegral<int>(2)),
-        ShrinkableAny(shrinkIntegral<int>(3))});
+    Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>, initializer_list<ShrinkableBase>>({
+        ShrinkableBase(shrinkIntegral<int>(1)),
+        ShrinkableBase(shrinkIntegral<int>(2)),
+        ShrinkableBase(shrinkIntegral<int>(3))});
 
     // EXPECT_EQ(serializeShrinkable(baseShr), "");
 
@@ -39,15 +39,15 @@ TEST(ListLikeShrinker, ints3)
 
 TEST(ListLikeShrinker, ints8)
 {
-    Shrinkable<vector<ShrinkableAny>> baseShr = make_shrinkable<vector<ShrinkableAny>, initializer_list<ShrinkableAny>>({
-        ShrinkableAny(shrinkIntegral<int>(1)),
-        ShrinkableAny(shrinkIntegral<int>(2)),
-        ShrinkableAny(shrinkIntegral<int>(3)),
-        ShrinkableAny(shrinkIntegral<int>(4)),
-        ShrinkableAny(shrinkIntegral<int>(5)),
-        ShrinkableAny(shrinkIntegral<int>(6)),
-        ShrinkableAny(shrinkIntegral<int>(7)),
-        ShrinkableAny(shrinkIntegral<int>(8))});
+    Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>, initializer_list<ShrinkableBase>>({
+        ShrinkableBase(shrinkIntegral<int>(1)),
+        ShrinkableBase(shrinkIntegral<int>(2)),
+        ShrinkableBase(shrinkIntegral<int>(3)),
+        ShrinkableBase(shrinkIntegral<int>(4)),
+        ShrinkableBase(shrinkIntegral<int>(5)),
+        ShrinkableBase(shrinkIntegral<int>(6)),
+        ShrinkableBase(shrinkIntegral<int>(7)),
+        ShrinkableBase(shrinkIntegral<int>(8))});
 
     Shrinkable<vector<int>> shr0 = shrinkListLike<vector, int>(baseShr, 0, false, false);
     Shrinkable<vector<int>> shr1 = shrinkListLike<vector, int>(baseShr, 0, true, false);

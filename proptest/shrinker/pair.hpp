@@ -7,35 +7,18 @@ namespace proptest {
 
 namespace util {
 
-class PROPTEST_API PairShrinker {
-    using ARG1 = Any;
-    using ARG2 = Any;
-    using out_pair_t = pair<ARG1, ARG2>;
-    using pair_t = pair<Shrinkable<ARG1>, Shrinkable<ARG2>>;
-    using shrinkable_t = Shrinkable<pair_t>;
-    using stream_t = typename shrinkable_t::StreamType;
-
-private:
-    static Function<stream_t(const shrinkable_t&)> shrinkFirst();
-
-    static Function<stream_t(const shrinkable_t&)> shrinkSecond();
-
-public:
-    static Shrinkable<out_pair_t> shrink(const shrinkable_t& shrinkable);
-};
+PROPTEST_API ShrinkableBase shrinkPairImpl(const ShrinkableBase& shrinkable);
 
 } // namespace util
 
+
 template <typename ARG1, typename ARG2>
-Shrinkable<pair<ARG1, ARG2>> shrinkPair(
-    const Shrinkable<ARG1>& firstShr, const Shrinkable<ARG2>& secondShr)
+Shrinkable<pair<ARG1,ARG2>> shrinkPair(const Shrinkable<ARG1>& firstShr, const Shrinkable<ARG2>& secondShr)
 {
-    // type-erase ARG1 and ARG2 with ShrinkableAny
-    ShrinkableAny firstShrAny(firstShr), secondShrAny(secondShr);
-    auto elemPair = util::make_pair(firstShrAny, secondShrAny);
-    auto shrinkable = make_shrinkable<decltype(elemPair)>(elemPair);
-    return util::PairShrinker::shrink(shrinkable).map<pair<ARG1, ARG2>>(+[](const pair<Any, Any>& anyPair) {
-        return util::make_pair(anyPair.first.getRef<ARG1>(), anyPair.second.getRef<ARG2>());
+    auto pairShr = ShrinkableBase(util::make_pair(ShrinkableBase(firstShr), ShrinkableBase(secondShr)));
+    return util::shrinkPairImpl(pairShr).map(+[](const Any& anyPair) -> Any {
+        const auto& shrPair = anyPair.getRef<pair<ShrinkableBase, ShrinkableBase>>();
+        return util::make_pair(shrPair.first.getRef<ARG1>(), shrPair.second.getRef<ARG2>());
     });
 }
 

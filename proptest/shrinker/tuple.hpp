@@ -12,27 +12,27 @@ namespace proptest {
 //extern template struct Shrinkable<vector<ShrinkableAny>>;
 
 namespace util {
-PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableAny>> vectorAnyShr);
+PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkTupleUsingVector(Shrinkable<vector<ShrinkableBase>> vectorAnyShr);
 } // namespace util
 
 template <typename... ARGS>
 PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<tuple<Shrinkable<ARGS>...>>& shrinkable)
 {
     constexpr size_t NumArgs = sizeof...(ARGS);
-    Shrinkable<vector<ShrinkableAny>> vectorAnyShr = shrinkable.template map<vector<ShrinkableAny>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
-        vector<ShrinkableAny> anyVector;
+    Shrinkable<vector<ShrinkableBase>> vectorAnyShr = shrinkable.template map<vector<ShrinkableBase>>(+[](const tuple<Shrinkable<ARGS>...>& tuple) {
+        vector<ShrinkableBase> anyVector;
         anyVector.reserve(NumArgs);
         util::For<NumArgs>([&] (auto index_sequence) {
-            anyVector.push_back(ShrinkableAny(get<index_sequence.value>(tuple)));
+            anyVector.push_back(get<index_sequence.value>(tuple));
         });
         return anyVector;
     });
 
     vectorAnyShr = util::shrinkTupleUsingVector(vectorAnyShr);
-    return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableAny>& shrAnyVec) {
+    return vectorAnyShr.map<tuple<ARGS...>>([](const vector<ShrinkableBase>& shrAnyVec) {
         vector<Any> anyVec;
         anyVec.reserve(shrAnyVec.size());
-        util::transform(shrAnyVec.begin(), shrAnyVec.end(), util::inserter(anyVec, anyVec.begin()), [](const ShrinkableAny& shr) -> Any {
+        util::transform(shrAnyVec.begin(), shrAnyVec.end(), util::inserter(anyVec, anyVec.begin()), [](const ShrinkableBase& shr) -> Any {
             return shr.getAny();
         });
         return util::vectorToTuple<ARGS...>(anyVec);

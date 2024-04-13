@@ -10,8 +10,8 @@ namespace util {
 
 struct PROPTEST_API VectorShrinker
 {
-    using elem_t = ShrinkableAny;
-    using vector_t = vector<ShrinkableAny>;
+    using elem_t = ShrinkableBase;
+    using vector_t = vector<elem_t>;
 
     using shrinkable_t = Shrinkable<vector_t>;
     using stream_t = shrinkable_t::StreamType;
@@ -24,53 +24,53 @@ struct PROPTEST_API VectorShrinker
 
     static stream_t shrinkElementwise(const shrinkable_t& shrinkable, size_t power, size_t offset);
 
-    static shrinkable_t shrinkMid(const Shrinkable<vector<ShrinkableAny>>& shrinkableCont, size_t minSize, size_t frontSize, size_t rearSize);
+    static shrinkable_t shrinkMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t frontSize, size_t rearSize);
 
-    static shrinkable_t shrinkFrontAndThenMid(const Shrinkable<vector<ShrinkableAny>>& shrinkableCont, size_t minSize, size_t rearSize);
+    static shrinkable_t shrinkFrontAndThenMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t rearSize);
 };
 
 }  // namespace util
 
 //extern template struct PROPTEST_API Shrinkable<vector<Shrinkable<Any>>>;
 
-PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableAny>>& shr, size_t minSize);
+PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkMembershipwise(const Shrinkable<vector<ShrinkableBase>>& shr, size_t minSize);
 
-PROPTEST_API Shrinkable<vector<ShrinkableAny>> shrinkAnyVector(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);
+PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkAnyVector(const Shrinkable<vector<ShrinkableBase>>& shrinkAnyVecShr, size_t minSize, bool elementwise, bool membershipwise);
 
 template <template <typename...> class Container, typename T>
-Shrinkable<vector<ShrinkableAny>> toAnyVectorShrinkable(const Container<Shrinkable<T>>& shrinkableCont)
+Shrinkable<vector<ShrinkableBase>> toVectorShrinkableBase(const Container<Shrinkable<T>>& shrinkableCont)
 {
-    Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = make_shrinkable<vector<ShrinkableAny>>();
-    vector<ShrinkableAny>& shrinkAnyVec = shrinkAnyVecShr.getMutableRef();
-    shrinkAnyVec.reserve(shrinkableCont.size());
-    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkAnyVec, shrinkAnyVec.begin()), +[](const Shrinkable<T>& shr) -> ShrinkableAny {
+    Shrinkable<vector<ShrinkableBase>> shrinkBaseVecShr = make_shrinkable<vector<ShrinkableBase>>();
+    vector<ShrinkableBase>& shrinkBaseVec = shrinkBaseVecShr.getMutableRef();
+    shrinkBaseVec.reserve(shrinkableCont.size());
+    util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkBaseVec, shrinkBaseVec.begin()), +[](const Shrinkable<T>& shr) -> ShrinkableBase {
         return shr;
     });
-    return shrinkAnyVecShr;
+    return shrinkBaseVecShr;
 }
 
 template <template <typename...> class Container, typename T>
-Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
+Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<ShrinkableBase>>& shrinkableBaseVecShr)
 {
-    return shrinkableAnyVecShr.template flatMap<Container<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) {
+    return shrinkableBaseVecShr.template flatMap<Container<T>>(
+        +[](const vector<ShrinkableBase>& _shrinkableVector) {
             auto valueContPtr = util::make_shared<Container<T>>();
             util::transform(
                 _shrinkableVector.begin(), _shrinkableVector.end(), util::inserter(*valueContPtr, valueContPtr->begin()),
-                +[](const ShrinkableAny& shr) -> T { return shr.getAny().getRef<T>(); });
+                +[](const ShrinkableBase& shr) -> T { return shr.getAny().getRef<T>(); });
             return Shrinkable<Container<T>>(util::make_any<Container<T>>(valueContPtr));
         });
 }
 
 template <template <typename...> class ListLike, typename T>
-Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<ShrinkableAny>>& shrinkableAnyVecShr)
+Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<ShrinkableBase>>& shrinkableBaseVecShr)
 {
-    return shrinkableAnyVecShr.template flatMap<ListLike<T>>(
-        +[](const vector<ShrinkableAny>& _shrinkableVector) {
+    return shrinkableBaseVecShr.template flatMap<ListLike<T>>(
+        +[](const vector<ShrinkableBase>& _shrinkableVector) {
             auto valueContPtr = util::make_shared<ListLike<T>>();
             util::transform(
                 _shrinkableVector.begin(), _shrinkableVector.end(), util::back_inserter(*valueContPtr),
-                +[](const ShrinkableAny& shr) -> T { return shr.getAny().getRef<T>(); });
+                +[](const ShrinkableBase& shr) -> T { return shr.getAny().getRef<T>(); });
             return Shrinkable<ListLike<T>>(util::make_any<ListLike<T>>(valueContPtr));
         });
 }
@@ -91,12 +91,12 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
 {
     auto shrinkableCont = shr.getRef();
     // change type to any
-    Shrinkable<vector<ShrinkableAny>> shrinkAnyVecShr = toAnyVectorShrinkable(shrinkableCont);
+    Shrinkable<vector<ShrinkableBase>> shrinkVecShrBase = toVectorShrinkableBase(shrinkableCont);
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
+    shrinkVecShrBase = shrinkAnyVector(shrinkVecShrBase, minSize, elementwise, membershipwise);
 
     // transform to proper output type
-    return toContainerTShrinkable<Container, T>(shrinkableElemsShr);
+    return toContainerTShrinkable<Container, T>(shrinkVecShrBase);
 }
 
 
@@ -114,10 +114,10 @@ Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T
  * @return Shrinkable<ListLike<T>>
  */
 template <template <typename...> class ListLike, typename T>
-Shrinkable<ListLike<T>> shrinkListLike(const Shrinkable<vector<ShrinkableAny>>& shrinkAnyVecShr, size_t minSize, bool elementwise = true, bool membershipwise = true)
+Shrinkable<ListLike<T>> shrinkListLike(const Shrinkable<vector<ShrinkableBase>>& shrinkAnyVecShr, size_t minSize, bool elementwise = true, bool membershipwise = true)
 {
     // membershipwise shrinking
-    Shrinkable<vector<ShrinkableAny>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
+    Shrinkable<vector<ShrinkableBase>> shrinkableElemsShr = shrinkAnyVector(shrinkAnyVecShr, minSize, elementwise, membershipwise);
 
     // transform to proper output type
     return toListLikeTShrinkable<ListLike, T>(shrinkableElemsShr);
