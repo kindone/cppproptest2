@@ -12,6 +12,7 @@
 #include "proptest/generator/list.hpp"
 #include "proptest/std/list.hpp"
 #include "proptest/Property.hpp"
+#include "proptest/std/chrono.hpp"
 
 
 namespace proptest {

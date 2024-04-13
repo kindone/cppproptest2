@@ -6,6 +6,7 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/PropertyContext.hpp"
 #include "proptest/Generator.hpp"
+#include "proptest/std/chrono.hpp"
 #include <thread>
 #include <atomic>
 

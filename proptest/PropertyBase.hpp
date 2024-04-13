@@ -4,7 +4,9 @@
 #include "proptest/PropertyContext.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/std/optional.hpp"
+#include "proptest/std/vector.hpp"
 #include "proptest/util/function.hpp"
+#include "proptest/Generator.hpp"
 
 #define PROP_EXPECT_STREAM(condition, a, sign, b)                                            \
     ([&]() -> stringstream& {                                                           \
@@ -69,16 +71,39 @@
 namespace proptest {
 
 class Random;
+struct ShrinkableBase;
+struct AnyGenerator;
 
 class PROPTEST_API PropertyBase {
 public:
-    PropertyBase() : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs) {}
+    using GenVec = vector<AnyGenerator>;
+
+    PropertyBase(vector<AnyGenerator>&& gens) : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), genVec(util::move(gens)) {}
 
     static void setDefaultNumRuns(uint32_t);
     static void tag(const char* filename, int lineno, string key, string value);
     static void succeed(const char* filename, int lineno, const char* condition, const stringstream& str);
     static void fail(const char* filename, int lineno, const char* condition, const stringstream& str);
     static stringstream& getLastStream();
+
+    virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const = 0;
+
+    bool runForAll(const GenVec& curGenVec);
+    bool test(const vector<ShrinkableBase>& curShrVec);
+
+    void shrink(Random& savedRand, const GenVec& curGenVec);
+
+    struct ShowShrVec {
+        ShowShrVec(const PropertyBase& _property, const vector<ShrinkableBase>& _shrVec) : property(_property), shrVec(_shrVec) {}
+
+        friend ostream& operator<<(ostream& os, const ShowShrVec& show)
+        {
+            show.property.writeArgs(os, show.shrVec);
+            return os;
+        }
+        const PropertyBase& property;
+        const vector<ShrinkableBase>& shrVec;
+    };
 
 protected:
     static void setContext(PropertyContext* context);
@@ -87,6 +112,8 @@ protected:
 
 protected:
     bool invoke(Random& rand);
+    virtual bool callFunction(const vector<ShrinkableBase>& shrVec) = 0;
+    virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) = 0;
 
     static uint32_t defaultNumRuns;
     static uint32_t defaultMaxDurationMs;
@@ -99,6 +126,8 @@ protected:
 
     Function<void()> onStartup;
     Function<void()> onCleanup;
+
+    vector<AnyGenerator> genVec;
 
     friend struct PropertyContext;
 };

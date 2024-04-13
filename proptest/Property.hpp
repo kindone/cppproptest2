@@ -9,7 +9,6 @@
 #include "proptest/util/assert.hpp"
 #include "proptest/util/tuple.hpp"
 #include "proptest/util/matrix.hpp"
-#include "proptest/std/chrono.hpp"
 
 /**
  * @file Property.hpp
@@ -29,13 +28,12 @@ class Property final : public PropertyBase {
 public:
     static constexpr size_t Arity = sizeof...(ARGS);
     using Func = Function<bool(ARGS...)>;
-    using GenVec = vector<AnyGenerator>;
 
 private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
 
 public:
-    Property(const Func& f, vector<AnyGenerator>&& gens) : func(f), genVec(util::move(gens)) {}
+    Property(const Func& f, vector<AnyGenerator>&& gens) : PropertyBase(util::move(gens)), func(f) {}
 
 public:
     /**
@@ -170,87 +168,6 @@ public:
         return false;
     }
 
-private:
-
-    bool runForAll(const GenVec& curGenVec)
-    {
-        Random rand(seed);
-        Random savedRand(seed);
-        cout << "random seed: " << seed << endl;
-        PropertyContext ctx;
-        auto startedTime = steady_clock::now();
-
-        size_t i = 0;
-        try {
-            for (; i < numRuns; i++) {
-                if(maxDurationMs != 0) {
-                    auto currentTime = steady_clock::now();
-                    if(duration_cast<util::milliseconds>(currentTime - startedTime).count() > maxDurationMs)
-                    {
-                        cout << "Timed out after " << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed " << i << " tests" << endl;
-                        ctx.printSummary();
-                        return true;
-                    }
-                }
-                bool pass = true;
-                do {
-                    pass = true;
-                    try {
-                        savedRand = rand;
-                        if (onStartup)
-                            onStartup();
-                        // generate values
-                        bool result = util::Call<Arity>(func, [&](auto index_sequence) {
-                            return curGenVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
-                        });
-
-                        if (onCleanup)
-                            onCleanup();
-                        stringstream failures = ctx.flushFailures();
-                        // failed expectations
-                        if (failures.rdbuf()->in_avail()) {
-                            cerr << "Falsifiable, after " << (i + 1) << " tests: ";
-                            cerr << failures.str();
-                            shrink(savedRand, curGenVec);
-                            return false;
-                        } else if (!result) {
-                            cerr << "Falsifiable, after " << (i + 1) << " tests" << endl;
-                            shrink(savedRand, curGenVec);
-                            return false;
-                        }
-                        pass = true;
-                    } catch (const Success&) {
-                        pass = true;
-                    } catch (const Discard&) {
-                        // silently discard combination
-                        pass = false;
-                    }
-                } while (!pass);
-            }
-        } catch (const AssertFailed& e) {
-            cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
-                 << ")" << endl;
-            // shrink
-            shrink(savedRand, curGenVec);
-            return false;
-        } catch (const PropertyFailedBase& e) {
-            cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
-                 << ")" << endl;
-            // shrink
-            shrink(savedRand, curGenVec);
-            return false;
-        } catch (const exception& e) {
-            cerr << "Falsifiable, after " << (i + 1) << " tests - unhandled exception thrown: " << e.what() << endl;
-            // shrink
-            shrink(savedRand, curGenVec);
-            return false;
-        }
-
-        cout << "OK, passed " << numRuns << " tests" << endl;
-        ctx.printSummary();
-        return true;
-    }
-
 public:
     /**
     * @brief Executes all input combinations in the Cartesian product of input lists
@@ -278,91 +195,29 @@ public:
     }
 
 private:
-    bool test(const vector<ShrinkableBase>& curShrVec)
-    {
-        bool result = false;
-        try {
-            if (onStartup)
-                onStartup();
 
-            result = util::Call<Arity>(func, [&](auto index_sequence) {
-                return curShrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
-            });
-
-            if (onCleanup)
-                onCleanup();
-        } catch (const AssertFailed&) {
-            result = false;
-            // cerr << "    assertion failed: " << e.what() << " (" << e.filename << ":"
-            //           << e.lineno << ")" << endl;
-        } catch (const exception&) {
-            result = false;
-        }
-        return result;
+    virtual bool callFunction(const vector<ShrinkableBase>& shrVec) override {
+        return util::Call<Arity>(func, [&](auto index_sequence) {
+            return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        });
     }
 
-    void shrink(Random& savedRand, const GenVec& curGenVec)
-    {
-        // regenerate failed value tuple
-        vector<ShrinkableBase> shrVec;
-        vector<ShrinkableBase::StreamType> shrinksVec;
-        shrVec.reserve(Arity);
-        shrinksVec.reserve(Arity);
-        for(size_t i = 0; i < Arity; i++) {
-            auto shr = curGenVec[i](savedRand);
-            shrVec.push_back(shr);
-            shrinksVec.push_back(shr.getShrinks());
-        };
-
-        cout << "  with args: " << ShowShrVec{shrVec} << endl;
-
-        for(size_t i = 0; i < Arity; i++) {
-            auto shrinks = shrinksVec[i];
-            while (!shrinks.isEmpty()) {
-                auto iter = shrinks.iterator<ShrinkableBase::StreamElementType>();
-                bool shrinkFound = false;
-                PropertyContext context;
-                // keep trying until failure is reproduced
-                while (iter.hasNext()) {
-                    // get shrinkable
-                    auto next = iter.next();
-                    vector<ShrinkableBase> curShrVec = shrVec;
-                    curShrVec[i] = next;
-                    if (!test(curShrVec) || context.hasFailures()) {
-                        shrinks = next.getShrinks();
-                        shrVec[i] = next;
-                        shrinkFound = true;
-                        break;
-                    }
-                }
-                if (shrinkFound) {
-                    cout << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{shrVec} << endl;
-                    if (context.hasFailures())
-                        cout << "    by failed expectation: " << context.flushFailures(4).str() << endl;
-                } else {
-                    break;
-                }
-            }
-        }
-
-        cout << "  simplest args found by shrinking: " << ShowShrVec{shrVec} << endl;
+    virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) override {
+        return util::Call<Arity>(func, [&](auto index_sequence) {
+            return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        });
     }
 
-    struct ShowShrVec {
-        friend ostream& operator<<(ostream& os, const ShowShrVec& show)
-        {
-            os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(show.shrVec[0]);
-            util::For<Arity-1>([&](auto index_sequence) {
-                os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(show.shrVec[index_sequence.value+1]);
-            });
-            os << " }";
-            return os;
-        }
-        const vector<ShrinkableBase>& shrVec;
-    };
+    virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const override
+    {
+        os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(shrVec[0]);
+        util::For<Arity-1>([&](auto index_sequence) {
+            os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(shrVec[index_sequence.value+1]);
+        });
+        os << " }";
+    }
 
     Func func;
-    vector<AnyGenerator> genVec;
 };
 
 namespace util {

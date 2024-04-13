@@ -3,6 +3,7 @@
 #include "proptest/test/testutil.hpp"
 #include "proptest/generator/generators.hpp"
 #include "proptest/combinator/combinators.hpp"
+#include "proptest/std/chrono.hpp"
 
 using namespace proptest;
 
