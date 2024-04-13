@@ -220,7 +220,7 @@ struct PROPTEST_API AnyGenerator
     template <typename T>
     AnyGenerator(const Arbi<T>& arbi) : anyGen(arbi) {}
 
-    ShrinkableAny operator()(Random& rand) const;
+    ShrinkableBase operator()(Random& rand) const;
 
     template <typename T>
     Shrinkable<T> generate(Random& rand) {
@@ -228,7 +228,7 @@ struct PROPTEST_API AnyGenerator
     }
 
 private:
-    Function<ShrinkableAny(Random&)> anyGen;
+    Function<ShrinkableBase(Random&)> anyGen;
 };
 
 // extern template struct PROPTEST_API Function<Shrinkable<Any>(Random&)>;

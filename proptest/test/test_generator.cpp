@@ -110,9 +110,9 @@ TEST(AnyGenerator, basic)
     Random rand(getCurrentTime());
     auto gen = interval<int>(0, 10);
     AnyGenerator anyGen(gen);
-    auto anyShr = anyGen(rand).get();
-    EXPECT_GE(anyShr.getRef<int>(), 0);
-    EXPECT_LE(anyShr.getRef<int>(), 10);
+    auto anyShr = anyGen(rand);
+    EXPECT_GE(anyShr.getAny().getRef<int>(), 0);
+    EXPECT_LE(anyShr.getAny().getRef<int>(), 10);
 
     auto shr = anyGen.generate<int>(rand);
     EXPECT_GE(shr.getRef(), 0);
@@ -123,7 +123,7 @@ TEST(AnyGenerator, arbitrary)
 {
     Random rand(getCurrentTime());
     AnyGenerator anyGen = Arbi<int>();
-    [[maybe_unused]] auto anyShr = anyGen(rand).get();
+    [[maybe_unused]] auto anyShr = anyGen(rand);
     [[maybe_unused]] auto shr = anyGen.generate<int>(rand);
     // TODO: test
 }

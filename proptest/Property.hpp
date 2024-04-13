@@ -278,7 +278,7 @@ public:
     }
 
 private:
-    bool test(const vector<ShrinkableAny>& curShrVec)
+    bool test(const vector<ShrinkableBase>& curShrVec)
     {
         bool result = false;
         try {
@@ -315,8 +315,8 @@ private:
     void shrink(Random& savedRand, const GenVec& curGenVec)
     {
         // regenerate failed value tuple
-        vector<ShrinkableAny> shrVec;
-        vector<ShrinkableAny::StreamType> shrinksVec;
+        vector<ShrinkableBase> shrVec;
+        vector<ShrinkableBase::StreamType> shrinksVec;
         shrVec.reserve(Arity);
         shrinksVec.reserve(Arity);
         for(size_t i = 0; i < Arity; i++) {
@@ -333,14 +333,14 @@ private:
             auto shrinks = shrinksVec[N];
             while (!shrinks.isEmpty()) {
                 // printShrinks(shrinks);
-                auto iter = shrinks.iterator<ShrinkableAny::StreamElementType>();
+                auto iter = shrinks.iterator<ShrinkableBase::StreamElementType>();
                 bool shrinkFound = false;
                 PropertyContext context;
                 // keep trying until failure is reproduced
                 while (iter.hasNext()) {
                     // get shrinkable
                     auto next = iter.next();
-                    vector<ShrinkableAny> curShrVec = shrVec;
+                    vector<ShrinkableBase> curShrVec = shrVec;
                     curShrVec[N] = next;
                     if (!test(curShrVec) || context.hasFailures()) {
                         shrinks = next.getShrinks();
@@ -365,14 +365,14 @@ private:
     struct ShowShrVec {
         friend ostream& operator<<(ostream& os, const ShowShrVec& show)
         {
-            os << "{ " << Show<ShrinkableAny, tuple_element_t<0, ArgTuple>>(show.shrVec[0]);
+            os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(show.shrVec[0]);
             util::For<Arity-1>([&](auto index_sequence) {
-                os << ", " << Show<ShrinkableAny, tuple_element_t<index_sequence.value+1, ArgTuple>>(show.shrVec[index_sequence.value+1]);
+                os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(show.shrVec[index_sequence.value+1]);
             });
             os << " }";
             return os;
         }
-        const vector<ShrinkableAny>& shrVec;
+        const vector<ShrinkableBase>& shrVec;
     };
 
     Func func;
