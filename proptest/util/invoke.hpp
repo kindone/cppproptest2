@@ -12,14 +12,9 @@ template <typename RET, typename...ARGS, GenLike<ARGS>...GENS>
 decltype(auto) invokeExplicit(Function<RET(ARGS...)> func, GENS&&...gens) {
     constexpr size_t NumArgs = sizeof...(ARGS);
     using ArgTuple = tuple<ARGS...>;
-    auto genTuple = util::make_tuple(generator(gens)...);
 
-    vector<AnyGenerator> genVec;
+    vector<AnyGenerator> genVec{generator(gens)...};
     genVec.reserve(NumArgs);
-
-    util::For<NumArgs>([&](auto index_sequence) {
-        genVec.push_back(get<index_sequence.value>(genTuple));
-    });
 
     Random rand(getCurrentTime());
     auto generateArgs = [&](auto index_sequence) {

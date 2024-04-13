@@ -419,6 +419,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
 
     // prepare genVec
     vector<AnyGenerator> genVec{generator(gens)...};
+    genVec.reserve(NumArgs);
 
     // fill the rest with arbitraries
     util::For<NumArgs-NumGens>([&genVec](auto index_sequence) {
