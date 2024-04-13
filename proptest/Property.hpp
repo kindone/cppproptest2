@@ -301,17 +301,6 @@ private:
         return result;
     }
 
-    template <typename Shrinks>
-    static void printShrinks(const Shrinks& shrinks)
-    {
-        auto itr = shrinks.iterator();
-        // cout << "    shrinks: " << endl;
-        for (int i = 0; i < 4 && itr.hasNext(); i++) {
-            auto& value = itr.next();
-            cout << "    " << Show<decay_t<decltype(value)>>(value) << endl;
-        }
-    }
-
     void shrink(Random& savedRand, const GenVec& curGenVec)
     {
         // regenerate failed value tuple
@@ -327,12 +316,9 @@ private:
 
         cout << "  with args: " << ShowShrVec{shrVec} << endl;
 
-        util::For<Arity>([&](auto index_sequence) {
-            constexpr size_t N = index_sequence.value;
-
-            auto shrinks = shrinksVec[N];
+        for(size_t i = 0; i < Arity; i++) {
+            auto shrinks = shrinksVec[i];
             while (!shrinks.isEmpty()) {
-                // printShrinks(shrinks);
                 auto iter = shrinks.iterator<ShrinkableBase::StreamElementType>();
                 bool shrinkFound = false;
                 PropertyContext context;
@@ -341,23 +327,23 @@ private:
                     // get shrinkable
                     auto next = iter.next();
                     vector<ShrinkableBase> curShrVec = shrVec;
-                    curShrVec[N] = next;
+                    curShrVec[i] = next;
                     if (!test(curShrVec) || context.hasFailures()) {
                         shrinks = next.getShrinks();
-                        shrVec[N] = next;
+                        shrVec[i] = next;
                         shrinkFound = true;
                         break;
                     }
                 }
                 if (shrinkFound) {
-                    cout << "  shrinking found simpler failing arg " << N << ": " << ShowShrVec{shrVec} << endl;
+                    cout << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{shrVec} << endl;
                     if (context.hasFailures())
                         cout << "    by failed expectation: " << context.flushFailures(4).str() << endl;
                 } else {
                     break;
                 }
             }
-        });
+        }
 
         cout << "  simplest args found by shrinking: " << ShowShrVec{shrVec} << endl;
     }
@@ -432,13 +418,8 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     using ArgTuple = typename FuncType::ArgTuple;
 
     // prepare genVec
-    auto genTuple = util::make_tuple(generator(gens)...);
-    vector<AnyGenerator> genVec;
-    genVec.reserve(NumArgs);
-    // fill with gens
-    util::For<NumGens>([&](auto index_sequence) {
-        genVec.push_back(get<index_sequence.value>(genTuple));
-    });
+    vector<AnyGenerator> genVec{generator(gens)...};
+
     // fill the rest with arbitraries
     util::For<NumArgs-NumGens>([&genVec](auto index_sequence) {
         using T = decay_t<tuple_element_t<NumGens + index_sequence.value, ArgTuple>>;
