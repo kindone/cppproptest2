@@ -199,4 +199,22 @@ Shrinkable<vector<ShrinkableBase>> shrinkAnyVector(const Shrinkable<vector<Shrin
     return shrinkableElemsShr;
 }
 
+Shrinkable<vector<ShrinkableBase>> shrinkVectorLength(const Shrinkable<vector<ShrinkableBase>>& shr,
+                                                         size_t minSize)
+{
+    auto shrinkableElems = shr.getRef();
+    auto size = shrinkableElems.size();
+    auto rangeShrinkable =
+        shrinkIntegral<size_t>(size - minSize).template map<size_t>([minSize](const size_t& s) { return s + minSize; });
+    return rangeShrinkable.template flatMap<vector<ShrinkableBase>>([shr](const size_t& newSize) {
+        if (newSize == 0)
+            return Shrinkable<vector<ShrinkableBase>>(vector<ShrinkableBase>());
+        else {
+            const auto& shrinkableElems = shr.getRef();
+            return Shrinkable<vector<ShrinkableBase>>(
+                util::make_any<vector<ShrinkableBase>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize));
+        }
+    });
+}
+
 } // namespace proptest

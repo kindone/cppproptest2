@@ -142,11 +142,14 @@ Shrinkable<ListLike<Shrinkable<T>>> shrinkListLikeLength(const Shrinkable<ListLi
         if (newSize == 0)
             return Shrinkable<ListLike<Shrinkable<T>>>(ListLike<Shrinkable<T>>());
         else {
-            auto shrinkableElems = shr.getRef();
+            const auto& shrinkableElems = shr.getRef();
             return Shrinkable<ListLike<Shrinkable<T>>>(
                 util::make_any<ListLike<Shrinkable<T>>>(shrinkableElems.begin(), shrinkableElems.begin() + newSize));
         }
     });
 }
+
+PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkVectorLength(const Shrinkable<vector<ShrinkableBase>>& shr,
+size_t minSize);
 
 }  // namespace proptest

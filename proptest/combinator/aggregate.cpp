@@ -11,10 +11,10 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
 
     auto deriveAggregate = [gen1, gen2gen, minSize](const uint64_t& size) {
         if (size == 0)
-            return Function1([](Random&) { return make_shrinkable<vector<ShrinkableAny>>(); });
+            return Function1([](Random&) { return make_shrinkable<vector<ShrinkableBase>>(); });
         return Function1([gen1, gen2gen, size, minSize](Random& rand) {
             ShrinkableBase shr = gen1(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
-            auto shrVec = make_shrinkable<vector<ShrinkableAny>>();
+            auto shrVec = make_shrinkable<vector<ShrinkableBase>>();
             auto& vec = shrVec.getMutableRef();
             vec.reserve(size);
             vec.push_back(shr);
@@ -22,19 +22,19 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
                 shr = gen2gen(shr.getAny()).getRef<Function1>()(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
                 vec.push_back(shr);
             }
-            return shrinkListLikeLength<vector, Any>(shrVec, minSize) // -> Shrinkable<vector<Shrinkable<Any>>>
+            return shrinkVectorLength(shrVec, minSize) // -> Shrinkable<vector<Shrinkable<Any>>>
                 .andThen([](const ShrinkableBase& parent) {
-                    const vector<ShrinkableAny>& shrVec_ = parent.getRef<vector<ShrinkableAny>>();
+                    const vector<ShrinkableBase>& shrVec_ = parent.getRef<vector<ShrinkableBase>>();
                     if (shrVec_.size() == 0)
                         return ShrinkableBase::StreamType::empty();
-                    const ShrinkableAny& lastElemShr = shrVec_.back();
+                    const ShrinkableBase& lastElemShr = shrVec_.back();
                     ShrinkableBase::StreamType elemShrinks = lastElemShr.getShrinks();
                     if (elemShrinks.isEmpty())
                         return ShrinkableBase::StreamType::empty();
                     return elemShrinks.template transform<ShrinkableBase, ShrinkableBase>(
                         [copy = shrVec_](const ShrinkableBase& elem) mutable -> ShrinkableBase {
-                            copy[copy.size() - 1] = ShrinkableAny(elem);
-                            return make_shrinkable<vector<ShrinkableAny>>(copy);
+                            copy[copy.size() - 1] = elem;
+                            return make_shrinkable<vector<ShrinkableBase>>(copy);
                         });
                 });
         });

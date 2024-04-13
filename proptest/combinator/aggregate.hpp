@@ -22,14 +22,14 @@ Generator<vector<T>> aggregateHelper(GenFunction<T> gen1, Function<GenFunction<T
                                     size_t maxSize)
 {
     // Call aggregateImplAny with Any type
-    Generator<vector<ShrinkableAny>> anyVecGen = aggregateImpl(gen1, [gen2gen](const Any& t) -> Function1 { return gen2gen(t.getRef<T>()); }, minSize, maxSize);
+    Generator<vector<ShrinkableBase>> anyVecGen = aggregateImpl(gen1, [gen2gen](const Any& t) -> Function1 { return gen2gen(t.getRef<T>()); }, minSize, maxSize);
 
     // Convert the generated vector<Any> back to vector<T>
-    return anyVecGen.template map<vector<T>>([](const vector<ShrinkableAny>& anyShrVec) -> vector<T> {
+    return anyVecGen.template map<vector<T>>([](const vector<ShrinkableBase>& shrBaseVec) -> vector<T> {
         vector<T> tVec;
-        tVec.reserve(anyShrVec.size());
-        for (const ShrinkableAny& shrAny : anyShrVec) {
-            tVec.push_back(shrAny.getAny().getRef<T>()); // Assuming Any has a get<T>() method
+        tVec.reserve(shrBaseVec.size());
+        for (const ShrinkableAny& shrBase : shrBaseVec) {
+            tVec.push_back(shrBase.getAny().getRef<T>()); // Assuming Any has a get<T>() method
         }
         return tVec;
     });
