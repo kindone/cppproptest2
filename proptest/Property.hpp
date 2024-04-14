@@ -206,6 +206,11 @@ private:
         return util::Call<Arity>(func, [&](auto index_sequence) {
             return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
         });
+
+        // auto lambda = [&](auto index_sequence) -> Any {
+        //     return genVec[index_sequence.value](rand).getAny();
+        // };
+        // return util::CallWithAny<decltype(func), decltype(lambda), ARGS...>(util::forward<decltype(func)>(func), util::forward<decltype(lambda)>(lambda));
     }
 
     virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const override

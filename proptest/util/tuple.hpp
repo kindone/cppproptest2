@@ -66,6 +66,20 @@ decltype(auto) Call(Func&& func, ArgFunc&& argFunc)
     return Call(util::forward<Func>(func), util::forward<ArgFunc>(argFunc), make_index_sequence<N>{});
 }
 
+template <class Func, class ArgFunc, typename...ARGS, size_t... Is>
+// ArgFunc is a template lambda that takes (auto index_sequence) as an argument
+decltype(auto) CallWithAny(Func&& func, ArgFunc&& argFunc, index_sequence<Is...>)
+{
+    return func(argFunc(std::integral_constant<size_t, Is>{}).template getRef<ARGS>()...);
+}
+
+template <class Func, class ArgFunc, typename...ARGS>
+decltype(auto) CallWithAny(Func&& func, ArgFunc&& argFunc)
+{
+    constexpr size_t N = sizeof...(ARGS);
+    return CallWithAny<Func, ArgFunc, ARGS...>(util::forward<Func>(func), util::forward<ArgFunc>(argFunc), make_index_sequence<N>{});
+}
+
 
 
 } // namespace util
