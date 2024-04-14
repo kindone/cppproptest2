@@ -169,17 +169,17 @@ forAll([](std::string original) {
 
 The `forAll` function automatically identifies parameter types of the given property function. This automation allows any number of parameters of simple or complex types to be used to define a property-based test:
 
-![overview](images/forall.svg)
-<!--
+<!-- ![overview](images/forall.svg)-->
+
 ```kroki-d2
 forAll: |cpp
 forAll([](string s, vector<string> v, map<int, string> m) {
   // Do stuff with s, v, and m
-});
+}, Arbitrary<string>(1,4));
 |
 
 S: |cpp
-Arbitrary<string>
+Arbitrary<string> of size 1~4
 |
 
 V: |cpp
@@ -210,7 +210,7 @@ V -> VS: "element: string"
 M -> MI: "key: int"
 M -> MS: "value: string"
 ```
--->
+
 
 It then automatically feeds in the randomly generated values of those types to call the given function multiple times. With this powerful generation engine, we can fully parameterize and randomize our tests with high flexibility but with much less effort.
 
