@@ -79,6 +79,7 @@ public:
     using GenVec = vector<AnyGenerator>;
 
     PropertyBase(vector<AnyGenerator>&& gens) : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), genVec(util::move(gens)) {}
+    virtual ~PropertyBase() {}
 
     static void setDefaultNumRuns(uint32_t);
     static void tag(const char* filename, int lineno, string key, string value);

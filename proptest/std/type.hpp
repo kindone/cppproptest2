@@ -21,6 +21,7 @@ using std::conjunction_v;
 
 using std::is_constructible_v;
 using std::is_convertible_v;
+using std::is_copy_constructible_v;
 using std::is_fundamental_v;
 using std::is_lvalue_reference;
 using std::is_lvalue_reference_v;

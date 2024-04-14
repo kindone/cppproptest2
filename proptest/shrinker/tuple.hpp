@@ -17,8 +17,6 @@ PROPTEST_API Shrinkable<vector<ShrinkableBase>> shrinkTupleUsingVector(Shrinkabl
 template <typename... ARGS>
 PROPTEST_API Shrinkable<tuple<ARGS...>> shrinkTuple(const Shrinkable<vector<ShrinkableBase>>& shrinkable)
 {
-    constexpr size_t NumArgs = sizeof...(ARGS);
-
     return util::shrinkTupleUsingVector(shrinkable).map<tuple<ARGS...>>([](const vector<ShrinkableBase>& shrAnyVec) {
         vector<Any> anyVec;
         anyVec.reserve(shrAnyVec.size());

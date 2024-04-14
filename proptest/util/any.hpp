@@ -144,7 +144,7 @@ struct PROPTEST_API Any {
         if constexpr(is_lvalue_reference_v<T>) {
             ptr = util::make_shared<AnyLValRef<decay_t<T>>>(t);
         }
-        else if constexpr (is_fundamental_v<T>) {
+        else if constexpr(is_fundamental_v<T> || is_copy_constructible_v<T>) {
             ptr = util::make_shared<AnyVal<T>>(t);
         }
         else {
@@ -228,17 +228,20 @@ Any make_any(Args&&... args)
 
     if constexpr (is_same_v<Any, decay_t<T>>) {
         static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
-        return Any{args...};
+        return Any{util::forward<Args>(args)...};
+    }
+    else if constexpr(sizeof...(Args) == 1 && (is_same_v<Any, decay_t<Args>> && ...)) {
+        return Any{util::forward<Args>(args)...};
     }
     else if constexpr(is_lvalue_reference_v<T>) {
         static_assert(sizeof...(Args) == 1, "an l-value reference must be provided as argument");
-        return Any{util::make_shared<AnyLValRef<decay_t<T>>>(args...)};
-    }
-    else if constexpr (is_fundamental_v<T>) {
-        return Any{util::make_shared<AnyVal<T>>(T{args...})};
+        return Any{util::make_shared<AnyLValRef<decay_t<T>>>(util::forward<Args>(args)...)};
     }
     else if constexpr (sizeof...(Args) == 1 && (is_same_v<decay_t<Args>, shared_ptr<T>> && ...)) {
-        return Any(util::make_shared<AnyRef<T>>(args...));
+        return Any(util::make_shared<AnyRef<T>>(util::forward<Args>(args)...));
+    }
+    else if constexpr (is_fundamental_v<decay_t<T>> || is_copy_constructible_v<decay_t<T>>){
+        return Any{util::make_shared<AnyVal<T>>(util::forward<T>(T(util::forward<Args>(args)...)))};
     }
     else {
         return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(util::forward<Args>(args)...)));

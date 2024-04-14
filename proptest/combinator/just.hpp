@@ -21,7 +21,7 @@ Generator<T> just(T&& value)
 {
     if constexpr (is_trivial<T>::value)
         return generator([value](Random&) { return make_shrinkable<T>(value); });
-    else if(!is_trivial<T>::value)
+    else if constexpr (!is_trivial<T>::value)
     {
         auto any = util::make_any<T>(util::forward<T>(value));  // requires copy constructor
         return generator([any](Random&) { return Shrinkable<T>(any); });
