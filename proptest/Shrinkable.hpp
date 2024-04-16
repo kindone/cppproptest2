@@ -21,7 +21,7 @@ struct PROPTEST_API ShrinkableBase
     using StreamElementType = ShrinkableBase;
     using StreamType = ::proptest::Stream;
 
-    explicit ShrinkableBase(Any _value);
+    explicit ShrinkableBase(const Any& _value);
 
     template <typename T>
     ShrinkableBase(const Shrinkable<T>& other) : value(other.value), shrinksGen(other.shrinksGen) {}

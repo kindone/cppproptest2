@@ -51,6 +51,9 @@ struct PROPTEST_API AnyVal : AnyHolder {
     const type_info& type() const override { return typeid(T); }
     virtual ~AnyVal() {}
 
+    AnyVal(T&& val) : value(util::move(val)) {
+    }
+
     AnyVal(const T& val) : value(val) {
     }
 
@@ -102,6 +105,9 @@ struct PROPTEST_API AnyRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
     virtual ~AnyRef() {}
 
+    AnyRef(T&& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(util::move(t))))) {
+    }
+
     AnyRef(const T& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(t)))) {
     }
 
@@ -138,6 +144,18 @@ struct PROPTEST_API Any {
     virtual ~Any();
 
     Any(const Any& other);
+    Any(Any&& other);
+
+    template <typename T>
+        requires (!is_lvalue_reference_v<T>)
+    Any(T&& t) {
+        if constexpr(is_fundamental_v<T> || is_copy_constructible_v<T>) {
+            ptr = util::make_shared<AnyVal<T>>(util::move(t));
+        }
+        else {
+            ptr = util::make_shared<AnyRef<T>>(util::make_shared<T>(util::move(t)));
+        }
+    }
 
     template <typename T>
     Any(const T& t) {
@@ -153,18 +171,23 @@ struct PROPTEST_API Any {
     }
 
     template <typename T>
-    Any(const shared_ptr<AnyLValRef<T>>& holderPtr) : ptr(holderPtr){
-    }
+    Any(const shared_ptr<AnyLValRef<T>>& holderPtr) : ptr(holderPtr){}
+    template <typename T>
+    Any(shared_ptr<AnyLValRef<T>>&& holderPtr) : ptr(holderPtr){}
 
     template <typename T>
-    Any(const shared_ptr<AnyRef<T>>& holderPtr) : ptr(holderPtr){
-    }
+    Any(const shared_ptr<AnyRef<T>>& holderPtr) : ptr(holderPtr){}
+    template <typename T>
+    Any(shared_ptr<AnyRef<T>>&& holderPtr) : ptr(holderPtr){}
 
     template <typename T>
-    Any(const shared_ptr<AnyVal<T>>& holderPtr) : ptr(holderPtr){
-    }
+    Any(const shared_ptr<AnyVal<T>>& holderPtr) : ptr(holderPtr){}
+
+    template <typename T>
+    Any(shared_ptr<AnyVal<T>>&& holderPtr) : ptr(holderPtr){}
 
     Any(const shared_ptr<AnyHolder>& holderPtr);
+    Any(shared_ptr<AnyHolder>&& holderPtr);
 
     Any clone() const;
 

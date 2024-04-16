@@ -7,6 +7,7 @@ namespace proptest {
 const Any Any::empty;
 
 Any::Any(const Any& other) : ptr(other.ptr) {}
+Any::Any(Any&& other) : ptr(other.ptr) {}
 
 Any::~Any() {}
 
@@ -33,6 +34,7 @@ Any& Any::operator=(const Any& other) {
 }
 
 Any::Any(const shared_ptr<AnyHolder>& holderPtr) : ptr(holderPtr) { }
+Any::Any(shared_ptr<AnyHolder>&& holderPtr) : ptr(holderPtr) { }
 
 Any Any::clone() const
 {

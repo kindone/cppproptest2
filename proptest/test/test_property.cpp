@@ -317,6 +317,13 @@ TEST(Property, TestTupleCheckFail)
     });
 }
 
+TEST(Property, TestArgCheckFail)
+{
+    forAll([](int a, int b) {
+        PROP_ASSERT((-10 < a && a < 100) || (-20 < b && b < 200));
+    });
+}
+
 bool propertyAsFunc(string, int, vector<int>)
 {
     return true;

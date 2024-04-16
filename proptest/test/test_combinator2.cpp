@@ -158,8 +158,8 @@ TEST(PropTest, TestDependency2)
     auto numElementsGen = Arbi<uint16_t>();
     auto dimGen = pairOf(numRowsGen, numElementsGen);
 
-    auto rawGen = dependency<Dimension, IndexVector>(
-        dimGen, +[](const Dimension& dimension) {
+    auto rawGen = dimGen.pairWith<IndexVector>(
+        +[](const Dimension& dimension) {
             int numRows = dimension.first;
             uint16_t numElements = dimension.second;
             auto firstGen = interval<uint16_t>(0, numElements);
@@ -178,10 +178,8 @@ TEST(PropTest, TestDependency2)
         cout << "rawGen: " << i <<  endl;
     }
 
-    return;
-
-    auto tableDataGen = transform<RawData, TableData>(
-        rawGen, +[](const RawData& raw) {
+    auto tableDataGen = rawGen.template map<TableData>(
+        +[](const RawData& raw) {
             TableData tableData;
             auto dimension = raw.first;
             tableData.num_rows = dimension.first;
@@ -195,8 +193,8 @@ TEST(PropTest, TestDependency2)
         cout << "table: " << tableDataGen(rand).get() << " / table " << i << endl;
     }
 
-    auto tableDataWithValueGen = dependency<TableData, vector<bool>>(
-        tableDataGen, +[](const TableData& td) {
+    auto tableDataWithValueGen = tableDataGen.template pairWith<vector<bool>>(
+        +[](const TableData& td) {
             vector<bool> values;
             auto vectorGen = Arbi<vector<bool>>();
             vectorGen.setSize(td.num_elements);
@@ -206,9 +204,11 @@ TEST(PropTest, TestDependency2)
     // exhaustive(tableDataGen(rand), 0);
 
     // DictionaryCompression::IQTypeInfo ti;
+    int i = 0;
     forAll(
-        +[](const pair<TableData, vector<bool>>) {
+        [&i](pair<TableData, vector<bool>>) {
             // column->set(&index[i].first, index[i].second);
+            cout << "running: " << i++ << endl;
             return true;
         },
         tableDataWithValueGen);

@@ -12,6 +12,8 @@ TEST(Shrinkable, basic)
     EXPECT_EQ(shr.get(), 100);
     EXPECT_EQ(shr.getAny().getRef<int>(), 100);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
+
+    cout << sizeof(shr) << endl;
 }
 
 TEST(Shrinkable, with)

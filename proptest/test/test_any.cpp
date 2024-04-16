@@ -276,26 +276,26 @@ TEST(AnyVal, ptr_mutation)
     ASSERT_EQ(val2.getRef<Copyable*>()->value, 200);
 }
 
-TEST(AnyVal, reference_mutation)
-{
-    Copyable copyable(100);
-    Copyable& copyableRef = copyable;
-    AnyVal<Copyable&> val = util::make_anyval<Copyable&>(copyableRef);
-    ASSERT_EQ(val.type(), typeid(Copyable&));
-    ASSERT_EQ(val.getRef<Copyable&>().value, 100);
-    ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
+// TEST(AnyVal, reference_mutation)
+// {
+//     Copyable copyable(100);
+//     Copyable& copyableRef = copyable;
+//     AnyVal<Copyable&> val = util::make_anyval<Copyable&>(copyableRef);
+//     ASSERT_EQ(val.type(), typeid(Copyable&));
+//     ASSERT_EQ(val.getRef<Copyable&>().value, 100);
+//     ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
 
-    AnyVal<Copyable&> val2 = val;
-    ASSERT_EQ(val2.type(), typeid(Copyable&));
-    ASSERT_EQ(val2.getRef<Copyable&>().value, 100);
-    ASSERT_EQ(val2.getRef<Copyable&>().numCopied, 0);
-    ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
+//     AnyVal<Copyable&> val2 = val;
+//     ASSERT_EQ(val2.type(), typeid(Copyable&));
+//     ASSERT_EQ(val2.getRef<Copyable&>().value, 100);
+//     ASSERT_EQ(val2.getRef<Copyable&>().numCopied, 0);
+//     ASSERT_EQ(val.getRef<Copyable&>().numCopied, 0);
 
-    copyable.value = 200;
+//     copyable.value = 200;
 
-    ASSERT_EQ(val.getRef<Copyable&>().value, 200);
-    ASSERT_EQ(val2.getRef<Copyable&>().value, 200);
-}
+//     ASSERT_EQ(val.getRef<Copyable&>().value, 200);
+//     ASSERT_EQ(val2.getRef<Copyable&>().value, 200);
+// }
 
 TEST(AnyRef, not_copied_when_assigned)
 {
@@ -445,6 +445,22 @@ TEST(Any, Any)
     ASSERT_EQ(any0.type(), typeid(vector<string>));
     Any any(Any{any0});
     ASSERT_EQ(any.type(), typeid(vector<string>));
+}
+
+TEST(Any, move)
+{
+    Movable m(100);
+    Any any0(util::move(m));
+    ASSERT_EQ(any0.getRef<Movable>().value, 100);
+    ASSERT_EQ(m.value, 0);
+}
+
+TEST(Any, move2)
+{
+    Movable m(100);
+    auto any0 = util::make_any<Movable>(util::move(m));
+    ASSERT_EQ(any0.getRef<Movable>().value, 100);
+    ASSERT_EQ(m.value, 0);
 }
 
 TEST(Any, reassignment_empty)

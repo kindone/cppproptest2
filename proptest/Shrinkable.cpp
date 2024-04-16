@@ -2,7 +2,7 @@
 
 namespace proptest {
 
-ShrinkableBase::ShrinkableBase(Any _value) : value(_value), shrinksGen(+[]() { return StreamType::empty(); }) {}
+ShrinkableBase::ShrinkableBase(const Any& _value) : value(_value), shrinksGen(+[]() { return StreamType::empty(); }) {}
 
 ShrinkableBase::ShrinkableBase(const Any& _value, const Function<StreamType()>& _shrinksGen) : value(_value), shrinksGen(_shrinksGen) { }
 
