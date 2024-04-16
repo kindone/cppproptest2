@@ -43,6 +43,7 @@ struct CallableHolderBase {
 
 template <typename Callable, typename RET, typename...ARGS>
 struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
+    explicit CallableHolder(Callable&& c) : callable(util::move(c)) {}
     explicit CallableHolder(const Callable& c) : callable(c) {}
 
     static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable has incompatible signature for RET(ARGS...)>");
@@ -72,8 +73,13 @@ struct PROPTEST_API Function<RET(ARGS...)> {
     Function(const Function& other) : holder(other.holder) {}
 
     template <typename Callable>
-        requires (!is_base_of_v<Function, decay_t<Callable>>)
+        requires (!is_lvalue_reference_v<Callable> && !is_base_of_v<Function, decay_t<Callable>>)
     Function(Callable&& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
+    }
+
+    template <typename Callable>
+        requires (!is_base_of_v<Function, decay_t<Callable>>)
+    Function(const Callable& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(c)) {
     }
 
     operator bool() const {
