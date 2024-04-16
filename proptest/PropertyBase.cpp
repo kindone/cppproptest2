@@ -1,10 +1,9 @@
 #include "proptest/PropertyBase.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/std/chrono.hpp"
+#include "proptest/Random.hpp"
 
 namespace proptest {
-
-int64_t getCurrentTime();
 
 namespace util {
 

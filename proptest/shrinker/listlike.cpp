@@ -1,5 +1,6 @@
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/shrinker/integral.hpp"
+#include <math.h>
 
 namespace proptest {
 

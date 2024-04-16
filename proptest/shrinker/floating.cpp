@@ -1,4 +1,5 @@
 #include "proptest/shrinker/floating.hpp"
+#include <math.h>
 
 namespace proptest {
 

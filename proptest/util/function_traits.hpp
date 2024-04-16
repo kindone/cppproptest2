@@ -1,6 +1,7 @@
 #pragma once
 #include "proptest/std/lang.hpp"
 #include "proptest/util/typelist.hpp"
+#include <cstddef>
 
 namespace proptest {
 
