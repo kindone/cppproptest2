@@ -99,8 +99,8 @@ ShrinkableBase ShrinkableBase::concatStatic(const StreamType& then) const {
 
 // concat: extend shrinksGen stream with function taking parent as argument
 ShrinkableBase ShrinkableBase::concat(Function<StreamType(const ShrinkableBase&)> then) const {
-    return with([copy = *this, shrinksGen = this->shrinksGen, then]() {
-        auto shrinksWithThen = shrinksGen().template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
+    return with([copy = *this, then]() {
+        auto shrinksWithThen = copy.shrinksGen().template transform<ShrinkableBase,ShrinkableBase>([then](const ShrinkableBase& shr) -> ShrinkableBase {
             return shr.concat(then);
         });
         return shrinksWithThen.concat([=]() { return then(copy); });

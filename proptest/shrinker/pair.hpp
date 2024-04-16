@@ -15,10 +15,10 @@ PROPTEST_API ShrinkableBase shrinkPairImpl(const ShrinkableBase& shrinkable);
 template <typename ARG1, typename ARG2>
 Shrinkable<pair<ARG1,ARG2>> shrinkPair(const Shrinkable<ARG1>& firstShr, const Shrinkable<ARG2>& secondShr)
 {
-    auto pairShr = ShrinkableBase(util::make_pair(ShrinkableBase(firstShr), ShrinkableBase(secondShr)));
+    auto pairShr = ShrinkableBase(util::make_any<pair<ShrinkableBase,ShrinkableBase>>(ShrinkableBase(firstShr), ShrinkableBase(secondShr)));
     return util::shrinkPairImpl(pairShr).map(+[](const Any& anyPair) -> Any {
         const auto& shrPair = anyPair.getRef<pair<ShrinkableBase, ShrinkableBase>>();
-        return util::make_pair(shrPair.first.getRef<ARG1>(), shrPair.second.getRef<ARG2>());
+        return util::make_any<pair<ARG1,ARG2>>(shrPair.first.getRef<ARG1>(), shrPair.second.getRef<ARG2>());
     });
 }
 
