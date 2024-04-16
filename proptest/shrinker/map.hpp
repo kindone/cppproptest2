@@ -13,12 +13,12 @@ template <typename Key, typename Value>
 Shrinkable<map<Key, Value>> shrinkMap(const Shrinkable<vector<ShrinkableBase>>& inPairShrVecShr, size_t minSize) {
     Shrinkable<vector<ShrinkableBase>> pairShrVecShr = shrinkAnyVector(inPairShrVecShr, minSize, /*elementwise*/true, /*membershipwise*/true);
     return pairShrVecShr.template flatMap<map<Key, Value>>([](const vector<ShrinkableBase>& anyVec) {
-        auto mapPtr = util::make_shared<map<Key, Value>>();
+        auto mapPtr = util::make_unique<map<Key, Value>>();
         for(const auto& any : anyVec) {
             const auto& thePair = any.getRef<pair<Key,Value>>();
             mapPtr->insert(thePair);
         }
-        return Shrinkable<map<Key, Value>>(util::make_any<map<Key, Value>>(mapPtr));
+        return Shrinkable<map<Key, Value>>(util::make_any<map<Key, Value>>(util::move(mapPtr)));
     });
 }
 

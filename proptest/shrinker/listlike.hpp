@@ -52,11 +52,11 @@ Shrinkable<Container<T>> toContainerTShrinkable(const Shrinkable<vector<Shrinkab
 {
     return shrinkableBaseVecShr.template flatMap<Container<T>>(
         +[](const vector<ShrinkableBase>& _shrinkableVector) {
-            auto valueContPtr = util::make_shared<Container<T>>();
+            auto valueContPtr = util::make_unique<Container<T>>();
             util::transform(
                 _shrinkableVector.begin(), _shrinkableVector.end(), util::inserter(*valueContPtr, valueContPtr->begin()),
                 +[](const ShrinkableBase& shr) -> T { return shr.getAny().getRef<T>(); });
-            return Shrinkable<Container<T>>(util::make_any<Container<T>>(valueContPtr));
+            return Shrinkable<Container<T>>(util::make_any<Container<T>>(util::move(valueContPtr)));
         });
 }
 
@@ -65,11 +65,11 @@ Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<Shrinkable
 {
     return shrinkableBaseVecShr.template flatMap<ListLike<T>>(
         +[](const vector<ShrinkableBase>& _shrinkableVector) {
-            auto valueContPtr = util::make_shared<ListLike<T>>();
+            auto valueContPtr = util::make_unique<ListLike<T>>();
             util::transform(
                 _shrinkableVector.begin(), _shrinkableVector.end(), util::back_inserter(*valueContPtr),
                 +[](const ShrinkableBase& shr) -> T { return shr.getAny().getRef<T>(); });
-            return Shrinkable<ListLike<T>>(util::make_any<ListLike<T>>(valueContPtr));
+            return Shrinkable<ListLike<T>>(util::make_any<ListLike<T>>(util::move(valueContPtr)));
         });
 }
 

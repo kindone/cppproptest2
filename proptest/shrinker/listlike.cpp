@@ -124,9 +124,9 @@ Shrinkable<vector<ShrinkableBase>> VectorShrinker::shrinkMid(const Shrinkable<ve
     return rangeShrinkable.template flatMap<vector<ShrinkableBase>>([shr, frontSize](const size_t& rearSize) {
         // concat front and rear
         auto shrinkableCont = shr.getRef();
-        auto contPtr = util::make_shared<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
+        auto contPtr = util::make_unique<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
         contPtr->insert(contPtr->end(), shrinkableCont.begin() + (contPtr->size()-rearSize), shrinkableCont.end());
-        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(contPtr));
+        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
     }).concat([minSize, frontSize, rearSize](const stream_element_t& parentElem) -> stream_t {
         shrinkable_t parent = parentElem;
         size_t parentSize = parent.getRef().size();
@@ -147,9 +147,9 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinka
     return rangeShrinkable.template flatMap<vector<ShrinkableBase>>([shr, maxFrontSize](const size_t& frontSize) {
         const auto& shrinkableCont = shr.getRef();
         // concat front and rear
-        auto contPtr = util::make_shared<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
+        auto contPtr = util::make_unique<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
         contPtr->insert(contPtr->end(), shrinkableCont.begin() + maxFrontSize, shrinkableCont.end());
-        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(contPtr));
+        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
     }).concat([minSize, rearSize](const shrinkable_t& parent) -> stream_t {
         // reduce front [0,size-rearSize-1] as much possible
         size_t parentSize = parent.getRef().size();

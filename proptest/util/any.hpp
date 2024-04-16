@@ -105,13 +105,13 @@ struct PROPTEST_API AnyRef : AnyHolder {
     const type_info& type() const override { return typeid(T); }
     virtual ~AnyRef() {}
 
-    AnyRef(T&& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(util::move(t))))) {
+    AnyRef(T&& t) : ptr(util::make_unique<T>(util::move(t))) {
     }
 
-    AnyRef(const T& t) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(util::make_shared<T>(t)))) {
+    AnyRef(const T& t) : ptr(util::make_unique<T>(t)) {
     }
 
-    AnyRef(const shared_ptr<T>& tptr) : ptr(static_pointer_cast<void>(const_pointer_cast<decay_t<T>>(tptr))) {
+    AnyRef(unique_ptr<T>&& tptr) : ptr(util::move(tptr)) {
     }
 
     const void* rawPtr() const override {
@@ -128,13 +128,13 @@ struct PROPTEST_API AnyRef : AnyHolder {
 
     virtual shared_ptr<AnyHolder> clone() const override {
         if constexpr(copy_constructible<T>)
-            return util::make_shared<AnyRef<T>>(*static_pointer_cast<T>(ptr));
+            return util::make_shared<AnyRef<T>>(*ptr);
         else
             throw runtime_error(__FILE__, __LINE__, "cannot clone AnyRef of a type with no copy constructor: " + string(type().name()));
     }
 
 private:
-    shared_ptr<void> ptr;
+    unique_ptr<T> ptr;
 };
 
 struct PROPTEST_API Any {
@@ -153,7 +153,7 @@ struct PROPTEST_API Any {
             ptr = util::make_shared<AnyVal<T>>(util::move(t));
         }
         else {
-            ptr = util::make_shared<AnyRef<T>>(util::make_shared<T>(util::move(t)));
+            ptr = util::make_shared<AnyRef<T>>(util::make_unique<T>(util::move(t)));
         }
     }
 
@@ -260,14 +260,14 @@ Any make_any(Args&&... args)
         static_assert(sizeof...(Args) == 1, "an l-value reference must be provided as argument");
         return Any{util::make_shared<AnyLValRef<decay_t<T>>>(util::forward<Args>(args)...)};
     }
-    else if constexpr (sizeof...(Args) == 1 && (is_same_v<decay_t<Args>, shared_ptr<T>> && ...)) {
+    else if constexpr (sizeof...(Args) == 1 && (is_same_v<decay_t<Args>, unique_ptr<T>> && ...)) {
         return Any(util::make_shared<AnyRef<T>>(util::forward<Args>(args)...));
     }
     else if constexpr (is_fundamental_v<decay_t<T>> || is_copy_constructible_v<decay_t<T>>){
         return Any{util::make_shared<AnyVal<T>>(util::forward<T>(T(util::forward<Args>(args)...)))};
     }
     else {
-        return Any(util::make_shared<AnyRef<T>>(util::make_shared<T>(util::forward<Args>(args)...)));
+        return Any(util::make_shared<AnyRef<T>>(util::make_unique<T>(util::forward<Args>(args)...)));
     }
 }
 

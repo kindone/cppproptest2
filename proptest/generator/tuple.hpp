@@ -26,12 +26,12 @@ decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens)
     // generator
     return generator([genVec](Random& rand) mutable {
         // generate into new vector
-        auto shrVecPtr = util::make_shared<vector<ShrinkableBase>>();
+        auto shrVecPtr = util::make_unique<vector<ShrinkableBase>>();
         shrVecPtr->reserve(Size);
         for(const auto& gen : *genVec) {
             shrVecPtr->push_back(gen(rand));
         }
-        return shrinkTuple(ArgTypeList{}, make_shrinkable<vector<ShrinkableBase>>(shrVecPtr));
+        return shrinkTuple(ArgTypeList{}, make_shrinkable<vector<ShrinkableBase>>(util::move(shrVecPtr)));
     });
 }
 
@@ -53,12 +53,12 @@ public:
     // Arbi(const tuple<GenFunction<ARGS>...>& _genTup) : genTup(_genTup) {}
 
     Shrinkable<tuple<ARGS...>> operator()(Random& rand) const override {
-        auto shrVecPtr = util::make_shared<vector<ShrinkableBase>>();
+        auto shrVecPtr = util::make_unique<vector<ShrinkableBase>>();
         shrVecPtr->reserve(Size);
         for(auto& gen : genVec) {
             shrVecPtr->push_back(gen(rand));
         }
-        return shrinkTuple<ARGS...>(make_shrinkable<vector<ShrinkableBase>>(shrVecPtr));
+        return shrinkTuple<ARGS...>(make_shrinkable<vector<ShrinkableBase>>(util::move(shrVecPtr)));
     }
 
 private:
