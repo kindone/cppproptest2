@@ -79,10 +79,8 @@ ostream& errorOrEmpty(bool condition);
 #define PROP_ASSERT_STREAM(condition, a, sign, b)                                                                  \
     do {                                                                                                           \
         if (!(condition)) {                                                                                        \
-            stringstream __prop_assert_stream_str;                                                                 \
-            __prop_assert_stream_str << #condition << " with " << a << sign << b;                                  \
-            ::proptest::AssertFailed __proptest_except_obj(__FILE__, __LINE__, {}, __prop_assert_stream_str.str(), \
-                                                           nullptr);                                               \
+            ::proptest::AssertFailed __proptest_except_obj(__FILE__, __LINE__, {},                                 \
+                (proptest::stringstream() << #condition << " with " << a << sign << b).str(), nullptr);            \
             throw __proptest_except_obj;                                                                           \
         }                                                                                                          \
     } while (false)
@@ -101,11 +99,10 @@ ostream& errorOrEmpty(bool condition);
 #define PROP_ASSERT_STREQ(a, b, n)                                                                            \
     do {                                                                                                      \
         if (!(memcmp(a, b, n) == 0)) {                                                                        \
-            stringstream __prop_assert_stream_str;                                                            \
-            __prop_assert_stream_str << #a << " not equals " << #b << " with " << proptest::Show<char*>(a, n) \
-                                     << " not equals " << proptest::Show<char*>(b, n);                        \
             ::proptest::AssertFailed __proptest_except_obj(__FILE__, __LINE__, {},                            \
-                                                           __prop_assert_stream_str.str().c_str(), nullptr);  \
+                (::proptest::stringstream() << #a << " not equals " << #b << " with " <<                      \
+                 proptest::Show<char*>(a, n) << " not equals " << proptest::Show<char*>(b, n)).str().c_str(), \
+                 nullptr);                                                                                    \
             throw __proptest_except_obj;                                                                      \
         }                                                                                                     \
     } while (false)

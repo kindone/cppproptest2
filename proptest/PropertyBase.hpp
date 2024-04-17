@@ -8,66 +8,6 @@
 #include "proptest/util/function.hpp"
 #include "proptest/Generator.hpp"
 
-#define PROP_EXPECT_STREAM(condition, a, sign, b)                                            \
-    ([&]() -> stringstream& {                                                           \
-        if (!(condition)) {                                                                  \
-            stringstream __prop_expect_stream_str;                                      \
-            __prop_expect_stream_str << (a) << (sign) << (b);                                      \
-            ::proptest::PropertyBase::fail(__FILE__, __LINE__, #condition, __prop_expect_stream_str);    \
-        } else {                                                                             \
-            stringstream __prop_expect_stream_str;                                      \
-            ::proptest::PropertyBase::succeed(__FILE__, __LINE__, #condition, __prop_expect_stream_str); \
-        }                                                                                    \
-        return ::proptest::PropertyBase::getLastStream();                                                \
-    })()
-
-#define PROP_EXPECT(cond) PROP_EXPECT_STREAM(cond, "", "", "")
-#define PROP_EXPECT_TRUE(cond) PROP_EXPECT_STREAM(cond, "", "", "")
-#define PROP_EXPECT_FALSE(cond) PROP_EXPECT_STREAM(cond, cond, " == ", "true")
-#define PROP_EXPECT_EQ(a, b) PROP_EXPECT_STREAM((a == b), a, " != ", b)
-#define PROP_EXPECT_NE(a, b) PROP_EXPECT_STREAM((a != b), a, " == ", b)
-#define PROP_EXPECT_LT(a, b) PROP_EXPECT_STREAM((a < b), a, " >= ", b)
-#define PROP_EXPECT_GT(a, b) PROP_EXPECT_STREAM((a > b), a, " <= ", b)
-#define PROP_EXPECT_LE(a, b) PROP_EXPECT_STREAM((a <= b), a, " > ", b)
-#define PROP_EXPECT_GE(a, b) PROP_EXPECT_STREAM((a >= b), a, " < ", b)
-#define PROP_EXPECT_STREQ(a, b, n) \
-    PROP_EXPECT_STREAM(memcmp(a, b, n) == 0, ::proptest::Show<char*>(a, n), " not equals ", ::proptest::Show<char*>(b, n))
-#define PROP_EXPECT_STREQ2(a, b, n1, n2)                                                                      \
-    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) == 0, ::proptest::Show<char*>(a, n1), " not equals ", \
-                       ::proptest::Show<char*>(b, n2))
-#define PROP_EXPECT_STRNE(a, b, n) \
-    PROP_EXPECT_STREAM(memcmp(a, b, n) != 0, ::proptest::Show<char*>(a, n), " equals ", ::proptest::Show<char*>(b, n))
-#define PROP_EXPECT_STRNE2(a, b, n1, n2)                                                                  \
-    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) != 0, ::proptest::Show<char*>(a, n1), " equals ", \
-                       ::proptest::Show<char*>(b, n2))
-
-#define PROP_STAT(VALUE)                                                                       \
-    do {                                                                                       \
-        stringstream __prop_stat_key;                                                     \
-        __prop_stat_key << (#VALUE);                                                           \
-        stringstream __prop_stat_value;                                                   \
-        __prop_stat_value << boolalpha;                                                   \
-        __prop_stat_value << (VALUE);                                                          \
-        ::proptest::PropertyBase::tag(__FILE__, __LINE__, __prop_stat_key.str(), __prop_stat_value.str()); \
-    } while (false)
-
-#define PROP_TAG(KEY, VALUE)                                                                   \
-    do {                                                                                       \
-        stringstream __prop_stat_key;                                                     \
-        __prop_stat_key << (KEY);                                                              \
-        stringstream __prop_stat_value;                                                   \
-        __prop_stat_value << boolalpha;                                                   \
-        __prop_stat_value << (VALUE);                                                          \
-        ::proptest::PropertyBase::tag(__FILE__, __LINE__, __prop_stat_key.str(), __prop_stat_value.str()); \
-    } while (false)
-
-#define PROP_CLASSIFY(condition, KEY, VALUE)                   \
-    do {                                                       \
-        if (condition) {                                       \
-            ::proptest::PropertyBase::tag(__FILE__, __LINE__, KEY, VALUE); \
-        }                                                      \
-    } while (false)
-
 namespace proptest {
 
 class Random;
@@ -148,4 +88,46 @@ protected:
     friend struct PropertyContext;
 };
 
+stringstream& expectStream(const stringstream& __prop_expect_stream_str, bool result, const char* condition, const char* filename, int lineno);
+
 }  // namespace proptest
+
+#define PROP_EXPECT_STREAM(condition, a, sign, b)                                            \
+    ::proptest::expectStream(::proptest::stringstream() << (a) << (sign) << (b), !(condition), #condition, __FILE__, __LINE__)
+
+#define PROP_EXPECT(cond) PROP_EXPECT_STREAM(cond, "", "", "")
+#define PROP_EXPECT_TRUE(cond) PROP_EXPECT_STREAM(cond, "", "", "")
+#define PROP_EXPECT_FALSE(cond) PROP_EXPECT_STREAM(cond, cond, " == ", "true")
+#define PROP_EXPECT_EQ(a, b) PROP_EXPECT_STREAM((a == b), a, " != ", b)
+#define PROP_EXPECT_NE(a, b) PROP_EXPECT_STREAM((a != b), a, " == ", b)
+#define PROP_EXPECT_LT(a, b) PROP_EXPECT_STREAM((a < b), a, " >= ", b)
+#define PROP_EXPECT_GT(a, b) PROP_EXPECT_STREAM((a > b), a, " <= ", b)
+#define PROP_EXPECT_LE(a, b) PROP_EXPECT_STREAM((a <= b), a, " > ", b)
+#define PROP_EXPECT_GE(a, b) PROP_EXPECT_STREAM((a >= b), a, " < ", b)
+#define PROP_EXPECT_STREQ(a, b, n) \
+    PROP_EXPECT_STREAM(memcmp(a, b, n) == 0, ::proptest::Show<char*>(a, n), " not equals ", ::proptest::Show<char*>(b, n))
+#define PROP_EXPECT_STREQ2(a, b, n1, n2)                                                                      \
+    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) == 0, ::proptest::Show<char*>(a, n1), " not equals ", \
+                       ::proptest::Show<char*>(b, n2))
+#define PROP_EXPECT_STRNE(a, b, n) \
+    PROP_EXPECT_STREAM(memcmp(a, b, n) != 0, ::proptest::Show<char*>(a, n), " equals ", ::proptest::Show<char*>(b, n))
+#define PROP_EXPECT_STRNE2(a, b, n1, n2)                                                                  \
+    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) != 0, ::proptest::Show<char*>(a, n1), " equals ", \
+                       ::proptest::Show<char*>(b, n2))
+
+#define PROP_STAT(VALUE)                                                                       \
+    do {                                                                                       \
+        ::proptest::PropertyBase::tag(__FILE__, __LINE__, (::proptest::stringstream() << (#VALUE)).str(), (::proptest::stringstream() << boolalpha << (VALUE)).str()); \
+    } while (false)
+
+#define PROP_TAG(KEY, VALUE)                                                                   \
+    do {                                                                                       \
+        ::proptest::PropertyBase::tag(__FILE__, __LINE__, (::proptest::stringstream() << (KEY)).str(), (::proptest::stringstream() << boolalpha << (VALUE)).str()); \
+    } while (false)
+
+#define PROP_CLASSIFY(condition, KEY, VALUE)                   \
+    do {                                                       \
+        if (condition) {                                       \
+            ::proptest::PropertyBase::tag(__FILE__, __LINE__, KEY, VALUE); \
+        }                                                      \
+    } while (false)
