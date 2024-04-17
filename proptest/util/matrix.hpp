@@ -13,33 +13,11 @@ decltype(auto) cartesianProduct(Function<RET(ARGS...)> func, initializer_list<AR
     using TUP = tuple<ARGS...>;
     constexpr int Size = sizeof...(ARGS);
 
-    auto vecTuple = util::make_tuple(vector<ARGS>(lists)...);
+    auto vecTuple = util::make_tuple();
     // prepare vecs
-    vector<vector<Any>> vecs(Size);
-    util::For<Size>([&] (auto index_sequence) {
-        auto vec = get<index_sequence.value>(vecTuple);
-        // convert to Any by copying
-        vecs[index_sequence.value].insert(vecs[index_sequence.value].end(), vec.begin(), vec.end());
-    });
-
+    vector<vector<Any>> vecs{vector<Any>(lists.begin(), lists.end())...};
     // i per args
     size_t is[Size] = {0};
-    // progress condition
-    /*
-    // progress front elements first
-    auto progressFirst = [&]() {
-        for(size_t j = 0; j < Size; j++) {
-            if(is[j] < vecs[j].size()) {
-                for(size_t k = 0;k < j;k++)
-                    is[k] = 0;
-                is[j]++;
-                if(is[j] < vecs[j].size())
-                    return true;
-            }
-        }
-        return false;
-    };
-    */
 
     // progress rear elements first
     auto progress = [&]() {

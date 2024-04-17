@@ -36,17 +36,11 @@ struct PROPTEST_API PropertyFailedBase : public logic_error
     int lineno;
 };
 
-template <typename ValueTuple>
 struct PROPTEST_API PropertyFailed : public PropertyFailedBase
 {
     PropertyFailed(const AssertFailed& e) : PropertyFailedBase(e) {}
     virtual ~PropertyFailed();
 };
-
-template <typename ValueTuple>
-PropertyFailed<ValueTuple>::~PropertyFailed()
-{
-}
 
 struct PROPTEST_API Discard : public logic_error
 {
