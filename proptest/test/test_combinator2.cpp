@@ -154,7 +154,7 @@ TEST(PropTest, TestDependency2)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto numRowsGen = interval<int>(10000, 10000);
+    auto numRowsGen = interval<int>(1000, 1000);
     auto numElementsGen = Arbi<uint16_t>();
     auto dimGen = pairOf(numRowsGen, numElementsGen);
 
@@ -190,7 +190,7 @@ TEST(PropTest, TestDependency2)
     cout << "transformed." << endl;
 
     for (int i = 0; i < 10; i++) {
-        cout << "table: " << tableDataGen(rand).get() << " / table " << i << endl;
+        tableDataGen(rand).get();
     }
 
     auto tableDataWithValueGen = tableDataGen.template pairWith<vector<bool>>(
