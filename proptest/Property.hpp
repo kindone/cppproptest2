@@ -136,36 +136,8 @@ public:
     bool example(const ARGS&... args)
     {
         PropertyContext context;
-        auto valueTup = util::make_tuple(args...);
-        try {
-            try {
-                try {
-                    if (onStartup)
-                        onStartup();
-                    bool result = func(args...);
-                    if (onCleanup)
-                        onCleanup();
-                    return result;
-                } catch (const AssertFailed& e) {
-                    throw PropertyFailed<tuple<ARGS...>>(e);
-                }
-            } catch (const Success&) {
-                return true;
-            } catch (const Discard&) {
-                // silently discard combination
-                cerr << "Discard is not supported for single run" << endl;
-            }
-        } catch (const PropertyFailedBase& e) {
-            cerr << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
-            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
-            return false;
-        } catch (const exception& e) {
-            // skip shrinking?
-            cerr << "example failed by exception: " << e.what() << endl;
-            cerr << "  with args: " << Show<tuple<ARGS...>>(valueTup) << endl;
-            return false;
-        }
-        return false;
+        vector<Any> values{args...};
+        return exampleImpl(values);
     }
 
 public:
@@ -196,6 +168,12 @@ public:
 
 private:
 
+    virtual bool callFunction(const vector<Any>& anyVec) override {
+        return util::Call<Arity>(func, [&](auto index_sequence) {
+            return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        });
+    }
+
     virtual bool callFunction(const vector<ShrinkableBase>& shrVec) override {
         return util::Call<Arity>(func, [&](auto index_sequence) {
             return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
@@ -206,11 +184,6 @@ private:
         return util::Call<Arity>(func, [&](auto index_sequence) {
             return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
         });
-
-        // auto lambda = [&](auto index_sequence) -> Any {
-        //     return genVec[index_sequence.value](rand).getAny();
-        // };
-        // return util::CallWithAny<decltype(func), decltype(lambda), ARGS...>(util::forward<decltype(func)>(func), util::forward<decltype(lambda)>(lambda));
     }
 
     virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const override
@@ -218,6 +191,15 @@ private:
         os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(shrVec[0]);
         util::For<Arity-1>([&](auto index_sequence) {
             os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(shrVec[index_sequence.value+1]);
+        });
+        os << " }";
+    }
+
+    virtual void writeArgs(ostream& os, const vector<Any>& anyVec) const override
+    {
+        os << "{ " << Show<Any, tuple_element_t<0, ArgTuple>>(anyVec[0]);
+        util::For<Arity-1>([&](auto index_sequence) {
+            os << ", " << Show<Any, tuple_element_t<index_sequence.value+1, ArgTuple>>(anyVec[index_sequence.value+1]);
         });
         os << " }";
     }
@@ -307,7 +289,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
 template <typename Callable, typename... ExplicitGens>
 bool forAll(Callable&& callable, ExplicitGens&&... gens)
 {
-    return property(callable, gens...).forAll();
+    return property(util::forward<Callable>(callable), util::forward<ExplicitGens>(gens)...).forAll();
 }
 
 /**
@@ -339,7 +321,7 @@ lists
 template <typename Callable, typename... ARGS>
 bool matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
 {
-    return property(callable).matrix(util::forward<decltype(lists)>(lists)...);
+    return property(util::forward<Callable>(callable)).matrix(util::forward<decltype(lists)>(lists)...);
 }
 
 #define EXPECT_FOR_ALL(CALLABLE, ...) EXPECT_TRUE(proptest::forAll(CALLABLE, __VA_ARGS__))

@@ -17,17 +17,17 @@
 
 namespace proptest {
 
-ostream& show(ostream& os, const char*);
-ostream& show(ostream& os, const char*, size_t len);
-ostream& show(ostream& os, const string&);
-ostream& show(ostream& os, const UTF8String&);
-ostream& show(ostream& os, const CESU8String&);
-ostream& show(ostream& os, const UTF16BEString&);
-ostream& show(ostream& os, const UTF16LEString&);
-ostream& show(ostream& os, const bool&);
-ostream& show(ostream& os, const char&);
-ostream& show(ostream& os, const int8_t&);
-ostream& show(ostream& os, const uint8_t&);
+PROPTEST_API ostream& show(ostream& os, const char*);
+PROPTEST_API ostream& show(ostream& os, const char*, size_t len);
+PROPTEST_API ostream& show(ostream& os, const string&);
+PROPTEST_API ostream& show(ostream& os, const UTF8String&);
+PROPTEST_API ostream& show(ostream& os, const CESU8String&);
+PROPTEST_API ostream& show(ostream& os, const UTF16BEString&);
+PROPTEST_API ostream& show(ostream& os, const UTF16LEString&);
+PROPTEST_API ostream& show(ostream& os, const bool&);
+PROPTEST_API ostream& show(ostream& os, const char&);
+PROPTEST_API ostream& show(ostream& os, const int8_t&);
+PROPTEST_API ostream& show(ostream& os, const uint8_t&);
 // ostream& show(ostream& os, const int16_t&);
 // ostream& show(ostream& os, const uint16_t&);
 // ostream& show(ostream& os, const int32_t&);
@@ -36,8 +36,8 @@ ostream& show(ostream& os, const uint8_t&);
 // ostream& show(ostream& os, const uint64_t&);
 // ostream& show(ostream& os, const long&);
 // ostream& show(ostream& os, const unsigned long&);
-ostream& show(ostream& os, const float&);
-ostream& show(ostream& os, const double&);
+PROPTEST_API ostream& show(ostream& os, const float&);
+PROPTEST_API ostream& show(ostream& os, const double&);
 
 // forward declaration is needed to be available at call sites
 template <typename T>
@@ -65,6 +65,8 @@ template <typename T>
 ostream& show(ostream& os, const shared_ptr<T>& ptr);
 template <typename T>
 ostream& show(ostream& os, const optional<T>& opt);
+template <typename T>
+ostream& show(ostream& os, const Any& anyVal);
 
 namespace stateful {
 template <typename ObjectType, typename ModelType>
@@ -73,9 +75,9 @@ ostream& show(ostream& os, const Action<ObjectType,ModelType>& action);
 
 namespace util {
 
-struct HasShowImpl
+struct PROPTEST_API HasShowImpl
 {
-    template <typename T, typename CRITERIA = decltype(show(cout, declval<T>()))>
+    template <typename T, same_as<decltype(show(cout, declval<T>()))> CRITERIA>
     static true_type test(const T&);
 
     static false_type test(...);
@@ -154,6 +156,21 @@ struct Show<ShrinkableBase, U>
         return os;
     }
     const ShrinkableBase& value;
+};
+
+template <typename U>
+struct Show<Any, U>
+{
+    Show(const Any& _value) : value(_value) {}
+    friend ostream& operator<<(ostream& os, const Show<Any, U>& sh)
+    {
+        if constexpr(is_same_v<U, void>)
+            show(os, "<Any:\?\?\?>");
+        else
+            show(os, sh.value.template getRef<U>());
+        return os;
+    }
+    const Any& value;
 };
 
 namespace util {

@@ -88,7 +88,9 @@ public:
     static stringstream& getLastStream();
 
     virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const = 0;
+    virtual void writeArgs(ostream& os, const vector<Any>& anyVec) const = 0;
 
+    bool exampleImpl(const vector<Any>& anyVec);
     bool runForAll(const GenVec& curGenVec);
     bool test(const vector<ShrinkableBase>& curShrVec);
 
@@ -106,6 +108,18 @@ public:
         const vector<ShrinkableBase>& shrVec;
     };
 
+    struct ShowAnyVec {
+        ShowAnyVec(const PropertyBase& _property, const vector<Any>& _anyVec) : property(_property), anyVec(_anyVec) {}
+
+        friend ostream& operator<<(ostream& os, const ShowAnyVec& show)
+        {
+            show.property.writeArgs(os, show.anyVec);
+            return os;
+        }
+        const PropertyBase& property;
+        const vector<Any>& anyVec;
+    };
+
 protected:
     static void setContext(PropertyContext* context);
     static PropertyContext* getContext() { return context; }
@@ -113,6 +127,7 @@ protected:
 
 protected:
     bool invoke(Random& rand);
+    virtual bool callFunction(const vector<Any>& anyVec) = 0;
     virtual bool callFunction(const vector<ShrinkableBase>& shrVec) = 0;
     virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) = 0;
 

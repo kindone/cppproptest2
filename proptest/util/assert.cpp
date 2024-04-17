@@ -19,6 +19,9 @@ AssertFailed::~AssertFailed() {}
 
 PropertyFailedBase::~PropertyFailedBase() {}
 
+PropertyFailed::~PropertyFailed() {}
+
+
 Discard::~Discard() {}
 
 Success::~Success() {}

@@ -58,6 +58,39 @@ bool PropertyBase::invoke(Random&)
     return true;
 }
 
+bool PropertyBase::exampleImpl(const vector<Any>& values)
+{
+    try {
+        try {
+            try {
+                if (onStartup)
+                    onStartup();
+                bool result = callFunction(values);
+                if (onCleanup)
+                    onCleanup();
+                return result;
+            } catch (const AssertFailed& e) {
+                throw PropertyFailed(e);
+            }
+        } catch (const Success&) {
+            return true;
+        } catch (const Discard&) {
+            // silently discard combination
+            cerr << "Discard is not supported for single run" << endl;
+        }
+    } catch (const PropertyFailedBase& e) {
+        cerr << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
+        cerr << "  with args: " << ShowAnyVec{*this, values} << endl;
+        return false;
+    } catch (const exception& e) {
+        // skip shrinking?
+        cerr << "example failed by exception: " << e.what() << endl;
+        cerr << "  with args: " << ShowAnyVec{*this, values} << endl;
+        return false;
+    }
+    return false;
+}
+
 bool PropertyBase::runForAll(const GenVec& curGenVec)
 {
     Random rand(seed);
