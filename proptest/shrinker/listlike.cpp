@@ -1,6 +1,6 @@
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/shrinker/integral.hpp"
-#include <math.h>
+#include "proptest/std/math.hpp"
 
 namespace proptest {
 
