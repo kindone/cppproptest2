@@ -13,7 +13,6 @@ decltype(auto) cartesianProduct(Function<RET(ARGS...)> func, initializer_list<AR
     using TUP = tuple<ARGS...>;
     constexpr int Size = sizeof...(ARGS);
 
-    auto vecTuple = util::make_tuple();
     // prepare vecs
     vector<vector<Any>> vecs{vector<Any>(lists.begin(), lists.end())...};
     // i per args
