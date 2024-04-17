@@ -13,11 +13,11 @@ GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen)
 
         // shrink strategy 1: expand Shrinkable<T>
         ShrinkableBase intermediate =
-            shrinkableT.flatMap([&rand, gen2gen](const Any& t) mutable {
+            shrinkableT.flatMap([&rand, gen2gen](const Any& t) mutable -> ShrinkableBase {
                 // generate U
                 auto gen2 = gen2gen(t).template getRef<Function1>();
                 ShrinkableBase shrinkableU = gen2(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
-                return ShrinkableBase(util::make_pair(t, shrinkableU));
+                return make_shrinkable<Intermediate>(t, shrinkableU);
             });
 
         // shrink strategy 2: expand Shrinkable<U>
@@ -27,9 +27,8 @@ GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen)
                 const Intermediate& interpair = interShr.get<Intermediate>();
                 const ShrinkableBase& shrinkableU = interpair.second;
                 ShrinkableBase newShrinkableU =
-                    shrinkableU.flatMap([interShr](const Any& u) mutable {
-                        return ShrinkableBase(
-                            util::make_pair<Any, ShrinkableBase>(interShr.get<Intermediate>().first, ShrinkableBase(u)));
+                    shrinkableU.flatMap([interShr](const Any& u) mutable -> ShrinkableBase {
+                        return make_shrinkable<Intermediate>(interShr.get<Intermediate>().first, ShrinkableBase(u));
                     });
                 return newShrinkableU.getShrinks();
             });
