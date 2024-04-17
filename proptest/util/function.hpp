@@ -43,8 +43,12 @@ struct CallableHolderBase {
 
 template <typename Callable, typename RET, typename...ARGS>
 struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
-    explicit CallableHolder(Callable&& c) : callable(util::move(c)) {}
-    explicit CallableHolder(const Callable& c) : callable(c) {}
+    template<same_as<Callable> C>
+        requires (!is_lvalue_reference_v<C>)
+    explicit CallableHolder(C&& c) : callable(util::move(c)) {}
+
+    template<same_as<Callable> C>
+    explicit CallableHolder(const C& c) : callable(c) {}
 
     static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable has incompatible signature for RET(ARGS...)>");
 
