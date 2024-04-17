@@ -169,7 +169,7 @@ public:
     Generator(const Arbi<T>& arbi) : Generator(GeneratorCommon(arbi)) {}
 
     virtual Shrinkable<T> operator()(Random& rand) const override {
-        return func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+        return func.callDirect(rand).template getRef<ShrinkableBase>(true);
     }
 
     virtual shared_ptr<GeneratorBase<T>> clone() const override {
@@ -178,7 +178,7 @@ public:
 
     GenFunction<T> asGenFunction() override {
         return GenFunction<T>([func = this->func](Random& rand) {
-            return Shrinkable<T>(func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true));
+            return Shrinkable<T>(func.callDirect(rand).template getRef<ShrinkableBase>(true));
         });
     }
 

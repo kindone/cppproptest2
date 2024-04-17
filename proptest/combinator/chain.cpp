@@ -8,7 +8,7 @@ GeneratorCommon chainImpl1(Function1 gen1, Function1 gen2gen)
 {
     return Function1([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableTs = gen1(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableTs = gen1.callDirect(rand).template getRef<ShrinkableBase>(true);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<T>
@@ -16,7 +16,7 @@ GeneratorCommon chainImpl1(Function1 gen1, Function1 gen2gen)
             shrinkableTs.flatMap([&rand, gen2gen](const Any& t) mutable {
                 // generate U
                 auto gen2 = gen2gen(t).template getRef<Function1>();
-                ShrinkableBase shrinkableU = gen2(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+                ShrinkableBase shrinkableU = gen2.callDirect(rand).template getRef<ShrinkableBase>(true);
                 return ShrinkableBase(util::make_pair(t, shrinkableU));
             });
 
@@ -44,7 +44,7 @@ GeneratorCommon chainImplN(Function1 gen1, Function1 gen2gen)
 {
     return Function1([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableTs = gen1(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableTs = gen1.callDirect(rand).getRef<ShrinkableBase>(true);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<tuple<Ts...>>
@@ -53,7 +53,7 @@ GeneratorCommon chainImplN(Function1 gen1, Function1 gen2gen)
                 [&rand, gen2gen](const Any& ts) {
                     // generate U
                     auto gen2 = gen2gen(ts).getRef<Function1>();
-                    ShrinkableBase shrinkableU = gen2(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
+                    ShrinkableBase shrinkableU = gen2.callDirect(rand).getRef<ShrinkableBase>(true);
                     return ShrinkableBase(util::make_pair(ts, shrinkableU));
                 });
 
