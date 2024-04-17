@@ -245,20 +245,4 @@ stringstream& PropertyBase::getLastStream()
     return context->getLastStream();
 }
 
-stringstream& expectStream(const stringstream& __prop_expect_stream_str, bool result, const char* condition, const char* filename, int lineno)
-{
-    if (!result) {
-        ::proptest::PropertyBase::fail(filename, lineno, condition, __prop_expect_stream_str);
-        return ::proptest::PropertyBase::getLastStream();
-    } else {
-        ::proptest::PropertyBase::succeed(filename, lineno, condition, __prop_expect_stream_str);
-        return ::proptest::PropertyBase::getLastStream();
-    }
-}
-
-void propStat(const stringstream& __prop_stat_key, const stringstream& __prop_stat_value, const char* filename, int lineno)
-{
-    ::proptest::PropertyBase::tag(filename, lineno, __prop_stat_key.str(), __prop_stat_value.str());
-}
-
 }  // namespace proptest
