@@ -37,7 +37,7 @@ GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPt
                 [[maybe_unused]] uint64_t numRetry = 0;
                 while (true) {
                     try {
-                        return weighted.func(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+                        return weighted.func.callDirect(rand).template getRef<ShrinkableBase>(true);
                     } catch (const Discard&) {
                         // TODO: trace level low
                     }

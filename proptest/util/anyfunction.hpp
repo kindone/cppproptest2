@@ -8,6 +8,7 @@ namespace proptest {
 struct Callable1HolderBase {
     virtual ~Callable1HolderBase() {}
     virtual Any operator()(const Any& arg) = 0;
+    virtual Any operator()(void* ptr) = 0;
 };
 
 template <typename Callable, typename RET, typename ARG>
@@ -25,6 +26,15 @@ struct Callable1Holder : public Callable1HolderBase {
             return Any(callable(util::toCallableArg<ARG>(arg.getRef<ARG>())));
     }
 
+    Any operator()(void* ptr) override {
+        if constexpr(is_void_v<RET>) {
+            callable(util::toCallableArg<ARG>(*reinterpret_cast<const decay_t<ARG>*>(ptr)));
+            return Any();
+        }
+        else
+            return Any(callable(util::toCallableArg<ARG>(*reinterpret_cast<const decay_t<ARG>*>(ptr))));
+    }
+
     decay_t<Callable> callable;
 };
 
@@ -38,6 +48,11 @@ struct PROPTEST_API Function1
 
     Any operator()(const Any& arg) const {
         return holder->operator()(arg);
+    }
+
+    template <typename T>
+    Any callDirect(T& arg) const {
+        return holder->operator()(static_cast<void*>(&arg));
     }
 
     shared_ptr<Callable1HolderBase> holder;

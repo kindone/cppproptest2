@@ -13,13 +13,13 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
         if (size == 0)
             return Function1([](Random&) { return make_shrinkable<vector<ShrinkableBase>>(); });
         return Function1([gen1, gen2gen, size, minSize](Random& rand) {
-            ShrinkableBase shr = gen1(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
+            ShrinkableBase shr = gen1.callDirect(rand).getRef<ShrinkableBase>(true);
             auto shrVec = make_shrinkable<vector<ShrinkableBase>>();
             auto& vec = shrVec.getMutableRef();
             vec.reserve(size);
             vec.push_back(shr);
             for (size_t i = 1; i < size; i++) {
-                shr = gen2gen(shr.getAny()).getRef<Function1>()(util::make_any<Random&>(rand)).getRef<ShrinkableBase>(true);
+                shr = gen2gen(shr.getAny()).getRef<Function1>().callDirect(rand).getRef<ShrinkableBase>(true);
                 vec.push_back(shr);
             }
             return shrinkVectorLength(shrVec, minSize) // -> Shrinkable<vector<ShrinkableBase>>

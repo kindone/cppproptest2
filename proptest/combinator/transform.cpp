@@ -8,7 +8,7 @@ namespace util {
 GeneratorCommon transformImpl(Function1 gen, Function1 transformer)
 {
     return GeneratorCommon([gen, transformer](Random& rand) {
-        ShrinkableBase shrinkable = gen(util::make_any<Random&>(rand)).template getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkable = gen.callDirect(rand).template getRef<ShrinkableBase>(true);
         return shrinkable.map(transformer);
     });
 }
