@@ -205,13 +205,13 @@ TEST(PropTest, TestDependency2)
 
     // DictionaryCompression::IQTypeInfo ti;
     int i = 0;
-    forAll(
+    property(
         [&i](pair<TableData, vector<bool>>) {
             // column->set(&index[i].first, index[i].second);
             cout << "running: " << i++ << endl;
             return true;
         },
-        tableDataWithValueGen);
+        tableDataWithValueGen).setNumRuns(100).forAll();
 }
 
 TEST(PropTest, TestDependency3)
