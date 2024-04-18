@@ -1,3 +1,4 @@
+#pragma once
 #include "proptest/statefultest.hpp"
 // #include "proptest/stateful/concurrency_class.hpp"
 #include "proptest/stateful/concurrency_function.hpp"

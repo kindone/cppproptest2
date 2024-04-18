@@ -272,11 +272,14 @@ Any make_any(Args&&... args)
     }
 }
 
-
 }
 
 template <typename T>
 using AnyT = Any;
+
+}  // namespace proptest
+
+#ifdef PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
 
 #define EXTERN_DECLARE_ANYVAL(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::AnyVal, TYPE)
 #define EXTERN_DECLARE_ANYREF(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::AnyRef, TYPE)
@@ -284,4 +287,4 @@ using AnyT = Any;
 DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_ANYVAL);
 DEFINE_FOR_ALL_STRINGTYPES(EXTERN_DECLARE_ANYREF);
 
-}  // namespace proptest
+#endif // PROPTEST_ENABLE_EXPLICIT_INSTANTIATION

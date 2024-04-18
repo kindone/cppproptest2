@@ -74,6 +74,9 @@ Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
     return util::deriveImpl(asGenFunction1(), [=](T& t) { return Function1(genFactory(t));} );
 }
 
+}  // namespace proptest
+
+#ifdef PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
 
 #define EXTERN_DECLARE_GENERATORBASE(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::GeneratorBase, TYPE)
 #define EXTERN_DECLARE_GENERATOR(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::Generator, TYPE)
@@ -81,4 +84,4 @@ Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
 DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_GENERATORBASE);
 DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_GENERATOR);
 
-}  // namespace proptest
+#endif // PROPTEST_ENABLE_EXPLICIT_INSTANTIATION

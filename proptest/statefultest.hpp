@@ -1,3 +1,4 @@
+#pragma once
 #include "proptest/proptest.hpp"
 // #include "proptest/stateful/stateful_class.hpp"
 #include "proptest/stateful/stateful_function.hpp"
