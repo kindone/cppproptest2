@@ -9,10 +9,10 @@ namespace proptest {
 namespace util {
 
 PROPTEST_API ostream& codepage(ostream& os, uint32_t code);
-ostream& charAsHex(ostream& os, uint8_t c);
-ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2);
-ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3);
-ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4);
+PROPTEST_API ostream& charAsHex(ostream& os, uint8_t c);
+PROPTEST_API ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2);
+PROPTEST_API ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3);
+PROPTEST_API ostream& charAsHex(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4);
 PROPTEST_API ostream& charAsHex(ostream& os, vector<uint8_t>& chars);
 PROPTEST_API ostream& charAsHex(ostream& os, const string& str);
 PROPTEST_API ostream& validString(ostream& os, const string& str);
@@ -35,8 +35,8 @@ struct PROPTEST_API StringPrintable
     string str;
 };
 
-ostream& validChar(ostream& os, uint8_t c);
-ostream& validChar2(ostream& os, uint8_t c);
+PROPTEST_API ostream& validChar(ostream& os, uint8_t c);
+PROPTEST_API ostream& validChar2(ostream& os, uint8_t c);
 // ostream& validChar(ostream& os, uint8_t c1, uint8_t c2);
 // ostream& validChar(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3);
 // ostream& validChar(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4);

@@ -26,10 +26,10 @@ public:
 };
 
 namespace util {
-ostream& validUTF16Char(ostream& os, uint8_t c);
-ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2);
-ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3);
-ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4);
+PROPTEST_API ostream& validUTF16Char(ostream& os, uint8_t c);
+PROPTEST_API ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2);
+PROPTEST_API ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3);
+PROPTEST_API ostream& validUTF16Char(ostream& os, uint8_t c1, uint8_t c2, uint8_t c3, uint8_t c4);
 
 PROPTEST_API ostream& decodeUTF16BE(ostream& os, vector<uint8_t>& chars);
 PROPTEST_API ostream& decodeUTF16BE(ostream& os, const string& str);

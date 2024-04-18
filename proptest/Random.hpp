@@ -54,34 +54,34 @@ private:
 };
 
 template <>
-char Random::getRandom<char>(int64_t min, int64_t max);
+PROPTEST_API char Random::getRandom<char>(int64_t min, int64_t max);
 
 template <>
-int8_t Random::getRandom<int8_t>(int64_t min, int64_t max);
+PROPTEST_API int8_t Random::getRandom<int8_t>(int64_t min, int64_t max);
 
 template <>
-int16_t Random::getRandom<int16_t>(int64_t min, int64_t max);
+PROPTEST_API int16_t Random::getRandom<int16_t>(int64_t min, int64_t max);
 
 template <>
-int32_t Random::getRandom<int32_t>(int64_t min, int64_t max);
+PROPTEST_API int32_t Random::getRandom<int32_t>(int64_t min, int64_t max);
 
 template <>
-int64_t Random::getRandom<int64_t>(int64_t min, int64_t max);
+PROPTEST_API int64_t Random::getRandom<int64_t>(int64_t min, int64_t max);
 
 template <>
-char Random::getRandomU<char>(uint64_t min, uint64_t max);
+PROPTEST_API char Random::getRandomU<char>(uint64_t min, uint64_t max);
 
 template <>
-uint8_t Random::getRandomU<uint8_t>(uint64_t min, uint64_t max);
+PROPTEST_API uint8_t Random::getRandomU<uint8_t>(uint64_t min, uint64_t max);
 
 template <>
-uint16_t Random::getRandomU<uint16_t>(uint64_t min, uint64_t max);
+PROPTEST_API uint16_t Random::getRandomU<uint16_t>(uint64_t min, uint64_t max);
 
 template <>
-uint32_t Random::getRandomU<uint32_t>(uint64_t min, uint64_t max);
+PROPTEST_API uint32_t Random::getRandomU<uint32_t>(uint64_t min, uint64_t max);
 
 template <>
-uint64_t Random::getRandomU<uint64_t>(uint64_t min, uint64_t max);
+PROPTEST_API uint64_t Random::getRandomU<uint64_t>(uint64_t min, uint64_t max);
 
 
 }  // namespace proptest

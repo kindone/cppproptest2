@@ -74,4 +74,16 @@ Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
     return util::deriveImpl(asGenFunction1(), [=](T& t) { return Function1(genFactory(t));} );
 }
 
+extern template struct GeneratorBase<bool>;
+extern template struct GeneratorBase<int>;
+extern template struct GeneratorBase<uint32_t>;
+extern template struct GeneratorBase<uint64_t>;
+extern template struct GeneratorBase<string>;
+
+extern template struct Generator<bool>;
+extern template struct Generator<int>;
+extern template struct Generator<uint32_t>;
+extern template struct Generator<uint64_t>;
+extern template struct Generator<string>;
+
 }  // namespace proptest

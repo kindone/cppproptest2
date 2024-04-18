@@ -159,6 +159,13 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
     return Shrinkable<T>{util::make_any<T>(util::forward<ARGS>(args)...)};
 }
 
+extern template struct Shrinkable<bool>;
+extern template struct Shrinkable<int>;
+extern template struct Shrinkable<uint32_t>;
+extern template struct Shrinkable<uint64_t>;
+extern template struct Shrinkable<string>;
+extern template struct Shrinkable<vector<ShrinkableBase>>;
+
 } // namespace proptest
 
 
@@ -183,6 +190,5 @@ public:
         return lhs.getRef().first < rhs.getRef().first;
     }
 };
-
 
 }  // namespace std
