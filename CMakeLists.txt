@@ -75,6 +75,19 @@ ADD_LIBRARY(proptest
     #NO_PACKAGE
 )
 
+target_precompile_headers(proptest
+    PUBLIC
+    "proptest/proptest.hpp"
+    "proptest/Generator.hpp"
+    "proptest/util/any.hpp"
+    "proptest/util/tuple.hpp"
+    "proptest/util/Function.hpp"
+    "proptest/Property.hpp"
+    "proptest/PropertyBase.hpp"
+    "proptest/Shrinkable.hpp"
+    "proptest/Stream.hpp"
+)
+
 set_target_properties(proptest PROPERTIES
 	COMPILE_FLAGS "-DPROPTEST_DLL -DPROTEST_DLL_EXPORTS")
 
