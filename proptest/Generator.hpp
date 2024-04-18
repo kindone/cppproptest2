@@ -167,6 +167,7 @@ public:
     Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}
     Generator(const Function1 _func) : func(_func) {}
     Generator(const Arbi<T>& arbi) : Generator(GeneratorCommon(arbi)) {}
+    virtual ~Generator() {}
 
     virtual Shrinkable<T> operator()(Random& rand) const override {
         return func.callDirect(rand).template getRef<ShrinkableBase>(true);

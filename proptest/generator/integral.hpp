@@ -2,22 +2,12 @@
 #include "proptest/Stream.hpp"
 #include "proptest/Arbitrary.hpp"
 #include "proptest/std/concepts.hpp"
+#include "proptest/util/define.hpp"
 
 /**
  * @file integral.hpp
  * @brief Arbitrary for integers
  */
-
-#define DEFINE_FOR_ALL_INTTYPES(DEF) \
-    DEF(char);\
-    DEF(int8_t);\
-    DEF(int16_t);\
-    DEF(int32_t);\
-    DEF(int64_t);\
-    DEF(uint8_t);\
-    DEF(uint16_t);\
-    DEF(uint32_t);\
-    DEF(uint64_t);
 
 namespace proptest {
 
@@ -430,43 +420,43 @@ PROPTEST_API Generator<T> integers(T start, T count)
 
 // for template instantiations
 #define EXTERN_GENERATEINTEGER(TYPE) \
-    extern template proptest::Shrinkable<TYPE> generateInteger(proptest::Random& rand, TYPE min, TYPE max)
+    extern template PROPTEST_API proptest::Shrinkable<TYPE> generateInteger(proptest::Random& rand, TYPE min, TYPE max)
 
 #define EXTERN_NATURAL(TYPE) \
-    extern template proptest::Generator<TYPE> natural(TYPE max)
+    extern template PROPTEST_API proptest::Generator<TYPE> natural(TYPE max)
 
 #define EXTERN_NONNEGATIVE(TYPE) \
-    extern template proptest::Generator<TYPE> nonNegative(TYPE max)
+    extern template PROPTEST_API proptest::Generator<TYPE> nonNegative(TYPE max)
 
 #define EXTERN_INTERVAL(TYPE) \
-    extern template proptest::Generator<TYPE> interval(TYPE min, TYPE max)
+    extern template PROPTEST_API proptest::Generator<TYPE> interval(TYPE min, TYPE max)
 
 #define EXTERN_INRANGE(TYPE) \
-    extern template proptest::Generator<TYPE> inRange(TYPE from, TYPE to)
+    extern template PROPTEST_API proptest::Generator<TYPE> inRange(TYPE from, TYPE to)
 
 #define EXTERN_INTEGERS(TYPE) \
-    extern template proptest::Generator<TYPE> integers(TYPE start, TYPE count)
+    extern template PROPTEST_API proptest::Generator<TYPE> integers(TYPE start, TYPE count)
 
 
 
 
 #define DEFINE_GENERATEINTEGER(TYPE) \
-    template proptest::Shrinkable<TYPE> generateInteger(proptest::Random& rand, TYPE min, TYPE max)
+    template PROPTEST_API proptest::Shrinkable<TYPE> generateInteger(proptest::Random& rand, TYPE min, TYPE max)
 
 #define DEFINE_NATURAL(TYPE) \
-    template proptest::Generator<TYPE> natural(TYPE max)
+    template PROPTEST_API proptest::Generator<TYPE> natural(TYPE max)
 
 #define DEFINE_NONNEGATIVE(TYPE) \
-    template proptest::Generator<TYPE> nonNegative(TYPE max)
+    template PROPTEST_API proptest::Generator<TYPE> nonNegative(TYPE max)
 
 #define DEFINE_INTERVAL(TYPE) \
-    template proptest::Generator<TYPE> interval(TYPE min, TYPE max)
+    template PROPTEST_API proptest::Generator<TYPE> interval(TYPE min, TYPE max)
 
 #define DEFINE_INRANGE(TYPE) \
-    template proptest::Generator<TYPE> inRange(TYPE from, TYPE to)
+    template PROPTEST_API proptest::Generator<TYPE> inRange(TYPE from, TYPE to)
 
 #define DEFINE_INTEGERS(TYPE) \
-    template proptest::Generator<TYPE> integers(TYPE start, TYPE count)
+    template PROPTEST_API proptest::Generator<TYPE> integers(TYPE start, TYPE count)
 
 namespace proptest {
 // template instantiation

@@ -8,6 +8,7 @@
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
+#include "proptest/util/define.hpp"
 
 namespace proptest {
 
@@ -159,12 +160,11 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
     return Shrinkable<T>{util::make_any<T>(util::forward<ARGS>(args)...)};
 }
 
-extern template struct Shrinkable<bool>;
-extern template struct Shrinkable<int>;
-extern template struct Shrinkable<uint32_t>;
-extern template struct Shrinkable<uint64_t>;
-extern template struct Shrinkable<string>;
-extern template struct Shrinkable<vector<ShrinkableBase>>;
+
+#define EXTERN_DECLARE_SHRINKABLE(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::Shrinkable, TYPE)
+
+DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_SHRINKABLE);
+extern template struct PROPTEST_API Shrinkable<vector<ShrinkableBase>>;
 
 } // namespace proptest
 

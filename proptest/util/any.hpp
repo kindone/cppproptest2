@@ -7,6 +7,7 @@
 #include "proptest/std/concepts.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/exception.hpp"
+#include "proptest/util/define.hpp"
 
 namespace proptest
 {
@@ -118,13 +119,13 @@ struct PROPTEST_API AnyRef : AnyHolder {
         return ptr.get();
     }
 
-    bool operator==(const T& other) {
-        if constexpr(equality_check_available<T>) {
-            return static_pointer_cast<T>(ptr)->operator==(*static_pointer_cast<T>(other.ptr));
-        }
-        else
-            return false;
-    }
+    // bool operator==(const T& other) {
+    //     if constexpr(equality_check_available<T>) {
+    //         return static_pointer_cast<T>(ptr)->operator==(*static_pointer_cast<T>(other.ptr));
+    //     }
+    //     else
+    //         return false;
+    // }
 
     virtual shared_ptr<AnyHolder> clone() const override {
         if constexpr(copy_constructible<T>)
@@ -276,5 +277,11 @@ Any make_any(Args&&... args)
 
 template <typename T>
 using AnyT = Any;
+
+#define EXTERN_DECLARE_ANYVAL(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::AnyVal, TYPE)
+#define EXTERN_DECLARE_ANYREF(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::AnyRef, TYPE)
+
+DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_ANYVAL);
+DEFINE_FOR_ALL_STRINGTYPES(EXTERN_DECLARE_ANYREF);
 
 }  // namespace proptest
