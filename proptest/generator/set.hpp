@@ -34,11 +34,11 @@ public:
     {
         // generate random Ts using elemGen
         size_t size = rand.getRandomSize(minSize, maxSize + 1);
-        Shrinkable<set<Shrinkable<T>>> shrinkableSet = make_shrinkable<set<Shrinkable<T>>>();
+        auto shrinkableSet = util::make_shared<set<Shrinkable<T>>>();
 
-        while (shrinkableSet.getRef().size() < size) {
+        while (shrinkableSet->size() < size) {
             auto elem = elemGen(rand);
-            shrinkableSet.getMutableRef().insert(elem);
+            shrinkableSet->insert(elem);
         }
         return shrinkSet(shrinkableSet, minSize);
     }

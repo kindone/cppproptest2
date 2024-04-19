@@ -58,9 +58,9 @@ Shrinkable<ListLike<T>> toListLikeTShrinkable(const Shrinkable<vector<Shrinkable
  * @return Shrinkable<ListLike<T>>
  */
 template <template <typename...> class Container, typename T>
-Shrinkable<Container<T>> shrinkContainer(const Shrinkable<Container<Shrinkable<T>>>& shr, size_t minSize, bool elementwise = true, bool membershipwise = true)
+Shrinkable<Container<T>> shrinkContainer(const shared_ptr<Container<Shrinkable<T>>>& shr, size_t minSize, bool elementwise = true, bool membershipwise = true)
 {
-    auto shrinkableCont = shr.getRef();
+    auto& shrinkableCont = *shr;
     // change type to any
     Shrinkable<vector<ShrinkableBase>> shrinkVecShrBase = toVectorShrinkableBase(shrinkableCont);
     // membershipwise shrinking
