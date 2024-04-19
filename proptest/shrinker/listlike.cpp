@@ -6,6 +6,28 @@ namespace proptest {
 
 namespace util {
 
+struct VectorShrinker
+{
+    using elem_t = ShrinkableBase;
+    using vector_t = vector<elem_t>;
+
+    using shrinkable_t = Shrinkable<vector_t>;
+    using stream_t = shrinkable_t::StreamType;
+    using stream_element_t = shrinkable_t::StreamElementType;
+
+    using elem_stream_t = elem_t::StreamType;
+    using elem_stream_element_t = elem_t::StreamElementType;
+
+    static stream_t shrinkBulk(const shrinkable_t& ancestor, size_t power, size_t offset);
+
+    static stream_t shrinkElementwise(const shrinkable_t& shrinkable, size_t power, size_t offset);
+
+    static shrinkable_t shrinkMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t frontSize, size_t rearSize);
+
+    static shrinkable_t shrinkFrontAndThenMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t rearSize);
+};
+
+
 VectorShrinker::stream_t VectorShrinker::shrinkBulk(const VectorShrinker::shrinkable_t& ancestor, size_t power, size_t offset)
 {
 
