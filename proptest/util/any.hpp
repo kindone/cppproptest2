@@ -62,14 +62,6 @@ struct PROPTEST_API AnyVal : AnyHolder {
         return &value;
     }
 
-    bool operator==(const T& other) {
-        if constexpr(equality_check_available<T>) {
-            return value == other;
-        }
-        else
-            return false;
-    }
-
     virtual shared_ptr<AnyHolder> clone() const override {
         return util::make_shared<AnyVal<T>>(value);
     }
@@ -87,10 +79,6 @@ struct PROPTEST_API AnyLValRef : AnyHolder {
 
     const void* rawPtr() const override {
         return &value;
-    }
-
-    bool operator==(const T& other) {
-        return &value == &other;
     }
 
     virtual shared_ptr<AnyHolder> clone() const override {
@@ -118,14 +106,6 @@ struct PROPTEST_API AnyRef : AnyHolder {
     const void* rawPtr() const override {
         return ptr.get();
     }
-
-    // bool operator==(const T& other) {
-    //     if constexpr(equality_check_available<T>) {
-    //         return static_pointer_cast<T>(ptr)->operator==(*static_pointer_cast<T>(other.ptr));
-    //     }
-    //     else
-    //         return false;
-    // }
 
     virtual shared_ptr<AnyHolder> clone() const override {
         if constexpr(copy_constructible<T>)
@@ -248,8 +228,6 @@ AnyVal<T> make_anyval(T value)
 template <typename T, typename... Args>
 Any make_any(Args&&... args)
 {
-    // static_assert((!is_same_v<decay_t<Args, shared_ptr<T>> && ...), "shared_ptr<T> must not be passed as argument");
-
     if constexpr (is_same_v<Any, decay_t<T>>) {
         static_assert(sizeof...(Args) == 1, "a value must be provided as argument");
         return Any{util::forward<Args>(args)...};
