@@ -6,7 +6,7 @@
 #include "proptest/std/string.hpp"
 
 
-// #define PROPTEST_ENABLE_EXPLICIT_INSTANTIATION 1
+#define PROPTEST_ENABLE_EXPLICIT_INSTANTIATION 1
 
 #define DEFINE_FOR_ALL_INTTYPES(DEF) \
     DEF(char);\
