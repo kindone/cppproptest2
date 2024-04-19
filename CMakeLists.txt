@@ -75,18 +75,18 @@ ADD_LIBRARY(proptest
     #NO_PACKAGE
 )
 
-target_precompile_headers(proptest
-    PUBLIC
-    "proptest/proptest.hpp"
-    "proptest/Generator.hpp"
-    "proptest/util/any.hpp"
-    "proptest/util/tuple.hpp"
-    "proptest/util/Function.hpp"
-    "proptest/Property.hpp"
-    "proptest/PropertyBase.hpp"
-    "proptest/Shrinkable.hpp"
-    "proptest/Stream.hpp"
-)
+# target_precompile_headers(proptest
+#     PUBLIC
+#     "proptest/proptest.hpp"
+#     "proptest/Generator.hpp"
+#     "proptest/util/any.hpp"
+#     "proptest/util/tuple.hpp"
+#     "proptest/util/Function.hpp"
+#     "proptest/Property.hpp"
+#     "proptest/PropertyBase.hpp"
+#     "proptest/Shrinkable.hpp"
+#     "proptest/Stream.hpp"
+# )
 
 set_target_properties(proptest PROPERTIES
 	COMPILE_FLAGS "-DPROPTEST_DLL -DPROTEST_DLL_EXPORTS")
@@ -171,6 +171,8 @@ SET(compile_sources
     proptest/test/compile/tuple.cpp
     proptest/test/compile/unicode.cpp
     proptest/test/compile/vector.cpp
+    proptest/test/compile/generator.cpp
+    proptest/test/compile/shrinker.cpp
 )
 
 ADD_EXECUTABLE(compile_proptest
