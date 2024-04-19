@@ -37,7 +37,7 @@ struct function_traits<R(Args...)>
     using argument_type_list = util::TypeList<Args...>;
 
     template <template <typename...> typename TEMPLATE, typename NEW_RETURN_TYPE = return_type>
-    using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
+    using function_type_with_signature = TEMPLATE<NEW_RETURN_TYPE(Args...)>;
 };
 
 // member function pointer
@@ -84,21 +84,9 @@ private:
         using type = typename call_type::template argument<N + 1>::type;
     };
 
-    using return_and_argument_type_list = typename argument_type_list::template prepend<return_type>;
-    template <typename TARGET_RET>
-    using converted_return_and_argument_type_list = typename argument_type_list::template prepend<return_type>::template prepend<TARGET_RET>;
-
 public:
-    template <template <typename...> typename TEMPLATE>
-    using template_type_with_args = typename TypeListToTemplateTypeHelper<TEMPLATE, argument_type_list>::type;
-    template <template <typename...> typename TEMPLATE>
-    using template_type_with_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, return_and_argument_type_list>::type;
     template <template <typename...> typename TEMPLATE, typename NEW_RETURN_TYPE = return_type>
     using function_type_with_signature = typename TypeListToFunctionTypeHelper<TEMPLATE, return_type, argument_type_list>::type;
-    template <template <typename...> typename TEMPLATE, typename CALLABLE>
-    using template_type_with_self_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename return_and_argument_type_list::template prepend<CALLABLE>>::type;
-    template <template <typename...> typename TEMPLATE, typename CALLABLE, typename TARGET_RET>
-    using template_type_with_self_converted_ret_and_args = typename TypeListToTemplateTypeHelper<TEMPLATE, typename converted_return_and_argument_type_list<TARGET_RET>::template prepend<CALLABLE>>::type;
 
     template <size_t N>
     using argument_type = typename argument<N>::type;
