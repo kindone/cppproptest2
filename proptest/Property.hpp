@@ -118,6 +118,14 @@ public:
         // combine explicit generators and implicit generators into a tuple by overriding implicit generators with explicit generators
         constexpr size_t NumExplicitGens = sizeof...(gens);
 
+        // check if explicit generators are compatible with the ARGS
+        util::For<NumExplicitGens>([](auto index_sequence) {
+            using GenTup = tuple<ExplicitGens...>;
+            using T = decay_t<tuple_element_t<index_sequence.value, ArgTuple>>;
+            using ExplicitGen = decay_t<tuple_element_t<index_sequence.value, GenTup>>;
+            static_assert(is_same_v<typename invoke_result_t<ExplicitGen, Random&>::type, T>, "Supplied generator type does not match property argument type");
+        });
+
         vector<AnyGenerator> curGenVec{generator(gens)...};
         curGenVec.reserve(genVec.size());
         for(size_t i = NumExplicitGens; i < genVec.size(); i++) {
@@ -209,34 +217,16 @@ private:
 
 namespace util {
 
-template <typename Callable, typename... ARGS>
-Function<bool(ARGS...)> functionWithBoolResultHelper(util::TypeList<ARGS...>, Callable&& callable)
-{
-    Function<void(const ARGS&...)> func = callable;
-    return [func](const ARGS&... args) {
-        func(args...);
-        return true;
-    };
-}
-
-template <class Callable>
-decltype(auto) toFunctionWithBoolResult(Callable&& callable)
-{
-    using FuncType = function_traits<Callable>::template function_type_with_signature<Function>;
-    using RetType = FuncType::RetType;
-    if constexpr(is_same_v<RetType, void>) {
-        // using FuncTypeBoolRet = function_traits<Callable>::template function_type_with_signature<Function, bool>;
-        typename function_traits<Callable>::argument_type_list argument_type_list;
-        return functionWithBoolResultHelper(argument_type_list, util::forward<Callable>(callable));
-    }
-    else
-        return FuncType(callable);
-}
-
 template <typename... ARGS>
 decltype(auto) createProperty(Function<bool(ARGS...)> func, vector<AnyGenerator>&& genVec)
 {
     return Property<ARGS...>(func, util::forward<decltype(genVec)>(genVec));
+}
+
+template <typename... ARGS>
+decltype(auto) createProperty(Function<void(ARGS...)> func, vector<AnyGenerator>&& genVec)
+{
+    return Property<ARGS...>([func](const ARGS&...args) { func(args...); return true; }, util::forward<decltype(genVec)>(genVec));
 }
 
 }  // namespace util
@@ -259,6 +249,14 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     constexpr size_t NumGens = sizeof...(ExplicitGens);
     using ArgTuple = typename FuncType::ArgTuple;
 
+    // check if explicit generators are compatible with the callable
+    util::For<sizeof...(ExplicitGens)>([](auto index_sequence) {
+        using GenTup = tuple<ExplicitGens...>;
+        using T = decay_t<tuple_element_t<index_sequence.value, ArgTuple>>;
+        using ExplicitGen = decay_t<tuple_element_t<index_sequence.value, GenTup>>;
+        static_assert(is_same_v<typename invoke_result_t<ExplicitGen, Random&>::type, T>, "Supplied generator type does not match property argument type");
+    });
+
     // prepare genVec
     vector<AnyGenerator> genVec{generator(gens)...};
     genVec.reserve(NumArgs);
@@ -270,8 +268,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     });
 
     // callable to Function
-    auto func = util::toFunctionWithBoolResult(callable);
-    return util::createProperty(func, util::move(genVec));
+    return util::createProperty(FuncType(callable), util::move(genVec));
 }
 /**
  * @brief Immediately executes a randomized property test
