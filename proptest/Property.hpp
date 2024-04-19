@@ -34,30 +34,30 @@ private:
 
 public:
     Property(const Func& f, vector<AnyGenerator>&& gens) : func(f) {
-        base = make_unique<PropertyBase>(util::move(gens));
-        base->setCallFunction([this](const vector<Any>& anyVec) {
+        base = util::make_unique<PropertyBase>(util::move(gens));
+        base->setCallFunction([func=this->func](const vector<Any>& anyVec) {
             return util::Call<Arity>(func, [&](auto index_sequence) {
                 return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
             });
         });
-        base->setCallFunctionWithShr([this](const vector<ShrinkableBase>& shrVec) {
+        base->setCallFunctionWithShr([func=this->func](const vector<ShrinkableBase>& shrVec) {
             return util::Call<Arity>(func, [&](auto index_sequence) {
                 return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
             });
         });
-        base->setCallFunctionFromGen([this](Random& rand, const vector<AnyGenerator>& genVec) {
+        base->setCallFunctionFromGen([func=this->func](Random& rand, const vector<AnyGenerator>& genVec) {
             return util::Call<Arity>(func, [&](auto index_sequence) {
                 return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
             });
         });
-        base->setWriteArgs([this](ostream& os, const vector<Any>& anyVec) {
+        base->setWriteArgs([func=this->func](ostream& os, const vector<Any>& anyVec) {
             os << "{ " << Show<Any, tuple_element_t<0, ArgTuple>>(anyVec[0]);
             util::For<Arity-1>([&](auto index_sequence) {
                 os << ", " << Show<Any, tuple_element_t<index_sequence.value+1, ArgTuple>>(anyVec[index_sequence.value+1]);
             });
             os << " }";
         });
-        base->setWriteShrs([this](ostream& os, const vector<ShrinkableBase>& shrVec) {
+        base->setWriteShrs([func=this->func](ostream& os, const vector<ShrinkableBase>& shrVec) {
             os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(shrVec[0]);
             util::For<Arity-1>([&](auto index_sequence) {
                 os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(shrVec[index_sequence.value+1]);
@@ -147,8 +147,6 @@ public:
     bool forAll(ExplicitGens&&... gens)
     {
         // combine explicit generators and implicit generators into a tuple by overriding implicit generators with explicit generators
-        constexpr size_t NumExplicitGens = sizeof...(gens);
-
         vector<AnyGenerator> curGenVec{generator(gens)...};
         curGenVec.reserve(Arity);
         return base->runForAll(curGenVec);

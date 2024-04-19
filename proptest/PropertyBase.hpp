@@ -153,9 +153,10 @@ protected:
     Function<bool(const vector<ShrinkableBase>&)> callFunctionWithShr;
     Function<bool(const vector<Any>&)> callFunction;
     Function<bool(Random&, const vector<AnyGenerator>&)> callFunctionFromGen;
+public:
     Function<void(ostream& os, const vector<ShrinkableBase>& shrVec)> writeShrs;
     Function<void(ostream& os, const vector<Any>& anyVec)> writeArgs;
-
+protected:
     vector<AnyGenerator> genVec;
 
     friend struct PropertyContext;
