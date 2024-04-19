@@ -60,6 +60,7 @@ bool PropertyBase::invoke(Random&)
 
 bool PropertyBase::exampleImpl(const vector<Any>& values)
 {
+    PropertyContext context;
     try {
         try {
             try {
@@ -91,8 +92,13 @@ bool PropertyBase::exampleImpl(const vector<Any>& values)
     return false;
 }
 
-bool PropertyBase::runForAll(const GenVec& curGenVec)
+bool PropertyBase::runForAll(GenVec& curGenVec)
 {
+    // fill with default generators
+    for(size_t i = curGenVec.size(); i < genVec.size(); i++) {
+        curGenVec.push_back(genVec[i]);
+    }
+
     Random rand(seed);
     Random savedRand(seed);
     cout << "random seed: " << seed << endl;
@@ -175,7 +181,7 @@ bool PropertyBase::test(const vector<ShrinkableBase>& curShrVec)
         if (onStartup)
             onStartup();
 
-        result = callFunction(curShrVec);
+        result = callFunctionWithShr(curShrVec);
 
         if (onCleanup)
             onCleanup();

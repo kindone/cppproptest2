@@ -24,7 +24,7 @@ namespace proptest {
  */
 template <typename... ARGS>
     requires (sizeof...(ARGS) > 0)
-class Property final : public PropertyBase {
+class Property {
 public:
     static constexpr size_t Arity = sizeof...(ARGS);
     using Func = Function<bool(ARGS...)>;
@@ -33,7 +33,38 @@ private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
 
 public:
-    Property(const Func& f, vector<AnyGenerator>&& gens) : PropertyBase(util::move(gens)), func(f) {}
+    Property(const Func& f, vector<AnyGenerator>&& gens) : func(f) {
+        base = make_unique<PropertyBase>(util::move(gens));
+        base->setCallFunction([this](const vector<Any>& anyVec) {
+            return util::Call<Arity>(func, [&](auto index_sequence) {
+                return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+            });
+        });
+        base->setCallFunctionWithShr([this](const vector<ShrinkableBase>& shrVec) {
+            return util::Call<Arity>(func, [&](auto index_sequence) {
+                return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+            });
+        });
+        base->setCallFunctionFromGen([this](Random& rand, const vector<AnyGenerator>& genVec) {
+            return util::Call<Arity>(func, [&](auto index_sequence) {
+                return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+            });
+        });
+        base->setWriteArgs([this](ostream& os, const vector<Any>& anyVec) {
+            os << "{ " << Show<Any, tuple_element_t<0, ArgTuple>>(anyVec[0]);
+            util::For<Arity-1>([&](auto index_sequence) {
+                os << ", " << Show<Any, tuple_element_t<index_sequence.value+1, ArgTuple>>(anyVec[index_sequence.value+1]);
+            });
+            os << " }";
+        });
+        base->setWriteShrs([this](ostream& os, const vector<ShrinkableBase>& shrVec) {
+            os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(shrVec[0]);
+            util::For<Arity-1>([&](auto index_sequence) {
+                os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(shrVec[index_sequence.value+1]);
+            });
+            os << " }";
+        });
+    }
 
 public:
     /**
@@ -44,7 +75,7 @@ public:
      */
     Property& setSeed(uint64_t s)
     {
-        seed = s;
+        base->setSeed(s);
         return *this;
     }
 
@@ -56,7 +87,7 @@ public:
      */
     Property& setNumRuns(uint32_t runs)
     {
-        numRuns = runs;
+        base->setNumRuns(runs);
         return *this;
     }
 
@@ -68,7 +99,7 @@ public:
      */
     Property& setOnStartup(Function<void()> _onStartup)
     {
-        onStartup = _onStartup;
+        base->setOnStartup(_onStartup);
         return *this;
     }
 
@@ -80,7 +111,7 @@ public:
      */
     Property& setOnCleanup(Function<void()> _onCleanup)
     {
-        onCleanup = _onCleanup;
+        base->setOnCleanup(_onCleanup);
         return *this;
     }
 
@@ -92,7 +123,7 @@ public:
      */
     Property& setMaxDurationMs(uint32_t durationMs)
     {
-        maxDurationMs = durationMs;
+        base->setMaxDurationMs(durationMs);
         return *this;
     }
 
@@ -119,11 +150,8 @@ public:
         constexpr size_t NumExplicitGens = sizeof...(gens);
 
         vector<AnyGenerator> curGenVec{generator(gens)...};
-        curGenVec.reserve(genVec.size());
-        for(size_t i = NumExplicitGens; i < genVec.size(); i++) {
-            curGenVec.push_back(genVec[i]);
-        }
-        return runForAll(curGenVec);
+        curGenVec.reserve(Arity);
+        return base->runForAll(curGenVec);
     }
 
     /**
@@ -135,12 +163,10 @@ public:
      */
     bool example(const ARGS&... args)
     {
-        PropertyContext context;
         vector<Any> values{args...};
-        return exampleImpl(values);
+        return base->exampleImpl(values);
     }
 
-public:
     /**
     * @brief Executes all input combinations in the Cartesian product of input lists
     *
@@ -168,75 +194,22 @@ public:
 
 private:
 
-    virtual bool callFunction(const vector<Any>& anyVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
-        });
-    }
-
-    virtual bool callFunction(const vector<ShrinkableBase>& shrVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
-        });
-    }
-
-    virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
-        });
-    }
-
-    virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const override
-    {
-        os << "{ " << Show<ShrinkableBase, tuple_element_t<0, ArgTuple>>(shrVec[0]);
-        util::For<Arity-1>([&](auto index_sequence) {
-            os << ", " << Show<ShrinkableBase, tuple_element_t<index_sequence.value+1, ArgTuple>>(shrVec[index_sequence.value+1]);
-        });
-        os << " }";
-    }
-
-    virtual void writeArgs(ostream& os, const vector<Any>& anyVec) const override
-    {
-        os << "{ " << Show<Any, tuple_element_t<0, ArgTuple>>(anyVec[0]);
-        util::For<Arity-1>([&](auto index_sequence) {
-            os << ", " << Show<Any, tuple_element_t<index_sequence.value+1, ArgTuple>>(anyVec[index_sequence.value+1]);
-        });
-        os << " }";
-    }
-
     Func func;
+    unique_ptr<PropertyBase> base;
 };
 
 namespace util {
-
-template <typename Callable, typename... ARGS>
-Function<bool(ARGS...)> functionWithBoolResultHelper(util::TypeList<ARGS...>, Callable&& callable)
-{
-    Function<void(const ARGS&...)> func = callable;
-    return [func](const ARGS&... args) {
-        func(args...);
-        return true;
-    };
-}
-
-template <class Callable>
-decltype(auto) toFunctionWithBoolResult(Callable&& callable)
-{
-    using FuncType = function_traits<Callable>::template function_type_with_signature<Function>;
-    using RetType = FuncType::RetType;
-    if constexpr(is_same_v<RetType, void>) {
-        // using FuncTypeBoolRet = function_traits<Callable>::template function_type_with_signature<Function, bool>;
-        typename function_traits<Callable>::argument_type_list argument_type_list;
-        return functionWithBoolResultHelper(argument_type_list, util::forward<Callable>(callable));
-    }
-    else
-        return FuncType(callable);
-}
 
 template <typename... ARGS>
 decltype(auto) createProperty(Function<bool(ARGS...)> func, vector<AnyGenerator>&& genVec)
 {
     return Property<ARGS...>(func, util::forward<decltype(genVec)>(genVec));
+}
+
+template <typename... ARGS>
+decltype(auto) createProperty(Function<void(ARGS...)> func, vector<AnyGenerator>&& genVec)
+{
+    return Property<ARGS...>([func](const ARGS&...args) { func(args...); return true; }, util::forward<decltype(genVec)>(genVec));
 }
 
 }  // namespace util
@@ -270,8 +243,7 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     });
 
     // callable to Function
-    auto func = util::toFunctionWithBoolResult(callable);
-    return util::createProperty(func, util::move(genVec));
+    return util::createProperty(FuncType(callable), util::move(genVec));
 }
 /**
  * @brief Immediately executes a randomized property test

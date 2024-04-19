@@ -87,21 +87,31 @@ public:
     static void fail(const char* filename, int lineno, const char* condition, const stringstream& str);
     static stringstream& getLastStream();
 
-    virtual void writeArgs(ostream& os, const vector<ShrinkableBase>& shrVec) const = 0;
-    virtual void writeArgs(ostream& os, const vector<Any>& anyVec) const = 0;
-
     bool exampleImpl(const vector<Any>& anyVec);
-    bool runForAll(const GenVec& curGenVec);
+    bool runForAll(GenVec& curGenVec);
     bool test(const vector<ShrinkableBase>& curShrVec);
 
     void shrink(Random& savedRand, const GenVec& curGenVec);
+
+    void setSeed(uint64_t s) { seed = s; }
+    void setNumRuns(uint32_t runs) { numRuns = runs; }
+    void setMaxDurationMs(uint32_t durationMs) { maxDurationMs = durationMs; }
+    void setOnStartup(Function<void()> _onStartup) { onStartup = _onStartup; }
+    void setOnCleanup(Function<void()> _onCleanup) { onCleanup = _onCleanup; }
+
+
+    void setCallFunctionWithShr(Function<bool(const vector<ShrinkableBase>&)> _callFunctionWithShr) { callFunctionWithShr = _callFunctionWithShr; }
+    void setCallFunction(Function<bool(const vector<Any>&)> _callFunction) { callFunction = _callFunction; }
+    void setCallFunctionFromGen(Function<bool(Random&, const vector<AnyGenerator>&)> _callFunctionFromGen) { callFunctionFromGen = _callFunctionFromGen; }
+    void setWriteShrs(Function<void(ostream& os, const vector<ShrinkableBase>& shrVec)> _writeShrs) { writeShrs = _writeShrs; }
+    void setWriteArgs(Function<void(ostream& os, const vector<Any>& anyVec)> _writeArgs) { writeArgs = _writeArgs; }
 
     struct ShowShrVec {
         ShowShrVec(const PropertyBase& _property, const vector<ShrinkableBase>& _shrVec) : property(_property), shrVec(_shrVec) {}
 
         friend ostream& operator<<(ostream& os, const ShowShrVec& show)
         {
-            show.property.writeArgs(os, show.shrVec);
+            show.property.writeShrs(os, show.shrVec);
             return os;
         }
         const PropertyBase& property;
@@ -127,9 +137,6 @@ protected:
 
 protected:
     bool invoke(Random& rand);
-    virtual bool callFunction(const vector<Any>& anyVec) = 0;
-    virtual bool callFunction(const vector<ShrinkableBase>& shrVec) = 0;
-    virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) = 0;
 
     static uint32_t defaultNumRuns;
     static uint32_t defaultMaxDurationMs;
@@ -142,6 +149,12 @@ protected:
 
     Function<void()> onStartup;
     Function<void()> onCleanup;
+
+    Function<bool(const vector<ShrinkableBase>&)> callFunctionWithShr;
+    Function<bool(const vector<Any>&)> callFunction;
+    Function<bool(Random&, const vector<AnyGenerator>&)> callFunctionFromGen;
+    Function<void(ostream& os, const vector<ShrinkableBase>& shrVec)> writeShrs;
+    Function<void(ostream& os, const vector<Any>& anyVec)> writeArgs;
 
     vector<AnyGenerator> genVec;
 
