@@ -70,7 +70,6 @@ template <typename T>
 template <typename U>
 Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
 {
-    // return Generator<U>(proptest::derive<T, U>(this->asGenFunction(), genFactory));
     return util::deriveImpl(asGenFunction1(), [=](T& t) { return Function1(genFactory(t));} );
 }
 

@@ -113,7 +113,7 @@ public:
     template <typename U>
     decltype(auto) tupleWith(Function<GenFunction<U>(T&)> genFactory);
 
-    template <typename FACTORY>
+    template <invocable<T&> FACTORY>
     decltype(auto) tupleWith(FACTORY&& genFactory)
     {
         using U = typename invoke_result_t<invoke_result_t<FACTORY, T&>, Random&>::type;
@@ -197,15 +197,8 @@ public:
 template <GenLike GEN>
 decltype(auto) generator(GEN&& gen)
 {
-    using RetType = typename function_traits<GEN>::return_type::type;  // cast Shrinkable<T>(Random&) -> T
+    using RetType = typename invoke_result_t<GEN, Random&>::type;  // cast Shrinkable<T>(Random&) -> T
     return Generator<RetType>(Function1(util::forward<GEN>(gen)));
-}
-
-template <GenLike GEN>
-decltype(auto) asGenFunction(GEN&& gen)
-{
-    using retType = decltype(gen(declval<Random&>()));
-    return static_cast<Function<retType(Random&)>>(gen);
 }
 
 struct PROPTEST_API AnyGenerator
