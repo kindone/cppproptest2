@@ -167,14 +167,14 @@ Shrinkable<T> make_shrinkable(ARGS&&... args)
 
 #define EXTERN_DECLARE_SHRINKABLE(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::Shrinkable, TYPE)
 #define EXTERN_DECLARE_FUNCTION(SIGNATURE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::Function, SIGNATURE)
-#define EXTERN_GENERATOR_FUNCTION(TYPE) EXTERN_DECLARE_FUNCTION(Shrinkable<TYPE>(::proptest::Random&))
+#define EXTERN_GENERATOR_FUNCTION(TYPE) EXTERN_DECLARE_FUNCTION(::proptest::Shrinkable<TYPE>(::proptest::Random&))
 
 DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_SHRINKABLE);
 EXTERN_DECLARE_SHRINKABLE(::proptest::vector<::proptest::ShrinkableBase>);
 
 DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_GENERATOR_FUNCTION);
 EXTERN_GENERATOR_FUNCTION(::proptest::vector<::proptest::ShrinkableBase>);
-EXTERN_DECLARE_FUNCTION(ShrinkableBase(::proptest::Random&));
+EXTERN_DECLARE_FUNCTION(::proptest::ShrinkableBase(::proptest::Random&));
 
 #endif // PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
 

@@ -5,6 +5,9 @@
 #include "proptest/util/utf16string.hpp"
 #include "proptest/std/string.hpp"
 
+
+#define PROPTEST_ENABLE_EXPLICIT_INSTANTIATION 1
+
 #define DEFINE_FOR_ALL_INTTYPES(DEF) \
     DEF(char);\
     DEF(int8_t);\

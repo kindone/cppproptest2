@@ -2,6 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/Generator.hpp"
+#include "proptest/util/define.hpp"
 
 namespace proptest {
 
@@ -81,3 +82,11 @@ using ArbitraryContainer = ArbiContainer<ARGS...>;
     }
 
 } // namespace proptest
+
+
+#ifdef PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
+
+#define EXTERN_DECLARE_ARBITRARY(TYPE) EXTERN_DECLARE_STRUCT_TYPE(::proptest::Arbi, TYPE)
+//DEFINE_FOR_ALL_BASIC_TYPES(EXTERN_DECLARE_ARBITRARY);
+
+#endif // PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
