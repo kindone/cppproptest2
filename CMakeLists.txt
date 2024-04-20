@@ -189,3 +189,22 @@ TARGET_LINK_LIBRARIES(compile_proptest
 ADD_TEST(compile_proptest_gtest
     EXCLUDE_FROM_ALL
     compile_proptest)
+
+SET(test_proptest_mini_sources
+    proptest/test/test_mini.cpp
+)
+
+ADD_EXECUTABLE(test_proptest_mini
+    EXCLUDE_FROM_ALL
+    ${test_proptest_mini_sources}
+)
+
+TARGET_LINK_LIBRARIES(test_proptest_mini
+    PRIVATE
+        proptest
+	gtest_main
+)
+
+ADD_TEST(test_proptest_mini_gtest
+    EXCLUDE_FROM_ALL
+    test_proptest_mini)
