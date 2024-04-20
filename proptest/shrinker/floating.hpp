@@ -5,29 +5,6 @@
 
 namespace proptest {
 
-namespace util {
-
-template <typename FLOATTYPE>
-FLOATTYPE decomposeFloat(FLOATTYPE value, int* exp);
-
-template <typename FLOATTYPE>
-FLOATTYPE composeFloat(FLOATTYPE value, int exp);
-
-template <>
-float decomposeFloat<float>(float value, int* exp);
-
-template <>
-double decomposeFloat<double>(double value, int* exp);
-
-template <>
-float composeFloat<float>(float value, int exp);
-
-template <>
-double composeFloat<double>(double value, int exp);
-
-}  // namespace util
-
-
 // template declaration
 template <typename FLOATTYPE>
 PROPTEST_API Shrinkable<FLOATTYPE>::StreamType floatShrinks(FLOATTYPE value);
