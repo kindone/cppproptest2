@@ -4,8 +4,6 @@
 
 namespace proptest {
 
-GeneratorCommon::~GeneratorCommon() {}
-
 ShrinkableBase AnyGenerator::operator()(Random& rand) const {
     return anyGen(rand);
 }

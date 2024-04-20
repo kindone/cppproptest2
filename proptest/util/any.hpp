@@ -62,14 +62,6 @@ struct PROPTEST_API AnyVal : AnyHolder {
         return &value;
     }
 
-    bool operator==(const T& other) {
-        if constexpr(equality_check_available<T>) {
-            return value == other;
-        }
-        else
-            return false;
-    }
-
     virtual shared_ptr<AnyHolder> clone() const override {
         return util::make_shared<AnyVal<T>>(value);
     }
@@ -87,10 +79,6 @@ struct PROPTEST_API AnyLValRef : AnyHolder {
 
     const void* rawPtr() const override {
         return &value;
-    }
-
-    bool operator==(const T& other) {
-        return &value == &other;
     }
 
     virtual shared_ptr<AnyHolder> clone() const override {

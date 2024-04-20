@@ -23,8 +23,6 @@ struct GeneratorCommon {
     template <typename T>
     GeneratorCommon(const Arbi<T>& arbi) : func([arbi](Random& rand) { return arbi(rand); }) {}
 
-    virtual ~GeneratorCommon();
-
     Function1 func;
 };
 
