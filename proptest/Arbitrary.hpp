@@ -20,8 +20,12 @@ class PROPTEST_API ArbitraryBase : public GeneratorBase<T>
  * @brief \ref Arbitrary (alias) or Arbi is the default generator for basic types.
  */
 template <typename T>
-class PROPTEST_API Arbi : public ArbitraryBase<T>
+struct PROPTEST_API Arbi : public ArbitraryBase<T>
 {
+
+    Shrinkable<T> operator()(Random&) const override {
+        static_assert(std::is_same<T, void>::value, "Specialization for Arbi<T> must be defined before use");
+    }
 };
 
 template <typename T>
