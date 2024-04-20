@@ -27,17 +27,26 @@ TEST(Compile, define_arbitrary_container_without_element_arbitrary)
     cout << shr.get()[0].a << endl;
 }
 
-// namespace proptest {
-// DEFINE_ARBITRARY(MyObj, []() {
-//     auto intGen = interval(10, 20);
-//     return construct<MyObj, int>(intGen);
-// });
-// }
+namespace proptest {
+DEFINE_ARBITRARY(MyObj, []() {
+    auto intGen = interval(10, 20);
+    return intGen.map<MyObj>([](int i) { return MyObj(i); });
+});
+}
 
-// TEST(Compile, define_arbitrary)
+TEST(Compile, using_defined_arbitrary)
+{
+    Random rand(1);
+    auto myObjGen = Arbi<MyObj>();
+    auto shr = myObjGen(rand);
+    cout << shr.get().a << endl;
+}
+
+// TEST(Compile, using_undefined_arbitrary)
 // {
 //     Random rand(1);
-//     auto myObjGen = Arbi<MyObj>();
+//     auto myObjGen = Arbi<MyObj2>();
 //     auto shr = myObjGen(rand);
 //     cout << shr.get().a << endl;
 // }
+
