@@ -26,7 +26,7 @@ ShrinkableBase ShrinkableBase::clone() const {
 
 // must be a callable with signature U(T&)
 ShrinkableBase ShrinkableBase::map(Function1 transformer) const {
-    return ShrinkableBase(transformer(value)).with([shrinksGen = this->shrinksGen, transformer]() -> StreamType {
+    return ShrinkableBase(transformer(value), [shrinksGen = this->shrinksGen, transformer]() -> StreamType {
         return shrinksGen().template transform<StreamElementType,StreamElementType>([transformer](const ShrinkableBase& shr) -> StreamElementType {
                 return shr.map(transformer);
             });

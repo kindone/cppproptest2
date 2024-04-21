@@ -27,7 +27,7 @@ Shrinkable<T> binarySearchShrinkableImpl(T value)
         } else if (min + 2 >= max) {
             return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() -> stream_t { return genpos(min, mid); })),
+            return stream_t(elem_t(Shrinkable<T>(util::make_any<T>(mid), [=]() -> stream_t { return genpos(min, mid); })),
                             [=]() -> stream_t { return genpos(mid, max); });
     };
 
@@ -39,11 +39,11 @@ Shrinkable<T> binarySearchShrinkableImpl(T value)
         } else if (min + 2 >= max) {
             return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() -> stream_t { return genneg(mid, max); })),
+            return stream_t(elem_t(Shrinkable<T>(util::make_any<T>(mid), [=]() -> stream_t { return genneg(mid, max); })),
                             [=]() -> stream_t { return genneg(min, mid); });
     };
 
-    return make_shrinkable<T>(value).with([value]() {
+    return Shrinkable<T>(util::make_any<T>(value), [value]() {
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)
@@ -69,7 +69,7 @@ Shrinkable<T> binarySearchShrinkableUImpl(T value)
         } else if (min + 2 >= max) {
             return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() { return genpos(min, mid); })),
+            return stream_t(elem_t(Shrinkable<T>(util::make_any<T>(mid), [=]() { return genpos(min, mid); })),
                             [=]() { return genpos(mid, max); });
     };
 
@@ -81,11 +81,11 @@ Shrinkable<T> binarySearchShrinkableUImpl(T value)
         } else if (min + 2 >= max) {
             return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() { return genneg(mid, max); })),
+            return stream_t(elem_t(Shrinkable<T>(util::make_any<T>(mid), [=]() { return genneg(mid, max); })),
                             [=]() { return genneg(min, mid); });
     };
 
-    return make_shrinkable<T>(value).with([value]() {
+    return Shrinkable<T>(util::make_any<T>(value), [value]() {
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)

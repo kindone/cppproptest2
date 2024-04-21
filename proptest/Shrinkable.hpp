@@ -103,6 +103,8 @@ struct Shrinkable : public ShrinkableBase
 
     explicit Shrinkable(Any _value) : ShrinkableBase(_value) {}
 
+    Shrinkable(const Any& _value, const Function<StreamType()>& _shrinksGen) : ShrinkableBase(_value, _shrinksGen) {}
+
     Shrinkable with(const StreamType& otherShrinks) const {
         return ShrinkableBase::with(otherShrinks);
     }
