@@ -82,9 +82,9 @@ ShrinkableBase ShrinkableBase::filter(Function1 criteria, int tolerance) const {
     if(!criteria(value).template getRef<bool>())
         throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
-    return with(filterStream(shrinksGen(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
+    return with([=, shrinksGen = this->shrinksGen]() { return filterStream(shrinksGen(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
         return shr.filter(criteria, tolerance);
-    }));
+    }); });
 }
 
 ShrinkableBase::StreamType ShrinkableBase::getShrinks() const { return shrinksGen(); }
