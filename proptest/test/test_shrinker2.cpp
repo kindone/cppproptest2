@@ -1,12 +1,5 @@
-#include "proptest/shrinker/integral.hpp"
-#include "proptest/shrinker/bool.hpp"
-#include "proptest/shrinker/floating.hpp"
-#include "proptest/shrinker/listlike.hpp"
-#include "proptest/shrinker/set.hpp"
-#include "proptest/shrinker/map.hpp"
-#include "proptest/shrinker/string.hpp"
-#include "proptest/shrinker/stringlike.hpp"
-#include "proptest/util/utf8string.hpp"
+#include "proptest/shrinker/shrinkers.hpp"
+#include "proptest/proptest.hpp"
 #include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
 
@@ -61,9 +54,51 @@ TEST(ListLikeShrinker, ints8)
 
     EXPECT_EQ(serializeShrinkable(shr0), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ]}");
     EXPECT_EQ(serializeShrinkable(shr1), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ], shrinks: [{value: [ 0, 0, 0, 0, 0, 0, 0, 0 ]}, {value: [ 1, 1, 1, 2, 2, 3, 3, 4 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 2 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 1 ]}]}, {value: [ 1, 1, 1, 2, 2, 2, 2, 3 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 2, 2, 3 ]}]}]}, {value: [ 1, 2, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 0, 2, 3, 3, 4, 4, 5 ]}, {value: [ 1, 1, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 1, 2, 3, 3, 4, 4, 5 ]}]}]}, {value: [ 1, 2, 3, 4, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 0, 0, 4, 5, 6, 7 ]}, {value: [ 1, 1, 1, 2, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 1, 1, 4, 5, 6, 7 ]}]}, {value: [ 1, 2, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 2, 3, 4, 5, 6, 7 ]}, {value: [ 1, 1, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 2, 3, 4, 5, 6, 7 ]}]}]}]}]}");
-    // too long!
-    // EXPECT_EQ(serializeShrinkable(shr2), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ], shrinks: [{value: [ 0, 0, 0, 0, 0, 0, 0, 0 ]}, {value: [ 1, 1, 1, 2, 2, 3, 3, 4 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 2 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 1 ]}]}, {value: [ 1, 1, 1, 2, 2, 2, 2, 3 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 2, 2, 3 ]}]}]}, {value: [ 1, 2, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 0, 2, 3, 3, 4, 4, 5 ]}, {value: [ 1, 1, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 1, 2, 3, 3, 4, 4, 5 ]}]}]}, {value: [ 1, 2, 3, 4, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 0, 0, 4, 5, 6, 7 ]}, {value: [ 1, 1, 1, 2, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 1, 1, 4, 5, 6, 7 ]}]}, {value: [ 1, 2, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 2, 3, 4, 5, 6, 7 ]}, {value: [ 1, 1, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 2, 3, 4, 5, 6, 7 ]}]}]}]}]}");
+    // too long to compare results, just check the count
+    size_t count = 0;
+    serializeShrinkable(shr2, count);
+    EXPECT_EQ(count, pow(2, 8));
     // EXPECT_EQ(serializeShrinkable(shr3), "{value: [ 1, 2, 3, 4, 5, 6, 7, 8 ], shrinks: [{value: [ 0, 0, 0, 0, 0, 0, 0, 0 ]}, {value: [ 1, 1, 1, 2, 2, 3, 3, 4 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 2 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 1, 1, 1 ]}]}, {value: [ 1, 1, 1, 2, 2, 2, 2, 3 ], shrinks: [{value: [ 0, 1, 1, 1, 1, 2, 2, 3 ]}]}]}, {value: [ 1, 2, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 0, 2, 3, 3, 4, 4, 5 ]}, {value: [ 1, 1, 2, 3, 3, 4, 5, 6 ], shrinks: [{value: [ 0, 1, 2, 3, 3, 4, 4, 5 ]}]}]}, {value: [ 1, 2, 3, 4, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 0, 0, 4, 5, 6, 7 ]}, {value: [ 1, 1, 1, 2, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 1, 1, 4, 5, 6, 7 ]}]}, {value: [ 1, 2, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 0, 2, 3, 4, 5, 6, 7 ]}, {value: [ 1, 1, 2, 3, 4, 5, 6, 7 ], shrinks: [{value: [ 0, 1, 2, 3, 4, 5, 6, 7 ]}]}]}]}]}");
+}
+
+
+template <typename T>
+void checkShrinkableHelper(const proptest::Shrinkable<T>& shrinkable, set<string>& resultSet) {
+    stringstream ss;
+    ss << proptest::Show<T>(shrinkable.get());
+    auto insertResult = resultSet.insert(ss.str());
+    // element must be unique
+    if(!insertResult.second)
+        throw runtime_error(__FILE__, __LINE__, "Duplicate shrinkable found: " + ss.str());
+    auto shrinks = shrinkable.getShrinks();
+    if(!shrinks.isEmpty()) {
+        for (auto itr = shrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(); itr.hasNext();) {
+            proptest::Shrinkable<T> shrinkable2 = itr.next();
+            checkShrinkableHelper<T>(shrinkable2, resultSet);
+        }
+    }
+}
+
+// checks whether shrinks are unique and returns number of shrinks by full traversal
+template <typename T>
+size_t checkShrinkable(const proptest::Shrinkable<T>& shr)
+{
+    set<string> resultSet;
+    checkShrinkableHelper<T>(shr, resultSet);
+    return resultSet.size();
+}
+
+TEST(ListLikeShrinker, intsN)
+{
+    matrix([](int N) {
+        Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>>();
+        vector<ShrinkableBase>& vec = baseShr.getMutableRef();
+        for(int i = 0; i < N; i++)
+            vec.push_back(ShrinkableBase(shrinkIntegral<int>(i+1)));
+
+        Shrinkable<vector<int>> shr = shrinkListLike<vector, int>(baseShr, 0, false, true);
+        EXPECT_EQ(checkShrinkable(shr), pow(2, N));
+    }, {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18});
 }
 
 TEST(SetShrinker, ints)

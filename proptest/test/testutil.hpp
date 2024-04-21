@@ -132,14 +132,15 @@ bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrin
 }
 
 template <typename T>
-void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shrinkable) {
+void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shrinkable, size_t& count) {
     stream << "{value: " << proptest::Show<T>(shrinkable.get());
+    count ++;
     auto shrinks = shrinkable.getShrinks();
     if(!shrinks.isEmpty()) {
         stream << ", shrinks: [";
         for (auto itr = shrinks.template iterator<typename proptest::Shrinkable<T>::StreamElementType>(); itr.hasNext();) {
             proptest::Shrinkable<T> shrinkable2 = itr.next();
-            outShrinkable<T>(stream, shrinkable2);
+            outShrinkable<T>(stream, shrinkable2, count);
             if(itr.hasNext())
                 stream << ", ";
         }
@@ -152,7 +153,16 @@ template <typename T>
 proptest::string serializeShrinkable(const proptest::Shrinkable<T>& shr)
 {
     proptest::stringstream stream;
-    outShrinkable<T>(stream, shr);
+    size_t count = 0;
+    outShrinkable<T>(stream, shr, count);
+    return stream.str();
+}
+
+template <typename T>
+proptest::string serializeShrinkable(const proptest::Shrinkable<T>& shr, size_t& count)
+{
+    proptest::stringstream stream;
+    outShrinkable<T>(stream, shr, count);
     return stream.str();
 }
 
