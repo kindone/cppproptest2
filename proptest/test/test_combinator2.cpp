@@ -181,7 +181,7 @@ TEST(PropTest, TestDependency2)
     auto tableDataGen = rawGen.template map<TableData>(
         +[](const RawData& raw) {
             TableData tableData;
-            auto dimension = raw.first;
+            const auto& dimension = raw.first;
             tableData.num_rows = dimension.first;
             tableData.num_elements = dimension.second;
             tableData.indexes = raw.second;
@@ -195,7 +195,6 @@ TEST(PropTest, TestDependency2)
 
     auto tableDataWithValueGen = tableDataGen.template pairWith<vector<bool>>(
         +[](const TableData& td) {
-            vector<bool> values;
             auto vectorGen = Arbi<vector<bool>>();
             vectorGen.setSize(td.num_elements);
             return vectorGen;
