@@ -6,86 +6,101 @@
 namespace proptest {
 namespace util {
 
-Shrinkable<int64_t> binarySearchShrinkable(int64_t value)
+template <typename T>
+Shrinkable<T> binarySearchShrinkableImpl(T value);
+template <typename T>
+Shrinkable<T> binarySearchShrinkableImpl(T value);
+
+template <typename T>
+Shrinkable<T> binarySearchShrinkableImpl(T value)
 {
-    using stream_t = Shrinkable<int64_t>::StreamType;
-    using elem_t = Shrinkable<int64_t>::StreamElementType;
-    using genfunc_t = Function<stream_t(int64_t, int64_t)>;
+    using stream_t = Shrinkable<T>::StreamType;
+    using elem_t = Shrinkable<T>::StreamElementType;
+    using genfunc_t = Function<stream_t(T, T)>;
 
     // given min, max, generate stream
-    static genfunc_t genpos = +[](int64_t min, int64_t max) -> stream_t {
-        int64_t mid = static_cast<int64_t>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? 1 : 0));
+    static genfunc_t genpos = +[](T min, T max) -> stream_t {
+        T mid = static_cast<T>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? 1 : 0));
 
         if (min + 1 >= max) {
             return stream_t::empty();
         } else if (min + 2 >= max) {
-            return stream_t::one<elem_t>(make_shrinkable<int64_t>(mid));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<int64_t>(mid).with([=]() -> stream_t { return genpos(min, mid); })),
+            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() -> stream_t { return genpos(min, mid); })),
                             [=]() -> stream_t { return genpos(mid, max); });
     };
 
-    static genfunc_t genneg = +[](int64_t min, int64_t max) -> stream_t {
-        int64_t mid = static_cast<int64_t>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? -1 : 0));
+    static genfunc_t genneg = +[](T min, T max) -> stream_t {
+        int64_t mid = static_cast<T>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? -1 : 0));
 
         if (min + 1 >= max) {
             return stream_t::empty();
         } else if (min + 2 >= max) {
-            return stream_t::one<elem_t>(make_shrinkable<int64_t>(mid));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<int64_t>(mid).with([=]() -> stream_t { return genneg(mid, max); })),
+            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() -> stream_t { return genneg(mid, max); })),
                             [=]() -> stream_t { return genneg(min, mid); });
     };
 
-    return make_shrinkable<int64_t>(value).with([value]() {
+    return make_shrinkable<T>(value).with([value]() {
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)
-            return stream_t::one<elem_t>(make_shrinkable<int64_t>(0)).concat(genpos(0, value));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(0)).concat(genpos(0, value));
         else
-            return stream_t::one<elem_t>(make_shrinkable<int64_t>(0)).concat(genneg(value, 0));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(0)).concat(genneg(value, 0));
     });
 }
 
-Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value)
+template <typename T>
+Shrinkable<T> binarySearchShrinkableUImpl(T value)
 {
-    using stream_t = Shrinkable<uint64_t>::StreamType;
-    using elem_t = Shrinkable<uint64_t>::StreamElementType;
-    using genfunc_t = Function<stream_t(uint64_t, uint64_t)>;
+    using stream_t = Shrinkable<T>::StreamType;
+    using elem_t = Shrinkable<T>::StreamElementType;
+    using genfunc_t = Function<stream_t(T, T)>;
 
     // given min, max, generate stream
-    static genfunc_t genpos = +[](uint64_t min, uint64_t max) {
-        uint64_t mid = static_cast<uint64_t>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? 1 : 0));
+    static genfunc_t genpos = +[](T min, T max) {
+        T mid = static_cast<T>(min / 2 + max / 2 + ((min % 2 != 0 && max % 2 != 0) ? 1 : 0));
 
         if (min + 1 >= max) {
             return stream_t::empty();
         } else if (min + 2 >= max) {
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(mid));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<uint64_t>(mid).with([=]() { return genpos(min, mid); })),
+            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() { return genpos(min, mid); })),
                             [=]() { return genpos(mid, max); });
     };
 
-    static genfunc_t genneg = +[](uint64_t min, uint64_t max) {
-        uint64_t mid = (min % 2 != 0 && max % 2 != 0) ? (min / 2 + max / 2 - 1) : (min / 2 + max / 2);
+    static genfunc_t genneg = +[](T min, T max) {
+        T mid = (min % 2 != 0 && max % 2 != 0) ? (min / 2 + max / 2 - 1) : (min / 2 + max / 2);
 
         if (min + 1 >= max) {
             return stream_t::empty();
         } else if (min + 2 >= max) {
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(mid));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(mid));
         } else
-            return stream_t(elem_t(make_shrinkable<uint64_t>(mid).with([=]() { return genneg(mid, max); })),
+            return stream_t(elem_t(make_shrinkable<T>(mid).with([=]() { return genneg(mid, max); })),
                             [=]() { return genneg(min, mid); });
     };
 
-    return make_shrinkable<uint64_t>(value).with([value]() {
+    return make_shrinkable<T>(value).with([value]() {
         if (value == 0)
             return stream_t::empty();
         else if (value > 0)
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genpos(0U, value));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(0U)).concat(genpos(0U, value));
         else
-            return stream_t::one<elem_t>(make_shrinkable<uint64_t>(0U)).concat(genneg(value, 0U));
+            return stream_t::template one<elem_t>(make_shrinkable<T>(0U)).concat(genneg(value, 0U));
     });
+}
+
+Shrinkable<int64_t> binarySearchShrinkable(int64_t value) {
+    return binarySearchShrinkableImpl<int64_t>(value);
+}
+
+Shrinkable<uint64_t> binarySearchShrinkableU(uint64_t value) {
+    return binarySearchShrinkableUImpl<uint64_t>(value);
 }
 
 }  // namespace util
@@ -95,12 +110,10 @@ template <typename T>
     requires is_integral_v<T>
 Shrinkable<T> shrinkIntegralImpl(T value)
 {
-    if constexpr(is_same_v<T, int64_t>)
-        return util::binarySearchShrinkable(value);
-    else if constexpr(is_signed<T>::value)
-        return util::binarySearchShrinkable(static_cast<int64_t>(value)).map<T>([](const int64_t& val) { return static_cast<T>(val); });
+    if constexpr(is_signed<T>::value)
+        return util::binarySearchShrinkableImpl<T>(value);
     else
-        return util::binarySearchShrinkableU(static_cast<uint64_t>(value)).map<T>([](const uint64_t& val) { return static_cast<T>(val); });
+        return util::binarySearchShrinkableUImpl<T>(value);
 }
 
 template<> Shrinkable<int8_t> shrinkIntegral<int8_t>(int8_t value) {
@@ -134,5 +147,9 @@ template<> Shrinkable<int64_t> shrinkIntegral<int64_t>(int64_t value) {
 template<> Shrinkable<uint64_t> shrinkIntegral<uint64_t>(uint64_t value) {
     return shrinkIntegralImpl<uint64_t>(value);
 }
+
+// template<> Shrinkable<size_t> shrinkIntegral<size_t>(size_t value) {
+//     return shrinkIntegralImpl<size_t>(value);
+// }
 
 }  // namespace proptest
