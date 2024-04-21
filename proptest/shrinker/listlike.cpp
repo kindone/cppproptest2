@@ -22,8 +22,6 @@ struct VectorShrinker
 
     static stream_t shrinkElementwise(const shrinkable_t& shrinkable, size_t power, size_t offset);
 
-    static shrinkable_t shrinkMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t frontSize, size_t rearSize);
-
     static shrinkable_t shrinkFrontAndThenMid(const shrinkable_t& shrinkableCont, size_t minSize, size_t rearSize);
 };
 
@@ -136,54 +134,29 @@ VectorShrinker::stream_t VectorShrinker::shrinkElementwise(const VectorShrinker:
     return newShrinkable.getShrinks();
 }
 
-Shrinkable<vector<ShrinkableBase>> VectorShrinker::shrinkMid(const Shrinkable<vector<ShrinkableBase>>& shr, size_t minSize, size_t frontSize, size_t rearSize) {
-    auto shrinkableCont = shr.getRef();
-    // remove mid as much as possible
-    size_t minRearSize = minSize >= frontSize ? minSize - frontSize : 0;
-    size_t maxRearSize = shrinkableCont.size() - frontSize;
-    // rear size within [minRearSize, minRearSize]
-    auto rangeShrinkable = shrinkIntegral<size_t>(maxRearSize - minRearSize).template map<size_t>([minRearSize](const size_t& s) { return s + minRearSize; });
-    return rangeShrinkable.template flatMap<vector<ShrinkableBase>>([shr, frontSize](const size_t& rearSize) {
-        // concat front and rear
-        auto shrinkableCont = shr.getRef();
-        auto contPtr = util::make_unique<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
-        contPtr->insert(contPtr->end(), shrinkableCont.begin() + (contPtr->size()-rearSize), shrinkableCont.end());
-        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
-    }).concat([minSize, frontSize, rearSize](const stream_element_t& parentElem) -> stream_t {
-        shrinkable_t parent = parentElem;
-        size_t parentSize = parent.getRef().size();
-        // no further shrinking possible
-        if(parentSize <= minSize || parentSize <= frontSize)
-            return stream_t::empty();
-        return shrinkMid(parent, minSize, frontSize + 1, rearSize).getShrinks();
-    });
-}
-
 VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinkable<vector<ShrinkableBase>>& shr, size_t minSize, size_t rearSize) {
+    // remove front as much as possible while keeping rear intact
     const auto& shrinkableCont = shr.getRef();
-    // remove front as much as possible
     size_t minFrontSize = minSize >= rearSize ? minSize - rearSize : 0;
-    size_t maxFrontSize = shrinkableCont.size() - rearSize;
-    // front size within [min,max]
-    auto rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
-    return rangeShrinkable.template flatMap<vector<ShrinkableBase>>([shr, maxFrontSize](const size_t& frontSize) {
+    size_t maxFrontSize = shrinkableCont.size() - rearSize; // == rear part size
+    // front size within [minFrontSize,maxFrontSize]
+    ShrinkableBase rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
+    return rangeShrinkable.flatMap([shr, maxFrontSize](const Any& frontSizeAny) -> Any {
+        const size_t& frontSize = frontSizeAny.getRef<size_t>();
         const auto& shrinkableCont = shr.getRef();
-        // concat front and rear
+        // concat front and rear parts
         auto contPtr = util::make_unique<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
+        // contPtr->reserve(frontSize + maxFrontSize);
         contPtr->insert(contPtr->end(), shrinkableCont.begin() + maxFrontSize, shrinkableCont.end());
-        return Shrinkable<vector<ShrinkableBase>>(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
+        return ShrinkableBase(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
     }).concat([minSize, rearSize](const shrinkable_t& parent) -> stream_t {
         // reduce front [0,size-rearSize-1] as much possible
         size_t parentSize = parent.getRef().size();
         // no further shrinking possible
         if(parentSize <= minSize || parentSize <= rearSize) {
-            // try shrinking mid
-            if(minSize < parentSize && rearSize + 1 < parentSize)
-                return shrinkMid(parent, minSize, 1, rearSize + 1).getShrinks();
-            else
-                return stream_t::empty();
+            return stream_t::empty();
         }
-        // shrink front further by fixing last element in front to rear
+        // shrink front further by fixing one more element to rear
         // [1,[2,3,4]]
         // [[1,2,3],4]
         // [[1,2],3,4]

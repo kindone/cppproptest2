@@ -13,7 +13,6 @@ Shrinkable<vector<ShrinkableBase>> toVectorShrinkableBase(const Container<Shrink
 {
     Shrinkable<vector<ShrinkableBase>> shrinkBaseVecShr = make_shrinkable<vector<ShrinkableBase>>();
     vector<ShrinkableBase>& shrinkBaseVec = shrinkBaseVecShr.getMutableRef();
-    shrinkBaseVec.reserve(shrinkableCont.size());
     util::transform(shrinkableCont.begin(), shrinkableCont.end(), util::inserter(shrinkBaseVec, shrinkBaseVec.begin()), +[](const Shrinkable<T>& shr) -> ShrinkableBase {
         return shr;
     });
