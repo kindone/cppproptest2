@@ -146,7 +146,6 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinka
         const auto& shrinkableCont = shr.getRef();
         // concat front and rear parts
         auto contPtr = util::make_unique<vector<ShrinkableBase>>(shrinkableCont.begin(), shrinkableCont.begin() + frontSize);
-        // contPtr->reserve(frontSize + maxFrontSize);
         contPtr->insert(contPtr->end(), shrinkableCont.begin() + maxFrontSize, shrinkableCont.end());
         return ShrinkableBase(util::make_any<vector<ShrinkableBase>>(util::move(contPtr)));
     }).concat([minSize, rearSize](const shrinkable_t& parent) -> stream_t {
