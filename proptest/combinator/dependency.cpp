@@ -27,8 +27,8 @@ GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen)
                 const Intermediate& interpair = interShr.get<Intermediate>();
                 const ShrinkableBase& shrinkableU = interpair.second;
                 ShrinkableBase newShrinkableU =
-                    shrinkableU.flatMap([interShr](const Any& u) mutable -> ShrinkableBase {
-                        return make_shrinkable<Intermediate>(interShr.get<Intermediate>().first, ShrinkableBase(u));
+                    shrinkableU.flatMap([first = interShr.get<Intermediate>().first](const Any& u) mutable -> ShrinkableBase {
+                        return make_shrinkable<Intermediate>(first, ShrinkableBase(u));
                     });
                 return newShrinkableU.getShrinks();
             });
