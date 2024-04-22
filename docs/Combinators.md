@@ -255,7 +255,8 @@ However, using `filter` for generating values with complex dependency may result
 
 ### Aggregation or Accumulation of Values
 
-You may want to generate values that are related to previously generated values. This can be achieved with `aggregate` or `accumulate`.
+You may want to generate values that are related to previously generated values. Such example is generating a sequence of chess moves where knowing previous moves are crucial for generating new valid move.
+This can be achieved with `aggregate` or `accumulate`.
 Both of the combinators take base generator in the form of `Generator<T>` as the first argument and a factory that takes a value of type `T` and returns `Generator<T>`, as the second argument.
 
 While `accumulate` generates a single value, `aggregate` generates a vector of values at each generation.
@@ -269,8 +270,8 @@ While `accumulate` generates a single value, `aggregate` generates a vector of v
     // generate initial value
     auto baseGen = interval(0, 1000);
     // generate a value based on previous value
-    auto gen = accumulate(
-        gen1,
+    Generator<int> gen = accumulate(
+        baseGen,
         [](int num) {
             return interval(num/2, num*2);
         },
@@ -281,8 +282,8 @@ While `accumulate` generates a single value, `aggregate` generates a vector of v
     // generate initial value
     auto baseGen = interval(0, 1000);
     // generate list of values
-    auto gen = aggregate(
-        gen1,
+    Generator<vector<int>> gen = aggregate(
+        baseGen,
         [](int num) {
             return interval(num/2, num*2);
         },
