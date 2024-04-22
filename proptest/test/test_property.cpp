@@ -128,42 +128,42 @@ TEST(Property, TestCheckBasic)
     });
 }
 
-// struct Bit
-// {
-//     uint8_t v;
-//     const uint16_t len;
-//     bool null;
+struct Bit
+{
+    uint8_t v;
+    const uint16_t len;
+    bool null;
 
-//     Bit(uint8_t vbit, bool null) : v(vbit), len(sizeof(uint8_t)), null(null) {}
-//     ~Bit() = default;
-// };
+    Bit(uint8_t vbit, bool null) : v(vbit), len(sizeof(uint8_t)), null(null) {}
+    ~Bit() = default;
+};
 
-// namespace proptest {
+namespace proptest {
 
-// template <>
-// class Arbi<Bit> : public ArbiBase<Bit> {
-// public:
-//     Shrinkable<Bit> operator()(Random& rand) const override
-//     {
-//         static auto gen_v =
-//             proptest::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) { return (1 << 0) & vbit; });
-//         static auto gen_bit = construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
-//         return gen_bit(rand);
-//     }
+template <>
+class Arbi<Bit> : public ArbiBase<Bit> {
+public:
+    Shrinkable<Bit> operator()(Random& rand) const override
+    {
+        static auto gen_v =
+            proptest::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) { return (1 << 0) & vbit; });
+        static auto gen_bit = construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
+        return gen_bit(rand);
+    }
 
-//     shared_ptr<GeneratorBase> clone() const override {
-//         return util::make_shared<Arbi>();
-//     }
-// };
-// }  // namespace proptest
+    shared_ptr<GeneratorBase> clone() const override {
+        return util::make_shared<Arbi>();
+    }
+};
+}  // namespace proptest
 
-// TEST(Property, TestCheckBit)
-// {
-//     forAll([](Bit bit) {
-//         PROP_STAT(bit.v == 1);
-//         PROP_STAT(bit.v != 1 && bit.v != 0);
-//     });
-// }
+TEST(Property, TestCheckBit)
+{
+    forAll([](Bit bit) {
+        PROP_STAT(bit.v == 1);
+        PROP_STAT(bit.v != 1 && bit.v != 0);
+    });
+}
 
 struct GenSmallInt : public proptest::GeneratorBase<int32_t>
 {
