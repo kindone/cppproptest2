@@ -5,18 +5,18 @@ namespace proptest {
 
 namespace util {
 
-GeneratorCommon deriveImpl(Function1 gen1, Function1 gen2gen)
+GeneratorCommon deriveImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen)
 {
-    Function1 genU = [gen1, gen2gen](Random& rand) {
+    Function1<ShrinkableBase> genU = [gen1, gen2gen](Random& rand) {
         // generate T
-        ShrinkableBase shrinkableT = gen1.callDirect(rand).getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableT = gen1.callDirect(rand);
         using Intermediate = pair<Any, ShrinkableBase>;
         // shrink strategy 1: expand Shrinkable<T>
         ShrinkableBase intermediate =
             shrinkableT.flatMap([&rand, gen2gen](const Any& t) mutable {
                 // generate U
-                Function1 gen2 = gen2gen(t).getRef<Function1>();
-                ShrinkableBase shrinkableU = gen2.callDirect(rand).getRef<ShrinkableBase>(true);
+                auto gen2 = gen2gen(t);
+                ShrinkableBase shrinkableU = gen2.callDirect(rand);
                 return ShrinkableBase(util::make_pair(t, shrinkableU));
             });
 

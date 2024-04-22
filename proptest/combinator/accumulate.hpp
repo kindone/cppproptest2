@@ -2,7 +2,7 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
-#include "proptest/Generator.hpp"
+#include "proptest/GenType.hpp"
 #include "proptest/util/function_traits.hpp"
 #include "proptest/generator/integral.hpp"
 
@@ -15,7 +15,7 @@ namespace proptest {
 
 namespace util {
 
-PROPTEST_API GeneratorCommon accumulateImpl(Function1 gen1, Function1 gen2gen, size_t minSize, size_t maxSize);
+PROPTEST_API GeneratorCommon accumulateImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen, size_t minSize, size_t maxSize);
 
 }  // namespace util
 /**
@@ -34,8 +34,8 @@ template <GenLike GEN1, typename GEN2GEN>
 decltype(auto) accumulate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t maxSize)
 {
     using T = typename invoke_result_t<GEN1, Random&>::type;  // get the T from shrinkable<T>(Random&)
-    Function1 func1Gen1 = gen1;
-    Function1 func1Gen2Gen([gen2gen](const Any& t) -> Function1 { return gen2gen(t.getRef<T>()); });
+    Function1<ShrinkableBase> func1Gen1 = gen1;
+    Function1<Function1<ShrinkableBase>> func1Gen2Gen([gen2gen](const Any& t) -> Function1<ShrinkableBase> { return gen2gen(t.getRef<T>()); });
     return Generator<T>(util::accumulateImpl(func1Gen1, func1Gen2Gen, minSize, maxSize));
 }
 

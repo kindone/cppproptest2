@@ -4,19 +4,19 @@ namespace proptest {
 
 namespace util {
 
-GeneratorCommon dependencyImpl(Function1 gen1, Function1 gen2gen)
+GeneratorCommon dependencyImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen)
 {
     return GeneratorCommon([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableT = gen1.callDirect(rand).template getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableT = gen1.callDirect(rand);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<T>
         ShrinkableBase intermediate =
             shrinkableT.flatMap([&rand, gen2gen](const Any& t) mutable -> ShrinkableBase {
                 // generate U
-                auto gen2 = gen2gen(t).template getRef<Function1>();
-                ShrinkableBase shrinkableU = gen2.callDirect(rand).template getRef<ShrinkableBase>(true);
+                auto gen2 = gen2gen(t);
+                ShrinkableBase shrinkableU = gen2.callDirect(rand);
                 return make_shrinkable<Intermediate>(t, shrinkableU);
             });
 

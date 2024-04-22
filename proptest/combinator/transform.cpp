@@ -5,10 +5,10 @@ namespace proptest {
 
 namespace util {
 
-GeneratorCommon transformImpl(Function1 gen, Function1 transformer)
+GeneratorCommon transformImpl(Function1<ShrinkableBase> gen, Function1<Any> transformer)
 {
     return GeneratorCommon([gen, transformer](Random& rand) {
-        ShrinkableBase shrinkable = gen.callDirect(rand).template getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkable = gen.callDirect(rand);
         return shrinkable.map(transformer);
     });
 }

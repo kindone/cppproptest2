@@ -5,21 +5,21 @@ namespace proptest {
 
 namespace util {
 
-GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize, size_t maxSize)
+GeneratorCommon aggregateImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen, size_t minSize, size_t maxSize)
 {
     auto intervalGen = interval<uint64_t>(minSize, maxSize);
 
     auto deriveAggregate = [gen1, gen2gen, minSize](const uint64_t& size) {
         if (size == 0)
-            return Function1([](Random&) { return make_shrinkable<vector<ShrinkableBase>>(); });
-        return Function1([gen1, gen2gen, size, minSize](Random& rand) {
-            ShrinkableBase shr = gen1.callDirect(rand).getRef<ShrinkableBase>(true);
+            return Function1<ShrinkableBase>([](Random&) { return make_shrinkable<vector<ShrinkableBase>>(); });
+        return Function1<ShrinkableBase>([gen1, gen2gen, size, minSize](Random& rand) {
+            ShrinkableBase shr = gen1.callDirect(rand);
             auto shrVec = make_shrinkable<vector<ShrinkableBase>>();
             auto& vec = shrVec.getMutableRef();
             vec.reserve(size);
             vec.push_back(shr);
             for (size_t i = 1; i < size; i++) {
-                shr = gen2gen(shr.getAny()).getRef<Function1>().callDirect(rand).getRef<ShrinkableBase>(true);
+                shr = gen2gen(shr.getAny()).callDirect(rand);
                 vec.push_back(shr);
             }
             return shrinkVectorLength(shrVec, minSize) // -> Shrinkable<vector<ShrinkableBase>>
@@ -40,7 +40,7 @@ GeneratorCommon aggregateImpl(Function1 gen1, Function1 gen2gen, size_t minSize,
         });
     };
 
-    return deriveImpl(intervalGen, [deriveAggregate](const Any& sizeAny) -> Function1 { return deriveAggregate(sizeAny.getRef<uint64_t>()); });
+    return deriveImpl(intervalGen, [deriveAggregate](const Any& sizeAny) -> Function1<ShrinkableBase> { return deriveAggregate(sizeAny.getRef<uint64_t>()); });
 }
 
 } // namespace util

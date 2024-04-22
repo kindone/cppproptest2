@@ -141,7 +141,7 @@ VectorShrinker::shrinkable_t VectorShrinker::shrinkFrontAndThenMid(const Shrinka
     size_t maxFrontSize = shrinkableCont.size() - rearSize; // == rear part size
     // front size within [minFrontSize,maxFrontSize]
     ShrinkableBase rangeShrinkable = shrinkIntegral<size_t>(maxFrontSize - minFrontSize).template map<size_t>([minFrontSize](const size_t& s) { return s + minFrontSize; });
-    return rangeShrinkable.flatMap([shr, maxFrontSize](const Any& frontSizeAny) -> Any {
+    return rangeShrinkable.flatMap([shr, maxFrontSize](const Any& frontSizeAny) -> ShrinkableBase {
         const size_t& frontSize = frontSizeAny.getRef<size_t>();
         const auto& shrinkableCont = shr.getRef();
         // concat front and rear parts

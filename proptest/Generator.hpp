@@ -15,15 +15,15 @@ namespace proptest {
 struct GeneratorCommon {
     GeneratorCommon(const GeneratorCommon& other) : func(other.func) {}
 
-    GeneratorCommon(Function1 _func) : func(_func) {}
+    GeneratorCommon(const Function1<ShrinkableBase>& _func) : func(_func) {}
 
     template <typename T>
     GeneratorCommon(const Generator<T>& gen) : func(gen.func) {}
 
     template <typename T>
-    GeneratorCommon(const Arbi<T>& arbi) : func([arbi](Random& rand) { return arbi(rand); }) {}
+    GeneratorCommon(const Arbi<T>& arbi) : func([arbi](Random& rand) -> ShrinkableBase { return arbi(rand); }) {}
 
-    Function1 func;
+    Function1<ShrinkableBase> func;
 };
 
 template <typename T>
@@ -147,7 +147,7 @@ public:
         };
     }
 
-    virtual Function1 asGenFunction1() {
+    virtual Function1<ShrinkableBase> asGenFunction1() {
         auto thisClone = clone();
         return [thisClone](Random& rand) -> Shrinkable<T> {
             return thisClone->operator()(rand);
@@ -163,14 +163,14 @@ public:
     Generator(const Generator& other) : func(other.func) {}
     Generator(const GeneratorCommon& common) : func(common.func) {}
     Generator(const Function<Shrinkable<T>(Random&)>& _func) : func(_func) {}
-    Generator(const Function1 _func) : func(_func) {}
+    Generator(const Function1<ShrinkableBase>& _func) : func(_func) {}
 
     template <same_as<T> U>
-    Generator(const Arbi<U>& arbi) : Generator(GeneratorCommon(arbi)) {}
+    Generator(const Arbi<U>& arbi) : Generator(Function1<ShrinkableBase>([arbi](Random& rand) -> ShrinkableBase { return arbi(rand); })) {}
     virtual ~Generator() {}
 
     virtual Shrinkable<T> operator()(Random& rand) const override {
-        return func.callDirect(rand).template getRef<ShrinkableBase>(true);
+        return func.callDirect(rand);
     }
 
     virtual shared_ptr<GeneratorBase<T>> clone() const override {
@@ -179,15 +179,15 @@ public:
 
     GenFunction<T> asGenFunction() override {
         return GenFunction<T>([func = this->func](Random& rand) {
-            return Shrinkable<T>(func.callDirect(rand).template getRef<ShrinkableBase>(true));
+            return Shrinkable<T>(func.callDirect(rand));
         });
     }
 
-    Function1 asGenFunction1() override {
+    Function1<ShrinkableBase> asGenFunction1() override {
         return func;
     }
 
-    Function1 func;
+    Function1<ShrinkableBase> func;
 };
 
 /**
@@ -198,7 +198,7 @@ template <GenLike GEN>
 decltype(auto) generator(GEN&& gen)
 {
     using RetType = typename invoke_result_t<GEN, Random&>::type;  // cast Shrinkable<T>(Random&) -> T
-    return Generator<RetType>(Function1(util::forward<GEN>(gen)));
+    return Generator<RetType>(Function1<ShrinkableBase>(util::forward<GEN>(gen)));
 }
 
 struct PROPTEST_API AnyGenerator

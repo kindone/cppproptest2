@@ -36,7 +36,7 @@ struct GeneratorCommon;
 template <typename T, typename U>
 Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
-    return util::deriveImpl(gen1, [gen2gen](T& t) -> Function1 { return gen2gen(t); });
+    return util::deriveImpl(gen1, [gen2gen](T& t) -> Function1<ShrinkableBase> { return gen2gen(t); });
 }
 
 }  // namespace proptest

@@ -1,4 +1,4 @@
-#include "proptest/combinator/oneof.hpp"
+#include "proptest/Generator.hpp"
 
 namespace proptest {
 
@@ -28,7 +28,7 @@ GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPt
                 weight = (1.0 - sum) / static_cast<double>(numUnassigned);
         }
 
-    return Function1([genVecPtr](Random& rand) {
+    return Function1<ShrinkableBase>([genVecPtr](Random& rand) {
         while (true) {
             auto dice = rand.getRandomSize(0, genVecPtr->size());
             const util::WeightedBase& weighted = (*genVecPtr)[dice];
@@ -37,7 +37,7 @@ GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPt
                 [[maybe_unused]] uint64_t numRetry = 0;
                 while (true) {
                     try {
-                        return weighted.func.callDirect(rand).template getRef<ShrinkableBase>(true);
+                        return weighted.func.callDirect(rand);
                     } catch (const Discard&) {
                         // TODO: trace level low
                     }
