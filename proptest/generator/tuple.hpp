@@ -7,6 +7,29 @@
 
 namespace proptest {
 
+template <typename...ARGS>
+decltype(auto) tupleOf(const shared_ptr<vector<AnyGenerator>>& genVec)
+{
+    if(genVec->size() != sizeof...(ARGS))
+        throw invalid_argument(__FILE__, __LINE__, "tupleOf: genVec size does not match number of arguments");
+    // generator
+    return generator([genVec](Random& rand) mutable {
+        // generate into new vector
+        auto shrVecPtr = util::make_unique<vector<ShrinkableBase>>();
+        shrVecPtr->reserve(genVec->size());
+        for(const auto& gen : *genVec) {
+            shrVecPtr->push_back(gen(rand));
+        }
+        return shrinkTuple<ARGS...>(make_shrinkable<vector<ShrinkableBase>>(util::move(shrVecPtr)));
+    });
+}
+
+template <typename...ARGS>
+decltype(auto) tupleOf(util::TypeList<ARGS...>, const shared_ptr<vector<AnyGenerator>>& genVec)
+{
+    return tupleOf<ARGS...>(genVec);
+}
+
 /**
  * @file tuple.hpp
  * @brief Arbitrary for tuple<T1,..., Tn> and utility function tupleOf(gen0, ..., gens)
@@ -24,16 +47,9 @@ decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens)
     using ArgTypeList = util::TypeList<typename function_traits<GEN0>::return_type::type, typename function_traits<GENS>::return_type::type...>;
     auto genVec = util::make_shared<vector<AnyGenerator>, initializer_list<AnyGenerator>>({generator(gen0), generator(gens)...});
     // generator
-    return generator([genVec](Random& rand) mutable {
-        // generate into new vector
-        auto shrVecPtr = util::make_unique<vector<ShrinkableBase>>();
-        shrVecPtr->reserve(Size);
-        for(const auto& gen : *genVec) {
-            shrVecPtr->push_back(gen(rand));
-        }
-        return shrinkTuple(ArgTypeList{}, make_shrinkable<vector<ShrinkableBase>>(util::move(shrVecPtr)));
-    });
+    return tupleOf(ArgTypeList{}, genVec);
 }
+
 
 /**
  * @ingroup Generators
