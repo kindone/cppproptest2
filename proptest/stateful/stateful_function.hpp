@@ -2,12 +2,12 @@
 
 #include "proptest/util/function_traits.hpp"
 #include "proptest/stateful/action.hpp"
+#include "proptest/Generator.hpp"
 #include "proptest/combinator/transform.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/just.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
-#include "proptest/Generator.hpp"
 #include "proptest/Arbitrary.hpp"
 #include "proptest/generator/list.hpp"
 #include "proptest/std/list.hpp"

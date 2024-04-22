@@ -4,19 +4,19 @@
 namespace proptest {
 namespace util {
 
-GeneratorCommon chainImpl1(Function1 gen1, Function1 gen2gen)
+GeneratorCommon chainImpl1(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen)
 {
-    return Function1([gen1, gen2gen](Random& rand) -> ShrinkableBase {
+    return Function1<ShrinkableBase>([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableTs = gen1.callDirect(rand).template getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableTs = gen1.callDirect(rand);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<T>
         ShrinkableBase intermediate =
             shrinkableTs.flatMap([&rand, gen2gen](const Any& t) mutable {
                 // generate U
-                auto gen2 = gen2gen(t).template getRef<Function1>();
-                ShrinkableBase shrinkableU = gen2.callDirect(rand).template getRef<ShrinkableBase>(true);
+                auto gen2 = gen2gen(t);
+                ShrinkableBase shrinkableU = gen2.callDirect(rand);
                 return ShrinkableBase(util::make_pair(t, shrinkableU));
             });
 
@@ -40,11 +40,11 @@ GeneratorCommon chainImpl1(Function1 gen1, Function1 gen2gen)
     });
 }
 
-GeneratorCommon chainImplN(Function1 gen1, Function1 gen2gen)
+GeneratorCommon chainImplN(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen)
 {
-    return Function1([gen1, gen2gen](Random& rand) -> ShrinkableBase {
+    return Function1<ShrinkableBase>([gen1, gen2gen](Random& rand) -> ShrinkableBase {
         // generate T
-        ShrinkableBase shrinkableTs = gen1.callDirect(rand).getRef<ShrinkableBase>(true);
+        ShrinkableBase shrinkableTs = gen1.callDirect(rand);
         using Intermediate = pair<Any, ShrinkableBase>;
 
         // shrink strategy 1: expand Shrinkable<tuple<Ts...>>
@@ -52,8 +52,8 @@ GeneratorCommon chainImplN(Function1 gen1, Function1 gen2gen)
             shrinkableTs.flatMap(
                 [&rand, gen2gen](const Any& ts) {
                     // generate U
-                    auto gen2 = gen2gen(ts).getRef<Function1>();
-                    ShrinkableBase shrinkableU = gen2.callDirect(rand).getRef<ShrinkableBase>(true);
+                    auto gen2 = gen2gen(ts);
+                    ShrinkableBase shrinkableU = gen2.callDirect(rand);
                     return ShrinkableBase(util::make_pair(ts, shrinkableU));
                 });
 

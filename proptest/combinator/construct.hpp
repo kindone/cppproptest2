@@ -19,7 +19,7 @@ Generator<CLASS> constructImpl(const shared_ptr<vector<AnyGenerator>>& genVec)
         throw invalid_argument(__FILE__, __LINE__, "construct: genVec size does not match number of arguments");
 
     auto tupleGen = tupleOf<decay_t<ARGS>...>(genVec);
-    return tupleGen.map<CLASS>([](const tuple<decay_t<ARGS>...>& tup) {
+    return tupleGen.template map<CLASS>([](const tuple<decay_t<ARGS>...>& tup) {
         return util::Call<NumArgs>(+[](const decay_t<ARGS>&...args) {
             return CLASS(util::toCallableArg<ARGS>(args)...);
         }, [&tup](auto index_sequence) {

@@ -1,6 +1,7 @@
 #include "proptest/generator/unicode.hpp"
-#include "proptest/combinator/oneof.hpp"
+#include "proptest/Generator.hpp"
 #include "proptest/generator/integral.hpp"
+#include "proptest/combinator/oneof.hpp"
 
 namespace proptest {
 
