@@ -1,8 +1,9 @@
 #pragma once
 #include "proptest/Random.hpp"
-#include "proptest/Generator.hpp"
+#include "proptest/GenType.hpp"
 #include "proptest/std/exception.hpp"
 #include "proptest/util/assert.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file oneof.hpp
@@ -26,11 +27,11 @@ namespace util {
 
 struct WeightedBase
 {
-    WeightedBase(const Function1& _func, double _weight) : func(_func), weight(_weight) {}
+    WeightedBase(const Function1<ShrinkableBase>& _func, double _weight) : func(_func), weight(_weight) {}
     template <typename T>
     WeightedBase(const Weighted<T>& weighted) : func(weighted.func), weight(weighted.weight) {}
 
-    Function1 func;
+    Function1<ShrinkableBase> func;
     double weight;
 };
 
@@ -41,7 +42,7 @@ struct Weighted : WeightedBase
     using type = T;
 
     Weighted(const WeightedBase& base) : WeightedBase(base) {}
-    Weighted(const Function1& _func, double _weight) : WeightedBase(_func, _weight) {}
+    Weighted(const Function1<ShrinkableBase>& _func, double _weight) : WeightedBase(_func, _weight) {}
 };
 
 template <typename T, GenLike<T> GEN>
@@ -55,8 +56,6 @@ Weighted<T> GenToWeighted(const Weighted<T>& weighted)
 {
     return weighted;
 }
-
-PROPTEST_API GeneratorCommon oneOfImpl(const shared_ptr<vector<util::WeightedBase>>& genVecPtr);
 
 }  // namespace util
 

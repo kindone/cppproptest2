@@ -5,7 +5,9 @@
 #include "proptest/combinator/derive.hpp"
 #include "proptest/combinator/dependency.hpp"
 #include "proptest/combinator/chain.hpp"
+#include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/combinatorimpl.hpp"
+
 
 
 namespace proptest {
@@ -29,7 +31,7 @@ template <typename U>
 Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(T&)> genFactory)
 {
     using Intermediate = pair<Any, ShrinkableBase>;
-    Generator<Intermediate> intermediateGen = util::dependencyImpl(asGenFunction1(), [=](T& t) { return Function1(genFactory(t));} );
+    Generator<Intermediate> intermediateGen = util::dependencyImpl(asGenFunction1(), [=](T& t) { return Function1<ShrinkableBase>(genFactory(t));} );
     return intermediateGen.map(+[](const Intermediate& interpair) {
         return util::make_pair(interpair.first.getRef<T>(), interpair.second.getRef<U>());
     });
@@ -52,14 +54,14 @@ decltype(auto) GeneratorBase<T>::tupleWith(Function<GenFunction<U>(T&)> genFacto
 {
     if constexpr (util::TupleLike<T>) {
         using Intermediate = pair<Any, ShrinkableBase>;
-        Generator<Intermediate> intermediateGen = util::chainImplN(asGenFunction1(), [genFactory](T& c) { return Function1(genFactory(c)); });
+        Generator<Intermediate> intermediateGen = util::chainImplN(asGenFunction1(), [genFactory](T& c) { return Function1<ShrinkableBase>(genFactory(c)); });
         return intermediateGen.map(+[](const Intermediate& interpair) {
             const T& ts = interpair.first.getRef<T>();
             return tuple_cat(ts, tuple<U>(interpair.second.getRef<U>()));
         });
     } else {
         using Intermediate = pair<Any, ShrinkableBase>;
-        Generator<Intermediate> intermediateGen = util::chainImpl1(asGenFunction1(), [genFactory](T& t) { return Function1(genFactory(t)); });
+        Generator<Intermediate> intermediateGen = util::chainImpl1(asGenFunction1(), [genFactory](T& t) { return Function1<ShrinkableBase>(genFactory(t)); });
         return intermediateGen.map(+[](const Intermediate& interpair) -> tuple<T, U> {
             return tuple<T, U>(interpair.first.getRef<T>(), interpair.second.getRef<U>());
         });
@@ -70,7 +72,7 @@ template <typename T>
 template <typename U>
 Generator<U> GeneratorBase<T>::flatMap(Function<GenFunction<U>(T&)> genFactory)
 {
-    return util::deriveImpl(asGenFunction1(), [=](T& t) { return Function1(genFactory(t));} );
+    return util::deriveImpl(asGenFunction1(), [=](T& t) { return Function1<ShrinkableBase>(genFactory(t));} );
 }
 
 }  // namespace proptest

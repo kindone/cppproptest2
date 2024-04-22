@@ -42,18 +42,18 @@ struct PROPTEST_API ShrinkableBase
 
     StreamType getShrinks() const;
 
-    ShrinkableBase map(Function1 transformer) const;
+    ShrinkableBase map(Function1<Any> transformer) const;
 
-    ShrinkableBase flatMap(Function1 transformer) const;
+    ShrinkableBase flatMap(Function1<ShrinkableBase> transformer) const;
 
     template <typename U, typename T>
     ShrinkableBase mapShrinkable(Function<ShrinkableBase(ShrinkableBase&)> transformer) const;
 
     // provide filtered generation, shrinking
-    ShrinkableBase filter(Function1 criteria) const;
+    ShrinkableBase filter(Function1<bool> criteria) const;
 
     // provide filtered generation, shrinking
-    ShrinkableBase filter(Function1 criteria, int tolerance) const;
+    ShrinkableBase filter(Function1<bool> criteria, int tolerance) const;
 
     // concat: continues with then after horizontal dead end
     ShrinkableBase concatStatic(const StreamType& then) const;
@@ -120,12 +120,12 @@ struct Shrinkable : public ShrinkableBase
     Shrinkable clone() const { return ShrinkableBase::clone(); }
 
     template <typename U>
-    Shrinkable<U> map(Func1<U(T&)> transformer) const {
+    Shrinkable<U> map(Function1<Any> transformer) const {
         return ShrinkableBase::map(transformer);
     }
 
     template <typename U>
-    Shrinkable<U> flatMap(Func1<ShrinkableBase(T&)> transformer) const {
+    Shrinkable<U> flatMap(Function1<ShrinkableBase> transformer) const {
         return ShrinkableBase::flatMap(transformer);
     }
 
@@ -135,12 +135,12 @@ struct Shrinkable : public ShrinkableBase
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Func1<bool(T&)> criteria) const {
+    Shrinkable filter(Function1<bool> criteria) const {
         return ShrinkableBase::filter(criteria);
     }
 
     // provide filtered generation, shrinking
-    Shrinkable filter(Func1<bool(T&)> criteria, int tolerance) const {
+    Shrinkable filter(Function1<bool> criteria, int tolerance) const {
         return ShrinkableBase::filter(criteria, tolerance);
     }
 

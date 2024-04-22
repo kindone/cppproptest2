@@ -24,7 +24,7 @@ template <typename T, typename U>
 Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     using Intermediate = pair<Any, ShrinkableBase>;
-    Generator<Intermediate> intermediateGen = util::dependencyImpl(gen1, [gen2gen](T& t) -> Function1 { return gen2gen(t); });
+    Generator<Intermediate> intermediateGen = util::dependencyImpl(gen1, [gen2gen](T& t) -> Function1<ShrinkableBase> { return gen2gen(t); });
     return intermediateGen.map(+[](const Intermediate& interpair) {
         return util::make_pair(interpair.first.getRef<T>(), interpair.second.getRef<U>());
     });

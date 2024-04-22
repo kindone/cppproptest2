@@ -23,7 +23,7 @@ template <typename U, typename T>
 Generator<tuple<T, U>> chainImpl(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     using Intermediate = pair<Any, ShrinkableBase>;
-    Generator<Intermediate> intermediateGen = util::chainImpl1(gen1, [gen2gen](T& t) { return Function1(gen2gen(t)); });
+    Generator<Intermediate> intermediateGen = util::chainImpl1(gen1, [gen2gen](T& t) -> Function1<ShrinkableBase> { return gen2gen(t); });
     return intermediateGen.map(+[](const Intermediate& interpair) -> tuple<T, U> {
         return tuple<T, U>(interpair.first.getRef<T>(), interpair.second.getRef<U>());
     });
@@ -36,7 +36,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
     using ChainType = Chain<T0, T1, Ts...>;
     using NextChainType = Chain<T0, T1, Ts..., U>;
     using Intermediate = pair<Any, ShrinkableBase>;
-    Generator<Intermediate> intermediateGen = util::chainImplN(gen1, [gen2gen](ChainType& c) { return Function1(gen2gen(c)); });
+    Generator<Intermediate> intermediateGen = util::chainImplN(gen1, [gen2gen](ChainType& c) -> Function1<ShrinkableBase> { return gen2gen(c); });
     return intermediateGen.map(+[](const Intermediate& interpair) -> NextChainType {
         const ChainType& ts = interpair.first.getRef<ChainType>();
         return tuple_cat(ts, tuple<U>(interpair.second.getRef<U>()));

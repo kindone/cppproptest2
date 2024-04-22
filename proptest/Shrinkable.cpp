@@ -25,7 +25,7 @@ ShrinkableBase ShrinkableBase::clone() const {
 }
 
 // must be a callable with signature U(T&)
-ShrinkableBase ShrinkableBase::map(Function1 transformer) const {
+ShrinkableBase ShrinkableBase::map(Function1<Any> transformer) const {
     return ShrinkableBase(transformer(value), [shrinksGen = this->shrinksGen, transformer]() -> StreamType {
         return shrinksGen().template transform<StreamElementType,StreamElementType>([transformer](const ShrinkableBase& shr) -> StreamElementType {
                 return shr.map(transformer);
@@ -35,8 +35,8 @@ ShrinkableBase ShrinkableBase::map(Function1 transformer) const {
 }
 
 // must be a callable with signature Shrinkable<U>(T&)
-ShrinkableBase ShrinkableBase::flatMap(Function1 transformer) const {
-    return transformer(value).template getRef<ShrinkableBase>(true).with([shrinksGen = this->shrinksGen, transformer]() {
+ShrinkableBase ShrinkableBase::flatMap(Function1<ShrinkableBase> transformer) const {
+    return transformer(value).with([shrinksGen = this->shrinksGen, transformer]() {
         return shrinksGen().template transform<ShrinkableBase,ShrinkableBase>([transformer](const ShrinkableBase& shr) -> StreamElementType {
                 return shr.flatMap(transformer);
             });
@@ -44,30 +44,30 @@ ShrinkableBase ShrinkableBase::flatMap(Function1 transformer) const {
     );
 }
 
-ShrinkableBase ShrinkableBase::filter(Function1 criteria) const {
+ShrinkableBase ShrinkableBase::filter(Function1<bool> criteria) const {
     // criteria must be true for head
-    if(!criteria(value).template getRef<bool>())
+    if(!criteria(value))
         throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
     else
         return with([shrinksGen = this->shrinksGen, criteria]() {
             return shrinksGen().template filter<ShrinkableBase>([criteria](const ShrinkableBase& shr) -> bool {
-                return criteria(shr.getAny()).template getRef<bool>();
+                return criteria(shr.getAny());
             }).template transform<ShrinkableBase,ShrinkableBase>([criteria](const ShrinkableBase& shr) {
                 return shr.filter(criteria);
             });
         });
 }
 
-ShrinkableBase ShrinkableBase::filter(Function1 criteria, int tolerance) const {
+ShrinkableBase ShrinkableBase::filter(Function1<bool> criteria, int tolerance) const {
 
-    static Function<StreamType(const StreamType&, Function1, int)> filterStream = +[](const StreamType& stream, Function1 _criteria, int _tolerance) {
+    static Function<StreamType(const StreamType&, Function1<bool>, int)> filterStream = +[](const StreamType& stream, Function1<bool> _criteria, int _tolerance) {
         if(stream.isEmpty())
             return StreamType::empty();
         else {
             for(auto itr = stream.template iterator<ShrinkableBase>(); itr.hasNext();) {
                 auto shr = itr.next();
                 auto tail = itr.stream;
-                if(_criteria(shr.getAny()).template getRef<bool>()) {
+                if(_criteria(shr.getAny())) {
                     return StreamType{shr, [tail, _criteria, _tolerance]() { return filterStream(tail, _criteria, _tolerance);}};
                 }
                 // extract from shr's children
@@ -79,7 +79,7 @@ ShrinkableBase ShrinkableBase::filter(Function1 criteria, int tolerance) const {
         }
     };
     // criteria must be true for head
-    if(!criteria(value).template getRef<bool>())
+    if(!criteria(value))
         throw invalid_argument(__FILE__, __LINE__, "cannot apply criteria");
 
     return with([=, shrinksGen = this->shrinksGen]() { return filterStream(shrinksGen(), criteria, tolerance).template transform<ShrinkableBase,ShrinkableBase>([criteria, tolerance](const ShrinkableBase& shr) {
