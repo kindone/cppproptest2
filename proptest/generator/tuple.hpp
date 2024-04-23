@@ -43,7 +43,6 @@ decltype(auto) tupleOf(util::TypeList<ARGS...>, const shared_ptr<vector<AnyGener
 template <GenLike GEN0, GenLike... GENS>
 decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens)
 {
-    constexpr auto Size = sizeof...(GENS) + 1;
     using ArgTypeList = util::TypeList<typename function_traits<GEN0>::return_type::type, typename function_traits<GENS>::return_type::type...>;
     auto genVec = util::make_shared<vector<AnyGenerator>, initializer_list<AnyGenerator>>({generator(gen0), generator(gens)...});
     // generator
