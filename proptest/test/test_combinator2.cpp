@@ -409,17 +409,17 @@ TEST(PropTest, TestAggregate)
 struct Box
 {
     Box() {}
-    Box(std::vector<Box>& _children) : children(_children) {}
-    std::vector<Box> children;
+    Box(vector<Box>& _children) : children(_children) {}
+    vector<Box> children;
 };
 
 struct Node
 {
     Node(int _value) : value(_value) {}
-    Node(int _value, std::vector<Node>& _children) : value(_value), children(_children) {}
+    Node(int _value, vector<Node>& _children) : value(_value), children(_children) {}
 
     int value;
-    std::vector<Node> children;
+    vector<Node> children;
 };
 
 namespace proptest {
@@ -473,7 +473,7 @@ TEST(PropTest, TestRecursive)
     Random rand(seed);
 
     [[maybe_unused]] auto emptyBoxGen = construct<Box>();
-    GenFunction<Box> boxGen = construct<Box, std::vector<Box>&>(Arbi<std::vector<Box>>(reference(boxGen)).setSize(0, 2));
+    GenFunction<Box> boxGen = construct<Box, vector<Box>&>(Arbi<vector<Box>>(reference(boxGen)).setSize(0, 2));
     auto tree = boxGen(rand).get();
     cout << "tree: " << proptest::Show<Box>(tree) << endl;
 }
@@ -486,10 +486,10 @@ TEST(PropTest, TestRecursive2)
 
     auto intGen = Arbi<int>();
     auto leafGen = construct<Node, int>(intGen);
-    auto leafVecGen = Arbi<std::vector<Node>>(leafGen).setSize(1, 2);
-    auto branch1Gen = construct<Node, int, std::vector<Node>&>(intGen, leafVecGen);
-    GenFunction<Node> branchNGen = construct<Node, int, std::vector<Node>&>(
-        intGen, Arbi<std::vector<Node>>(oneOf<Node>(branch1Gen, reference(branchNGen))).setSize(1, 2));
+    auto leafVecGen = Arbi<vector<Node>>(leafGen).setSize(1, 2);
+    auto branch1Gen = construct<Node, int, vector<Node>&>(intGen, leafVecGen);
+    GenFunction<Node> branchNGen = construct<Node, int, vector<Node>&>(
+        intGen, Arbi<vector<Node>>(oneOf<Node>(branch1Gen, reference(branchNGen))).setSize(1, 2));
     auto tree = branchNGen(rand).get();
     cout << "tree: " << proptest::Show<Node>(tree) << endl;
 }
@@ -507,7 +507,7 @@ TEST(PropTest, TestRecursive3)
         Shrinkable<Box> operator()(Random& rand)
         {
             if (level > 0)
-                return construct<Box, std::vector<Box>&>(Arbi<std::vector<Box>>(BoxGen(level - 1)).setSize(0, 10))(rand);
+                return construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen(level - 1)).setSize(0, 10))(rand);
             else
                 return construct<Box>()(rand);
         }
@@ -521,7 +521,7 @@ TEST(PropTest, TestRecursive3)
 
     Function<GenFunction<Box>(int)> BoxGen2 = [&BoxGen2](int level) -> GenFunction<Box> {
         if (level > 0)
-            return construct<Box, std::vector<Box>&>(Arbi<std::vector<Box>>(BoxGen2(level - 1)).setSize(0, 10));
+            return construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen2(level - 1)).setSize(0, 10));
         else
             return construct<Box>();
     };

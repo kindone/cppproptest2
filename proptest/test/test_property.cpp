@@ -146,7 +146,7 @@ public:
     Shrinkable<Bit> operator()(Random& rand) const override
     {
         static auto gen_v =
-            proptest::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) { return (1 << 0) & vbit; });
+            proptest::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
         static auto gen_bit = construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
         return gen_bit(rand);
     }
