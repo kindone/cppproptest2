@@ -9,6 +9,11 @@
 #include "proptest/std/tuple.hpp"
 #include "proptest/GenType.hpp"
 
+/**
+ * @file Generator.hpp
+ * @brief Template definitions of Generator<T>
+ */
+
 namespace proptest {
 
 /* Type-erased type */
@@ -155,7 +160,11 @@ public:
     }
 };
 
-/* Wrapping a Function */
+/**
+ * @ingroup Generators
+ * @brief Generator<T> is a wrapper for generator functions (or GenFunction<T>) to provide utility methods.
+ * @details Generator<T> is the default result type of various utility methods of both Generator<T> and Arbi<T>
+ */
 template <typename T>
 struct PROPTEST_API Generator : public GeneratorBase<T>
 {
@@ -192,7 +201,7 @@ public:
 
 /**
  * @ingroup Generators
- * @brief Helper function to create \ref Generator<T> from generator functions to provide utility methods.
+ * @brief Helper function to create \ref Generator from generator functions to provide utility methods.
  */
 template <GenLike GEN>
 decltype(auto) generator(GEN&& gen)
