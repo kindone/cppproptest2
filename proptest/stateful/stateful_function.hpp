@@ -14,6 +14,10 @@
 #include "proptest/Property.hpp"
 #include "proptest/std/chrono.hpp"
 
+/**
+ * @file stateful_function.hpp
+ * @brief Stateful testing class based on functional style
+ */
 
 namespace proptest {
 

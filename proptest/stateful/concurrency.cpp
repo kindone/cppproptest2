@@ -3,7 +3,7 @@
 namespace proptest {
 namespace concurrent {
 
-Spawner::~Spawner() {}
+//Spawner::~Spawner() {}
 
 } // namespace concurrent
 } // namespace proptest

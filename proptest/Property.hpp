@@ -63,7 +63,7 @@ public:
     /**
      * @brief Sets the startup function
      *
-     * @param onStartup Invoked in each run before running the property function
+     * @param _onStartup Invoked in each run before running the property function
      * @return Property& `Property` object itself for chaining
      */
     Property& setOnStartup(Function<void()> _onStartup)
@@ -75,7 +75,7 @@ public:
     /**
      * @brief Sets the cleanup function
      *
-     * @param onCleanup Invoked in each run after running the property function.
+     * @param _onCleanup Invoked in each run after running the property function.
      * @return Property& `Property` object itself for chaining
      */
     Property& setOnCleanup(Function<void()> _onCleanup)
@@ -292,7 +292,7 @@ bool forAll(Callable&& callable, ExplicitGens&&... gens)
 /**
 * @brief Immediately executes all input combinations in the Cartesian product of input lists
 *
-* equivalent to `property(...).forAll()`
+* equivalent to `property(...).matrix()`
 *
 * Usage:
 * @code
@@ -314,7 +314,6 @@ lists
 * @return true if all the cases succeed
 * @return false if any one of the cases fails
 */
-
 template <typename Callable, typename... ARGS>
 bool matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
 {

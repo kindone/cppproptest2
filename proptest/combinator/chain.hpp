@@ -57,7 +57,7 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
  *         stringGen.setMaxSize(intVal); // string size is dependent to intVal generated from intGen
  *         return stringGen;
  *     });
- *     // chain(gen, ...) is equivalent to gen.tupleWith(...), if gen is of Arbitrary or Generator type
+ *     // chain(gen, ...) is equivalent to gen.tupleWith(...), if gen is an Arbitrary or a Generator type
  * @endcode
  */
 template <GenLike GEN1, GenLikeGen<GEN1> GEN2GEN>

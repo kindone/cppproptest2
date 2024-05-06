@@ -10,6 +10,11 @@
 #include <thread>
 #include <atomic>
 
+/**
+ * @file concurrency_function.hpp
+ * @brief Concurrency testing class based on functional style
+ */
+
 namespace proptest {
 
 namespace concurrent {

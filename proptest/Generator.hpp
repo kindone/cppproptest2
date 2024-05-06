@@ -162,7 +162,7 @@ public:
 
 /**
  * @ingroup Generators
- * @brief Generator<T> is a wrapper for generator functions (or GenFunction<T>) to provide utility methods.
+ * @brief Generator<T> is a standard type for generators (including GenFunction<T>) that provides utility methods.
  * @details Generator<T> is the default result type of various utility methods of both Generator<T> and Arbi<T>
  */
 template <typename T>

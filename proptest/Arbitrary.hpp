@@ -4,6 +4,11 @@
 #include "proptest/Generator.hpp"
 #include "proptest/util/define.hpp"
 
+/**
+ * @file Arbitrary.hpp
+ * @brief Template definitions of Arbitrary<T> and its variants
+ */
+
 namespace proptest {
 
 template <typename T>

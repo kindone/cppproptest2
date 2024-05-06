@@ -9,6 +9,11 @@
 
 #include "proptest/typefwd.hpp"
 
+/**
+ * @file Stream.hpp
+ * @brief Stream class that represents a lazy list composed of value (head) and a generator (tail)
+ */
+
 namespace proptest {
 
 struct Stream;

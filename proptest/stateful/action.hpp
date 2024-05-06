@@ -5,9 +5,13 @@
 #include "proptest/std/io.hpp"
 
 
+/**
+ * @file action.hpp
+ * @brief Action classes for stateful/concurrency testing
+ */
+
 namespace proptest {
 namespace stateful {
-
 
 struct EmptyModel
 {

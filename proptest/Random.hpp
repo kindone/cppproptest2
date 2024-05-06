@@ -5,6 +5,11 @@
 #include "proptest/std/concepts.hpp"
 #include "proptest/std/exception.hpp"
 
+/**
+ * @file Random.hpp
+ * @brief Random number generator class
+ */
+
 namespace proptest {
 
 PROPTEST_API int64_t getCurrentTime();

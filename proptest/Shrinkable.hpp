@@ -10,6 +10,11 @@
 #include "proptest/Stream.hpp"
 #include "proptest/util/define.hpp"
 
+/**
+ * @file Shrinkable.hpp
+ * @brief Shrinkable class that represents a value that can be shrunk
+ */
+
 namespace proptest {
 
 struct ShrinkableBase;

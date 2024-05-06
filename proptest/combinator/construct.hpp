@@ -5,10 +5,14 @@
 #include "proptest/std/memory.hpp"
 #include "proptest/util/function.hpp"
 
+/**
+ * @file construct.hpp
+ * @brief Generator combinator for generating a type with a constructor
+ */
+
 namespace proptest {
 
 namespace util {
-
 
 template <typename CLASS, typename... ARGS>
 Generator<CLASS> constructImpl(const shared_ptr<vector<AnyGenerator>>& genVec)
@@ -48,6 +52,24 @@ Generator<CLASS> construct()
     return util::constructImpl<CLASS, ARGS...>(genVec);
 }
 
+/**
+ * @ingroup Combinators
+ * @brief Generates a CLASS type by specifying target constructor's parameter types and their (optional) generators
+ *
+ * Usage:
+ *
+ * @code
+ *      struct Point {
+ *          Point() : x(0), y(0) {}
+ *          Point(int x, int y) : x(x), y(y) {}
+ *          int x;
+ *          int y;
+ *      };
+ *      GenFunction<Point> objectGen = construct<Point>(); // calls Point()
+ *      GenFunction<Point> objectGen2 = construct<Point, int, int>(nonNegative(), nonNegative()); // Point(int, int)
+ *      GenFunction<Point> objectGen3 = construct<Point, int, int>(); // ints are generated using Arbi<int>
+ * @endcode
+ */
 template <typename CLASS, typename... ARGS, GenLike ExplicitGen0, GenLike...ExplicitGens>
 Generator<CLASS> construct(ExplicitGen0&& gen0, ExplicitGens&&... gens)
 {
