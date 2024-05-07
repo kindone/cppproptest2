@@ -2,6 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/util/anyfunction.hpp"
+#include "proptest/Shrinkable.hpp"
 
 namespace proptest {
 

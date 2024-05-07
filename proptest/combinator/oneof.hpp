@@ -3,6 +3,7 @@
 #include "proptest/GenType.hpp"
 #include "proptest/std/exception.hpp"
 #include "proptest/util/assert.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file oneof.hpp

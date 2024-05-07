@@ -4,6 +4,7 @@
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/just.hpp"
 #include "proptest/std/algorithm.hpp"
+#include "proptest/combinator/combinatorimpl.hpp"
 
 /**
  * @file elementof.hpp
