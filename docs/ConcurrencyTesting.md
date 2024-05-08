@@ -9,6 +9,9 @@ Following depicts a concurrent test for `std::vector<int>` with `push_back(int)`
 
 ```cpp
 
+#include "proptest/proptest.hpp"
+#include "proptest/concurrencytest.hpp"
+
 using namespace proptest;
 using namespace proptest::concurrent;
 

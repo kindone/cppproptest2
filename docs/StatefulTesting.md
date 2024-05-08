@@ -51,7 +51,9 @@ An `Action` or a `SimpleAction` is formally defined as a functor object of the f
 You can use `SimpleAction` and its variant if you do not intend to use a model object. Let's discuss this simper variant first. The function takes an `ObjectType` reference. You will typically be defining a `SimpleAction` with a lambda. Our first goal is to create a generator for our action. A generator for an action with no arguments such as `pop_back()` can be defined as:
 
 ```cpp
-#include "statefultest.hpp"
+#include "proptest/statefultest.hpp"
+using namespace proptest;
+using namespace proptest::stateful;
 
 // ...
 
