@@ -97,7 +97,7 @@ prop.go();
 
 // or, we can just initialize the object to an empty object
 auto prop = statefulProperty<T>(
-    /* initial state generator */ just<MyVector>([]() { return MyVector(); }),
+    /* initial state generator */ lazy<MyVector>([]() { return MyVector(); }),
     /* action generator */ actionGen);
 prop.go();
 ```
@@ -140,7 +140,7 @@ TEST(MyVectorTest, Stateful)
     // `oneOf` can take weights, so you can adjust rate of generation of an action
     //    auto actionGen = oneOf<SimpleAction<MyVector>>(pushBackGen, popBackGen, weightedGen<SimpleAction<MyVector>>(clearGen, 0.1));
     auto prop = statefulProperty<MyVector>(
-        /* initial state generator */ just<MyVector>([]() { return MyVector(); }),
+        /* initial state generator */ lazy<MyVector>([]() { return MyVector(); }),
         /* action generator */ actionGen);
     // Tests massive cases with randomly generated action sequences
     prop.go();

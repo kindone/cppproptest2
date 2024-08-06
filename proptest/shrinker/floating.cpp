@@ -85,7 +85,7 @@ Shrinkable<FLOATTYPE>::StreamType floatShrinksImpl(FLOATTYPE value)
 
         // shrink fraction within (0.0 and 0.5)
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
-            auto value = shr.get();
+            auto value = shr.getRef();
             int exp = 0;
             /*FLOATTYPE fraction = */ util::decomposeFloat(value, &exp);
             if (value == 0.0f)
@@ -99,7 +99,7 @@ Shrinkable<FLOATTYPE>::StreamType floatShrinksImpl(FLOATTYPE value)
 
         // integerfy
         floatShrinkable = floatShrinkable.andThen(+[](const Shrinkable<FLOATTYPE>& shr) {
-            auto value = shr.get();
+            auto value = shr.getRef();
             auto intValue = static_cast<int>(value);
             if (intValue != 0 && static_cast<FLOATTYPE>(abs(intValue)) < abs(value)) {
                 return Stream::template one<Elem>(make_shrinkable<FLOATTYPE>(static_cast<FLOATTYPE>(intValue)));

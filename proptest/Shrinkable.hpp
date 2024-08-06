@@ -38,7 +38,7 @@ struct PROPTEST_API ShrinkableBase
 
     ShrinkableBase with(Function<StreamType()> otherStream) const;
 
-    template <typename T> T get() const { return value.getRef<T>(); }
+    // template <typename T> T get() const { return value.getRef<T>(); }
     template <typename T> const T& getRef() const { return value.getRef<T>(); }
     template <typename T> T& getMutableRef() { return value.getMutableRef<T>(); }
     Any getAny() const;
@@ -118,7 +118,7 @@ struct Shrinkable : public ShrinkableBase
         return ShrinkableBase::with(otherStream);
     }
 
-    T get() const { return ShrinkableBase::get<T>(); }
+    // T get() const { return ShrinkableBase::get<T>(); }
     const T& getRef() const { return ShrinkableBase::getRef<T>(); }
     T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
 

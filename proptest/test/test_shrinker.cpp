@@ -96,9 +96,9 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed2)
     using Elem = Shrinkable<TypeParam>::StreamElementType;
     Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8).concat([](const Elem& shr) {
         Shrinkable<TypeParam> inShr = shr;
-        if(inShr.get() == 0)
+        if(inShr.getRef() == 0)
             return StreamType::empty();
-        return StreamType::template one<Elem>(Shrinkable<TypeParam>(-inShr.get()));
+        return StreamType::template one<Elem>(Shrinkable<TypeParam>(-inShr.getRef()));
     });
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: [{value: 0}, {value: -4, shrinks: [{value: -2, shrinks: [{value: -1, shrinks: [{value: 1}]}, {value: 2}]}, {value: -3, shrinks: [{value: 3}]}, {value: 4}]}, {value: -6, shrinks: [{value: -5, shrinks: [{value: 5}]}, {value: 6}]}, {value: -7, shrinks: [{value: 7}]}, {value: 8}]}");
 }

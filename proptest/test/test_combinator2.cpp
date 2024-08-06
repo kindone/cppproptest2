@@ -56,14 +56,14 @@ TEST(PropTest, TestTransform)
 
         for (int i = 0; i < 10; i++) {
             auto shrinkable = stringGen(rand);
-            cout << "string: " << shrinkable.get() << endl;
+            cout << "string: " << shrinkable.getRef() << endl;
             int j = 0;
             for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < 3; j++) {
                 Shrinkable<string> shrinkable2 = itr.next();
-                cout << "  shrink: " << shrinkable2.get() << endl;
+                cout << "  shrink: " << shrinkable2.getRef() << endl;
                 int k = 0;
                 for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < 3; k++) {
-                    cout << "    shrink: " << Shrinkable<string>(itr2.next()).get() << endl;
+                    cout << "    shrink: " << Shrinkable<string>(itr2.next()).getRef() << endl;
                 }
             }
         }
@@ -76,7 +76,7 @@ TEST(PropTest, TestTransform)
             });
 
         for (int i = 0; i < 10; i++) {
-            cout << "vector " << vectorGen(rand).get()[0] << endl;
+            cout << "vector " << vectorGen(rand).getRef()[0] << endl;
         }
     }
 
@@ -85,14 +85,14 @@ TEST(PropTest, TestTransform)
 
         for (int i = 0; i < 10; i++) {
             auto shrinkable = stringGen(savedRand);
-            cout << "string2: " << shrinkable.get() << endl;
+            cout << "string2: " << shrinkable.getRef() << endl;
             int j = 0;
             for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < 3; j++) {
                 Shrinkable<string> shrinkable2 = itr.next();
-                cout << "  shrink2: " << shrinkable2.get() << endl;
+                cout << "  shrink2: " << shrinkable2.getRef() << endl;
                 int k = 0;
                 for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < 3; k++) {
-                    cout << "    shrink2: " << Shrinkable<string>(itr2.next()).get() << endl;
+                    cout << "    shrink2: " << Shrinkable<string>(itr2.next()).getRef() << endl;
                 }
             }
         }
@@ -104,7 +104,7 @@ TEST(PropTest, TestTransform)
         });
 
         for (int i = 0; i < 10; i++) {
-            cout << "vector2 " << vectorGen(savedRand).get()[0] << endl;
+            cout << "vector2 " << vectorGen(savedRand).getRef()[0] << endl;
         }
     }
 }
@@ -117,7 +117,7 @@ TEST(PropTest, TestTranform2)
         Arbi<uint8_t>(), +[](const uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
 
     for (int i = 0; i < 10; i++)
-        cout << gen(rand).get() << endl;
+        cout << gen(rand).getRef() << endl;
 }
 
 TEST(PropTest, TestDependency)
@@ -135,7 +135,7 @@ TEST(PropTest, TestDependency)
     int64_t seed = getCurrentTime();
     Random rand(seed);
     for (int i = 0; i < 10; i++) {
-        auto pair = pairGen(rand).get();
+        auto pair = pairGen(rand).getRef();
         cout << "(" << pair.first << ", " << pair.second << ")" << endl;
     }
     cout << "exhaustive: " << endl;
@@ -173,8 +173,8 @@ TEST(PropTest, TestDependency2)
     cout << "raw." << endl;
 
     for (int i = 0; i < 10; i++) {
-        // cout << "rawGen: " << rawGen(rand).get() << " / raw " << i << endl;
-        rawGen(rand).get();
+        // cout << "rawGen: " << rawGen(rand).getRef() << " / raw " << i << endl;
+        rawGen(rand).getRef();
         cout << "rawGen: " << i <<  endl;
     }
 
@@ -190,7 +190,7 @@ TEST(PropTest, TestDependency2)
     cout << "transformed." << endl;
 
     for (int i = 0; i < 10; i++) {
-        tableDataGen(rand).get();
+        tableDataGen(rand).getRef();
     }
 
     auto tableDataWithValueGen = tableDataGen.template pairWith<vector<bool>>(
@@ -474,7 +474,7 @@ TEST(PropTest, TestRecursive)
 
     [[maybe_unused]] auto emptyBoxGen = construct<Box>();
     GenFunction<Box> boxGen = construct<Box, vector<Box>&>(Arbi<vector<Box>>(reference(boxGen)).setSize(0, 2));
-    auto tree = boxGen(rand).get();
+    auto tree = boxGen(rand).getRef();
     cout << "tree: " << proptest::Show<Box>(tree) << endl;
 }
 
@@ -490,7 +490,7 @@ TEST(PropTest, TestRecursive2)
     auto branch1Gen = construct<Node, int, vector<Node>&>(intGen, leafVecGen);
     GenFunction<Node> branchNGen = construct<Node, int, vector<Node>&>(
         intGen, Arbi<vector<Node>>(oneOf<Node>(branch1Gen, reference(branchNGen))).setSize(1, 2));
-    auto tree = branchNGen(rand).get();
+    auto tree = branchNGen(rand).getRef();
     cout << "tree: " << proptest::Show<Node>(tree) << endl;
 }
 
@@ -516,7 +516,7 @@ TEST(PropTest, TestRecursive3)
     };
 
     auto boxGen = BoxGen(4);
-    auto tree = boxGen(rand).get();
+    auto tree = boxGen(rand).getRef();
     cout << "tree: " << proptest::Show<Box>(tree) << endl;
 
     Function<GenFunction<Box>(int)> BoxGen2 = [&BoxGen2](int level) -> GenFunction<Box> {
@@ -527,7 +527,7 @@ TEST(PropTest, TestRecursive3)
     };
 
     auto boxGen2 = BoxGen2(2);
-    auto tree2 = boxGen2(rand).get();
+    auto tree2 = boxGen2(rand).getRef();
     cout << "tree2: " << proptest::Show<Box>(tree2) << endl;
 }
 

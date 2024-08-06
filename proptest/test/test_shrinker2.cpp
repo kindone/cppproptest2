@@ -65,7 +65,7 @@ TEST(ListLikeShrinker, ints8)
 template <typename T>
 void checkShrinkableHelper(const proptest::Shrinkable<T>& shrinkable, set<string>& resultSet) {
     stringstream ss;
-    ss << proptest::Show<T>(shrinkable.get());
+    ss << proptest::Show<T>(shrinkable.getRef());
     auto insertResult = resultSet.insert(ss.str());
     // element must be unique
     if(!insertResult.second)

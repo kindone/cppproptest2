@@ -78,7 +78,7 @@ void printShrinkable(const proptest::Shrinkable<T>& shrinkable, int level) {
     for (int i = 0; i < level; i++)
         proptest::cout << "  ";
 
-    proptest::cout << "shrinkable: " << proptest::Show<T>(shrinkable.get()) << proptest::endl;
+    proptest::cout << "shrinkable: " << proptest::Show<T>(shrinkable.getRef()) << proptest::endl;
 }
 
 template <typename T>
@@ -108,7 +108,7 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, propt
 template <typename T>
 bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs, size_t maxElements = 1000)
 {
-    if(lhs.get() != rhs.get())
+    if(lhs.getRef() != rhs.getRef())
         return false;
 
     maxElements --;
@@ -133,7 +133,7 @@ bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrin
 
 template <typename T>
 void outShrinkable(proptest::ostream& stream, const proptest::Shrinkable<T>& shrinkable, size_t& count) {
-    stream << "{value: " << proptest::Show<T>(shrinkable.get());
+    stream << "{value: " << proptest::Show<T>(shrinkable.getRef());
     count ++;
     auto shrinks = shrinkable.getShrinks();
     if(!shrinks.isEmpty()) {

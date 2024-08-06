@@ -9,7 +9,7 @@ using namespace proptest;
 TEST(Shrinkable, basic)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     EXPECT_EQ(shr.getAny().getRef<int>(), 100);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
 
@@ -19,11 +19,11 @@ TEST(Shrinkable, basic)
 TEST(Shrinkable, with)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.with(Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200)));
-    EXPECT_EQ(shr2.get(), 100);
+    EXPECT_EQ(shr2.getRef(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
-    EXPECT_EQ(Shrinkable<int>(shr2.getShrinks().getHeadRef<Shrinkable<int>::StreamElementType>()).get(), 200);
+    EXPECT_EQ(Shrinkable<int>(shr2.getShrinks().getHeadRef<Shrinkable<int>::StreamElementType>()).getRef(), 200);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100, shrinks: [{value: 200}]}");
 }
@@ -32,7 +32,7 @@ TEST(Shrinkable, with)
 TEST(Shrinkable, concatStatic)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.concatStatic(Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200)));
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100, shrinks: [{value: 200}]}");
@@ -46,7 +46,7 @@ TEST(Shrinkable, concatStatic)
 TEST(Shrinkable, concat)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.concat([](const Shrinkable<int>&) {
         return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200));
     });
@@ -56,7 +56,7 @@ TEST(Shrinkable, concat)
     Shrinkable<int> shr3 = shrinkIntegral<int>(2);
     EXPECT_EQ(serializeShrinkable(shr3), "{value: 2, shrinks: [{value: 0}, {value: 1}]}");
     Shrinkable<int> shr4 = shr3.concat([](const Shrinkable<int>& shr) {
-        return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(shr.get() + 5));
+        return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(shr.getRef() + 5));
     });
     EXPECT_EQ(serializeShrinkable(shr4), "{value: 2, shrinks: [{value: 0, shrinks: [{value: 5}]}, {value: 1, shrinks: [{value: 6}]}, {value: 7}]}");
 }
@@ -65,7 +65,7 @@ TEST(Shrinkable, concat)
 TEST(Shrinkable, andThenStatic)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.andThenStatic(Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200)));
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100, shrinks: [{value: 200}]}");
@@ -80,7 +80,7 @@ TEST(Shrinkable, andThenStatic)
 TEST(Shrinkable, andThen)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.andThen([](const Shrinkable<int>&) {
         return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200));
     });
@@ -90,7 +90,7 @@ TEST(Shrinkable, andThen)
     Shrinkable<int> shr3 = shrinkIntegral<int>(2);
     EXPECT_EQ(serializeShrinkable(shr3), "{value: 2, shrinks: [{value: 0}, {value: 1}]}");
     Shrinkable<int> shr4 = shr3.andThen([](const Shrinkable<int>& shr) {
-        return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(shr.get() + 5));
+        return Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(shr.getRef() + 5));
     });
     EXPECT_EQ(serializeShrinkable(shr4), "{value: 2, shrinks: [{value: 0, shrinks: [{value: 5}]}, {value: 1, shrinks: [{value: 6}]}]}");
 }
@@ -111,9 +111,9 @@ TEST(Shrinkable, filter)
 TEST(Shrinkable, map)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<int> shr2 = shr.map<int>([](const int& val) { return val + 1; });
-    EXPECT_EQ(101, shr2.get());
+    EXPECT_EQ(101, shr2.getRef());
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 101}");
 }
@@ -121,9 +121,9 @@ TEST(Shrinkable, map)
 TEST(Shrinkable, flatMap)
 {
     Shrinkable<int> shr(100);
-    EXPECT_EQ(shr.get(), 100);
+    EXPECT_EQ(shr.getRef(), 100);
     Shrinkable<string> shr2 = shr.flatMap<string>([](const int& val) { return make_shrinkable<string>(to_string(val + 1)); });
-    EXPECT_EQ("101", shr2.get());
+    EXPECT_EQ("101", shr2.getRef());
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: \"101\" (31 30 31)}");
 }

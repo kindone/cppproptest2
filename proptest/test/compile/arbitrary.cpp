@@ -24,7 +24,7 @@ TEST(Compile, define_arbitrary_container_without_element_arbitrary)
     auto myObjsGen = Arbi<vector<MyObj>>(myObjGen, 1,2);
     auto shr = myObjsGen(rand);
 
-    cout << shr.get()[0].a << endl;
+    cout << shr.getRef()[0].a << endl;
 }
 
 namespace proptest {
@@ -39,7 +39,7 @@ TEST(Compile, using_defined_arbitrary)
     Random rand(1);
     auto myObjGen = Arbi<MyObj>();
     auto shr = myObjGen(rand);
-    cout << shr.get().a << endl;
+    cout << shr.getRef().a << endl;
 }
 
 // TEST(Compile, using_undefined_arbitrary)

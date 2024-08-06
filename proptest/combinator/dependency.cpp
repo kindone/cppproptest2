@@ -24,10 +24,10 @@ GeneratorCommon dependencyImpl(Function1<ShrinkableBase> gen1, Function1<Functio
         intermediate =
             intermediate.andThen(+[](const ShrinkableBase& interShr) -> ShrinkableBase::StreamType {
                 // assume interShr has no shrinks
-                const Intermediate& interpair = interShr.get<Intermediate>();
+                const Intermediate& interpair = interShr.getRef<Intermediate>();
                 const ShrinkableBase& shrinkableU = interpair.second;
                 ShrinkableBase newShrinkableU =
-                    shrinkableU.flatMap([first = interShr.get<Intermediate>().first](const Any& u) mutable -> ShrinkableBase {
+                    shrinkableU.flatMap([first = interShr.getRef<Intermediate>().first](const Any& u) mutable -> ShrinkableBase {
                         return make_shrinkable<Intermediate>(first, ShrinkableBase(u));
                     });
                 return newShrinkableU.getShrinks();

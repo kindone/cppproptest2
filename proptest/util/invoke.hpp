@@ -18,7 +18,7 @@ decltype(auto) invokeExplicit(Function<RET(ARGS...)> func, GENS&&...gens) {
 
     Random rand(getCurrentTime());
     auto generateArgs = [&](auto index_sequence) {
-        return genVec[index_sequence.value].template generate<tuple_element_t<index_sequence.value, ArgTuple>>(rand).get();
+        return genVec[index_sequence.value].template generate<tuple_element_t<index_sequence.value, ArgTuple>>(rand).getRef();
     };
 
     if constexpr(is_same_v<RET, void>) {
@@ -55,7 +55,7 @@ decltype(auto) invoke(Function<RET(ARGS...)> func, GENS&&...gens) {
     Random rand(getCurrentTime());
 
     auto generateArgs = [&](auto index_sequence) {
-        return genVec[index_sequence.value].template generate<tuple_element_t<index_sequence.value, ArgTuple>>(rand).get();
+        return genVec[index_sequence.value].template generate<tuple_element_t<index_sequence.value, ArgTuple>>(rand).getRef();
     };
 
     if constexpr(is_same_v<RET, void>) {

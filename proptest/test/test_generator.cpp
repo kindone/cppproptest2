@@ -13,7 +13,7 @@ TEST(GenIntegral, basic)
 {
     Random rand(getCurrentTime());
     auto gen = interval<int>(0, 10);
-    auto val = gen(rand).get();
+    auto val = gen(rand).getRef();
     EXPECT_TRUE(val >= std::numeric_limits<int>::min());
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
 }
@@ -22,7 +22,7 @@ TEST(Generator, tupleOf)
 {
     Random rand(getCurrentTime());
     auto gen = tupleOf(interval<int>(0, 10), interval<int>(0, 10));
-    tuple<int, int> val = gen(rand).get();
+    tuple<int, int> val = gen(rand).getRef();
     EXPECT_TRUE(get<0>(val) >= 0);
     EXPECT_TRUE(get<0>(val) <= 10);
     EXPECT_TRUE(get<1>(val) >= 0);
@@ -56,13 +56,13 @@ TEST(Generator, GenFunction)
 {
     Random rand(getCurrentTime());
     Generator<int> gen = just<int>(1339);
-    EXPECT_EQ(gen(rand).get(), 1339);
+    EXPECT_EQ(gen(rand).getRef(), 1339);
 
     GenFunction<int> genFunc = gen;
-    EXPECT_EQ(genFunc(rand).get(), 1339);
+    EXPECT_EQ(genFunc(rand).getRef(), 1339);
 
     Generator<int> gen2 = genFunc;
-    EXPECT_EQ(gen2(rand).get(), 1339);
+    EXPECT_EQ(gen2(rand).getRef(), 1339);
 
     auto lambda = [](Random&) -> Shrinkable<int>
     {
@@ -70,9 +70,9 @@ TEST(Generator, GenFunction)
     };
 
     GenFunction<int> genFunc2 = lambda;
-    EXPECT_EQ(genFunc2(rand).get(), 1339);
+    EXPECT_EQ(genFunc2(rand).getRef(), 1339);
     Generator<int> gen3 = genFunc2;
-    EXPECT_EQ(gen3(rand).get(), 1339);
+    EXPECT_EQ(gen3(rand).getRef(), 1339);
 }
 
 TEST(Generator, gen2gen)
@@ -84,9 +84,9 @@ TEST(Generator, gen2gen)
         return just<int>(i + 1);
     };
 
-    EXPECT_EQ(gen(rand).get(), 1339);
+    EXPECT_EQ(gen(rand).getRef(), 1339);
     Generator<int> gen2 = gen2gen(1339);
-    EXPECT_EQ(gen2(rand).get(), 1340);
+    EXPECT_EQ(gen2(rand).getRef(), 1340);
 }
 
 TEST(Generator, monadic)
@@ -135,7 +135,7 @@ TEST(AnyGenerator, keep_options)
 
     for(int i = 0; i < 5; i++) {
         [[maybe_unused]] auto shr = anyGen.generate<list<int>>(rand);
-        show(cout, shr.get());
+        show(cout, shr.getRef());
         cout << endl;
         EXPECT_GE(shr.getRef().size(), 1U);
         EXPECT_LE(shr.getRef().size(), 2U);

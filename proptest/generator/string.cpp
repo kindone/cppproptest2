@@ -18,7 +18,7 @@ Shrinkable<string> Arbi<string>::operator()(Random& rand) const
     size_t size = rand.getRandomSize(minSize, maxSize + 1);
     string str(size, ' ' /*, allocator()*/);
     for (size_t i = 0; i < size; i++)
-        str[i] = elemGen(rand).get();
+        str[i] = elemGen(rand).getRef();
 
     return shrinkString(str, minSize);
 }
