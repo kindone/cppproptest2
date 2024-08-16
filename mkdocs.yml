@@ -57,8 +57,9 @@ nav:
     - README.md
     - 'Getting Started' : GettingStarted.md
     - Property.md
-    - Generators.md
-    - Combinators.md
+    - 'Generating Inputs':
+      - Generators.md
+      - Combinators.md
     - Shrinking.md
     - Printing.md
     - StatefulTesting.md

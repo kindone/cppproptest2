@@ -1,4 +1,4 @@
-# Generating Inputs
+# Generators
 
 ## Generators in Property-Based Testing
 

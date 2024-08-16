@@ -8,7 +8,8 @@ template <typename T>
 Shrinkable<T> generateIntegerImpl(Random& rand, T min = numeric_limits<T>::min(), T max = numeric_limits<T>::max())
 {
     T value = 0;
-    if (min == numeric_limits<T>::min() && max == numeric_limits<T>::max() && rand.getRandomBool()) {
+    // TODO: trueProb arg for boundary values
+    if (min == numeric_limits<T>::min() && max == numeric_limits<T>::max() && rand.getRandomBool(0.3)) {
         uint32_t i = rand.getRandomSize(0, sizeof(Arbi<T>::boundaryValues) / sizeof(Arbi<T>::boundaryValues[0]));
         value = Arbi<T>::boundaryValues[i];
     } else if (numeric_limits<T>::min() < 0)

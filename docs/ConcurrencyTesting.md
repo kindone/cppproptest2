@@ -1,7 +1,7 @@
 # Concurrency Testing
 
 Once you're familiar with [stateful testing](./StatefulTesting.md), you can get acquainted with concurrent stateful testing easily.
-Concurrency testing performs interleaved state transitions using multiple threads in parallel. It allows us to see if any anomaly or breaking of requirement can be found in the tested component with concurrent accesses.
+Concurrency testing performs interleaved state transitions using multiple threads in parallel. It allows us to see if any anomaly or breaking of concurrency requirement in the tested component.
 
 Actually, a concurrency test is almost immediately achievable when you have prepared a stateful test for an object type.
 Following depicts a concurrent test for `std::vector<int>` with `push_back(int)`, `pop_back()`, and `clear()` actions included.
