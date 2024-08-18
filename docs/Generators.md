@@ -62,24 +62,30 @@ forAll([](SomeNewType x, SomeOtherType y) {
 
 Here's quick reference for built-in arbitraries:
 
-| Purpose                          | Generator                                   | Examples                            |
-| -------------------------------- | ------------------------------------------- | ----------------------------------- |
-| Generate a boolean               | `Arbi<bool>()`                              | `true` or `false`                   |
-| Generate a character             | `Arbi<char>()`                              | `'c'` or `'%'`                      |
-| Generate an integer              | `Arbi<int>()`, `Arbi<uint64_t>()`, ...      | `12` or `-1133`                     |
-| Generate a floating point number | `Arbi<float>()`, `Arbi<double>()`           | `3.4` or `-1.4e3`                   |
-| Generate a string                | `Arbi<std::string>()`, `Arbi<UTF8String>()` | `"world"` or `"あ叶葉말"`           |
-| Generate a pair                  | `Arbi<std::pair<T1,T2>>()`                  | `{1, "xv"}` or `{true, 3.4}`        |
-| Generate a tuple                 | `Arbi<std::tuple<Ts...>>()`                 | `{1, "xv", true}` or `{true, 3.4}`  |
-| Generate a list                  | `Arbi<std::list<T>>()`                      | `{10, -4, 0}` or `{"k", "&"}`       |
-| Generate a vector                | `Arbi<std::vector<T>>()`                    | `{10, -4, 0}` or `{"k", "&"}`       |
-| Generate a set                   | `Arbi<std::set<T>>()`                       | set `{1, 3, 4}` but not `{1, 1, 3}` |
-| Generate a map                   | `Arbi<std::map<K,V>>()`                     | map of `"Bob" -> 25, "Alice" -> 30` |
+
+| Generator                                   | Purpose                          | Examples                            |
+| ------------------------------------------- | -------------------------------- | ----------------------------------- |
+| `Arbi<bool>()`                              | Generate a boolean               | `true` or `false`                   |
+| `Arbi<char>()`                              | Generate a character             | `'c'` or `'%'`                      |
+| `Arbi<int>()`, `Arbi<uint64_t>()`, ...      | Generate an integer              | `12` or `-1133`                     |
+| `Arbi<float>()`, `Arbi<double>()`           | Generate a floating point number | `3.4` or `-1.4e3`                   |
+
 
 * Boolean type:`bool`
 * Character type: `char`
 * Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
 * Floating point types: `float`, `double`
+
+| Generator                                   | Purpose                          | Examples                            |
+| ------------------------------------------- | -------------------------------- | ----------------------------------- |
+| `Arbi<std::string>()`, `Arbi<UTF8String>()` | Generate a string                | `"world"` or `"あ叶葉말"`             |
+| `Arbi<std::pair<T1,T2>>()`                  | Generate a pair                  | `{1, "xv"}` or `{true, 3.4}`        |
+| `Arbi<std::tuple<Ts...>>()`                 | Generate a tuple                 | `{1, "xv", true}` or `{true, 3.4}`  |
+| `Arbi<std::list<T>>()`                      | Generate a list                  | `{10, -4, 0}` or `{"k", "&"}`       |
+| `Arbi<std::vector<T>>()`                    | Generate a vector                | `{10, -4, 0}` or `{"k", "&"}`       |
+| `Arbi<std::set<T>>()`                       | Generate a set                   | set `{1, 3, 4}` but not `{1, 1, 3}` |
+| `Arbi<std::map<K,V>>()`                     | Generate a map                   | map of `"Bob" -> 25, "Alice" -> 30` |
+
 * String types:
     * `std::string` (defaults to generate ASCII character strings in \[0x01, 0x7F\] range)
     * `UTF8String` (a class which extends `std::string` and can be used to generate valid [UTF-8](https://en.wikipedia.org/wiki/UTF-8) strings by using `Arbi<UTF8String>`)
@@ -131,7 +137,7 @@ Here's quick reference for built-in arbitraries:
         vecInt.setSize(1, 10); // 3) generated vector will have size >= 1 and size <= 10
         ```
 
-As long as a generator for type `T` is available (either by `Arbitary<T>` defined or a custom generator provided), you can generate a container of that type, however complex the type `T` is, even including a container type. This means you can readily generate a random `vector<vector<int>>`, as `Arbitrary<vector<T>>` and `Arbitrary<int>` is readily available.
+As long as a generator for type `T` is available (either by `Arbitary<T>` defined or a custom generator provided), you can generate a container of that type, however complex the type `T` is, even including another container type. This means you can readily generate a random `vector<vector<int>>`, as `Arbitrary<vector<T>>` and `Arbitrary<int>` are both available.
 
 ```cpp
     Arbi<std::vector<std::vector<int>>>(); // generates a vector of vector of ints.

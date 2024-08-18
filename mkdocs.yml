@@ -11,7 +11,7 @@ theme:
   name: material
   font:
     text: 'Inter'
-    code: 'Inconsolata'
+    code: 'Spline Sans Mono' # 'Inconsolata'
   palette:
     primary: teal
     accent: light green
@@ -60,7 +60,10 @@ nav:
     - 'Generating Inputs':
       - Generators.md
       - Combinators.md
+      - 'Generating Real World Inputs' : GeneratorExamples.md
     - Shrinking.md
     - Printing.md
-    - StatefulTesting.md
-    - ConcurrencyTesting.md
+    - 'Stateful & Concurrency Testing':
+      - StatefulTesting.md
+      - ConcurrencyTesting.md
+      - 'Advanced Stateful & Concurrency Testing' : AdvancedStatefulTesting.md

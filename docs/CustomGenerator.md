@@ -1,4 +1,3 @@
-
 # Building Custom Generator from Scratch
 
 ## `GenFunction<T>` - Common representation for all generators for type `T`

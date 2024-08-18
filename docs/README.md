@@ -99,7 +99,7 @@ Following example shows how certain input domain of string type can be specified
 
 
 ```kroki-d2
-generator: "Custom Generator"{
+generator: "Custom String Generator"{
 
     arbitrary: |cpp
     Arbitrary<int>()
@@ -154,14 +154,12 @@ generator -> result3: generate {
 
 
 ```cpp
-// a tailored string generator
 auto stringGen = Arbitrary<int>()
     .filter([] (int& num) { return num % 2 == 0; }) // even numbers only
     .map([] (int& num) {
         return "<" + std::to_string(numStr) + ">"; // string like "<0>", ..., "<n>"
     });
 
-// property
 forAll([](std::string original) {
     // ... //
 }, stringGen);
