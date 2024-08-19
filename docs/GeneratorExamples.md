@@ -1,6 +1,10 @@
 # Generating Real-World Inputs
 
+Obtaining a suitable generator for your property test is crucial.
+This page provides realistic examples of generating complex inputs.
+
 ## Generating a valid `Date`
+
 * A proper Date representation based on number of days in a month
 * A day of a month should be in range between 1 to 31, while considering which month and year it is, to have correct maximum value among 28, 29, 30, and 31.
 
@@ -41,9 +45,12 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 ```
 
 ## Generating a fixed point decimal with precision `p` and scale `s`
-* A fixed point decimal requires a scale and a digit with precision
+
+* A `Decimal(p, s)` is a fixed point decimal with a precision `p` and a scale `s`.
+* It means there are `p` number of digits with `s` number of decimals, like `123.45` being a `Decimal(5,2)`.
 
 ## Generating a chess move
+
 * A board configuration is given
 * One of the pieces on the board is moved, according to the chess rule
 
