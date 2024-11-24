@@ -114,7 +114,7 @@ public:
         if (onStartup)
             prop->setOnStartup(onStartup);
         if (onCleanup)
-            prop->setOnStartup(onCleanup);
+            prop->setOnCleanup(onCleanup);
         if (seed != UINT64_MAX)
             prop->setSeed(seed);
         if (numRuns != UINT32_MAX)
