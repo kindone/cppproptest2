@@ -291,9 +291,11 @@ struct RearRunner
         thread_ready = true;
         while (!sync_ready) {}
 
+        stateful::Context context(num);
+
         for (auto action : actions) {
             log[counter++] = num; // start
-            action(obj, model);
+            action(obj, model, context);
             // cout << "rear2" << endl;
             log[counter++] = num; // end
         }
@@ -336,8 +338,9 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
     vector<int> log;
 
     // run front
+    stateful::Context context(FRONT_THREAD_ID);
     for (auto action : front) {
-        action(obj, model);
+        action(obj, model, context);
         log.push_back(FRONT_THREAD_ID);
         counter++;
     }

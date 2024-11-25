@@ -3,7 +3,8 @@
 #include "proptest/util/function.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/std/io.hpp"
-
+#include "proptest/std/variant.hpp"
+#include "proptest/stateful/context.hpp"
 
 /**
  * @file action.hpp
@@ -17,9 +18,11 @@ struct EmptyModel
 {
 };
 
+
 template <typename ObjectType>
 struct SimpleAction {
     using function_t = Function<void(ObjectType&)>;
+    using function_with_context_t = Function<void(ObjectType&, Context&)>;
     explicit SimpleAction(function_t f) : name("Action<?>"), func(f) {}
 
     SimpleAction(const string& _name, function_t f) : name(_name), func(f) {}
@@ -40,18 +43,32 @@ struct SimpleAction {
 template <typename ObjectType, typename ModelType>
 struct Action {
     using function_t = Function<void(ObjectType&, ModelType&)>;
+    using function_with_context_t = Function<void(ObjectType&, ModelType&, Context&)>;
     explicit Action(function_t f) : name("Action<?>"), func(f) {}
 
     Action(const string& _name, function_t f) : name(_name), func(f) {}
 
     Action(const SimpleAction<ObjectType>& simpleAction) : name(simpleAction.name) {
-        func = [simpleAction](ObjectType& obj, ModelType&) {
+        func = static_cast<function_t>([simpleAction](ObjectType& obj, ModelType&) {
             return simpleAction(obj);
-        };
+        });
+    }
+
+    void operator()(ObjectType& obj, ModelType& model, Context& context) const {
+        if (holds_alternative<function_t>(func)) {
+            get<function_t>(func)(obj, model);
+        } else {
+            get<function_with_context_t>(func)(obj, model, context);
+        }
     }
 
     void operator()(ObjectType& obj, ModelType& model) const {
-        func(obj, model);
+        if (holds_alternative<function_t>(func)) {
+            get<function_t>(func)(obj, model);
+        } else {
+            Context context;
+            get<function_with_context_t>(func)(obj, model, context);
+        }
     }
 
     friend ostream& operator<<(ostream& os, const Action& action) {
@@ -60,7 +77,7 @@ struct Action {
     }
 
     string name;
-    function_t func;
+    variant<function_t, function_with_context_t> func;
 };
 
 } // namespace stateful
