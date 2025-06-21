@@ -261,6 +261,7 @@ You don't need to care too much about *how* to test your requirements. Most of i
 * [Introduction to generators](Generators.md)
     * [Arbitraries](Generators.md#arbitraries-the-default-generators)
     * [Built-in generators](Generators.md#built-in-arbitraries)
+* [The `gen` namespace - convenient aliases for generators and combinators](GenNamespace.md)
 * [Generator combinators for creating generators from existing ones](Combinators.md)
 * [Counterexamples and notion of shrinking for automated debugging](Shrinking.md)
 * [Printing facilities](Printing.md)

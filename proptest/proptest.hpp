@@ -4,6 +4,7 @@
 #include "proptest/generator/generators.hpp"
 #include "proptest/combinator/combinators.hpp"
 #include "proptest/Property.hpp"
+#include "proptest/gen.hpp"
 
 /**
  * @file proptest.hpp

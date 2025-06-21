@@ -85,7 +85,9 @@
         "utility": "cpp",
         "stack": "cpp",
         "execution": "cpp",
-        "concepts": "cpp"
+        "concepts": "cpp",
+        "print": "cpp",
+        "queue": "cpp"
     },
     "files.exclude": {
         "BUILD/": true

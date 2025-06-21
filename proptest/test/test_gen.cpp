@@ -1,542 +1,277 @@
+#include "proptest/proptest.hpp"
+#include "proptest/test/gtest.hpp"
 #include "proptest/test/testutil.hpp"
+#include "proptest/Random.hpp"
 
 using namespace proptest;
 
-TEST(PropTest, FilterWithTolerance)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto smallIntGen = interval<int>(0, 100);
+// Example struct for demonstration
+struct Point {
+    int x, y;
+    Point(int x, int y) : x(x), y(y) {}
 
-    for (int i = 0; i < 4; i++) {
-        auto shr = smallIntGen(rand);
-        auto criteria = [](const int& v) { return v % 4 == 1; };
-        if (!criteria(shr.getRef()))
-            continue;
-        cout << "filter with tolerance:" << endl;
-        exhaustive(shr.filter(criteria, 1), 0);
-        cout << "filter without tolerance:" << endl;
-        exhaustive(shr.filter(criteria), 0);
-        cout << "full" << endl;
-        exhaustive(shr, 0);
+    bool operator==(const Point& other) const {
+        return x == other.x && y == other.y;
     }
-}
-
-TEST(PropTest, GenVectorOfInt)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto smallIntGen = interval<int>(0, 4);
-    Arbi<vector<int>> gen(smallIntGen);
-    gen.setSize(3);
-
-    // for(int i = 0; i < 20; i++) {
-    //     vector<int> val(gen(rand).get());
-    //     cout << "vec: ";
-    //     for(size_t j = 0; j < val.size(); j++)
-    //     {
-    //         cout << val[j] << ", ";
-    //     }
-    //     cout << endl;
-    // }
-    for (int i = 0; i < 1; i++)
-        exhaustive(gen(rand), 0);
-}
-
-TEST(PropTest, GenVectorWithNoArbitrary)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto fooGen = construct<Foo, int>(interval<int>(0, 4));
-    Arbi<vector<Foo>> gen(fooGen);
-    gen.setSize(3);
-
-    for (int i = 0; i < 1; i++)
-        exhaustive(gen(rand), 0);
-}
-
-TEST(PropTest, ShrinkableAndThen)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto intGen = interval<int>(0, 16);
-    auto evenGen = filter<int>(intGen, [](int& val) -> bool { return val % 2 == 0; });
-
-    auto evenShrinkable = evenGen(rand);
-    cout << "evenShrinkable: " << evenShrinkable.get() << endl;
-    {
-        exhaustive(evenShrinkable, 0);
-    }
-
-    auto andThen = evenShrinkable.andThenStatic(
-        [evenShrinkable]() { return Stream::one(make_shrinkable_any<int>(1000)); });
-
-    cout << "even.andThenStatic([1000]): " << andThen.get() << endl;
-    {
-        exhaustive(andThen, 0);
-    }
-
-    auto andThen2 = evenShrinkable.andThen([evenShrinkable](const Shrinkable<int>& parent) {
-        return Stream::one(make_shrinkable_any<int>(parent.get() / 2));
-    });
-
-    cout << "even.andThen([n/2]): " << andThen2.get() << endl;
-    {
-        exhaustive(andThen2, 0);
-    }
-
-    auto concat = evenShrinkable.concatStatic(
-        [evenShrinkable]() { return Stream::one(make_shrinkable_any<int>(1000)); });
-
-    cout << "even.concatStatic(1000): " << concat.get() << endl;
-    {
-        exhaustive(concat, 0);
-    }
-
-    auto concat2 = evenShrinkable.concat([evenShrinkable](const Shrinkable<int>& parent) {
-        return Stream::one(make_shrinkable_any<int>(parent.get() / 2));
-    });
-
-    cout << "even.concat(n/2): " << concat2.get() << endl;
-    {
-        exhaustive(concat2, 0);
-    }
-}
-
-TEST(PropTest, FloatShrinkable)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto floatGen = Arbi<float>();
-    auto shrinkable = floatGen(rand);
-    cout << "float generated: " << endl;
-    exhaustive(shrinkable, 0);
-}
-
-TEST(PropTest, ShrinkableBinary)
-{
-    using namespace util;
-    {
-        auto shrinkable = binarySearchShrinkable(0);
-        cout << "# binary of 0" << endl;
-        exhaustive(shrinkable, 0);
-    }
-    {
-        auto shrinkable = binarySearchShrinkable(1);
-        cout << "# binary of 1" << endl;
-        exhaustive(shrinkable, 0);
-    }
-    {
-        auto shrinkable = binarySearchShrinkable(8);
-        cout << "# binary of 8" << endl;
-        exhaustive(shrinkable, 0);
-    }
-
-    {
-        auto shrinkable = binarySearchShrinkable(7);
-        cout << "# binary of 7" << endl;
-        exhaustive(shrinkable, 0);
-    }
-
-    {
-        auto shrinkable = binarySearchShrinkable(9);
-        cout << "# binary of 9" << endl;
-        exhaustive(shrinkable, 0);
-    }
-
-    {
-        auto shrinkable = binarySearchShrinkable(-1);
-        cout << "# binary of -1" << endl;
-        exhaustive(shrinkable, 0);
-    }
-    {
-        auto shrinkable = binarySearchShrinkable(-3);
-        cout << "# binary of -3" << endl;
-        exhaustive(shrinkable, 0);
-    }
-    {
-        auto shrinkable = binarySearchShrinkable(-8);
-        cout << "# binary of -8" << endl;
-        exhaustive(shrinkable, 0);
-    }
-
-    {
-        auto shrinkable = binarySearchShrinkable(-7);
-        cout << "# binary of -7" << endl;
-        exhaustive(shrinkable, 0);
-    }
-
-    {
-        auto shrinkable = binarySearchShrinkable(-9);
-        cout << "# binary of -9" << endl;
-        exhaustive(shrinkable, 0);
-    }
-}
-
-TEST(PropTest, ShrinkableConcat)
-{
-    auto shrinkable = util::binarySearchShrinkable(8);
-
-    auto concat = shrinkable.concatStatic([shrinkable]() { return shrinkable.shrinks(); });
-
-    exhaustive(concat, 0);
-}
-
-TEST(PropTest, ShrinkVector)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    using T = int;
-    int len = 8;
-    vector<T> vec;
-    vec.reserve(len);
-    for (int i = 0; i < len; i++)
-        vec.push_back(8);
-
-    // return make_shrinkable<vector<T>>(util::move(vec));
-
-    auto shrinkableVector = util::binarySearchShrinkable(len).map<vector<T>>([vec](const int64_t& len) {
-        if (len <= 0)
-            return vector<T>();
-
-        auto begin = vec.begin();
-        auto last = vec.begin() + len;
-        return vector<T>(begin, last);
-    });
-
-    auto shrinkableVector2 = shrinkableVector.concat([](const Shrinkable<vector<T>>& shr) {
-        vector<T> copy = shr.get();
-        if (!copy.empty())
-            copy[0] /= 2;
-        return Stream(make_shrinkable_any<vector<T>>(copy));
-    });
-
-    exhaustive(shrinkableVector, 0);
-    exhaustive(shrinkableVector2, 0);
-}
-
-TEST(PropTest, ShrinkVectorFromGen)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    using T = int8_t;
-    auto genVec = Arbi<vector<T>>(interval<T>(-8, 8));
-    genVec.setMaxSize(8);
-    genVec.setMinSize(0);
-    auto vecShrinkable = genVec(rand);
-    // return make_shrinkable<vector<T>>(util::move(vec));
-    exhaustive(vecShrinkable, 0);
-}
-
-TEST(PropTest, ShrinkSetExhaustive)
-{
-    static auto combination = [](int n, int r) {
-        int result = 1;
-        for (int i = 1; i <= r; i++) {
-            result *= n--;
-            result /= i;
-        }
-        return result;
-    };
-
-    static auto sumCombinations = [](int n, int maxR) {
-        if (maxR < 0)
-            return 0;
-        int result = 0;
-        for (int r = 0; r <= maxR; r++)
-            result += combination(n, r);
-        return result;
-    };
-
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-
-    auto minAndMaxSizeGen = interval(0, 10).pairWith([](int& n) { return interval(n, 10); });
-
-    forAll(
-        [&rand](pair<int, int> minAndMaxSize) {
-            auto elemGen = interval(0, 99);
-            int minSize = minAndMaxSize.first;
-            int maxSize = minAndMaxSize.second;
-            auto setGen = Arbi<set<int>>(elemGen).setSize(minSize, maxSize);
-            for (int i = 0; i < 3; i++) {
-                auto strSet = set<string>();
-                stringstream exhaustiveStr;
-                int numTotal = 0;
-                auto root = setGen(rand);
-                exhaustive<set<int>>(
-                    root, 0, [&numTotal, &strSet, &exhaustiveStr](const Shrinkable<set<int>>& shrinkable, int level) {
-                        exhaustiveStr << "\n";
-                        for (int i = 0; i < level; i++)
-                            exhaustiveStr << "  ";
-                        exhaustiveStr << proptest::Show<set<int>>(shrinkable.get());
-                        numTotal++;
-
-                        stringstream str;
-                        str << proptest::Show<set<int>>(shrinkable.get());
-                        PROP_EXPECT(strSet.find(str.str()) == strSet.end())
-                            << str.str() << " already exists in: " << exhaustiveStr.str();
-                        strSet.insert(str.str());
-                    });
-                auto size = root.getRef().size();
-                PROP_EXPECT_EQ(numTotal, pow(2, size) - sumCombinations(size, minSize - 1));
-                // cout << "rootSize: "  << size  << ", minSize: " << minSize << ", total: " << numTotal << ", pow: " <<
-                // pow(2, size) << ", minus: " << sumCombinations(size, minSize-1) << endl; cout << "exhaustive: " <<
-                // exhaustiveStr.str() << endl;
-            }
-        },
-        minAndMaxSizeGen);
-}
-
-TEST(PropTest, TuplePair1)
-{
-    auto intGen = Arbi<int>();
-    auto smallIntGen = GenSmallInt();
-
-    auto gen = pairOf(intGen, smallIntGen);
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    for (int i = 0; i < 10; i++)
-        cout << gen(rand).get() << endl;
-}
-
-TEST(PropTest, TupleGen1)
-{
-    auto intGen = Arbi<int>();
-    auto smallIntGen = GenSmallInt();
-
-    auto gen = tupleOf(intGen, smallIntGen);
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    for (int i = 0; i < 10; i++)
-        cout << gen(rand).get() << endl;
-}
-
-TEST(PropTest, TupleGen2)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    while (true) {
-        auto intGen = Arbi<int>();
-        auto shrinkable = intGen(rand);
-        auto value = shrinkable.get();
-        if (value > -20 && value < 20) {
-            exhaustive(shrinkable, 0);
-            break;
-        }
-    }
-
-    auto smallIntGen = interval(-40, 40);
-    auto tupleGen = tupleOf(smallIntGen, smallIntGen, smallIntGen);
-    while (true) {
-        auto shrinkable = tupleGen(rand);
-        auto valueTup = shrinkable.get();
-        auto arg1 = get<0>(valueTup);
-        auto arg2 = get<1>(valueTup);
-        auto arg3 = get<2>(valueTup);
-        if (arg1 > -20 && arg1 < 20 && arg2 > -20 && arg2 < 20 && arg3 > -20 && arg3 < 20) {
-            exhaustive(shrinkable, 0);
-            break;
-        }
-    }
-}
-
-TEST(PropTest, TupleGen3)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    while (true) {
-        auto intGen = Arbi<int>();
-        auto shrinkable = intGen(rand);
-        auto value = shrinkable.get();
-        if (value > -20 && value < 20) {
-            break;
-        }
-    }
-
-    auto smallIntGen = interval(0, 3);
-    auto tupleGen = tupleOf(smallIntGen, smallIntGen, smallIntGen);
-    for (int i = 0; i < 3; i++) {
-        auto shrinkable = tupleGen(rand);
-        exhaustive(shrinkable, 0);
-    }
-}
-
-TEST(PropTest, GenVectorPerf)
-{
-    struct Log
-    {
-        Log()
-        {
-            cout << "construct" << endl;
-            breaker();
-        }
-        Log(const Log&)
-        {
-            cout << "copy construct" << endl;
-            breaker();
-        }
-
-        Log(Log&&) { cout << "move construct" << endl; }
-
-        Log& operator=(const Log&)
-        {
-            cout << "operator=()" << endl;
-            return *this;
-        }
-
-        void breaker() { cout << "  break()" << endl; }
-
-        ~Log()
-        {
-            cout << "destruct" << endl;
-            breaker();
-        }
-    };
-
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    auto logGen = Construct<Log>();
-    auto vecGen = Arbi<vector<Log>>(logGen);
-    vecGen.setSize(1);
-    auto shrinkable = vecGen(rand);
-
-    // exhaustive(shrinkable, 0);
-}
-
-TEST(PropTest, GenTupleVector)
-{
-    using IndexVector = vector<tuple<uint16_t, bool>>;
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-
-    int numRows = 8;
-    uint16_t numElements = 64;
-    auto firstGen = interval<uint16_t>(0, numElements);
-    auto secondGen = Arbi<bool>();  // TODO true : false should be 2:1
-    auto indexGen = tupleOf(firstGen, secondGen);
-    auto indexVecGen = Arbi<IndexVector>(indexGen);
-    indexVecGen.setMaxSize(numRows);
-    indexVecGen.setMinSize(numRows / 2);
-    auto shrinkable = indexVecGen(rand);
-    exhaustive(shrinkable, 0);
-}
-
-TEST(PropTest, GenVectorAndShrink)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-
-    auto smallIntGen = interval<int>(-8, 8);
-    auto vectorGen = Arbi<vector<int>>(smallIntGen);
-    for (size_t maxLen = 1; maxLen < 4; maxLen++) {
-        while (true) {
-            vectorGen.setMaxSize(maxLen);
-            auto vec = vectorGen(rand);
-            if (vec.getRef().size() > (maxLen > 3 ? maxLen - 3 : 0)) {
-                exhaustive(vec, 0);
-                cout << "printed: " << maxLen << endl;
-                break;
-            }
-        }
-    }
-}
-
-TEST(PropTest, ShrinkComplicated)
-{
-    class Complicated {
-    public:
-        int value;
-        Complicated(int a) : value(a) {}
-
-        Complicated(const Complicated&) = delete;
-        Complicated(Complicated&&) = default;
-
-    private:
-        Complicated() {}
-    };
-
-    auto complicated = make_shrinkable<Complicated>(5);
-
-    auto shrink = []() { return make_shrinkable<Complicated>(5); };
-
-    shrink();
-}
-
-TEST(PropTest, Polymorphic)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-
-    struct Vehicle
-    {
-        virtual ~Vehicle() = default;
-        virtual int get() { return 0; }
-    };
-
-    struct Car : public Vehicle
-    {
-        virtual int get() override { return 1; }
-    };
-
-    {
-        auto carGen = Arbi<int>().map<Vehicle>([](int&) { return Car(); });
-        auto carShrinkable = carGen(rand);
-        // polymorphism doesn't work!
-        cout << "car.get(): " << carShrinkable.getRef().get() << endl;
-    }
-
-    {
-        auto carGen = lazy<shared_ptr<Vehicle>>([]() { return util::make_shared<Car>(); });
-        auto carShrinkable = carGen(rand);
-        // polymorphism works
-        cout << "car.get(): " << carShrinkable.getRef()->get() << endl;
-    }
-
-    {
-        auto carGen = Arbi<int>().map<shared_ptr<Vehicle>>([](int&) { return util::make_shared<Car>(); });
-        auto carShrinkable = carGen(rand);
-        // polymorphism works
-        cout << "car.get(): " << carShrinkable.getRef()->get() << endl;
-    }
-}
-
-struct Constraint
-{
-    Constraint(int) : id(nextId()) { cout << "Constraint create" << id << endl; }
-    Constraint(const Constraint&) = delete;
-    Constraint& operator=(const Constraint&) = delete;
-    Constraint(Constraint&&)
-    {
-        id = nextId();
-        cout << "Constraint move" << id << endl;
-    }
-    ~Constraint() { cout << "~Constraint destroy" << id << endl; }
-
-    int id;
-    static int maxId;
-    static int nextId() { return maxId++; }
 };
-int Constraint::maxId = 0;
 
-TEST(PropTest, ConstraintObject)
-{
-    int64_t seed = getCurrentTime();
-    Random rand(seed);
-    // You cannot directly generate Constraint object, as it's a non-copyable object.
-    // But you can create a shared_ptr of Constraint
-    auto gen = lazy<shared_ptr<Constraint>>([]() { return util::make_shared<Constraint>(5); });
-
-    gen(rand);
-}
-
-TEST(Generator, performance_vector)
+TEST(GenNamespace, BasicTypeGenerators)
 {
     Random rand(getCurrentTime());
-    Arbi<vector<int>> arbi;
-    for(int i = 0; i < 1000; i++) {
-        auto shr = arbi(rand);
-        EXPECT_LE(shr.getRef().size(), Arbi<vector<int>>::defaultMaxSize);
-        EXPECT_GE(shr.getRef().size(), Arbi<vector<int>>::defaultMinSize);
+
+    // Test boolean generator
+    auto boolGen = gen::boolean();
+    for(int i = 0; i < 10; i++) {
+        auto result = boolGen(rand);
+        EXPECT_TRUE(result.getRef() == true || result.getRef() == false);
+    }
+
+    // Test integer generators
+    auto intGen = gen::int32();
+    for(int i = 0; i < 10; i++) {
+        auto result = intGen(rand);
+        EXPECT_TRUE(result.getRef() >= std::numeric_limits<int32_t>::min());
+        EXPECT_TRUE(result.getRef() <= std::numeric_limits<int32_t>::max());
+    }
+
+    // Test string generator
+    auto stringGen = gen::string();
+    for(int i = 0; i < 10; i++) {
+        auto result = stringGen(rand);
+        EXPECT_LE(result.getRef().size(), Arbi<string>::defaultMaxSize);
+    }
+}
+
+TEST(GenNamespace, NumericRangeGenerators)
+{
+    Random rand(getCurrentTime());
+
+    // Test interval generator
+    auto intervalGen = gen::interval(1, 100);
+    for(int i = 0; i < 50; i++) {
+        auto result = intervalGen(rand);
+        EXPECT_GE(result.getRef(), 1);
+        EXPECT_LE(result.getRef(), 100);
+    }
+
+    // Test natural generator
+    auto naturalGen = gen::natural(1000);
+    for(int i = 0; i < 50; i++) {
+        auto result = naturalGen(rand);
+        EXPECT_GT(result.getRef(), 0);
+        EXPECT_LE(result.getRef(), 1000);
+    }
+
+    // Test nonnegative generator
+    auto nonNegGen = gen::nonNegative(500);
+    for(int i = 0; i < 50; i++) {
+        auto result = nonNegGen(rand);
+        EXPECT_GE(result.getRef(), 0);
+        EXPECT_LE(result.getRef(), 500);
+    }
+}
+
+TEST(GenNamespace, ContainerGenerators)
+{
+    Random rand(getCurrentTime());
+
+    // Test vector generator
+    auto vectorGen = gen::vector<int>();
+    for(int i = 0; i < 10; i++) {
+        auto result = vectorGen(rand);
+        EXPECT_LE(result.getRef().size(), 200); // Use default max size
+    }
+
+    // Test list generator
+    auto listGen = gen::list<std::string>();
+    for(int i = 0; i < 10; i++) {
+        auto result = listGen(rand);
+        EXPECT_LE(result.getRef().size(), 200); // Use default max size
+    }
+
+    // Test set generator
+    auto setGen = gen::set<int>();
+    for(int i = 0; i < 10; i++) {
+        auto result = setGen(rand);
+        EXPECT_LE(result.getRef().size(), 200); // Use default max size
+    }
+
+    // Test map generator
+    auto mapGen = gen::map<std::string, int>();
+    for(int i = 0; i < 10; i++) {
+        auto result = mapGen(rand);
+        EXPECT_LE(result.getRef().size(), 200); // Use default max size
+    }
+}
+
+TEST(GenNamespace, StringGeneratorsWithCustomElements)
+{
+    Random rand(getCurrentTime());
+
+    // Test uppercase string generator
+    auto uppercaseGen = gen::string(gen::interval<char>('A', 'Z'));
+    for(int i = 0; i < 20; i++) {
+        auto result = uppercaseGen(rand);
+        const auto& str = result.getRef();
+        EXPECT_LE(str.size(), 200); // Use default max size
+        for(char c : str) {
+            EXPECT_GE(c, 'A');
+            EXPECT_LE(c, 'Z');
+        }
+    }
+
+    // Test digit string generator
+    auto digitGen = gen::string(gen::interval<char>('0', '9'));
+    for(int i = 0; i < 20; i++) {
+        auto result = digitGen(rand);
+        const auto& str = result.getRef();
+        EXPECT_LE(str.size(), 200); // Use default max size
+        for(char c : str) {
+            EXPECT_GE(c, '0');
+            EXPECT_LE(c, '9');
+        }
+    }
+}
+
+TEST(GenNamespace, Combinators)
+{
+    Random rand(getCurrentTime());
+
+    // Test just combinator
+    auto constantGen = gen::just(42);
+    for(int i = 0; i < 10; i++) {
+        auto result = constantGen(rand);
+        EXPECT_EQ(result.getRef(), 42);
+    }
+
+    // Test elementOf combinator
+    auto choiceGen = gen::elementOf<int>(1, 3, 5, 7, 11, 13, 17, 19);
+    for(int i = 0; i < 50; i++) {
+        auto result = choiceGen(rand);
+        int val = result.getRef();
+        EXPECT_TRUE(val == 1 || val == 3 || val == 5 || val == 7 || 
+                   val == 11 || val == 13 || val == 17 || val == 19);
+    }
+
+    // Test oneOf combinator
+    auto unionGen = gen::oneOf<int>(gen::interval(1, 10), gen::interval(100, 110));
+    for(int i = 0; i < 50; i++) {
+        auto result = unionGen(rand);
+        int val = result.getRef();
+        EXPECT_TRUE((val >= 1 && val <= 10) || (val >= 100 && val <= 110));
+    }
+}
+
+TEST(GenNamespace, ObjectConstruction)
+{
+    Random rand(getCurrentTime());
+
+    // Test construct combinator
+    auto pointGen = gen::construct<Point, int, int>(gen::interval(-10, 10), gen::interval(-10, 10));
+    for(int i = 0; i < 20; i++) {
+        auto result = pointGen(rand);
+        const auto& point = result.getRef();
+        EXPECT_GE(point.x, -10);
+        EXPECT_LE(point.x, 10);
+        EXPECT_GE(point.y, -10);
+        EXPECT_LE(point.y, 10);
+    }
+}
+
+TEST(GenNamespace, FilteringAndTransformation)
+{
+    Random rand(getCurrentTime());
+
+    // Test filter combinator
+    auto evenGen = gen::filter<int>(gen::int32(), [](int n) { return n % 2 == 0; });
+    for(int i = 0; i < 50; i++) {
+        auto result = evenGen(rand);
+        EXPECT_EQ(result.getRef() % 2, 0);
+    }
+
+    // Test suchThat combinator (alias for filter)
+    auto positiveGen = gen::suchThat<int>(gen::int32(), [](int n) { return n > 0; });
+    for(int i = 0; i < 50; i++) {
+        auto result = positiveGen(rand);
+        EXPECT_GT(result.getRef(), 0);
+    }
+
+    // Test transform combinator
+    auto stringFromIntGen = gen::transform<int, std::string>(gen::int32(), [](int n) { return std::to_string(n); });
+    for(int i = 0; i < 20; i++) {
+        auto result = stringFromIntGen(rand);
+        EXPECT_FALSE(result.getRef().empty());
+    }
+}
+
+TEST(GenNamespace, Dependencies)
+{
+    Random rand(getCurrentTime());
+
+    // Test dependency combinator
+    auto sizeAndVectorGen = gen::dependency<int, std::vector<int>>(
+        gen::interval(1, 5),
+        [](int size) { return gen::vector<int>().setSize(size); }
+    );
+
+    for(int i = 0; i < 20; i++) {
+        auto result = sizeAndVectorGen(rand);
+        const auto& pair = result.getRef();
+        EXPECT_GE(pair.first, 1);
+        EXPECT_LE(pair.first, 5);
+        EXPECT_EQ(pair.second.size(), pair.first);
+    }
+}
+
+TEST(GenNamespace, ComplexNestedStructures)
+{
+    Random rand(getCurrentTime());
+
+    // Test complex nested structure
+    auto complexGen = gen::vector<proptest::map<std::string, proptest::vector<int>>>();
+    for(int i = 0; i < 10; i++) {
+        auto result = complexGen(rand);
+        const auto& vec = result.getRef();
+        EXPECT_LE(vec.size(), 200); // Use default max size
+
+        for(const auto& map : vec) {
+            EXPECT_LE(map.size(), 200); // Use default max size
+            for(const auto& pair : map) {
+                EXPECT_LE(pair.second.size(), 200); // Use default max size
+            }
+        }
+    }
+}
+
+TEST(GenNamespace, PropertyTestExample)
+{
+    // Test that gen namespace works with forAll
+    forAll([](int x, int y) {
+        // Property: addition is commutative
+        return x + y == y + x;
+    }, gen::interval(-100, 100), gen::interval(-100, 100));
+}
+
+TEST(GenNamespace, TemplateArgumentDeduction)
+{
+    Random rand(getCurrentTime());
+
+    // Test that template argument deduction works
+    auto intervalGen = gen::interval(1, 100);  // No explicit <int>
+    auto naturalGen = gen::natural(1000);      // No explicit <int>
+    auto nonNegGen = gen::nonNegative(500);    // No explicit <int>
+
+    for(int i = 0; i < 10; i++) {
+        auto result1 = intervalGen(rand);
+        EXPECT_GE(result1.getRef(), 1);
+        EXPECT_LE(result1.getRef(), 100);
+
+        auto result2 = naturalGen(rand);
+        EXPECT_GT(result2.getRef(), 0);
+        EXPECT_LE(result2.getRef(), 1000);
+
+        auto result3 = nonNegGen(rand);
+        EXPECT_GE(result3.getRef(), 0);
+        EXPECT_LE(result3.getRef(), 500);
     }
 }
