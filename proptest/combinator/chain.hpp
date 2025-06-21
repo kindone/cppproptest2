@@ -45,6 +45,8 @@ Generator<Chain<T0, T1, Ts..., U>> chainImpl(GenFunction<Chain<T0, T1, Ts...>> g
 
 }  // namespace util
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for chaining two generators to generate a tuple of values, where the second generator
@@ -72,5 +74,7 @@ decltype(auto) chain(GEN1&& gen1, GEN2GEN&& gen2gen)
     Function<GenFunction<U>(CHAIN&)> funcGen2Gen = gen2gen;
     return util::chainImpl(funcGen1, funcGen2Gen);
 }
+
+} // namespace gen
 
 }  // namespace proptest

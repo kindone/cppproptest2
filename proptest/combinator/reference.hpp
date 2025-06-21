@@ -10,6 +10,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Takes reference of a generator and generates values from the generator by lazily referencing it
@@ -26,5 +28,7 @@ auto reference(GEN&& gen) -> Generator<typename invoke_result_t<GEN, Random&>::t
 {
     return generator([&gen](Random& rand) { return util::forward<GEN>(gen)(rand); });
 }
+
+} // namespace gen
 
 }  // namespace proptest

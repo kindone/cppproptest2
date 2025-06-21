@@ -18,6 +18,9 @@ namespace util {
 PROPTEST_API GeneratorCommon accumulateImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen, size_t minSize, size_t maxSize);
 
 }  // namespace util
+
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for accumulating a value of type T from a generator generator
@@ -38,5 +41,7 @@ decltype(auto) accumulate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t
     Function1<Function1<ShrinkableBase>> func1Gen2Gen([gen2gen](const Any& t) -> Function1<ShrinkableBase> { return gen2gen(t.getRef<T>()); });
     return Generator<T>(util::accumulateImpl(func1Gen1, func1Gen2Gen, minSize, maxSize));
 }
+
+} // namespace gen
 
 }  // namespace proptest

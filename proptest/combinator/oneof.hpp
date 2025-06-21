@@ -17,11 +17,15 @@ template <typename T>
 struct Weighted;
 }  // namespace util
 
+namespace gen {
+
 template <typename T>
 util::Weighted<T> weightedGen(GenFunction<T> gen, double weight);
 
 template <GenLike GEN>
 auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_result_t<GEN, Random&>::type>;
+
+} // namespace gen
 
 namespace util {
 
@@ -48,7 +52,7 @@ struct Weighted : WeightedBase
 template <typename T, GenLike<T> GEN>
 Weighted<T> GenToWeighted(GEN&& gen)
 {
-    return weightedGen<T>(util::forward<GEN>(gen), 0.0);
+    return gen::weightedGen<T>(util::forward<GEN>(gen), 0.0);
 }
 
 template <typename T>
@@ -59,6 +63,8 @@ Weighted<T> GenToWeighted(const Weighted<T>& weighted)
 
 }  // namespace util
 
+
+namespace gen {
 
 template <typename T>
 util::Weighted<T> weightedGen(GenFunction<T> gen, double weight)
@@ -104,7 +110,9 @@ Generator<T> oneOf(GENS&&... gens)
 template <typename T, typename... GENS>
 decltype(auto) unionOf(GENS&&... gens)
 {
-    return oneOf<T>(util::forward<GENS>(gens)...);
+    return ::proptest::gen::oneOf<T>(util::forward<GENS>(gens)...);
 }
+
+} // namespace gen
 
 }  // namespace proptest

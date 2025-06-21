@@ -11,6 +11,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating just a specific value
@@ -50,5 +52,7 @@ Generator<T> just(const Any& any)
 {
     return generator([any](Random&) { return Shrinkable<T>(any); });
 }
+
+} // namespace gen
 
 } // namespace proptest

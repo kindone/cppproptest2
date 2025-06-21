@@ -4,6 +4,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 Generator<int64_t> intervals(initializer_list<Interval> intervals)
 {
     using WeightedVec = vector<util::WeightedBase>;
@@ -49,5 +51,7 @@ Generator<uint64_t> uintervals(initializer_list<UInterval> intervals)
 
     return util::oneOfImpl(genVec);
 }
+
+}  // namespace gen
 
 }  // namespace proptest

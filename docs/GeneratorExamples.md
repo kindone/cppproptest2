@@ -32,13 +32,13 @@ int getMaximumDay(int year, int month) {
     return 31;
 }
 
-auto yearMonthGen = tupleOf(interval(0, 9999), interval(1,12));
+auto yearMonthGen = gen::tupleOf(gen::interval(0, 9999), gen::interval(1,12));
 
 // combines (int,int) and int into (int,int,int)
 auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMonth) {
     int year = std::get<0>(yearMonth);
     int month = std::get<1>(yearMonth);
-    auto dayGen = interval(1, getMaximumDay(year, month));
+    auto dayGen = gen::interval(1, getMaximumDay(year, month));
     return dayGen;
 });
 
@@ -81,11 +81,11 @@ auto gen2GenT = [](const std::pair<ChessBoard, ChessMove>& prev) {
   //     to get the new board state.
   return moveGen.map([currentBoard](const ChessMove& move) {
     ChessBoard newBoard = currentBoard.applyMove(move);
-    return std::make_pair(newBoard, move); 
+    return std::make_pair(newBoard, move);
   });
 };
 
 using GenT2GenT = decltype(gen2GenT);
 
-auto chessMoveSequenceGen = accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize);
+auto chessMoveSequenceGen = gen::accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize);
 ```

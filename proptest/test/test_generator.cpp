@@ -8,6 +8,7 @@
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;
+using namespace proptest::gen;
 
 TEST(GenIntegral, basic)
 {

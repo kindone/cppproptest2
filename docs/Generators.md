@@ -16,181 +16,353 @@ forAll([](int age, std::string name) {
 }, Arbitrary<int>(), Arbitrary<std::string>());
 ```
 
-Notice the extra arguments `Arbitrary<int>()` and `Arbitrary<std::string>()` in the `forAll()` call. As you can see, `forAll()` actually requires some information on how to generate the values for the parameter types. Some of the often used types have default generators defined in `cppproptest`.
+Notice the extra arguments `Arbitrary<int>()` and `Arbitrary<std::string>()` in the `forAll()` call. As you can see, `forAll()` actually requires some information on how to generate the values for the parameter types. Some of the commonly used data types have default generators defined in `cppproptest`.
 
-&nbsp;
+## Built-in Arbitraries and Their Generator Aliases
 
-## Arbitraries - The Default Generators
-
-### What makes defaults so special
-
-An `Arbitrary<T>` or its alias `Arbi<T>` is a **generator** type (that also coerces to `GenFunction<T>`).
-Arbitraries are specially treated in `cppproptest`. An arbitrary serves as globally defined default _generator_ for the type. If a default generator for a type is available, `cppproptest` can use the default generator to generate a value of that type, if no generator has been specified.
+For the `Arbitrary<int>()` in above example, we have an alias - `gen::int32()`. `cppproptest` provides such built-in arbitraries for common data types and useful aliases to those arbitraries in the `gen` namespace. Thus, you can also write above example as following:
 
 ```cpp
-forAll([](T1 t1, T2 t2, ..., TN tn) {
-    // property function body
-}, /* custom generators for T1, ..., TN */);
+forAll([](int age, std::string name) {
+}, gen::int32(), gen::string());
 ```
 
-For each of the parameter types of a property function, `forAll()` requires either a custom generator is provided as an argument, or a conforming `Arbitrary<T>` class has been defined in `proptest` namespace. A custom generator can be supplied in the `forAll()` function arguments next to the property function, as in the same order of parameters of the property function. If it hasn't been supplied, `forAll()` looks up the default generator - the _arbitrary_ - and uses it instead. If there were no `proptest::Arbitrary<T>` defined, the compilation would fail.
+Here is the complete list of the built-in arbitraries and their aliases. You can also refer to [Arbitrary](Arbitrary.md) page for more about arbitraries, including their configurable options and how they make up as default generators for a data type.
+
+### Basic Type Generators
+
+| Alias | Arbitrary | Description |
+|-------|----------|-------------|
+| `gen::boolean` | `Arbi<bool>` | Boolean values |
+| `gen::character` | `Arbi<char>` | Character values |
+| `gen::int8` | `Arbi<int8_t>` | 8-bit signed integers |
+| `gen::uint8` | `Arbi<uint8_t>` | 8-bit unsigned integers |
+| `gen::int16` | `Arbi<int16_t>` | 16-bit signed integers |
+| `gen::uint16` | `Arbi<uint16_t>` | 16-bit unsigned integers |
+| `gen::int32` | `Arbi<int32_t>` | 32-bit signed integers |
+| `gen::uint32` | `Arbi<uint32_t>` | 32-bit unsigned integers |
+| `gen::int64` | `Arbi<int64_t>` | 64-bit signed integers |
+| `gen::uint64` | `Arbi<uint64_t>` | 64-bit unsigned integers |
+| `gen::float32` | `Arbi<float>` | 32-bit floating point |
+| `gen::float64` | `Arbi<double>` | 64-bit floating point |
 
 ```cpp
-// if there is no default generator available, you must provide a generator for the type SomeNewType.
-forAll([](SomeNewType x) {
-}, someNewTypeGen);
+// Basic type generators
+auto boolGen = gen::boolean(0.7); // true probability: defaults to 0.5 if not given
+auto charGen = gen::character();
+auto intGen = gen::int32();
+auto uintGen = gen::uint32();
+auto floatGen = gen::float32();
+auto doubleGen = gen::float64();
 
+// Usage in forAll
+forAll([](bool b, char c, int32_t i, float f) {
+    // Property test with basic types
+}, gen::boolean(), gen::character(), gen::int32(), gen::float32());
+```
 
-// explicit generators should be supplied in same order as parameter types of property function
-forAll([](SomeNewType x, SomeOtherType y) {
-}, someNewTypeGen, SomeOtherTypeGen);
+### String Generators
 
+| Alias | Arbitrary | Description |
+|-------|----------|-------------|
+| `gen::string` | `Arbi<std::string>` | ASCII strings |
+| `gen::utf8string` | `Arbi<UTF8String>` | UTF-8 strings |
+| `gen::utf16bestring` | `Arbi<UTF16BEString>` | UTF-16 big-endian strings |
+| `gen::utf16lestring` | `Arbi<UTF16LEString>` | UTF-16 little-endian strings |
+| `gen::cesu8string` | `Arbi<CESU8String>` | CESU-8 strings |
 
-// if there is a default generator (Arbitrary<SomeType>) available, you can use that generator by omitting the argument
-forAll([](SomeType x) {
+```cpp
+// String generators with default character sets
+auto asciiStringGen = gen::string(); // defaults to printable ASCII, a.k.a. in [0x01, 0x7f]
+auto utf8StringGen = gen::utf8string(); // defaults to all UTF-8 characters
+auto utf16beStringGen = gen::utf16bestring();
+auto utf16leStringGen = gen::utf16lestring();
+auto cesu8StringGen = gen::cesu8string();
+
+// Custom string with specific character ranges
+auto uppercaseGen = gen::string(gen::interval<char>('A', 'Z'));
+auto digitGen = gen::string(gen::interval<char>('0', '9'));
+auto alphanumericGen = gen::utf8string(gen::unionOf<uint32_t>(
+    gen::interval<uint32_t>('A', 'Z'),
+    gen::interval<uint32_t>('a', 'z'),
+    gen::interval<uint32_t>('0', '9')
+));
+
+// Usage in forAll
+forAll([](std::string name, UTF8String alphanumeric) {
+    // Property test with strings
+}, gen::string(), alphanumericGen);
+```
+
+### Container Generators
+
+| Alias | Arbitrary | Description |
+|-------|----------|-------------|
+| `gen::vector<T>` | `Arbi<std::vector<T>>` | Vectors |
+| `gen::list<T>` | `Arbi<std::list<T>>` | Lists |
+| `gen::set<T>` | `Arbi<std::set<T>>` | Sets |
+| `gen::map<K,V>` | `Arbi<std::map<K,V>>` | Maps |
+| `gen::optional<T>` | `Arbi<std::optional<T>>` | Optional values |
+| `gen::shared_ptr<T>` | `Arbi<std::shared_ptr<T>>` | Shared pointers |
+
+Container generators often take size ranges and an element generator (uses default generator for the type if not given) as arguments.
+
+```cpp
+// Basic container generators
+auto intVectorGen = gen::vector<int>();
+auto stringListGen = gen::list<std::string>();
+auto intSetGen = gen::set<int>();
+auto stringIntMapGen = gen::map<std::string, int>();
+auto optionalIntGen = gen::optional<int>();
+auto sharedPtrIntGen = gen::shared_ptr<int>();
+
+// Containers with custom element generators
+auto smallIntVectorGen = gen::vector<int>(gen::interval<int>(1, 100));
+auto uppercaseStringListGen = gen::list<std::string>(gen::string(gen::interval<char>('A', 'Z')));
+
+// Containers with size constraints
+auto fixedSizeVectorGen = gen::vector<int>();
+fixedSizeVectorGen.setSize(5); // Always generates vectors of size 5
+
+auto boundedVectorGen = gen::vector<int>();
+boundedVectorGen.setMinSize(1);
+boundedVectorGen.setMaxSize(10); // Generates vectors of size 1-10
+
+auto vectorGen1 = gen::vector<int>(5, 5); // you can provide the size range directly to constructor
+auto vectorGen2 = gen::vector<int>(gen::interval(1,10), 5, 5); // element generator + size range at once
+
+// Map with custom key and value generators
+auto customMapGen = gen::map<std::string, int>();
+customMapGen.setKeyGen(gen::string(gen::interval<char>('a', 'z')));
+customMapGen.setElemGen(gen::interval<int>(0, 100));
+
+// Nested containers
+auto vectorOfMapsGen = gen::vector<gen::map<std::string, int>>();
+auto mapOfVectorsGen = gen::map<std::string, gen::vector<int>>();
+
+// Usage in forAll
+forAll([](std::vector<int> numbers, std::map<std::string, int> data) {
+    // Property test with containers
+}, gen::vector<int>(), gen::map<std::string, int>());
+```
+
+### Tuple and Pair Generators
+
+| Alias | Arbitrary | Description |
+|-------|----------|-------------|
+| `gen::pair<T1,T2>` | `Arbi<std::pair<T1,T2>>` | Pairs |
+| `gen::tuple<Ts...>` | `Arbi<std::tuple<Ts...>>` | Tuples |
+
+Pair and tuple generators take optional element generators as arguments.
+
+```cpp
+// Basic pair and tuple generators
+auto intStringPairGen = gen::pair<int, std::string>();
+auto intBoolStringTupleGen = gen::tuple<int, bool, std::string>();
+
+// Pairs and tuples with custom element generators
+auto smallIntUppercaseStringPairGen = gen::pair<int, std::string>(
+    gen::interval<int>(1, 100),
+    gen::string(gen::interval<char>('A', 'Z'))
+);
+
+auto customTupleGen = gen::tuple<int, bool, std::string>(
+    gen::interval<int>(-50, 50),
+    gen::boolean(),
+    gen::string(gen::interval<char>('a', 'z'))
+);
+
+// Usage in forAll
+forAll([](std::pair<int, std::string> data, std::tuple<int, bool, std::string> info) {
+    // Property test with pairs and tuples
+}, gen::pair<int, std::string>(), gen::tuple<int, bool, std::string>());
+```
+
+## Utility Numeric Range Generators
+
+There are also utility integer generators based on numeric range for everyday use.
+
+| Alias | Description |
+|-------|-------------|
+| `gen::natural<T>(max)` | Positive integers ≤ max |
+| `gen::nonNegative<T>(max)` | Non-negative integers ≤ max |
+| `gen::interval<T>(min, max)` | Integers in [min, max] |
+| `gen::inRange<T>(from, to)` | Integers in [from, to) |
+| `gen::integers<T>(start, count)` | Integers in [start, start+count) |
+
+```cpp
+// Numeric range generators - these are function calls, not type aliases
+auto smallIntGen = gen::interval<int>(1, 100); // generates [1, 100]
+auto positiveIntGen = gen::natural<int>(1000); // generates [1, 1000]
+auto nonNegIntGen = gen::nonNegative<int>(500); // generates [0,500]
+auto rangeIntGen = gen::inRange<int>(0, 100); // generates [0, 100)
+auto sequenceIntGen = gen::integers<int>(10, 20); // generates [10, 29]
+
+// Different integer types
+auto smallInt8Gen = gen::interval<int8_t>(-128, 127);
+auto uint16Gen = gen::natural<uint16_t>(65535);
+auto int64Gen = gen::interval<int64_t>(-1000000, 1000000);
+
+// Usage in forAll
+forAll([](int small, int positive, int nonNeg) {
+    // Property test with range-constrained integers
+}, gen::interval<int>(1, 100), gen::natural<int>(1000), gen::nonNegative<int>(500));
+```
+
+## Interval Generators
+
+Interval generators are basically shorthand equivalents for combining multiple numeric ranges (e.g. `gen::interval`) with a `gen::oneOf` (`gen::unionOf`) combinator.
+
+| Alias | Description |
+|-------|-------------|
+| `gen::intervals({Interval(min1,max1), ...})` | Multiple intervals for signed integers |
+| `gen::uintervals({UInterval(min1,max1), ...})` | Multiple intervals for unsigned integers |
+
+```cpp
+// Multiple interval generators
+auto multiRangeIntGen = gen::intervals({
+    gen::Interval(-100, -1),    // Negative numbers
+    gen::Interval(1, 100)       // Positive numbers
 });
 
-// Partially specifying generators is also allowed. Other types will be generated with arbitraries
-forAll([](SomeNewType x, SomeOtherType y) {
-}, someNewTypeGen); // y will be generated with Arbitary<SomeOtherType>
+auto multiRangeUintGen = gen::uintervals({
+    gen::UInterval(0, 9),       // Single digits
+    gen::UInterval(100, 999)    // Three digits
+});
+
+// Usage in forAll
+forAll([](int64_t multiRange) {
+    // Property test with multi-interval integers
+}, gen::intervals({gen::Interval(-100, -1), gen::Interval(1, 100)}));
 ```
 
+## Combinator Functions
 
-### Built-in Arbitraries
+The second part of `gen` namespace contains all the combinators provided by `cppproptest`.
 
-`cppproptest` provides a set of built-in generators for generation of types that are often used in practice. These built-in generators are in the form of Arbitraries. You can access an arbitrary for `T` with `proptest::Arbitrary<T>`. Some of them are defined as template classes with type parameters for universality. For example, `Arbitrary<vector<T>>` defines a generator for a vector of any given type `T`, assuming you have an arbitrary for `T` already defined, or you have provided a custom generator for `T` as an argument for the vector arbitrary's constructor. Arbitraries of Commonly used standard containers are defined with type parameters so that you can generate such containers for the elemental types you desire.
-
-Here's quick reference for built-in arbitraries:
-
-
-| Generator                                   | Purpose                          | Examples                            |
-| ------------------------------------------- | -------------------------------- | ----------------------------------- |
-| `Arbi<bool>()`                              | Generate a boolean               | `true` or `false`                   |
-| `Arbi<char>()`                              | Generate a character             | `'c'` or `'%'`                      |
-| `Arbi<int>()`, `Arbi<uint64_t>()`, ...      | Generate an integer              | `12` or `-1133`                     |
-| `Arbi<float>()`, `Arbi<double>()`           | Generate a floating point number | `3.4` or `-1.4e3`                   |
-
-
-* Boolean type:`bool`
-* Character type: `char`
-* Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
-* Floating point types: `float`, `double`
-
-| Generator                                   | Purpose                          | Examples                            |
-| ------------------------------------------- | -------------------------------- | ----------------------------------- |
-| `Arbi<std::string>()`, `Arbi<UTF8String>()` | Generate a string                | `"world"` or `"あ叶葉말"`             |
-| `Arbi<std::pair<T1,T2>>()`                  | Generate a pair                  | `{1, "xv"}` or `{true, 3.4}`        |
-| `Arbi<std::tuple<Ts...>>()`                 | Generate a tuple                 | `{1, "xv", true}` or `{true, 3.4}`  |
-| `Arbi<std::list<T>>()`                      | Generate a list                  | `{10, -4, 0}` or `{"k", "&"}`       |
-| `Arbi<std::vector<T>>()`                    | Generate a vector                | `{10, -4, 0}` or `{"k", "&"}`       |
-| `Arbi<std::set<T>>()`                       | Generate a set                   | set `{1, 3, 4}` but not `{1, 1, 3}` |
-| `Arbi<std::map<K,V>>()`                     | Generate a map                   | map of `"Bob" -> 25, "Alice" -> 30` |
-
-* String types:
-    * `std::string` (defaults to generate ASCII character strings in \[0x01, 0x7F\] range)
-    * `UTF8String` (a class which extends `std::string` and can be used to generate valid [UTF-8](https://en.wikipedia.org/wiki/UTF-8) strings by using `Arbi<UTF8String>`)
-    * `CESU8String` (similar to UTF-8, but can be used to generate valid [CESU-8](https://en.wikipedia.org/wiki/CESU-8) strings)
-    * `UTF16BEString` and `UTF16LEString` for [UTF-16](https://en.wikipedia.org/wiki/UTF-16) big and little endian strings. CESU-8 and Unicode types produce full unicode code point range of \[0x1, 0x10FFFF\], excluding forbidden surrogate code points (\[0xD800, 0xDFFF\])
-* Shared pointers: `std::shared_ptr<T>` where an `Arbi<T>` or a custom generator for `T` is available. It's also useful for generating polymorphic types.
-    ```cpp
-    struct Action {
-        virtual int get() = 0;
-    };
-    struct Insert : Action {
-        virtual void get() { return 1; }
-    };
-    struct Delete : Action {
-        virtual void get() { return 2; }
-    };
-    Generator<std::shared_ptr<Action>>(...); // can hold both Insert and Delete
-    ```
-* Standard containers: `std::string`, `std::vector`, `std::list`, `std::set`, `std::pair`, `std::tuple`, `std::map`
-    * Arbitraries for containers can optionally take a custom generator for their elemental types. If no custom generator for elemental type `T` is provided, `Arbitrary<T>` will be used instead.
-        ```cpp
-        // You can supply a specific generator for integers
-        auto vecInt0to100 = Arbi<std::vector<int>>(interval<int>(0,100));
-        // otherwise, Arbi<int> is used
-        auto vecInt = Arbi<std::vector<int>>();
-
-        // string aarbitraries also take optional element generator
-        auto uppercaseGen = Arbi<std::string>(interval('A', 'Z'));
-        auto alphabetGen = Arbi<std::string>(unionOf(interval('A', 'Z'), interval('a','z')));
-        ```
-
-    * `Arbi<std::Map>` provides setter methods for assigning a key generator and a value generator.
-
-        ```cpp
-        auto mapGen = Arbi<std::map<int,int>>();
-        mapGen.setKeyGen(interval<int>(0,100)); // interval: key ranges from 0 to 100
-        mapGen.setElemGen(interval<int>(-100, 100)); // interval: value ranges from -100 to 100
-        ```
-
-       * Containers provide methods for configuring the desired sizes
-        * `setMinSize(size)`, `setMaxSize(size)` for restricting the container to specific range of sizes
-        * `setSize(size)` for restricting the container to a specific size
-
-        ```cpp
-        auto vecInt = Arbi<std::vector<int>>();
-        vecInt.setSize(10);    // 1) generated vector will always have size 10
-        vecInt.setMinSize(1);  // 2) generated vector will have size >= 1
-        vecInt.setMaxSize(10); //    generated vector will have size <= 10
-        vecInt.setSize(1, 10); // 3) generated vector will have size >= 1 and size <= 10
-        ```
-
-As long as a generator for type `T` is available (either by `Arbitary<T>` defined or a custom generator provided), you can generate a container of that type, however complex the type `T` is, even including another container type. This means you can readily generate a random `vector<vector<int>>`, as `Arbitrary<vector<T>>` and `Arbitrary<int>` are both available.
+| Function | Description |
+|----------|-------------|
+| `gen::just<T>(value)` | Constant value |
+| `gen::elementOf<T>(vals...)` | Random selection from values |
+| `gen::oneOf<T>(gens...)` | Union of generators |
+| `gen::unionOf<T>(gens...)` | Alias for `gen::oneOf` |
+| `gen::construct<Class,Args...>(gens...)` | Object construction |
+| `gen::transform<T,U>(gen, func)` | Value transformation |
+| `gen::derive<T,U>(gen, genGen)` | Value derivation (flat-map) |
+| `gen::filter<T>(gen, predicate)` | Value filtering |
+| `gen::suchThat<T>(gen, predicate)` | Alias for filter |
+| `gen::dependency<T,U>(genT, genUGen)` | Dependency between values |
+| `gen::chain<T>(genT, genGen)` | Chain of generators |
+| `gen::aggregate<T>(genT, aggregator)` | Aggregation of values |
+| `gen::accumulate<T>(genT, accumulator, min, max)` | Accumulation of values |
+| `gen::lazy<T>(func)` | Lazy evaluation |
+| `gen::reference<T>(ref)` | Reference wrapper |
 
 ```cpp
-    Arbi<std::vector<std::vector<int>>>(); // generates a vector of vector of ints.
-    Arbi<std::map<std::string, std::vector<std::set<int>>>>();
-```
+// Constant value generator
+auto constantGen = gen::just<int>(42);
 
-This design makes arbitraries of `cppproptest` composable, meaning that they can be easily reusable as building blocks for a new generator.
+// Random selection from values
+auto choiceGen = gen::elementOf<int>(1, 2, 3, 5, 7, 11, 13);
 
+// Union of generators
+auto mixedIntGen = gen::oneOf<int>(
+    gen::interval<int>(1, 10),
+    gen::interval<int>(100, 110),
+    gen::interval<int>(1000, 1010)
+);
 
-### Defining an Arbitrary
-
-With template specialization, new `proptest::Arbi<T>` (or its alias `proptest::Arbitrary<T>`) for type `T` can be defined, if it hasn't been already defined yet. By defining an _Arbitrary_, you are effectively adding a default generator for a type.
-
-Following shows an example of defining an _Arbitrary_. Note that it should be defined under `proptest` namespace in order to be recognized and accessible by the library.
-
-```cpp
-namespace proptest { // you should define your Arbi<T> inside this namespace
-
-// define a template specialization of Arbi for Car type
-// by extending ArbiBase, you are decorating your arbitrary with standard methods (map, flatMap, filter, etc.)
-template <>
-struct Arbi<Car> : ArbiBase<Car> {
-  Shrinkable<Car> operator()(Random& rand) const {
-    bool isAutomatic = rand.getRandomBool();
-    return make_shrinkable<Car>(isAutomatic); // make_shrinkable creates a Car object by calling Car's constructor with 1 boolean parameter
-  }
+// Object construction
+struct Point {
+    Point(int x, int y) : x(x), y(y) {}
+    int x, y;
 };
+auto pointGen = gen::construct<Point, int, int>(
+    gen::interval<int>(-100, 100),
+    gen::interval<int>(-100, 100)
+);
 
-}
+// Value transformation
+auto stringLengthGen = gen::transform<std::string, size_t>(
+    gen::string(),
+    [](const std::string& s) { return s.length(); }
+);
+
+// Value filtering
+auto evenIntGen = gen::filter<int>(
+    gen::int32(),
+    [](int n) { return n % 2 == 0; }
+);
+
+// Dependency between values
+auto dependentGen = gen::dependency<int, std::string>(
+    gen::interval<int>(1, 10),
+    [](int size) { return gen::string().setSize(size); }
+);
+
+// Usage in forAll
+forAll([](int choice, Point p, size_t length, int even) {
+    // Property test with combinator-generated values
+}, gen::elementOf<int>(1, 2, 3),
+   gen::construct<Point, int, int>(gen::interval<int>(-100, 100), gen::interval<int>(-100, 100)),
+   gen::transform<std::string, size_t>(gen::string(), [](const std::string& s) { return s.length(); }),
+   gen::filter<int>(gen::int32(), [](int n) { return n % 2 == 0; }));
 ```
 
-Although you can define an arbitrary as shown in this example, it's only required to do so if you desire to have a default generator for the type.
+### Utility Functions for `oneOf`(`unionOf`) and `elementOf`
+
+There are utility functions for providing probabilities for each value or generator to be chosen for `gen::oneOf` or `gen::elementOf`.
+
+| Alias | Description |
+|-------|-------------|
+| `gen::weighted<T>(gen, weight)` | Weighted generator decorator |
+| `gen::weightedVal<T>(value, weight)` | Weighted value decorator |
 
 
-### Utility methods of Arbitrary
+## Examples
 
-`Arbitrary<T>` provides useful helpers for creating new generators from existing ones[^generatorT]. `filter` is such a helper. It restrictively generates values that satisfy a criteria function. Following shows an even number generator from the integer `Arbitrary`.
+### Basic Generators
 
 ```cpp
-// generates any integers
-auto anyIntGen = Arbi<int>();
-// generates even integers
-auto evenGen = anyIntGen.filter([](int num) {
-    return num % 2 == 0;
-});
+// Basic types
+auto boolGen = gen::boolean();
+auto intGen = gen::int32();
+auto stringGen = gen::string();
+
+// Numeric ranges - these are function calls, not type aliases
+auto smallIntGen = gen::interval(1, 100);
+auto positiveIntGen = gen::natural(1000);
+auto nonNegIntGen = gen::nonNegative(500);
 ```
 
-You can find the full list of such helpers in [Utility methods in standard generators](Combinators.md#utility-methods-in-standard-generators).
+### Container Generators
 
-&nbsp;
+```cpp
+// Simple containers
+auto intVectorGen = gen::vector<int>();
+auto stringListGen = gen::list<std::string>();
+auto intSetGen = gen::set<int>();
+auto stringIntMapGen = gen::map<std::string, int>();
+
+// Nested containers
+auto vectorOfMapsGen = gen::vector<gen::map<std::string, int>>();
+auto mapOfVectorsGen = gen::map<std::string, gen::vector<int>>();
+```
+
+### String Generators with Custom Elements
+
+```cpp
+// Custom character ranges
+auto uppercaseGen = gen::string(gen::interval<char>('A', 'Z'));
+auto digitGen = gen::string(gen::interval<char>('0', '9'));
+auto alphanumericGen = gen::string(gen::unionOf<char>(
+    gen::interval<char>('A', 'Z'),
+    gen::interval<char>('a', 'z'),
+    gen::interval<char>('0', '9')
+));
+```
 
 ## Building Custom Generators
-
 
 You can build your own generator for type `T` by manually defining the conforming generator type `GenFunction<T>`. You can refer to [Building Custom Generators from Scratch](CustomGenerator.md) for more information.
 

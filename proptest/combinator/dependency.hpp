@@ -13,6 +13,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating values with dependencies or relation to a base generator
@@ -29,5 +31,7 @@ Generator<pair<T, U>> dependency(GenFunction<T> gen1, Function<GenFunction<U>(T&
         return util::make_pair(interpair.first.getRef<T>(), interpair.second.getRef<U>());
     });
 }
+
+} // namespace gen
 
 }  // namespace proptest

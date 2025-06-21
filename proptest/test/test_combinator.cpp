@@ -1,15 +1,5 @@
-#include "proptest/combinator/just.hpp"
-#include "proptest/combinator/reference.hpp"
-#include "proptest/combinator/filter.hpp"
-#include "proptest/combinator/transform.hpp"
-#include "proptest/combinator/derive.hpp"
-#include "proptest/combinator/dependency.hpp"
-#include "proptest/combinator/oneof.hpp"
-#include "proptest/combinator/elementof.hpp"
-#include "proptest/combinator/chain.hpp"
-#include "proptest/combinator/intervals.hpp"
-#include "proptest/generator/bool.hpp"
-#include "proptest/generator/integral.hpp"
+#include "proptest/combinator/combinators.hpp"
+#include "proptest/gen.hpp"
 #include "proptest/std/string.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/test/gtest.hpp"
@@ -22,7 +12,7 @@ TEST(Just, lvalue)
 {
     int a = 1339;
     Random rand(getCurrentTime());
-    auto gen = just<int>(a);
+    auto gen = gen::just<int>(a);
     auto result = gen(rand);
     EXPECT_EQ(result.getRef(), 1339);
 }
@@ -30,7 +20,7 @@ TEST(Just, lvalue)
 TEST(Just, rvalue)
 {
     Random rand(getCurrentTime());
-    auto gen = just<int>(1339);
+    auto gen = gen::just<int>(1339);
     auto result = gen(rand);
     EXPECT_EQ(result.getRef(), 1339);
 }
@@ -38,7 +28,7 @@ TEST(Just, rvalue)
 TEST(Just, Any)
 {
     Random rand(getCurrentTime());
-    auto gen = just<Any>(Any(1339));
+    auto gen = gen::just<Any>(Any(1339));
     auto result = gen(rand);
     EXPECT_EQ(result.getAny().getRef<int>(), 1339);
 }
@@ -46,7 +36,7 @@ TEST(Just, Any)
 TEST(OneOf, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = oneOf<int>(just<int>(1339), just<int>(42));
+    auto gen = gen::oneOf<int>(gen::just<int>(1339), gen::just<int>(42));
     auto result = gen(rand);
     EXPECT_TRUE(result.getRef() == 1339 || result.getRef() == 42);
 }
@@ -54,7 +44,7 @@ TEST(OneOf, basic)
 TEST(OneOf, weighted)
 {
     Random rand(getCurrentTime());
-    auto gen = unionOf<int>(weightedGen(just<int>(1339), 0.9), weightedGen(just<int>(42), 0.1));
+    auto gen = gen::unionOf<int>(gen::weightedGen(gen::just<int>(1339), 0.9), gen::weightedGen(gen::just<int>(42), 0.1));
     int num1339 = 0, num42 = 0;
     for(int i = 0; i < 1000; i++) {
         auto result = gen(rand);
@@ -70,7 +60,7 @@ TEST(OneOf, weighted)
 TEST(ElementOf, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = elementOf<int>(1339, 42);
+    auto gen = gen::elementOf<int>(1339, 42);
     auto result = gen(rand);
     EXPECT_TRUE(result.getRef() == 1339 || result.getRef() == 42);
 }
@@ -78,7 +68,7 @@ TEST(ElementOf, basic)
 TEST(ElementOf, weighted)
 {
     Random rand(getCurrentTime());
-    auto gen = elementOf<int>(weightedVal(1339, 0.9), weightedVal(42, 0.1));
+    auto gen = gen::elementOf<int>(gen::weightedVal(1339, 0.9), gen::weightedVal(42, 0.1));
     int num1339 = 0, num42 = 0;
     for(int i = 0; i < 1000; i++) {
         auto result = gen(rand);
@@ -94,8 +84,8 @@ TEST(ElementOf, weighted)
 TEST(Filter, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = interval<int>(0, 100);
-    auto filtered = filter<int>(gen, [](int i) { return i % 2 == 0; });
+    auto gen = gen::interval<int>(0, 100);
+    auto filtered = gen::filter<int>(gen, [](int i) { return i % 2 == 0; });
 
     for(int i = 0; i < 100; i++)
     {
@@ -107,8 +97,8 @@ TEST(Filter, basic)
 TEST(Transform, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = interval<int>(0, 100);
-    auto transformed = transform<int, int>(gen, [](const int& i) { return i * 2; });
+    auto gen = gen::interval<int>(0, 100);
+    auto transformed = gen::transform<int, int>(gen, [](const int& i) { return i * 2; });
 
     for(int i = 0; i < 100; i++)
     {
@@ -120,8 +110,8 @@ TEST(Transform, basic)
 TEST(Transform, basic2)
 {
     Random rand(getCurrentTime());
-    auto gen = interval<int>(0, 10);
-    auto transformed = transform<int, string>(gen, [](const int& i) { return to_string(i); });
+    auto gen = gen::interval<int>(0, 10);
+    auto transformed = gen::transform<int, string>(gen, [](const int& i) { return to_string(i); });
 
     for(int i = 0; i < 100; i++)
     {
@@ -135,8 +125,8 @@ TEST(Transform, basic2)
 TEST(FilterTransform, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = filter<int>(interval<int>(0, 8), [](int i) { return i == 8; });
-    auto transformed = transform<int, string>(gen, [](const int& i) { return to_string(i); });
+    auto gen = gen::filter<int>(gen::interval<int>(0, 8), [](int i) { return i == 8; });
+    auto transformed = gen::transform<int, string>(gen, [](const int& i) { return to_string(i); });
 
     for(int i = 0; i < 10; i++)
     {
@@ -149,8 +139,8 @@ TEST(FilterTransform, basic)
 TEST(Derive, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = just<int>(8);
-    auto derived = derive<int, int>(gen, [](const int& i) { return interval(0, i); });
+    auto gen = gen::just<int>(8);
+    auto derived = gen::derive<int, int>(gen, [](const int& i) { return gen::interval(0, i); });
 
     for(int i = 0; i < 5; i++)
     {
@@ -166,8 +156,8 @@ TEST(Derive, basic)
 TEST(Dependency, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = just<int>(8);
-    auto derived = dependency<int, int>(gen, [](const int& i) { return interval(0, i); });
+    auto gen = gen::just<int>(8);
+    auto derived = gen::dependency<int, int>(gen, [](const int& i) { return gen::interval(0, i); });
 
     for(int i = 0; i < 5; i++)
     {
@@ -182,7 +172,7 @@ TEST(Dependency, basic)
 TEST(Chain, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = chain(interval<int>(0, 8), [](const int& i) -> Generator<int> { return interval(0, i); });
+    auto gen = gen::chain(gen::interval<int>(0, 8), [](const int& i) -> Generator<int> { return gen::interval(0, i); });
 
     for(int i = 0; i < 20; i++)
     {
@@ -203,18 +193,18 @@ TEST(PropTest, TestChain)
 
     auto nullableIntegers = Arbi<bool>().tupleWith<int>(+[](const bool& isNull) -> GenFunction<int> {
         if (isNull)
-            return just(0);
+            return gen::just(0);
         else
-            return interval<int>(10, 20);
+            return gen::interval<int>(10, 20);
     });
 
     auto tupleGen = nullableIntegers.tupleWith<int>(+[](const Chain<bool, int>& chain) {
         bool isNull = get<0>(chain);
         int value = get<1>(chain);
         if (isNull)
-            return interval(0, value);
+            return gen::interval(0, value);
         else
-            return interval(-10, value);
+            return gen::interval(-10, value);
     });
 
     for (int i = 0; i < 3; i++) {
@@ -226,7 +216,7 @@ TEST(PropTest, TestChain)
 TEST(Chain, chainTwice)
 {
     Random rand(getCurrentTime());
-    auto gen = chain(interval<int>(0, 4), [](const int&) -> Generator<int> { return interval(0, 4); });
+    auto gen = gen::chain(gen::interval<int>(0, 4), [](const int&) -> Generator<int> { return gen::interval(0, 4); });
 
     for(int i = 0; i < 5; i++)
     {
@@ -248,7 +238,7 @@ TEST(Chain, chainTwice)
 TEST(Intervals, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = intervals({Interval(0, 2), Interval(12, 22)});
+    auto gen = gen::intervals({Interval(0, 2), Interval(12, 22)});
 
     for(int i = 0; i < 20; i++)
     {

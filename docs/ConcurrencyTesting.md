@@ -17,27 +17,27 @@ using namespace proptest::concurrent;
 
 // ...
 
-auto pushBackGen = Arbi<int>().map<SimpleAction<std::vector<int>>>([](const int& value) {
+auto pushBackGen = gen::int32().map<SimpleAction<std::vector<int>>>([](const int& value) {
     return [value](const std::vector<int>& obj) {
         obj.push_back(value);
         return true;
     };
 });
 
-auto popBackGen = just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
+auto popBackGen = gen::just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
     if (obj.empty())
         return true;
     obj.pop_back();
     return true;
 });
 
-auto clearGen = just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
+auto clearGen = gen::just<SimpleAction<std::vector<int>>>([](const std::vector<int>& obj) {
     obj.clear();
     return true;
 });
 
 auto actionListGen = actionListGenOf<std::vector<int>>(pushBackGen, popBackGen, clearGen);
-auto concurrentProp = concurrency<std::vector<int>>(Arbi<std::vector<int>>(), actionListGen);
+auto concurrentProp = concurrency<std::vector<int>>(gen::vector<int>(), actionListGen);
 concurrentProp.go();
 ```
 

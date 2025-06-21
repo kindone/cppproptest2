@@ -19,6 +19,8 @@ template <typename T>
 struct Generator;
 struct GeneratorCommon;
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating a type U from a generator for type T by applying transformation on the
@@ -31,5 +33,7 @@ Generator<U> transform(Function<Shrinkable<T>(Random&)> gen, Function<U(T&)> tra
 {
     return util::transformImpl(gen, transformer);
 }
+
+} // namespace gen
 
 }  // namespace proptest

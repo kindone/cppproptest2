@@ -11,6 +11,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating a value of type T by calling a function<T()>
@@ -41,5 +43,7 @@ auto lazy(LazyEval&& lazyEval) -> Generator<invoke_result_t<LazyEval>>
 {
     return lazy<invoke_result_t<LazyEval>>(util::forward<LazyEval>(lazyEval));
 }
+
+} // namespace gen
 
 }  // namespace proptest

@@ -79,7 +79,7 @@ using float64 = Arbi<double>;
 /**
  * @brief String generators
  */
-using string = Arbi<std::string>;
+using string = Arbi<::proptest::string>;
 using utf8string = Arbi<UTF8String>;
 using cesu8string = Arbi<CESU8String>;
 using utf16bestring = Arbi<UTF16BEString>;
@@ -93,22 +93,22 @@ using utf16lestring = Arbi<UTF16LEString>;
  * @brief Container generators
  */
 template <typename T>
-using vector = Arbi<std::vector<T>>;
+using vector = Arbi<::proptest::vector<T>>;
 
 template <typename T>
-using list = Arbi<std::list<T>>;
+using list = Arbi<::proptest::list<T>>;
 
 template <typename T>
-using set = Arbi<std::set<T>>;
+using set = Arbi<::proptest::set<T>>;
 
 template <typename Key, typename Value>
-using map = Arbi<std::map<Key, Value>>;
+using map = Arbi<::proptest::map<Key, Value>>;
 
 template <typename T>
-using optional = Arbi<std::optional<T>>;
+using optional = Arbi<::proptest::optional<T>>;
 
 template <typename T>
-using shared_ptr = Arbi<std::shared_ptr<T>>;
+using shared_ptr = Arbi<::proptest::shared_ptr<T>>;
 
 // ============================================================================
 // TUPLE AND PAIR GENERATORS
@@ -118,10 +118,10 @@ using shared_ptr = Arbi<std::shared_ptr<T>>;
  * @brief Tuple and pair generators
  */
 template <typename T1, typename T2>
-using pair = Arbi<std::pair<T1, T2>>;
+using pair = Arbi<::proptest::pair<T1, T2>>;
 
 template <typename... Ts>
-using tuple = Arbi<std::tuple<Ts...>>;
+using tuple = Arbi<::proptest::tuple<Ts...>>;
 
 // ============================================================================
 // NUMERIC RANGE GENERATORS
@@ -156,166 +156,8 @@ auto integers(T start, T count) -> decltype(proptest::integers<T>(start, count))
 }
 
 // ============================================================================
-// COMBINATOR ALIASES
-// ============================================================================
-
-/**
- * @brief Constant value generator
- */
-template <typename T>
-auto just(T&& value) -> decltype(proptest::just<T>(std::forward<T>(value))) {
-    return proptest::just<T>(std::forward<T>(value));
-}
-
-/**
- * @brief Element selection from values
- */
-template <typename T, typename... Args>
-auto elementOf(Args&&... args) -> decltype(proptest::elementOf<T>(std::forward<Args>(args)...)) {
-    return proptest::elementOf<T>(std::forward<Args>(args)...);
-}
-
-/**
- * @brief Union of generators
- */
-template <typename T, typename... Gens>
-auto oneOf(Gens&&... gens) -> decltype(proptest::oneOf<T>(std::forward<Gens>(gens)...)) {
-    return proptest::oneOf<T>(std::forward<Gens>(gens)...);
-}
-
-/**
- * @brief Alias for oneOf
- */
-template <typename T, typename... Gens>
-auto unionOf(Gens&&... gens) -> decltype(proptest::unionOf<T>(std::forward<Gens>(gens)...)) {
-    return proptest::unionOf<T>(std::forward<Gens>(gens)...);
-}
-
-/**
- * @brief Object construction
- */
-template <typename Class, typename... Args, typename... Gens>
-auto construct(Gens&&... gens) -> decltype(proptest::construct<Class, Args...>(std::forward<Gens>(gens)...)) {
-    return proptest::construct<Class, Args...>(std::forward<Gens>(gens)...);
-}
-
-/**
- * @brief Value transformation
- */
-template <typename T, typename U, typename Gen>
-auto transform(Gen&& gen, auto&& transformer) -> decltype(proptest::transform<T, U>(std::forward<Gen>(gen), std::forward<decltype(transformer)>(transformer))) {
-    return proptest::transform<T, U>(std::forward<Gen>(gen), std::forward<decltype(transformer)>(transformer));
-}
-
-/**
- * @brief Value derivation (flat-map)
- */
-template <typename T, typename U, typename Gen>
-auto derive(Gen&& gen, auto&& genUGen) -> decltype(proptest::derive<T, U>(std::forward<Gen>(gen), std::forward<decltype(genUGen)>(genUGen))) {
-    return proptest::derive<T, U>(std::forward<Gen>(gen), std::forward<decltype(genUGen)>(genUGen));
-}
-
-/**
- * @brief Value filtering
- */
-template <typename T, typename Gen>
-auto filter(Gen&& gen, auto&& predicate) -> decltype(proptest::filter<T>(std::forward<Gen>(gen), std::forward<decltype(predicate)>(predicate))) {
-    return proptest::filter<T>(std::forward<Gen>(gen), std::forward<decltype(predicate)>(predicate));
-}
-
-/**
- * @brief Alias for filter
- */
-template <typename T, typename Gen>
-auto suchThat(Gen&& gen, auto&& predicate) -> decltype(proptest::suchThat<T>(std::forward<Gen>(gen), std::forward<decltype(predicate)>(predicate))) {
-    return proptest::suchThat<T>(std::forward<Gen>(gen), std::forward<decltype(predicate)>(predicate));
-}
-
-/**
- * @brief Dependency between values
- */
-template <typename T, typename U, typename GenT>
-auto dependency(GenT&& genT, auto&& genUGen) -> decltype(proptest::dependency<T, U>(std::forward<GenT>(genT), std::forward<decltype(genUGen)>(genUGen))) {
-    return proptest::dependency<T, U>(std::forward<GenT>(genT), std::forward<decltype(genUGen)>(genUGen));
-}
-
-/**
- * @brief Chain of generators
- */
-template <typename T, typename GenT>
-auto chain(GenT&& genT, auto&& genGen) -> decltype(proptest::chain<T>(std::forward<GenT>(genT), std::forward<decltype(genGen)>(genGen))) {
-    return proptest::chain<T>(std::forward<GenT>(genT), std::forward<decltype(genGen)>(genGen));
-}
-
-/**
- * @brief Aggregation of values
- */
-template <typename T, typename GenT>
-auto aggregate(GenT&& genT, auto&& aggregator) -> decltype(proptest::aggregate<T>(std::forward<GenT>(genT), std::forward<decltype(aggregator)>(aggregator))) {
-    return proptest::aggregate<T>(std::forward<GenT>(genT), std::forward<decltype(aggregator)>(aggregator));
-}
-
-/**
- * @brief Accumulation of values
- */
-template <typename T, typename GenT>
-auto accumulate(GenT&& genT, auto&& accumulator, size_t minSize, size_t maxSize) -> decltype(proptest::accumulate<T>(std::forward<GenT>(genT), std::forward<decltype(accumulator)>(accumulator), minSize, maxSize)) {
-    return proptest::accumulate<T>(std::forward<GenT>(genT), std::forward<decltype(accumulator)>(accumulator), minSize, maxSize);
-}
-
-/**
- * @brief Lazy evaluation
- */
-template <typename T>
-auto lazy(auto&& func) -> decltype(proptest::lazy<T>(std::forward<decltype(func)>(func))) {
-    return proptest::lazy<T>(std::forward<decltype(func)>(func));
-}
-
-/**
- * @brief Reference wrapper
- */
-template <typename T>
-auto reference(T& ref) -> decltype(proptest::reference<T>(ref)) {
-    return proptest::reference<T>(ref);
-}
-
-// ============================================================================
-// INTERVAL GENERATORS
-// ============================================================================
-
-/**
- * @brief Multiple intervals for signed integers
- */
-inline auto intervals(proptest::initializer_list<proptest::Interval> interval_list) -> decltype(proptest::intervals(interval_list)) {
-    return proptest::intervals(interval_list);
-}
-
-/**
- * @brief Multiple intervals for unsigned integers
- */
-inline auto uintervals(proptest::initializer_list<proptest::UInterval> interval_list) -> decltype(proptest::uintervals(interval_list)) {
-    return proptest::uintervals(interval_list);
-}
-
-// ============================================================================
 // UTILITY FUNCTIONS
 // ============================================================================
-
-/**
- * @brief Weighted generator decorator
- */
-template <typename T>
-auto weighted(GenFunction<T> gen, double weight) -> decltype(proptest::weightedGen<T>(gen, weight)) {
-    return proptest::weightedGen<T>(gen, weight);
-}
-
-/**
- * @brief Weighted value decorator
- */
-template <typename T>
-auto weightedVal(T value, double weight) -> decltype(proptest::weightedVal<T>(value, weight)) {
-    return proptest::weightedVal<T>(value, weight);
-}
 
 } // namespace gen
 

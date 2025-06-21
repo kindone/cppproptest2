@@ -2,6 +2,7 @@
 
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/Generator.hpp"
 #include "proptest/std/pair.hpp"
 #include "proptest/GenType.hpp"
 #include "proptest/combinator/combinatorimpl.hpp"
@@ -17,6 +18,8 @@ namespace proptest {
 
 template <typename T> struct Generator;
 struct GeneratorCommon;
+
+namespace gen {
 
 /**
  * @ingroup Combinators
@@ -38,5 +41,7 @@ Generator<U> derive(GenFunction<T> gen1, Function<GenFunction<U>(T&)> gen2gen)
 {
     return util::deriveImpl(gen1, [gen2gen](T& t) -> Function1<ShrinkableBase> { return gen2gen(t); });
 }
+
+} // namespace gen
 
 }  // namespace proptest

@@ -26,20 +26,26 @@ TEST(GenNamespace, BasicTypeGenerators)
         EXPECT_TRUE(result.getRef() == true || result.getRef() == false);
     }
 
-    // Test integer generators
-    auto intGen = gen::int32();
-    for(int i = 0; i < 10; i++) {
-        auto result = intGen(rand);
-        EXPECT_TRUE(result.getRef() >= std::numeric_limits<int32_t>::min());
-        EXPECT_TRUE(result.getRef() <= std::numeric_limits<int32_t>::max());
-    }
-
     // Test string generator
     auto stringGen = gen::string();
     for(int i = 0; i < 10; i++) {
         auto result = stringGen(rand);
         EXPECT_LE(result.getRef().size(), Arbi<string>::defaultMaxSize);
     }
+
+    // Test utf8string generator
+    auto alphanumericGen = gen::utf8string(gen::unionOf<uint32_t>(
+        gen::interval<uint32_t>('A', 'Z'),
+        gen::interval<uint32_t>('a', 'z'),
+        gen::interval<uint32_t>('0', '9')
+    ));
+
+    forAll([]([[maybe_unused]] std::string name, [[maybe_unused]] UTF8String alphanumeric) {
+        // Property test with strings
+        for(char c : alphanumeric) {
+            EXPECT_TRUE(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9');
+        }
+    }, gen::string(), alphanumericGen);
 }
 
 TEST(GenNamespace, NumericRangeGenerators)
@@ -71,6 +77,30 @@ TEST(GenNamespace, NumericRangeGenerators)
     }
 }
 
+TEST(GenNamespace, NumericRangesGenerators)
+{
+    auto multiRangeIntGen = gen::intervals({
+        Interval(-100, -1),    // Negative numbers
+        Interval(1, 100)       // Positive numbers
+    });
+
+    auto multiRangeUintGen = gen::uintervals({
+        UInterval(0, 9),       // Single digits
+        UInterval(100, 999)    // Three digits
+    });
+
+    // Usage in forAll
+    forAll([]([[maybe_unused]] int64_t multiRange) {
+        // Property test with multi-interval integers
+        EXPECT_TRUE((multiRange >= -100 && multiRange <= -1) || (multiRange >= 1 && multiRange <= 100));
+    }, multiRangeIntGen);
+
+    forAll([]([[maybe_unused]] uint64_t multiRange) {
+        EXPECT_TRUE((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999));
+        // Property test with multi-interval integers
+    }, multiRangeUintGen);
+}
+
 TEST(GenNamespace, ContainerGenerators)
 {
     Random rand(getCurrentTime());
@@ -83,7 +113,7 @@ TEST(GenNamespace, ContainerGenerators)
     }
 
     // Test list generator
-    auto listGen = gen::list<std::string>();
+    auto listGen = gen::list<string>();
     for(int i = 0; i < 10; i++) {
         auto result = listGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
@@ -97,7 +127,7 @@ TEST(GenNamespace, ContainerGenerators)
     }
 
     // Test map generator
-    auto mapGen = gen::map<std::string, int>();
+    auto mapGen = gen::map<string, int>();
     for(int i = 0; i < 10; i++) {
         auto result = mapGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
@@ -197,7 +227,7 @@ TEST(GenNamespace, FilteringAndTransformation)
     }
 
     // Test transform combinator
-    auto stringFromIntGen = gen::transform<int, std::string>(gen::int32(), [](int n) { return std::to_string(n); });
+    auto stringFromIntGen = gen::transform<int, string>(gen::int32(), [](int n) { return to_string(n); });
     for(int i = 0; i < 20; i++) {
         auto result = stringFromIntGen(rand);
         EXPECT_FALSE(result.getRef().empty());
@@ -209,7 +239,7 @@ TEST(GenNamespace, Dependencies)
     Random rand(getCurrentTime());
 
     // Test dependency combinator
-    auto sizeAndVectorGen = gen::dependency<int, std::vector<int>>(
+    auto sizeAndVectorGen = gen::dependency<int, vector<int>>(
         gen::interval(1, 5),
         [](int size) { return gen::vector<int>().setSize(size); }
     );
@@ -228,7 +258,7 @@ TEST(GenNamespace, ComplexNestedStructures)
     Random rand(getCurrentTime());
 
     // Test complex nested structure
-    auto complexGen = gen::vector<proptest::map<std::string, proptest::vector<int>>>();
+    auto complexGen = gen::vector<map<string, vector<int>>>();
     for(int i = 0; i < 10; i++) {
         auto result = complexGen(rand);
         const auto& vec = result.getRef();

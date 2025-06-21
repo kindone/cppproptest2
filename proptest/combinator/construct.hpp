@@ -34,6 +34,8 @@ Generator<CLASS> constructImpl(const shared_ptr<vector<AnyGenerator>>& genVec)
 
 } // namespace util
 
+namespace gen {
+
 template <typename CLASS, typename... ARGS>
 Generator<CLASS> construct()
 {
@@ -98,5 +100,7 @@ Generator<CLASS> construct(ExplicitGen0&& gen0, ExplicitGens&&... gens)
 
     return util::constructImpl<CLASS, ARGS...>(genVec);
 }
+
+} // namespace gen
 
 } // namespace proptest

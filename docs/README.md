@@ -259,9 +259,9 @@ You don't need to care too much about *how* to test your requirements. Most of i
 
 * [Getting Started with cppproptest](GettingStarted.md)
 * [Introduction to generators](Generators.md)
-    * [Arbitraries](Generators.md#arbitraries-the-default-generators)
-    * [Built-in generators](Generators.md#built-in-arbitraries)
-* [The `gen` namespace - convenient aliases for generators and combinators](GenNamespace.md)
+    * [Arbitraries, the default generators](Arbitrary.md)
+    * [`gen` namespace - built-in generators and combinators](GenNamespace.md)
+    * [Generating real-world inputs](GeneratorExamples.md)
 * [Generator combinators for creating generators from existing ones](Combinators.md)
 * [Counterexamples and notion of shrinking for automated debugging](Shrinking.md)
 * [Printing facilities](Printing.md)

@@ -29,6 +29,8 @@ struct UInterval
     uint64_t max;
 };
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief generates integer values in union of intervals
@@ -41,5 +43,7 @@ PROPTEST_API Generator<int64_t> intervals(initializer_list<Interval> interval_li
  * @details auto intGen = uintervals({UInterval(0, 2), UInterval(5, 10)}); // generates integers in [0,2] or [5,10]
  */
 PROPTEST_API Generator<uint64_t> uintervals(initializer_list<UInterval> interval_list);
+
+} // namespace gen
 
 }  // namespace proptest

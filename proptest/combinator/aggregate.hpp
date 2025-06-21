@@ -38,6 +38,8 @@ Generator<vector<T>> aggregateHelper(GenFunction<T> gen1, Function<GenFunction<T
 
 }  // namespace util
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for aggregating values into a vector where each value is generated from a given
@@ -60,5 +62,7 @@ decltype(auto) aggregate(GEN1&& gen1, GEN2GEN&& gen2gen, size_t minSize, size_t 
     Function<RetType(T&)> funcGen2Gen = gen2gen;
     return util::aggregateHelper<T>(funcGen1, funcGen2Gen, minSize, maxSize);
 }
+
+} // namespace gen
 
 }  // namespace proptest

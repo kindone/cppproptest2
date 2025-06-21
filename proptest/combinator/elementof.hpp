@@ -18,8 +18,12 @@ template <typename T>
 struct WeightedValue;
 }
 
+namespace gen {
+
 template <typename Impl, typename T = Impl>
 util::WeightedValue<T> weightedVal(Impl&& value, double weight);
+
+} // namespace gen
 
 namespace util {
 
@@ -44,7 +48,7 @@ template <typename T>
     requires(!is_same_v<decay_t<T>, WeightedValue<T>>)
 WeightedValue<T> ValueToWeighted(T&& value)
 {
-    return weightedVal<T>(util::forward<T>(value), 0.0);
+    return gen::weightedVal<T>(util::forward<T>(value), 0.0);
 }
 
 template <typename T>
@@ -54,6 +58,8 @@ WeightedValue<T> ValueToWeighted(const WeightedValue<T>& weighted)
 }
 
 }  // namespace util
+
+namespace gen {
 
 template <typename Impl, typename T>
 util::WeightedValue<T> weightedVal(Impl&& value, double weight)
@@ -82,9 +88,11 @@ decltype(auto) elementOf(Impl&&... values)
 
     transform(
         wvaluevec.begin(), wvaluevec.end(), util::back_inserter(*genVecPtr),
-        +[](const util::WeightedValue<T>& wvalue) -> util::WeightedBase { return weightedGen<T>(just<T>(wvalue.value), wvalue.weight); });
+        +[](const util::WeightedValue<T>& wvalue) -> util::WeightedBase { return weightedGen<T>(gen::just<T>(wvalue.value), wvalue.weight); });
 
     return Generator<T>(util::oneOfImpl(genVecPtr));
 }
+
+} // namespace gen
 
 }  // namespace proptest

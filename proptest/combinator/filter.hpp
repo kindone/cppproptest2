@@ -12,6 +12,8 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief You can add a filtering condition to a generator to restrict the generated values to have certain constraint
@@ -36,7 +38,9 @@ Generator<T> filter(const Generator<T>& gen, Function<bool(T&)> criteria) {
 template <typename T, GenLike GEN, typename Criteria>
 decltype(auto) suchThat(GEN&& gen, Criteria&& criteria)
 {
-    return filter<T>(util::forward<GEN>(gen), util::forward<Criteria>(criteria));
+    return gen::filter<T>(util::forward<GEN>(gen), util::forward<Criteria>(criteria));
 }
+
+} // namespace gen
 
 }  // namespace proptest
