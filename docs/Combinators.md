@@ -1,9 +1,8 @@
-
 # Generator Combinators
 
-Generator combinators are provided for building a new generator based on existing ones. Many of them come from ideas and best practices of functional programming. They can be chained as they receive existing generator(s) as argument and returns new generator.
+Generator combinators are provided for building a new generator based on existing ones. Many of them come from ideas and best practices of functional programming. They can be chained, as each combinator receives one or more existing generators as arguments and returns a new generator.
 
-While you can go through this document from top to the bottom, you might be want to find a suitable combinator for your use case using this table:
+While you can read this document sequentially, you might want to use the following table to quickly find a suitable combinator for your use case:
 
 | Generator/Combinator                                                                                                   | Purpose                                              | Examples                                                                      |
 |------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|-------------------------------------------------------------------------------|
@@ -13,11 +12,11 @@ While you can go through this document from top to the bottom, you might be want
 | [`interval<T>`, `integers<T>`](#integers-and-intervals)                                                                | Generate a value within numeric range of values      | a number within `1`~`9999`                                                    |
 | [`pairOf<T1,T2>`, `tupleOf<Ts...>`](#pair-and-tuples)                                                                  | Generate a pair or a tuple of different types        | a `pair<int, string>`                                                         |
 | [`unionOf<T>` (`oneOf<T>`)](#selecting-from-generators)                                                                | Union multiple generators                            | `20~39` or `60~79` combined                                                   |
-| [`transform<T,U>`](#transforming-or-mapping)                                                                           | Transform into another type or a value               | `"0"` or `"1.4"` (a number as string).                                        |
+| [`transform<T,U>`](#transforming-or-mapping)                                                                           | Transform into another type or a value               | `"0"` or `"1.4"` (a number as a string)                                       |
 | [`construct<T,ARGS...>`](#constructing-an-object)                                                                      | Generate a struct or a class object                  | a `Rectangle` object with width and height                                    |
-| [`filter` (`suchThat`)](#applying-constraints)                                                                         | Apply constraints in generated values                | an even natural number (`n % 2 == 0`)                                         |
+| [`filter` (`suchThat`)](#applying-constraints)                                                                         | Apply constraints to generated values                | an even natural number (`n % 2 == 0`)                                         |
 | [`dependency`, `chain`](#values-with-dependencies), [`pairWith`, `tupleWith`](#utility-methods-in-standard-generators) | Generate values with dependencies or relationships   | a rectangle where `width == height * 2`                                       |
-| [`aggregate`, `accumulate`](#aggregation-or-accumulation-of-values)                                                    | Generate a value based on previously generated value | a sequence of numbers where each one is between 0.5x and 1.5x of its previous |
+| [`aggregate`, `accumulate`](#aggregation-or-accumulation-of-values)                                                    | Generate a value based on previously generated value | a sequence of numbers where each is between 0.5x and 1.5x of its predecessor |
 
 &nbsp;
 
@@ -34,19 +33,19 @@ While you can go through this document from top to the bottom, you might be want
 
 ### Selecting from constants
 
-You may want to random choose from specific list of values.
+You may want to randomly choose from a specific list of values.
 
-* `elementOf<T>(val1, ..., valN)`: generates a type `T` from multiple values for type `T`, by choosing one of the values randomly
+* `elementOf<T>(val1, ..., valN)`: generates a value of type `T` by randomly choosing one from the provided constant values.
     ```cpp
     // generates a prime number under 50
     auto primeGen = elementOf<int>(2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47);
     ```
 
-    * `elementOf` can receive optional probabilitistic weights (`0 < weight < 1`, sum of weights must not exceed 1.0) for generators. If weight is unspecified for a generator, it is calculated automatically so that remaining probability among unspecified generators is evenly distributed.
+    * `elementOf` can receive optional probabilitistic weights (`0 < weight <= 1`, the sum of weights should ideally be 1.0 but must not exceed 1.0) for values. If a weight is unspecified for a value, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the values without specified weights.
     `weightedVal(<value>, <weight>)` is used to annotate the desired weight.
 
     ```cpp
-    // generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]
+    // generates 2, 5, or 10 with specified probabilities
     //   weight for 10 automatically becomes 1.0 - 0.8 - 0.15 == 0.05
     elementOf<int>(weightedVal(2, 0.8), weightedVal(5, 0.15), 10);
     ```
@@ -67,13 +66,15 @@ Some utility generators for integers are provided
     integers(1, 10); // generates an integer in {1, ..., 10}
     ```
 * `natural<INT_TYPE>(max)`: generates a positive integer up to `max`(inclusive)
+* `natural<INT_TYPE>(max)`: generates a positive integer (greater than 0) up to `max` (inclusive).
 * `nonNegative<INT_TYPE>(max)`: : generates zero or a positive integer up to `max`(inclusive)
+* `nonNegative<INT_TYPE>(max)`: generates zero or a positive integer (>= 0) up to `max` (inclusive).
 
 ### Pair and Tuples
 
-Generators for different types can be bound to a pair or a tuple.
+Generators for different types can be combined to produce a `std::pair` or `std::tuple`.
 
-* `pairOf<T1, T2>(gen1, gen2)` : generates a `std::pair<T1,T2>` based on result of generators `gen1` and `gen2`
+* `pairOf<T1, T2>(gen1, gen2)` : generates a `std::pair<T1,T2>` based on the results of generators `gen1` and `gen2`.
 
     ```cpp
     auto pairGen = pairOf(Arbi<int>(), Arbi<std::string>());
@@ -91,21 +92,23 @@ Generators for different types can be bound to a pair or a tuple.
 
 ### Selecting from generators
 
-You can combine generators to a single generator that can generate each of them with some probability. This can be considered as taking a *union* of generators.
+You can combine multiple generators of the same type into a single generator that randomly selects one of the underlying generators to produce a value. This can be considered as taking a *union* of generators.
 
-* `oneOf<T>(gen1, ..., genN)`: generates a type `T` from multiple generators for type `T`, by choosing one of the generators randomly
+* `oneOf<T>(gen1, ..., genN)`: generates a value of type `T` by randomly choosing one of the provided generators (`gen1` to `genN`, which must all generate type `T`).
 
     ```cpp
     // generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]
     auto evenGen = oneOf<int>(interval(0, 10), interval(100, 1000), interval(10000, 100000));
+    auto rangeGen = oneOf<int>(interval(0, 10), interval(100, 1000), interval(10000, 100000));
     ```
 
-    * `oneOf` can receive optional probabilistic weights (`0 < weight < 1`, sum of weights must not exceed 1.0) for generators. If weight is unspecified for a generator, it is calculated automatically so that remaining probability among unspecified generators is evenly distributed.
+    * `oneOf` can receive optional probabilitistic weights (`0 < weight <= 1`, the sum of weights should ideally be 1.0 but must not exceed 1.0) for generators. If a weight is unspecified for a generator, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the generators without specified weights.
     `weightedGen(<generator>, <weight>)` is used to annotate the desired weight.
 
     ```cpp
-    // generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]
+    // generates a numeric within ranges [0,10], [100, 1000], [10000, 100000] with specified probabilities
     auto evenGen = oneOf<int>(weightedGen(interval(0, 10), 0.8), weightedGen(interval(100, 1000), 0.15), interval(10000, 100000)/* weight automatically becomes 1.0 - (0.8 + 0.15) == 0.05 */);
+    auto rangeGen = oneOf<int>(weightedGen(interval(0, 10), 0.8), weightedGen(interval(100, 1000), 0.15), interval(10000, 100000)/* weight automatically becomes 1.0 - (0.8 + 0.15) == 0.05 */);
     ```
 
 * `unionOf<T>` is an alias of `oneOf<T>`
@@ -114,7 +117,7 @@ You can combine generators to a single generator that can generate each of them 
 
 You can generate an object of a class or a struct type `T`, by calling a matching constructor of `T`.
 
-* `construct<T, ARG1, ..., ARGN>([gen1, ..., genM])`: generates an object of type `T` by calling its constructor that matches the signature `(ARG1, ..., ARGN)`. Custom generators `gen1`,..., `genM` can be supplied for generating arguments. If `M < N`, then rest of the arguments are generated with `Arbi`s.
+* `construct<T, ARG1, ..., ARGN>([gen1, ..., genM])`: generates an object of type `T` by calling its constructor that matches the signature `(ARG1, ..., ARGN)`. Custom generators `gen1`,..., `genM` can be supplied for generating arguments. If `M < N`, the remaining `N - M` arguments are generated using their default `Arbi` generators (`Arbi<ARG_{M+1}>`, etc.).
 
     ```cpp
     struct Coordinate {
@@ -129,9 +132,9 @@ You can generate an object of a class or a struct type `T`, by calling a matchin
 
 ### Applying constraints
 
-You can add a filtering condition to a generator to restrict the generated values to have certain constraint.
+You can add a filtering condition to a generator to restrict the generated values to satisfy a certain constraint.
 
-* `filter<T>(gen, condition_predicate)`:  generates a type `T` that satisfies condition predicate (`condition_predicate` returns `true`)
+* `filter<T>(gen, condition_predicate)`: generates a value of type `T` using the base generator `gen`, but only yields values that satisfy the `condition_predicate` (i.e., for which the predicate returns `true`). If the predicate returns `false`, the generation is retried with a new value from `gen`.
 
     ```cpp
     // generates even numbers
@@ -144,22 +147,22 @@ You can add a filtering condition to a generator to restrict the generated value
 
 ### Transforming or mapping
 
-You can transform an existing generator to create new generator by providing a transformer function. This is equivalent to *mapping* in functional programming context.
+You can transform an existing generator to create a new generator by providing a transformer function. This is equivalent to *mapping* in a functional programming context.
 
-* `transform<T,U>(gen, transformer)`: generates type `U` based on generator for type `T`, using `transformer` that transforms a value of type `const T` to type `U`
+* `transform<T,U>(gen, transformer)`: generates type `U` based on a generator for type `T` (`gen`), using the `transformer` function which converts a value of type `const T&` to type `U`.
 
     ```cpp
-    // generates string from integers (e.g. "0", "1", ... , "-16384")
+    // generates strings from integers (e.g. "0", "1", ... , "-16384")
     auto numStringGen = transform<int, std::string>(Arbi<int>(),[](const int& num) {
-        return std::string(num);
+        return std::to_string(num);
     });
     ```
 
 ### Deriving or flat-mapping
 
-Another combinator that resembles `transform` is `derive`. This is equivalent to *flat-mapping* or *binding* in functional programming. Difference to `transform<T,U>` is that you can have greater control on the resultant generator.
+Another combinator that resembles `transform` is `derive`. This is equivalent to *flat-mapping* or *binding* in functional programming. The key difference from `transform<T, U>` is that the function provided to `derive` returns a *new generator* (`Generator<U>`) based on the intermediate value of type `T`, rather than just transforming the value into a `U`. This allows for more complex, context-dependent generation logic.
 
-* `derive<T, U>(genT, genUGen)`: derives a new generator for type `U`, based on result of `genT`, which is a generator for type `T`.
+* `derive<T, U>(genT, genUGen)`: derives a new generator for type `U`. It first generates a value of type `T` using `genT`. Then, it passes this value to `genUGen`, which is a function that returns a `Generator<U>`. This returned generator is then used to produce the final value of type `U`.
 
     ```cpp
     // generates a string something like "KOPZZFASF", "ghnpqpojv", or "49681002378", ... that consists of only uppercase/lowercase alphabets/numeric characters.
@@ -184,9 +187,9 @@ Following table compares `transform` and `derive`:
 
 ### Values with dependencies
 
-You may want to include dependency in the generated values. There are two variants that do this. One generates a pair and the other one generates a tuple.
+You may want to include dependencies between generated values. Two combinators facilitate this: one generates a `std::pair`, and the other generates a `std::tuple`.
 
-* `dependency<T,U>(genT, genUgen)`: generates a `std::pair<T,U>` with a generator `genT` for type `T` and `genUgen`. `genUgen` receives a type `T` and returns a generator for type `U`. This can effectively create a generator for a pair where second item depends on the first one.
+* `dependency<T,U>(genT, genUgen)`: generates a `std::pair<T,U>`. It first uses `genT` to generate a value of type `T`. This value is then passed to `genUgen`, which is a function that returns a `Generator<U>`. This returned generator produces the second element of the pair. This effectively creates a generator for a pair where the second item depends on the first.
 
     ```cpp
     auto sizeAndVectorGen = dependency<int, std::vector<bool>>(Arbi<bool>(), [](const int& num) {
@@ -202,9 +205,27 @@ You may want to include dependency in the generated values. There are two varian
         else
         return fromTo<int>(10, 20);
     });
+    // Example 1: Generate a size and a vector of that size
+    auto sizeAndVectorGen = dependency<int, std::vector<bool>>(interval(1, 100), [](const int& size) {
+        // Assume Arbi<std::vector<T>> has a method like setSize
+        auto vectorGen = Arbi<std::vector<bool>>();
+        vectorGen.setSize(size);
+        // generates a vector with exactly 'size' elements
+        return vectorGen;
+    });
+
+    // Example 2: Generate a bool and an int depending on the bool
+    auto nullableIntegerGen = dependency<bool, int>(Arbi<bool>(), [](const bool& isNull) -> Generator<int> {
+        if (isNull)
+            // If bool is true, return a generator for 0
+            return just(0);
+        else
+            // If bool is false, return a generator for ints between 10 and 20
+            return interval(10, 20);
+    });
     ```
 
-* `chain<Ts..., U>(genT, genUgen)`: similar to `dependency`, but takes a tuple generator for `std::tuple<Ts...>` and generates a `std::tuple<Ts..., U>` instead of a `std::pair`. `chain` can be repeatedly applied to itself, and results in a tuple one element larger than the previous one. You can chain multiple dependencies with this form.
+* `chain<Ts..., U>(genTuple, genUFromTuple)`: similar to `dependency`, but operates on tuples. It takes a generator `genTuple` for `std::tuple<Ts...>` and a function `genUFromTuple`. This function receives the generated tuple (`const std::tuple<Ts...>&`) and returns a `Generator<U>`. The final result is a generator for `std::tuple<Ts..., U>`. `chain` can be repeatedly applied to build tuples with multiple dependent elements.
 
     ```cpp
     auto yearMonthGen = tupleOf(fromTo(0, 9999), fromTo(1,12));
@@ -225,15 +246,36 @@ You may want to include dependency in the generated values. There are two varian
             return fromTo(1, 28);
         }
     }); // yearMonthDayGen generates std::tuple<int, int, int> of (year, month, day)
+    // Assuming helper functions: isLeapYear(int), monthHas31Days(int), monthHas30Days(int) exist
+    auto yearMonthGen = tupleOf(interval(1900, 2100), interval(1, 12));
+    // number of days in a month depends on the month and whether the year is a leap year
+    auto yearMonthDayGen = chain<int, int, int>(yearMonthGen, [](const std::tuple<int, int>& yearMonth) -> Generator<int> {
+        int year = std::get<0>(yearMonth);
+        int month = std::get<1>(yearMonth);
+        if (monthHas31Days(month)) {
+            return interval(1, 31);
+        } else if (monthHas30Days(month)) {
+            return interval(1, 30);
+        } else { // February (month == 2)
+            if (isLeapYear(year))
+                return interval(1, 29);
+            else
+                return interval(1, 28);
+        }
+    }); // yearMonthDayGen generates std::tuple<int, int, int> representing (year, month, day)
     ```
 
-Actually you can achieve the similar goal using `filter` combinator:
+Actually, you can often achieve a similar goal using the `filter` combinator:
 
 ```cpp
     // generate any year,month,day combination
     auto yearMonthDayGen = tupleOf(fromTo(0, 9999), fromTo(1,12), fromTo(1,31));
     // apply filter
     auto validYearMonthDayGen = yearMonthDayGen.filter([](std::tuple<int,int,int>& ymd) {
+    // generate any year, month, day combination first
+    auto anyYearMonthDayGen = tupleOf(interval(1900, 2100), interval(1, 12), interval(1, 31));
+    // then apply filter to keep only valid dates
+    auto validYearMonthDayGen = anyYearMonthDayGen.filter([](const std::tuple<int, int, int>& ymd) {
         int year = std::get<0>(ymd);
         int month = std::get<1>(ymd);
         int day = std::get<2>(ymd);
@@ -247,15 +289,16 @@ Actually you can achieve the similar goal using `filter` combinator:
             else
                 return day <= 28;
         }
+        return isValidDate(year, month, day); // Assuming isValidDate helper function
     });
 ```
 
-However, using `filter` for generating values with complex dependency may result in many generated values that do not meet the constraint to be discarded and retried. Therefore it's usually not recommended for that purpose if the ratio of discarded values is high.
+However, using `filter` for generating values with complex dependencies can be inefficient. If the constraints are tight, many generated values might be discarded before a valid one is found, leading to performance issues. In such cases, `dependency` or `chain` are often preferable as they construct valid values directly.
 
 
 ### Aggregation or Accumulation of Values
 
-You may want to generate values that are related to previously generated values. Such example is generating a sequence of chess moves where knowing previous moves are crucial for generating new valid move.
+You may want to generate a sequence of values where each value depends on the previously generated one(s). A common example is generating a sequence of chess moves, where knowing the previous move is crucial for generating the next valid move.
 This can be achieved with `aggregate` or `accumulate`.
 Both of the combinators take base generator in the form of `Generator<T>` as the first argument and a factory that takes a value of type `T` and returns `Generator<T>`, as the second argument.
 
@@ -265,34 +308,52 @@ While `accumulate` generates a single value, `aggregate` generates a vector of v
 |-----------------------------------------------------------------|------------------------|--------|
 | `accumulate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)` | `Generator<T>`         |        |
 | `aggregate<GenT, GenT2GenT>(genT, gen2GenT, minSize, maxSize)`  | `Generator<vector<T>>` |        |
+Both combinators take:
+1. A base generator (`genT`) for the initial value.
+2. A function (`genTFromT`) that receives the *previously generated value* of type `T` and returns a `Generator<T>` for the *next* value in the sequence.
+3. Minimum (`minSize`) and maximum (`maxSize`) lengths for the generated sequence.
+
+`accumulate` generates a sequence of values based on the previous one, but ultimately yields only the *final* value generated in that sequence. `aggregate` generates a similar sequence but yields the *entire sequence* as a `std::vector<T>`.
+
+| Combinator                                      | Result type            | Remark                                                     |
+|-------------------------------------------------|------------------------|------------------------------------------------------------|
+| `accumulate<T>(genT, genTFromT, minSize, maxSize)` | `Generator<T>`         | Generates sequence, returns the **last** element           |
+| `aggregate<T>(genT, genTFromT, minSize, maxSize)`  | `Generator<vector<T>>` | Generates sequence, returns the **entire sequence** vector |
 
 ```cpp
     // generate initial value
     auto baseGen = interval(0, 1000);
-    // generate a value based on previous value
-    Generator<int> gen = accumulate(
+    // generate a value based on previous value, return only the last one
+    Generator<int> gen = accumulate<int>(
         baseGen,
-        [](int num) {
-            return interval(num/2, num*2);
+        [](const int& num) {
+            // Generate next number between 0.5x and 1.5x of the previous
+            // Ensure lower bound is not negative if num is small
+            int lower = std::max(0, num / 2);
+            int upper = num + num / 2;
+            return interval(lower, upper);
         },
-        2 /* min size */, 10 /* max size */);
+        2 /* min sequence length */, 10 /* max sequence length */);
 ```
 
 ```cpp
     // generate initial value
-    auto baseGen = interval(0, 1000);
-    // generate list of values
-    Generator<vector<int>> gen = aggregate(
+    auto baseGen = interval(100, 1000); // Ensure initial value is not too small for division
+    // generate list of values where each depends on the previous
+    Generator<vector<int>> gen = aggregate<int>(
         baseGen,
         [](int num) {
-            return interval(num/2, num*2);
+            // Generate next number between 0.5x and 1.5x of the previous
+            int lower = std::max(0, num / 2);
+            int upper = num + num / 2;
+            return interval(lower, upper);
         },
-        2 /* min size */, 10 /* max size */);
+        2 /* min sequence length */, 10 /* max sequence length */);
 ```
 
 ## Utility Methods in Standard Generators
 
-Standard generators and combinators (including `Arbi<T>` and `Construct<...>`) returns a `Generator<T>`, which is of the form `(Random&) -> Shrinkable<T>` (aliased as `GenFunction<T>`), but has additional combinator methods decorated for ease of use. They in fact have equivalent standalone counterparts. Following table shows this relationship:
+Standard generator objects (like those returned by `Arbi<T>`, `construct<T>`, and the combinators themselves) often provide convenient member functions that mirror the standalone combinator functions. These methods allow for fluent chaining of operations directly on the generator object. The underlying type is typically `Generator<T>`, representing a function `(Random&) -> Shrinkable<T>` (aliased as `GenFunction<T>`). These methods have equivalent standalone counterparts, as shown below:
 
 | Decorated method                             | Result type                      | Equivalent Standalone combinator |
 |----------------------------------------------|----------------------------------|----------------------------------|
@@ -305,7 +366,7 @@ Standard generators and combinators (including `Arbi<T>` and `Construct<...>`) r
 
 These functions and methods can be continuously chained.
 
-* `.map<U>(mapper)`: effectively calls `transform<T,U>(gen, transformer)` combinator on itself with type `T` and generator `gen`.
+* `.map<U>(mapper)`: Equivalent to calling `transform<T,U>(*this, mapper)`. It transforms the output of the current generator using the provided `mapper` function.
 
     ```cpp
     // generator for strings of arbitrary number
@@ -316,9 +377,17 @@ These functions and methods can be continuously chained.
     transform<int, std::string>(Arbi<int>(), [](int &num) {
         return std::to_string(num);
     });
+    // generator for strings representing arbitrary integers
+    auto numStringGen = Arbi<int>().map<std::string>([](const int& num) {
+        return std::to_string(num);
+    });
+    // which is equivalent to:
+    auto numStringGenEquivalent = transform<int, std::string>(Arbi<int>(), [](const int& num) {
+        return std::to_string(num);
+    });
     ```
 
-* `.filter(filterer)`: apply `filter` combinator on itself.
+* `.filter(filterer)`: Equivalent to calling `filter<T>(*this, filterer)`. Applies a predicate to filter the values produced by the current generator.
 
     ```cpp
     // two equivalent ways to generate random even numbers
@@ -326,12 +395,12 @@ These functions and methods can be continuously chained.
         return num % 2 == 0;
     });
 
-    auto evenGen = filter<int>(Arbi<int>(),[](int& num) {
+    auto evenGenEquivalent = filter<int>(Arbi<int>(),[](const int& num) {
         return num % 2 == 0;
     });
     ```
 
-* `.flatMap<U>(genUGen)`: based on generated result of the generator object itself, induces a new generator for type `U`. It's equivalent combinator is `derive<T,U>`. Difference to `.map<U>` (or `transform<T,U>`) is that you can have greater control on the resultant generator.
+* `.flatMap<U>(genUFromT)`: Equivalent to calling `derive<T, U>(*this, genUFromT)`. Based on the generated value of the current generator (type `T`), it uses the `genUFromT` function to obtain a *new* generator (`Generator<U>`), which is then used to produce the final value. This allows the characteristics of the resulting generator `U` to depend on the intermediate value `T`.
 
     ```cpp
     auto stringGen = Arbi<int>().flatMap<std::string>([](int& num) {
@@ -339,25 +408,44 @@ These functions and methods can be continuously chained.
         genString.setMaxSize(num);
         return genString;
     });
+    // Generate a string whose maximum size depends on a generated integer
+    auto stringGen = interval(1, 50).flatMap<std::string>([](const int& maxSize) {
+        // Assume Arbi<string> has setMaxSize or similar
+        auto sizedStringGen = Arbi<std::string>();
+        sizedStringGen.setMaxSize(maxSize); // Configure the string generator
+        return sizedStringGen; // Return the configured generator
+    });
     ```
 
-* `.pairWith<U>(genUGen)` or `tupleWith<U>(genUGen)`: chains itself to create a generator of pair or tuple. Equivalent to `dependency` or `chain`, respectively.
+* `.pairWith<U>(genUFromT)` or `tupleWith<U>(genUFromT)`: Chain the current generator with another one where the second depends on the first. Equivalent to `dependency<T, U>(*this, genUFromT)` and `chain<T, U>(*this, genUFromT)` respectively. If the current generator produces a `std::tuple<Ts...>`, `tupleWith<U>` is equivalent to `chain<Ts..., U>(*this, genUFromTuple)`.
     ```cpp
     Arbi<bool>().tupleWith<int>([](bool& isEven) {
         if(isEven)
             return Arbi<int>().filter([](int& value) {
+    // Chain multiple dependent generators using tupleWith
+    auto complexGen = Arbi<bool>().tupleWith<int>([](const bool& isEven) -> Generator<int> {
+        if (isEven)
+            // If bool is true, generate an even integer
+            return Arbi<int>().filter([](const int& value) {
                 return value % 2 == 0;
-        });
+            });
         else
-            return Arbi<int>().filter([](int& value) {
-                return value % 2 == 1;
-        });
+            // If bool is false, generate an odd integer
+            return Arbi<int>().filter([](const int& value) {
+                return value % 2 != 0; // Fixed: Use != 0 for odd
+            });
     }).tupleWith<std::string>([](std::tuple<bool, int>& tuple) {
-        int size = std::get<1>(tuple);
+    }).tupleWith<std::string>([](const std::tuple<bool, int>& pair) -> Generator<std::string> {
+        // Generate a string whose size depends on the generated integer (second element)
+        int size = std::get<1>(pair);
+        // Ensure size is non-negative for the string generator
+        size = std::max(0, std::abs(size) % 100); // Example: Limit size reasonably
         auto stringGen = Arbi<std::string>();
+        // Assume Arbi<string> has setSize or similar
         stringGen.setSize(size);
         return stringGen;
-    });
+    }); // Results in Generator<tuple<bool, int, string>>
     ```
 
     Notice `tupleWith` can automatically chain a tuple generator of `n` parameters into a tuple generator of `n+1` parameters (`bool` generator -> `tuple<bool, int>` generator -> `tuple<bool, int, string>` generator in above example)
+    Notice how `tupleWith` automatically chains generators, increasing the tuple size by one element at each step (`Generator<bool>` -> `Generator<tuple<bool, int>>` -> `Generator<tuple<bool, int, string>>` in the example above).

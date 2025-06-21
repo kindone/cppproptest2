@@ -9,3 +9,5 @@ Stateful testing opens new possibilities for testing.
     * Out-of-memory errors
 * Thread-safety (concurrency testing)
 * Testing for Transactional requirements
+    * Transactional visibility as invariant property
+    * Atomicity of a transaction

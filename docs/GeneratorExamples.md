@@ -48,11 +48,15 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 
 * A `Decimal(p, s)` is a fixed point decimal with a precision `p` and a scale `s`.
 * It means there are `p` number of digits with `s` number of decimals, like `123.45` being a `Decimal(5,2)`.
+* We can first generate `p - s` number of numeric characters that does not start with `'0'`.
+* Then we can generate rest `s` number of numeric characters and concatenate the two strings with `.`.
+* We can generate a sign character in front of the new string to complete the decimal
 
 ## Generating a chess move
 
-* A board configuration is given
-* One of the pieces on the board is moved, according to the chess rule
+* A legitimate chess move follows complex rules based on previous state and action
+    * A board configuration is given as previous state
+    * Last move is given as previous action
 
 ```cpp
 

@@ -128,7 +128,6 @@ TEST(PairShrinker, double)
     auto toDouble = +[](const int& i) { return (double)i; };
     auto shr = shrinkPair<double, double>(shrinkIntegral<int>(1).map<double>(toDouble), shrinkIntegral<int>(2).map<double>(toDouble));
     EXPECT_EQ(serializeShrinkable(shr), "{value: (1, 2), shrinks: [{value: (0, 2), shrinks: [{value: (0, 0)}, {value: (0, 1)}]}, {value: (1, 0)}, {value: (1, 1)}]}");
-    printExhaustive(shr);
 }
 
 TEST(PairShrinker, strings)

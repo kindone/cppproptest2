@@ -60,10 +60,12 @@ nav:
     - 'Generating Inputs':
       - Generators.md
       - Combinators.md
-      - 'Generating Real World Inputs' : GeneratorExamples.md
     - Shrinking.md
     - Printing.md
     - 'Stateful & Concurrency Testing':
       - StatefulTesting.md
       - ConcurrencyTesting.md
+    - 'Tips & Best Practices':
+      - 'Generating Real World Inputs' : GeneratorExamples.md
       - 'Advanced Stateful & Concurrency Testing' : AdvancedStatefulTesting.md
+      - TestStrategies.md
