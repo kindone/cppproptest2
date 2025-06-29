@@ -1,7 +1,6 @@
 # cppproptest
 
-![cppproptest in a glance](images/overview.svg)
-<!--
+<!-- ![cppproptest in a glance](images/overview.svg) -->
 ```kroki-d2
 example: |cpp
 // example-based test
@@ -25,11 +24,10 @@ forAll([](std::string original) {
 
 example -> property : forAll()
 ```
--->
 
 `cppproptest` is a property-based testing library for C++. It focuses on usability with features included:
 
-* Out-of-box [generators](Generators.md#arbitraries-provided-by-cppproptest) for primitives and standard containers
+* Out-of-box [generators](Generators.md) for primitives and standard containers
 * Set of powerful [generator combinators](Combinators.md) for creating new generators from existing generators
 * [Shrinking capability](Shrinking.md) for quickly finding root cause of a failure and automated debugging support
 * [Stateful testing support](StatefulTesting.md) for testing state changes
@@ -154,7 +152,7 @@ generator -> result3: generate {
 
 
 ```cpp
-auto stringGen = Arbitrary<int>()
+auto stringGen = gen::integer()
     .filter([] (int& num) { return num % 2 == 0; }) // even numbers only
     .map([] (int& num) {
         return "<" + std::to_string(numStr) + ">"; // string like "<0>", ..., "<n>"
@@ -173,7 +171,7 @@ The `forAll` function automatically identifies parameter types of the given prop
 forAll: |cpp
 forAll([](string s, vector<string> v, map<int, string> m) {
   // Do stuff with s, v, and m
-}, Arbitrary<string>(1,4));
+}, gen::string(1,4));
 |
 
 S: |cpp

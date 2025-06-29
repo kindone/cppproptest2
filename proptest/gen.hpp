@@ -65,6 +65,7 @@ using int32 = Arbi<int32_t>;
 using uint32 = Arbi<uint32_t>;
 using int64 = Arbi<int64_t>;
 using uint64 = Arbi<uint64_t>;
+using integer = Arbi<int>;
 
 /**
  * @brief Floating point generators

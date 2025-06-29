@@ -10,7 +10,7 @@ While you can read this document sequentially, you might want to use the followi
 |------------------------------------------------------------------------------------------------------------------------|------------------------------------------------------|-------------------------------------------------------------------------------|
 | [`gen::just<T>`](#constants)                                                                                                | Generate just a constant                             | `0` or `"1337"`                                                               |
 | [`gen::elementOf<T>`](#selecting-from-values)                                                                               | Generate a value within constants                    | a prime number under 100                                                      |
-| [`Arbi<set<T>>`](Generators.md#built-in-arbitraries)                                                                   | Generate a list of unique values                     | `{3,5,1}` but not `{3,5,5}`                                                   |
+| [`gen::set<T>`](Generators.md#built-in-arbitraries)                                                                   | Generate a list of unique values                     | `{3,5,1}` but not `{3,5,5}`                                                   |
 | [`gen::interval<T>`, `gen::integers<T>`](#integers-and-intervals)                                                                | Generate a value within numeric range of values      | a number within `1`~`9999`                                                    |
 | [`gen::pairOf<T1,T2>`, `gen::tupleOf<Ts...>`](#pair-and-tuples)                                                                  | Generate a pair or a tuple of different types        | a `pair<int, string>`                                                         |
 | [`gen::unionOf<T>` (`gen::oneOf<T>`)](#selecting-from-generators)                                                                | Union multiple generators                            | `20~39` or `60~79` combined                                                   |
@@ -140,7 +140,7 @@ You can add a filtering condition to a generator to restrict the generated value
 
     ```cpp
     // generates even numbers
-    auto evenGen = gen::filter<int>(Arbi<int>(),[](const int& num) {
+    auto evenGen = gen::filter<int>(gen::int32(),[](const int& num) {
         return num % 2 == 0;
     });
     ```
@@ -380,7 +380,7 @@ These functions and methods can be continuously chained.
         return std::to_string(num);
     });
     // generator for strings representing arbitrary integers
-    auto numStringGen = Arbi<int>().map<std::string>([](const int& num) {
+    auto numStringGen = gen::int32().map<std::string>([](const int& num) {
         return std::to_string(num);
     });
     // which is equivalent to:
@@ -442,7 +442,7 @@ These functions and methods can be continuously chained.
         int size = std::get<1>(pair);
         // Ensure size is non-negative for the string generator
         size = std::max(0, std::abs(size) % 100); // Example: Limit size reasonably
-        auto stringGen = Arbi<std::string>();
+        auto stringGen = gen::string();
         // Assume Arbi<string> has setSize or similar
         stringGen.setSize(size);
         return stringGen;
