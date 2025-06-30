@@ -25,7 +25,7 @@ forAll([](std::string original) {
 example -> property : forAll()
 ```
 
-`cppproptest` is a property-based testing library for C++. It focuses on usability with features included:
+`cppproptest` is a property-based testing library for C++. It focuses on usability with variety of features including:
 
 * Out-of-box [generators](Generators.md) for primitives and standard containers
 * Set of powerful [generator combinators](Combinators.md) for creating new generators from existing generators
@@ -41,7 +41,7 @@ You can get started with `cppproptest` on this [page](GettingStarted.md).
 
 ## Generalization and Abstraction
 
-Property-based testing lets you write tests using abstract ideas, instead of introducing some dummy examples or overly contrived scenarios. You can write tests focusing on specification or requirements of the tested components.
+Property-based testing lets you write tests using general or universal ideas, instead of introducing specific examples or overly contrived scenarios. You can write tests focusing on specifications or requirements of the tested components.
 
 ### Clear Separation of Variants and Invariants
 
@@ -56,7 +56,7 @@ auto decodedMsg = decoder.decode(encodedMsg);
 ASSERT_EQ("Some dummy content that hopefully prove or disprove this works", decodedMsg);
 ```
 
-Even a simple test like this is confusing, as some dummy string value seems like as if it's playing a significant role in the test but in fact it isn't. Turning this dummy value to a free variable would lead to greater generalization of the test:
+Even a simple test like this can be confusing, as some dummy string value seems like as if it's conveying significant meaning in the test but in fact it isn't. Turning this dummy value to a free variable would lead to greater generalization of the test:
 
 ```cpp hl_lines="1 8"
 [](std::string originalMsg) {
@@ -71,7 +71,7 @@ Even a simple test like this is confusing, as some dummy string value seems like
 
 The new free variable `originalMsg` becomes the variant part (**input domain**) of the test while the rest becomes the invariant part.
 
-In order to turn this into a concrete test run, we can feed in some random values for the free variable `originalMsg`. This can be achieved by enclosing this function with `forAll()` function, which calls the given test function many times with some randomly generated values for the free variable `originalMsg`:
+In order to turn this into a concrete test run, we can feed in some random values for the free variable `originalMsg`. This can be achieved by enclosing this function with `forAll()` function, which calls the given test function (shown here in the form of lambda) many times with some randomly generated values for the function parameter `originalMsg`:
 
 ```cpp hl_lines="1 8"
 forAll([](std::string originalMsg) {
@@ -84,9 +84,9 @@ forAll([](std::string originalMsg) {
 });
 ```
 
-As a result, `forAll()` will test the encoder and decoder against arbitrary input strings, by calling the property function hundreds of times (200 is the default number of runs) with some random strings, instead of relying on a dummy value. This let's you validate the property with various forms of `originalMsg`.
+As a result, `forAll()` can essentially test the encoder and decoder against arbitrary input strings, by calling the property function hundreds of times (200 is the default number of runs) with some random strings, instead of relying on some dummy values. This let's you validate the property with various forms of a string.
 
-With this approach, our test becomes more readable, gets easier to maintain, and carries test writer's intention better.
+With this approach, our test becomes more readable, gets easier to maintain, and expresses the test writer's intention more precisely.
 
 ## Convenience and Versatility
 
@@ -94,13 +94,11 @@ Property-based testing often provides with the convenient out-of-box **generator
 
 Following example shows how certain input domain of string type can be specified using a built-in generator and generator combinators:
 
-
-
 ```kroki-d2
 generator: "Custom String Generator"{
 
     arbitrary: |cpp
-    Arbitrary<int>()
+    gen::integer()
     |
 
     filter: |cpp
@@ -159,11 +157,11 @@ auto stringGen = gen::integer()
     });
 
 forAll([](std::string original) {
-    // ... //
+    // "<-232>", <0>, <493284>, ... //
 }, stringGen);
 ```
 
-The `forAll` function automatically identifies parameter types of the given property function. This automation allows any number of parameters of simple or complex types to be used to define a property-based test:
+The `forAll` function automatically identifies number of parameters and their data types of the given property function. This mechanism allows any number of parameters of simple or complex data types to be used to define a property-based test.
 
 <!-- ![overview](images/forall.svg)-->
 
@@ -207,10 +205,9 @@ M -> MI: "key: int"
 M -> MS: "value: string"
 ```
 
+Once the generators for each parameters are determined, it then automatically feeds in randomly generated values of those types to make a call to the given function as many times as desired. With this powerful generation engine, we can fully parameterize and randomize our tests with high flexibility but with much less effort.
 
-It then automatically feeds in the randomly generated values of those types to call the given function multiple times. With this powerful generation engine, we can fully parameterize and randomize our tests with high flexibility but with much less effort.
-
-You don't need to care too much about *how* to test your requirements. Most of it is automatically done for you by the framework, letting you to focus on *what* to test.
+With this framework, you don't need to care too much about *how* to test your requirements. Most of it is automatically done for you by the framework, letting you to focus on *what* to test, instead.
 
 <!--
 ## Reusability and Scalability
@@ -262,7 +259,7 @@ You don't need to care too much about *how* to test your requirements. Most of i
     * [Generating real-world inputs](GeneratorExamples.md)
 * [Generator combinators for creating generators from existing ones](Combinators.md)
 * [Counterexamples and notion of shrinking for automated debugging](Shrinking.md)
-* [Printing facilities](Printing.md)
+* [Printing facilities for custom data types](Printing.md)
 * [Stateful testing with `cppproptest`](StatefulTesting.md)
 * [Concurrency testing with `cppproptest`](ConcurrencyTesting.md)
 * [Advanced mocking with `cppproptest` (work in progress)](Mocking.md)
