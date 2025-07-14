@@ -32,10 +32,15 @@ using std::thread;
 
 
 struct PROPTEST_API ConcurrentTestDump {
+    ConcurrentTestDump() {}
     ConcurrentTestDump(const vector<string>& _front) : front(_front) {}
 
     static constexpr int UNINITIALIZED_THREAD_ID = -2;
     static constexpr int FRONT_THREAD_ID = -1;
+
+    void setFront(const vector<string>& _front) {
+        front = _front;
+    }
 
     void appendFront() {
         log.push_back(FRONT_THREAD_ID);
@@ -71,8 +76,13 @@ struct PROPTEST_API ConcurrentTestDump {
 
         for (int i = 0; i < count; i++) {
             int threadId = log[i];
+
+            if(threadId == UNINITIALIZED_THREAD_ID) {
+                os << "(UNINITIALIZED) ";
+                break;
+            }
             // front
-            if(threadId == FRONT_THREAD_ID) {
+            else if(threadId == FRONT_THREAD_ID) {
                 os << front[frontItr] << " -> ";
                 ++frontItr;
             }
@@ -274,15 +284,14 @@ struct RearRunner
 
 
     RearRunner(int _num, ObjectType& _obj, ModelType& _model, const ActionList& _actions, atomic_bool& _thread_ready,
-               atomic_bool& _sync_ready, vector<int>& _log, atomic_int& _counter)
+               atomic_bool& _sync_ready, ConcurrentTestDump& _dump)
         : num(_num),
           obj(_obj),
           model(_model),
           actions(_actions),
           thread_ready(_thread_ready),
           sync_ready(_sync_ready),
-          log(_log),
-          counter(_counter)
+          dump(_dump)
     {
     }
 
@@ -294,21 +303,19 @@ struct RearRunner
         stateful::Context context(num);
 
         for (auto action : actions) {
-            log[counter++] = num; // start
+            dump.markActionStart(num);
             action(obj, model, context);
-            // cout << "rear2" << endl;
-            log[counter++] = num; // end
+            dump.markActionEnd(num);
         }
     }
 
     int num;
     ObjectType& obj;
-    ModelType model;
+    ModelType& model;
     const ActionList& actions;
     atomic_bool& thread_ready;
     atomic_bool& sync_ready;
-    vector<int>& log;
-    atomic_int& counter;
+    ConcurrentTestDump& dump;
 };
 
 template <typename ObjectType, typename ModelType>
@@ -334,15 +341,13 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
         return action.name;
     });
 
-    atomic<int> counter{0};
-    vector<int> log;
+    ConcurrentTestDump dump(frontNames);
 
     // run front
     stateful::Context context(FRONT_THREAD_ID);
     for (auto action : front) {
         action(obj, model, context);
-        log.push_back(FRONT_THREAD_ID);
-        counter++;
+        dump.appendFront();
     }
 
     // serial execution
@@ -362,17 +367,19 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
         for (int i = 0; i < numThreads; i++) {
             thread_ready.emplace_back(new atomic_bool(false));
             const auto& rear = rearShrs[i].getRef();
+            vector<string> rearNames;
+            transform(rear.begin(), rear.end(), util::back_inserter(rearNames), [](const ActionType& action) {
+                return action.name;
+            });
             rears.emplace_back(rear);
 
-            // logging start/end of action
-            for(size_t j = 0; j < rear.size() * 2; j++)
-                log.push_back(UNINITIALIZED_THREAD_ID);
+            dump.initRear(rearNames);
         }
 
         // start threads
         for(int i = 0; i < numThreads; i++) {
             rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(i, obj, model, rearShrs[i].getMutableRef(),
-                                                                       *thread_ready[i], sync_ready, log, counter));
+                                                                       *thread_ready[i], sync_ready, dump));
         }
 
         for (int i = 0; i < numThreads; i++) {
@@ -385,39 +392,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
             rearRunners[i].join();
         }
 
-        cout << "count: " << counter << ", order: ";
-        auto frontItr = front.begin();
-        vector<typename ActionList::iterator> rearItrs;
-        vector<bool> rearStarted;
-        rearItrs.reserve(numThreads);
-        rearStarted.reserve(numThreads);
-
-        for(int i = 0; i < numThreads; i++) {
-            rearItrs.push_back(rears[i].begin());
-            rearStarted.push_back(false);
-        }
-
-        for (int i = 0; i < counter; i++) {
-            int threadId = log[i];
-            // front
-            if(threadId == FRONT_THREAD_ID) {
-                cout << (*frontItr) << " -> ";
-                ++frontItr;
-            }
-            // rear
-            else {
-                if(rearStarted[threadId]) {
-                    cout << "thr" << threadId << " " << (*rearItrs[threadId]) << " end -> ";
-                    ++rearItrs[threadId];
-                }
-                else {
-                    cout << "thr" << threadId << " " << (*rearItrs[threadId]) << " start -> ";
-                }
-                rearStarted[threadId] = rearStarted[threadId] ? false : true;
-            }
-        }
-
-        cout << "onCleanup" << endl;
+        // dump.print(cout);
     });
 
     spawner.join();
@@ -430,6 +405,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 template <typename ObjectType, typename ModelType>
 void Concurrency<ObjectType, ModelType>::handleShrink(Random&)
 {
+
 }
 
 /* without model */

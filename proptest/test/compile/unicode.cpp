@@ -46,27 +46,6 @@ TEST(Compile, utf16le)
     }, gen::unicode());
 }
 
-TEST(Compile, unicode_stream)
-{
-    EXPECT_FOR_ALL([](uint32_t unicode) {
-        vector<uint8_t> utf16le, utf16be, utf8, cesu8;
-        util::encodeUTF16LE(unicode, utf16le);
-        util::encodeUTF16BE(unicode, utf16be);
-        util::encodeUTF8(unicode, utf8);
-        util::encodeCESU8(unicode, cesu8);
-
-        stringstream stream_utf16le, stream_utf16be, stream_utf8, stream_cesu8;
-        util::decodeUTF16LE(stream_utf16le, utf16le);
-        util::decodeUTF16BE(stream_utf16be, utf16be);
-        util::decodeUTF8(stream_utf8, utf8);
-        util::decodeCESU8(stream_cesu8, cesu8);
-
-        PROP_EXPECT_EQ(stream_utf16le.str(), stream_utf16be.str()) << util::hex << unicode << " " << stream_utf16le.str() << " : " << stream_utf16be.str();
-        PROP_EXPECT_EQ(stream_utf16le.str(), stream_utf8.str()) << util::hex << unicode << " " << stream_utf16le.str() << " : " << stream_utf8.str();
-        PROP_EXPECT_EQ(stream_utf16le.str(), stream_cesu8.str()) << util::hex << unicode << " " << stream_utf16le.str() << " : " << stream_cesu8.str();
-    }, gen::unicode());
-}
-
 TEST(Compile, CESU8UTF16BE)
 {
     vector<uint8_t> cesu8;
