@@ -76,7 +76,7 @@ uint64_t Random::getRandomUInt64(uint64_t min, uint64_t max)
     return static_cast<uint64_t>(dist(engine));
 }
 
-// [fromIncluded, toExclued)
+// [fromIncluded, toExcluded)
 uint32_t Random::getRandomSize(size_t fromIncluded, size_t toExcluded)
 {
     return getRandomUInt32(fromIncluded, toExcluded-1);
@@ -93,12 +93,15 @@ double Random::getRandomDouble()
     uniform_real_distribution<double> dist;
     return dist(engine);
 }
+
+// [min, max)
 float Random::getRandomFloat(float min, float max)
 {
     uniform_real_distribution<float> dist(min, max);
     return dist(engine);
 }
 
+// [min, max)
 double Random::getRandomDouble(double min, double max)
 {
     uniform_real_distribution<double> dist(min, max);
