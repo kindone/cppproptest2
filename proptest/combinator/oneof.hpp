@@ -1,6 +1,7 @@
 #pragma once
 #include "proptest/Random.hpp"
 #include "proptest/GenType.hpp"
+#include "proptest/Generator.hpp"
 #include "proptest/std/exception.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/combinator/combinatorimpl.hpp"
