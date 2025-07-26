@@ -7,6 +7,33 @@
 
 using namespace proptest;
 
+struct NonCopyable
+{
+    NonCopyable(int a) : a(a) { }
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
+    NonCopyable(NonCopyable&& other) noexcept : a(other.a) {
+        other.a = 0; // reset moved-from object
+    };
+    ~NonCopyable() {
+        cout << "~NonCopyable" << endl;
+    }
+    int a;
+};
+
+
+TEST(Property, NonCopyable)
+{
+    auto nonCopyableGen = interval(0, 10).map<NonCopyable>([](int n) {
+        return NonCopyable(n);
+    });
+
+    forAll([](const NonCopyable& nc) {
+        PROP_STAT(nc.a >= 0 && nc.a <= 10);
+        return true;
+    }, nonCopyableGen);
+}
+
 TEST(Property, matrix)
 {
     matrix([](int, int) {
