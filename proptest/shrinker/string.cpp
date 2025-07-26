@@ -14,7 +14,7 @@ Shrinkable<string> shrinkString(const string& str, size_t minSize) {
 
     // shrink front
     return shrinkRear.concat([minSize = minSize + 1](const Shrinkable<string>& shr) {
-        auto& str = shr.getRef();
+        auto str = shr.getRef();
         size_t maxSizeCopy = str.size();
         if (str.size() <= minSize)
             return Shrinkable<string>::StreamType::empty();

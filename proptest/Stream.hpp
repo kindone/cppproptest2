@@ -33,7 +33,7 @@ struct PROPTEST_API Stream
     bool isEmpty() const;
 
     template <typename T>
-    const T& getHeadRef() const {
+    T getHead() const {
         return head.getRef<T>();
     }
 
@@ -135,7 +135,7 @@ struct StreamIterator
         if(!hasNext())
             throw runtime_error(__FILE__, __LINE__, "no more elements in stream");
 
-        T value = stream.template getHeadRef<T>();
+        T value = stream.template getHead<T>();
         stream = stream.getTail();
         return value;
     }

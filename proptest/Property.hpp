@@ -177,20 +177,26 @@ public:
 private:
 
     virtual bool callFunction(const vector<Any>& anyVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            static_assert(std::is_copy_constructible_v<ArgT>, "getRef<ArgT>() in Property requires ArgT to be copy-constructible");
+            return anyVec[index_sequence.value].template getRef<ArgT>();
         });
     }
 
     virtual bool callFunction(const vector<ShrinkableBase>& shrVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            static_assert(std::is_copy_constructible_v<ArgT>, "getRef<ArgT>() in Property requires ArgT to be copy-constructible");
+            return shrVec[index_sequence.value].getAny().template getRef<ArgT>();
         });
     }
 
     virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            static_assert(std::is_copy_constructible_v<ArgT>, "getRef<ArgT>() in Property requires ArgT to be copy-constructible");
+            return genVec[index_sequence.value](rand).getAny().template getRef<ArgT>();
         });
     }
 

@@ -328,7 +328,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 
     ObjectType obj = initialShr.getRef();
     ModelType model = modelFactory ? modelFactory(obj) : ModelType();
-    auto& front = frontShr.getRef();
+    auto front = frontShr.getRef();
     vector<string> frontNames;
     transform(front.begin(), front.end(), util::back_inserter(frontNames), [](const ActionType& action) {
         return action.name;
@@ -361,7 +361,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 
         for (int i = 0; i < numThreads; i++) {
             thread_ready.emplace_back(new atomic_bool(false));
-            auto& rear = rearShrs[i].getRef();
+            auto rear = rearShrs[i].getRef();
             rears.emplace_back(rear);
 
             // logging start/end of action

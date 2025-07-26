@@ -23,7 +23,7 @@ TEST(Shrinkable, with)
     Shrinkable<int> shr2 = shr.with(Shrinkable<int>::StreamType::one<Shrinkable<int>::StreamElementType>(Shrinkable<int>(200)));
     EXPECT_EQ(shr2.getRef(), 100);
     EXPECT_EQ(shr2.getShrinks().isEmpty(), false);
-    EXPECT_EQ(Shrinkable<int>(shr2.getShrinks().getHeadRef<Shrinkable<int>::StreamElementType>()).getRef(), 200);
+    EXPECT_EQ(Shrinkable<int>(shr2.getShrinks().getHead<Shrinkable<int>::StreamElementType>()).getRef(), 200);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 100}");
     EXPECT_EQ(serializeShrinkable(shr2), "{value: 100, shrinks: [{value: 200}]}");
 }

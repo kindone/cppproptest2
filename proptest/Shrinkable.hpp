@@ -39,7 +39,15 @@ struct PROPTEST_API ShrinkableBase
     ShrinkableBase with(Function<StreamType()> otherStream) const;
 
     // template <typename T> T get() const { return value.getRef<T>(); }
-    template <typename T> const T& getRef() const { return value.getRef<T>(); }
+    template <typename T>
+    auto getRef() const {
+        static_assert(!std::is_reference_v<T>, "getRef<T>() must not be called with a reference type. Use the base type only.");
+        if constexpr (std::is_fundamental_v<T>) {
+            return value.getRef<T>(); // by value for true primitives
+        } else {
+            return static_cast<const T&>(value.getRef<T>()); // always by const reference for non-fundamental types
+        }
+    }
     template <typename T> T& getMutableRef() { return value.getMutableRef<T>(); }
     Any getAny() const;
 
@@ -119,7 +127,7 @@ struct Shrinkable : public ShrinkableBase
     }
 
     // T get() const { return ShrinkableBase::get<T>(); }
-    const T& getRef() const { return ShrinkableBase::getRef<T>(); }
+    decltype(auto) getRef() const { return ShrinkableBase::getRef<T>(); }
     T& getMutableRef() { return ShrinkableBase::getMutableRef<T>(); }
 
     Shrinkable clone() const { return ShrinkableBase::clone(); }

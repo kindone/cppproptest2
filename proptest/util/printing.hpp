@@ -151,8 +151,10 @@ struct Show<ShrinkableBase, U>
     {
         if constexpr(is_same_v<U, void>)
             show(os, "<Any:\?\?\?>");
-        else
+        else {
+            static_assert(std::is_copy_constructible_v<U>, "getRef<U>() in printing requires U to be copy-constructible");
             show(os, sh.value.getAny().template getRef<U>());
+        }
         return os;
     }
     const ShrinkableBase& value;
@@ -166,8 +168,10 @@ struct Show<Any, U>
     {
         if constexpr(is_same_v<U, void>)
             show(os, "<Any:\?\?\?>");
-        else
+        else {
+            static_assert(std::is_copy_constructible_v<U>, "getRef<U>() in printing requires U to be copy-constructible");
             show(os, sh.value.template getRef<U>());
+        }
         return os;
     }
     const Any& value;

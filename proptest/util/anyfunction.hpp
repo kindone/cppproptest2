@@ -20,7 +20,8 @@ struct Callable1Holder : public Callable1HolderBase<RET> {
     static_assert(isCallableOf<Callable, RET, ARG>, "Callable has incompatible signature for RET(ARG)>");
 
     RET operator()(const Any& arg) override {
-        return callable(util::toCallableArg<ARG>(arg.getRef<ARG>()));
+        using BaseArg = std::remove_reference_t<ARG>;
+        return callable(util::toCallableArg<ARG>(arg.getRef<BaseArg>()));
     }
 
     RET operator()(void* ptr) override {

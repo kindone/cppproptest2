@@ -57,7 +57,8 @@ template <class Func, class ArgFunc, size_t... Is>
 // ArgFunc is a template lambda that takes (auto index_sequence) as an argument
 decltype(auto) Call(Func&& func, ArgFunc&& argFunc, index_sequence<Is...>)
 {
-    return func(argFunc(std::integral_constant<size_t, Is>{})...);
+    // Use std::forward to preserve reference-ness of each argument
+    return std::forward<Func>(func)(std::forward<decltype(argFunc(std::integral_constant<size_t, Is>{}))>(argFunc(std::integral_constant<size_t, Is>{}))...);
 }
 
 template <size_t N, class Func, class ArgFunc>

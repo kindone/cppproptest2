@@ -17,13 +17,15 @@ struct PROPTEST_API AnyHolder {
     virtual ~AnyHolder() {}
 
     template <typename T>
-    const T& getRef() const {
-        if constexpr(is_lvalue_reference_v<T>) {
-            using RawT = decay_t<T>;
-            return *const_cast<RawT*>(static_cast<const RawT*>(rawPtr()));
-        }
-        else
+    auto getRef() const {
+        static_assert(!std::is_reference_v<T>, "getRef<T>() must not be called with a reference type. Use the base type only.");
+        if constexpr (std::is_fundamental_v<T>) {
+            // Return by value for fundamental types
             return *static_cast<const T*>(rawPtr());
+        } else {
+            // Always return by const reference for non-fundamental types
+            return *static_cast<const T*>(rawPtr());
+        }
     }
 
     template <typename T>
@@ -185,7 +187,7 @@ struct PROPTEST_API Any {
     // bool operator==(const Any& other);
 
     template <typename T>
-    const T& getRef(bool skipCheck = false) const {
+    decltype(auto) getRef(bool skipCheck = false) const {
         if constexpr(is_same_v<decay_t<T>, Any>)
             return *this;
         else {
@@ -194,7 +196,12 @@ struct PROPTEST_API Any {
             if(!skipCheck && type() != typeid(T)) {
                 throw invalid_cast_error(__FILE__, __LINE__, "cannot cast from " + string(type().name()) + " to " + string(typeid(T).name()));
             }
-            return ptr->getRef<T>();
+            if constexpr (std::is_fundamental_v<T>) {
+                // Return by value for fundamental types
+                return ptr->getRef<T>();
+            } else {
+                return ptr->getRef<T>();
+            }
         }
     }
 

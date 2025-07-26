@@ -7,7 +7,7 @@ Shrinkable<vector<ShrinkableBase>> shrinkTupleUsingVector(Shrinkable<vector<Shri
     const size_t Size = vectorAnyShr.getRef().size();
     for(size_t N = 0; N < Size; N++) {
         vectorAnyShr = vectorAnyShr.concat([N](const Shrinkable<vector<ShrinkableBase>>& parent) -> Shrinkable<vector<ShrinkableBase>>::StreamType {
-            const ShrinkableBase& elemShr = parent.getRef()[N];
+            auto elemShr = parent.getRef()[N];
             // need a mutable clone
             const auto& parentVec = parent.getRef();
             shared_ptr<vector<ShrinkableBase>> parentVecCopy = util::make_shared<vector<ShrinkableBase>>();

@@ -60,7 +60,7 @@ VectorShrinker::stream_t VectorShrinker::shrinkBulk(const VectorShrinker::shrink
                 newVec[i + frompos] = ancestorVec[i + frompos];
                 newElemStreams->push_back(elem_stream_t::empty());  // [1] -> []
             } else {
-                newVec[i + frompos] = (*elemStreams)[i].getHeadRef<elem_stream_element_t>();
+                newVec[i + frompos] = (*elemStreams)[i].getHead<elem_stream_element_t>();
                 newElemStreams->push_back((*elemStreams)[i].getTail());  // [0,4,6,7] -> [4,6,7]
                 nothingToDo = false;
             }

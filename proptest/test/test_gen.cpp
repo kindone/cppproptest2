@@ -90,14 +90,21 @@ TEST(GenNamespace, NumericRangesGenerators)
     });
 
     // Usage in forAll
-    forAll([]([[maybe_unused]] int64_t multiRange) {
-        // Property test with multi-interval integers
-        EXPECT_TRUE((multiRange >= -100 && multiRange <= -1) || (multiRange >= 1 && multiRange <= 100));
+    forAll([](int64_t multiRange) {
+        // Log the generated value for debugging
+        if (!((multiRange >= -100 && multiRange <= -1) || (multiRange >= 1 && multiRange <= 100))) {
+            std::cerr << "[FAIL int64_t] multiRange=" << multiRange << std::endl;
+        }
+        ASSERT_TRUE((multiRange >= -100 && multiRange <= -1) || (multiRange >= 1 && multiRange <= 100))
+            << "multiRange out of range: " << multiRange;
     }, multiRangeIntGen);
 
-    forAll([]([[maybe_unused]] uint64_t multiRange) {
-        EXPECT_TRUE((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999));
-        // Property test with multi-interval integers
+    forAll([](uint64_t multiRange) {
+        if (!((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999))) {
+            std::cerr << "[FAIL uint64_t] multiRange=" << multiRange << std::endl;
+        }
+        ASSERT_TRUE((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999))
+            << "multiRange out of range: " << multiRange;
     }, multiRangeUintGen);
 }
 
