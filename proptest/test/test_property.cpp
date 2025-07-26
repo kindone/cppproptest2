@@ -3,9 +3,49 @@
 #include "proptest/test/testutil.hpp"
 #include "proptest/generator/generators.hpp"
 #include "proptest/combinator/combinators.hpp"
+#include "proptest/gen.hpp"
 #include "proptest/std/chrono.hpp"
 
 using namespace proptest;
+
+struct NonCopyable
+{
+    NonCopyable() = delete;
+    NonCopyable(int a) : a(a) { }
+    NonCopyable(const NonCopyable&) = delete;
+    NonCopyable& operator=(const NonCopyable&) = delete;
+    NonCopyable(NonCopyable&& other) = delete;
+    // NonCopyable(NonCopyable&& other) noexcept : a(other.a) {
+    //     other.a = 0; // reset moved-from object
+    // };
+    ~NonCopyable() {
+        cout << "~NonCopyable" << endl;
+    }
+    int a;
+};
+
+struct NonEmptyConstructible
+{
+    NonEmptyConstructible() = delete;
+    NonEmptyConstructible(int a, int b) : a(a), b(b) { }
+    NonEmptyConstructible(const NonEmptyConstructible& other) { a = other.a; }
+    NonEmptyConstructible(NonEmptyConstructible&& other) = delete;
+
+    int a;
+    int b;
+};
+
+TEST(Property, NonCopyable)
+{
+    auto nonCopyableGen = interval(0, 10).map<NonCopyable>([](int n) {
+        return util::make_unique<NonCopyable>(n);
+    });
+
+    forAll([](const NonCopyable& nc) {
+        PROP_STAT(nc.a >= 0 && nc.a <= 10);
+        return true;
+    }, nonCopyableGen);
+}
 
 TEST(Property, matrix)
 {
@@ -122,7 +162,6 @@ TEST(Property, TestCheckBasic)
         d = b + a;
         PROP_ASSERT(c.size() == d.size());
         EXPECT_EQ(c.size(), d.size());
-        // ASSERT_EQ(c.size(), d.size());
         // EXPECT_EQ(c, d);// << "a: " << a << " + b: " << b << ", a+b: " << (a+b) << ", b+a: " << (b+a);
         return true;
     });
@@ -368,9 +407,82 @@ struct ShowDefault<Animal>
     }
 };
 
+template <>
+struct ShowDefault<NonEmptyConstructible>
+{
+    static ostream& show(ostream& os, const NonEmptyConstructible& c)
+    {
+        os << "a: " << c.a << ", b: " << c.b;
+        return os;
+    }
+};
+
+
 }  // namespace util
 
 }  // namespace proptest
+
+TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
+{
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+
+    auto vecGen = Arbi<vector<int>>();
+    vecGen.setMinSize(1);
+    vecGen.setMaxSize(20);
+    auto tupleGen = tupleOf(gen::interval(1,10));
+    auto nonCopyableGen = tupleOf(gen::interval(1,10)).flatMap<NonCopyable>(
+        [](const tuple<int>& tup) {
+            return gen::just(util::make_any<NonCopyable>(get<0>(tup)));
+        });
+
+    EXPECT_FOR_ALL(
+        [](const NonCopyable& c) {
+            PROP_EXPECT_GE(c.a, 1);
+            PROP_EXPECT_LE(c.a, 10);
+        },
+        nonCopyableGen);
+
+    auto nonCopyableGen2 = tupleOf(gen::interval(1,10)).map([](const tuple<int>& tup) {
+        return util::make_unique<NonCopyable>(get<0>(tup));
+    });
+
+    EXPECT_FOR_ALL(
+        [](const NonCopyable& c) {
+            PROP_EXPECT_GE(c.a, 1);
+            PROP_EXPECT_LE(c.a, 10);
+        },
+        nonCopyableGen2);
+}
+
+TEST(Property, TestCheckArbitraryWithConstructNonEmptyConstructible)
+{
+    static_assert(is_constructible_v<NonEmptyConstructible, const NonEmptyConstructible&>);
+
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+
+    auto objGen2 = gen::just(9).map<NonEmptyConstructible>(
+        [](const int& val) {
+            return NonEmptyConstructible(val, val+1);
+        });
+
+    Function<NonEmptyConstructible(const NonEmptyConstructible&)> func = [](const NonEmptyConstructible& c) {
+        EXPECT_GE(c.a, 1);
+        EXPECT_LE(c.a, 10);
+        return c;
+    };
+
+    for(int i = 0; i < 10;i ++)
+        func(objGen2(rand).getAny().getRef<NonEmptyConstructible>());
+
+    EXPECT_FOR_ALL(
+        [](const NonEmptyConstructible& c) {
+            PROP_EXPECT_GE(c.a, 1);
+            PROP_EXPECT_LE(c.a, 10);
+        },
+        objGen2);
+}
 
 TEST(Property, TestCheckArbitraryWithConstruct)
 {
@@ -378,18 +490,66 @@ TEST(Property, TestCheckArbitraryWithConstruct)
     Random rand(seed);
 
     auto vecGen = Arbi<vector<int>>();
+    vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
-    // auto animal = construct<Animal, int, string, vector<int>&>(Arbi<int>(), Arbi<string>(), vecGen);
-    auto animalGen = tupleOf(Arbi<int>(), Arbi<string>(), vecGen).map<Animal>(
+    auto tupleGen = tupleOf(gen::interval(1,10), Arbi<string>(), vecGen);
+    auto animalGen = tupleOf(gen::interval(1,10), Arbi<string>(), vecGen).map<Animal>(
         [](const tuple<int,string,vector<int>>& tup) { return Animal(get<0>(tup), get<1>(tup), get<2>(tup)); });
+    auto animalGen2 = construct<Animal, int, string, vector<int>&>(gen::interval(1,10), Arbi<string>(), vecGen);
     auto animalVecGen = Arbi<vector<Animal>>(animalGen);
     animalVecGen.setMaxSize(20);
+
+    auto func = [](const proptest::tuple<int, string, vector<int>>& tup) {
+        EXPECT_GE(get<0>(tup), 1);
+        EXPECT_LE(get<0>(tup), 10);
+    };
+
+    for(int i = 0; i < 100;i ++)
+        func(tupleGen(rand).getAny().getRef<proptest::tuple<int, string, vector<int>>>());
+
+    EXPECT_FOR_ALL(
+        [](const proptest::tuple<int, string, vector<int>>& tup) {
+            PROP_EXPECT_GE(get<0>(tup), 1);
+            PROP_EXPECT_LE(get<0>(tup), 10);
+            if (get<1>(tup).size() < 5 && get<2>(tup).size() < 5) {
+                show(cout, tup);
+                cout << endl;
+            }
+            PROP_STAT(get<1>(tup).size() > 0);
+        },
+        tupleGen);
+
+    EXPECT_FOR_ALL(
+        [](const Animal& animal) {
+            PROP_EXPECT_GE(animal.numFeet, 1);
+            PROP_EXPECT_LE(animal.numFeet, 10);
+            if (animal.name.size() < 5 && animal.measures.size() < 5) {
+                show(cout, animal);
+                cout << endl;
+            }
+            PROP_STAT(animal.name.size() > 0);
+        },
+        animalGen);
+
+    EXPECT_FOR_ALL(
+        [](const Animal& animal) {
+            PROP_EXPECT_GE(animal.numFeet, 1);
+            PROP_EXPECT_LE(animal.numFeet, 10);
+            if (animal.name.size() < 5 && animal.measures.size() < 5) {
+                show(cout, animal);
+                cout << endl;
+            }
+            PROP_STAT(animal.name.size() > 0);
+        },
+        animalGen2);
 
     EXPECT_FOR_ALL(
         [](vector<Animal> animals) {
             // cout << "animal " << i++ << endl;
             if (!animals.empty()) {
                 for (auto animal : animals) {
+                    PROP_EXPECT_GE(animal.numFeet, 1);
+                    PROP_EXPECT_LE(animal.numFeet, 10);
                     if (animal.name.size() < 5 && animal.measures.size() < 5) {
                         show(cout, animal);
                         cout << endl;

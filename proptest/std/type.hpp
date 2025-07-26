@@ -13,6 +13,7 @@ using std::type_info;
 using std::bad_cast;
 
 using std::bool_constant;
+using std::integral_constant;
 using std::false_type;
 using std::true_type;
 
@@ -25,8 +26,11 @@ using std::is_copy_constructible_v;
 using std::is_fundamental_v;
 using std::is_lvalue_reference;
 using std::is_lvalue_reference_v;
+using std::is_move_constructible_v;
 using std::is_pointer;
 using std::is_pointer_v;
+using std::is_reference;
+using std::is_reference_v;
 using std::is_const_v;
 using std::is_function_v;
 using std::is_same;

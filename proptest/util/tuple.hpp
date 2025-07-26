@@ -2,6 +2,7 @@
 #include "proptest/std/tuple.hpp"
 #include "proptest/std/lang.hpp"
 #include "proptest/std/concepts.hpp"
+#include "proptest/std/type.hpp"
 
 namespace proptest {
 
@@ -14,7 +15,7 @@ template <class F, size_t... Is>
 // func is a template lambda that takes (auto index_sequence) as an argument
 void For([[maybe_unused]] F func, index_sequence<Is...>)
 {
-    (func(std::integral_constant<size_t, Is>{}), ...);
+    (func(integral_constant<size_t, Is>{}), ...);
 }
 
 template <size_t N, class F>
@@ -37,7 +38,7 @@ template <class F, size_t... Is>
 // F is a template lambda that takes (auto index_sequence) as an argument
 decltype(auto) Map(F func, index_sequence<Is...>)
 {
-    return util::make_tuple(func(std::integral_constant<size_t, Is>{})...);
+    return util::make_tuple(func(integral_constant<size_t, Is>{})...);
 }
 
 template <size_t N, class F>
@@ -57,7 +58,8 @@ template <class Func, class ArgFunc, size_t... Is>
 // ArgFunc is a template lambda that takes (auto index_sequence) as an argument
 decltype(auto) Call(Func&& func, ArgFunc&& argFunc, index_sequence<Is...>)
 {
-    return func(argFunc(std::integral_constant<size_t, Is>{})...);
+    // Use std::forward to preserve reference-ness of each argument
+    return util::forward<Func>(func)(util::forward<decltype(argFunc(integral_constant<size_t, Is>{}))>(argFunc(integral_constant<size_t, Is>{}))...);
 }
 
 template <size_t N, class Func, class ArgFunc>
@@ -70,7 +72,7 @@ template <class Func, class ArgFunc, typename...ARGS, size_t... Is>
 // ArgFunc is a template lambda that takes (auto index_sequence) as an argument
 decltype(auto) CallWithAny(Func&& func, ArgFunc&& argFunc, index_sequence<Is...>)
 {
-    return func(argFunc(std::integral_constant<size_t, Is>{}).template getRef<ARGS>()...);
+    return func(argFunc(integral_constant<size_t, Is>{}).template getRef<ARGS>()...);
 }
 
 template <class Func, class ArgFunc, typename...ARGS>

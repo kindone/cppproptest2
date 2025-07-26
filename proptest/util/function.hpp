@@ -19,8 +19,8 @@ namespace util {
 /* const T& should be turned into compatible type T accordingly*/
 template <typename T>
 T toCallableArg(const decay_t<T>& value) {
-	if constexpr (std::is_reference_v<T>) {
-		if constexpr (std::is_const_v<std::remove_reference_t<T>>) {
+	if constexpr (is_reference_v<T>) {
+		if constexpr (is_const_v<remove_reference_t<T>>) {
 			return value;
 		} else {
 			return const_cast<decay_t<T>&>(value);
@@ -32,8 +32,17 @@ T toCallableArg(const decay_t<T>& value) {
 
 } // namespace util
 
-template <typename Callable, typename RET, typename...ARGS>
-concept isCallableOf = (invocable<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...>>));
+
+template <typename T>
+using NormalizedType = invoke_result_t<decltype(util::toCallableArg<T>), T>;
+
+template <typename Callable, typename RET, typename... ARGS>
+concept isCallableOf =
+    invocable<Callable, NormalizedType<ARGS>...> &&
+    (same_as<RET, void> ||
+     same_as<RET, invoke_result_t<Callable, NormalizedType<ARGS>...>> ||
+     constructible_from<RET,
+         const invoke_result_t<Callable, NormalizedType<ARGS>...>&>);
 
 template <typename RET, typename...ARGS>
 struct CallableHolderBase {
@@ -49,8 +58,6 @@ struct CallableHolder : public CallableHolderBase<RET, ARGS...> {
 
     template<same_as<Callable> C>
     explicit CallableHolder(const C& c) : callable(c) {}
-
-    static_assert(isCallableOf<Callable, RET, ARGS...>, "Callable has incompatible signature for RET(ARGS...)>");
 
     RET operator()(const decay_t<ARGS>&... args) override {
         if constexpr(is_void_v<RET>) {
@@ -77,13 +84,13 @@ struct PROPTEST_API Function<RET(ARGS...)> {
     Function(const Function& other) : holder(other.holder) {}
 
     template <typename Callable>
-        requires (!is_lvalue_reference_v<Callable> && !is_base_of_v<Function, decay_t<Callable>>)
+        requires (!is_lvalue_reference_v<Callable> && !is_base_of_v<Function, decay_t<Callable>> && isCallableOf<Callable, RET, ARGS...>)
     Function(Callable&& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(util::forward<Callable>(c))) {
     }
 
     template <typename Callable>
-        requires (!is_base_of_v<Function, decay_t<Callable>>)
-    Function(const Callable& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>>(c)) {
+        requires (!is_base_of_v<Function, decay_t<Callable>> && isCallableOf<Callable, RET, ARGS...>)
+    Function(const Callable& c) : holder(util::make_shared<CallableHolder<Callable, RET, ARGS...>, const Callable&>(c)) {
     }
 
     operator bool() const {
@@ -103,6 +110,5 @@ struct PROPTEST_API Function<RET(ARGS...)> {
 
     mutable shared_ptr<CallableHolderBase<RET, ARGS...>> holder;
 };
-
 
 } // namespace proptest

@@ -33,7 +33,7 @@ struct PROPTEST_API Stream
     bool isEmpty() const;
 
     template <typename T>
-    const T& getHeadRef() const {
+    decltype(auto) getHeadRef() const {
         return head.getRef<T>();
     }
 

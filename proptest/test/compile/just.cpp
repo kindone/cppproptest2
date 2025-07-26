@@ -23,5 +23,6 @@ TEST(Compile, just)
     EXPECT_EQ(gen1(rand).getRef(), 1);
 
     auto gen2 = just<NonCopyable>(util::make_any<NonCopyable>(2));
+    // getRef<NonCopyable>() is not allowed by new contract (non-copyable type)
     EXPECT_EQ(gen2(rand).getRef().a, 2);
 }

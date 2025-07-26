@@ -18,12 +18,13 @@ struct PROPTEST_API AnyHolder {
 
     template <typename T>
     const T& getRef() const {
-        if constexpr(is_lvalue_reference_v<T>) {
-            using RawT = decay_t<T>;
-            return *const_cast<RawT*>(static_cast<const RawT*>(rawPtr()));
-        }
-        else
-            return *static_cast<const T*>(rawPtr());
+        return *static_cast<const decay_t<T>*>(rawPtr());
+    }
+
+    template <typename T>
+        requires (is_fundamental_v<T> || is_pointer_v<T> || is_reference_v<T>)
+    decltype(auto) getRef() const {
+        return *static_cast<const decay_t<T>*>(rawPtr());
     }
 
     template <typename T>
@@ -107,14 +108,6 @@ struct PROPTEST_API AnyRef : AnyHolder {
         return ptr.get();
     }
 
-    // bool operator==(const T& other) {
-    //     if constexpr(equality_check_available<T>) {
-    //         return static_pointer_cast<T>(ptr)->operator==(*static_pointer_cast<T>(other.ptr));
-    //     }
-    //     else
-    //         return false;
-    // }
-
     virtual shared_ptr<AnyHolder> clone() const override {
         if constexpr(copy_constructible<T>)
             return util::make_shared<AnyRef<T>>(*ptr);
@@ -138,16 +131,23 @@ struct PROPTEST_API Any {
     template <typename T>
         requires (!is_lvalue_reference_v<T>)
     Any(T&& t) {
-        if constexpr(is_fundamental_v<T> || is_copy_constructible_v<T>) {
+        if constexpr(is_fundamental_v<T>) {
             ptr = util::make_shared<AnyVal<T>>(util::move(t));
         }
+        else if constexpr(is_copy_constructible_v<T>) {
+            ptr = util::make_shared<AnyVal<T>>(t);
+        }
+        else if constexpr(is_move_constructible_v<T>) {
+            ptr = util::make_shared<AnyRef<T>>(util::move(t));
+        }
         else {
-            ptr = util::make_shared<AnyRef<T>>(util::make_unique<T>(util::move(t)));
+            throw runtime_error(__FILE__, __LINE__, "Any cannot be constructed from a type that is neither copy-constructible nor move-constructible: " + string(typeid(T).name()));
         }
     }
 
     template <typename T>
     Any(const T& t) {
+        static_assert(is_same_v<decay_t<T>, Any> || is_move_constructible_v<T> || is_copy_constructible_v<T>);
         if constexpr(is_lvalue_reference_v<T>) {
             ptr = util::make_shared<AnyLValRef<decay_t<T>>>(t);
         }
@@ -185,7 +185,7 @@ struct PROPTEST_API Any {
     // bool operator==(const Any& other);
 
     template <typename T>
-    const T& getRef(bool skipCheck = false) const {
+    decltype(auto) getRef(bool skipCheck = false) const {
         if constexpr(is_same_v<decay_t<T>, Any>)
             return *this;
         else {

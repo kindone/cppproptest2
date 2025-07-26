@@ -31,6 +31,7 @@ public:
 
 private:
     using ArgTuple = tuple<decay_t<ARGS>...>;
+    using OrigArgTuple = tuple<ARGS...>;
 
 public:
     Property(const Func& f, vector<AnyGenerator>&& gens) : PropertyBase(util::move(gens)), func(f) {}
@@ -177,20 +178,26 @@ public:
 private:
 
     virtual bool callFunction(const vector<Any>& anyVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return anyVec[index_sequence.value].template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            return anyVec[index_sequence.value].template getRef<ArgT>();
         });
     }
 
     virtual bool callFunction(const vector<ShrinkableBase>& shrVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return shrVec[index_sequence.value].getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            return shrVec[index_sequence.value].getAny().template getRef<ArgT>();
         });
     }
 
     virtual bool callFunctionFromGen(Random& rand, const vector<AnyGenerator>& genVec) override {
-        return util::Call<Arity>(func, [&](auto index_sequence) {
-            return genVec[index_sequence.value](rand).getAny().template getRef<tuple_element_t<index_sequence.value, ArgTuple>>();
+        vector<Any> argVec; // make sure generated values are intact when passed as reference to the func throughout the call
+        return util::Call<Arity>(func, [&](auto index_sequence) -> decltype(auto) {
+            using ArgT = tuple_element_t<index_sequence.value, ArgTuple>;
+            Any arg = genVec[index_sequence.value](rand).getAny();
+            argVec.push_back(arg);
+            return arg.template getRef<ArgT>();
         });
     }
 

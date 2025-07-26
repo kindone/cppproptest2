@@ -10,8 +10,7 @@
  * @brief Dedicated namespace for generator aliases and combinators
  *
  * This namespace provides convenient aliases for all built-in generators and combinators.
- * It serves as a unified interface for accessing generators and combinators with shorter,
- * more intuitive names.
+ * It serves as a unified interface for accessing generators and combinators
  */
 
 namespace proptest {
@@ -19,8 +18,6 @@ namespace proptest {
 /**
  * @brief Dedicated namespace for generator aliases and combinators
  *
- * The `gen` namespace provides convenient aliases for all built-in generators and combinators.
- * This makes the API more intuitive and reduces verbosity when writing property-based tests.
  */
 namespace gen {
 

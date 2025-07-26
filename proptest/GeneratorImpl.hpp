@@ -14,10 +14,28 @@ namespace proptest {
 
 template <typename T>
 template <typename U>
+    requires (!util::is_unique_ptr_v<U>)
 Generator<U> GeneratorBase<T>::map(Function<U(T&)> mapper)
 {
     return util::transformImpl(asGenFunction1(), mapper);
 }
+
+template <typename T>
+template <typename U>
+    requires (!util::is_unique_ptr_v<U>)
+Generator<U> GeneratorBase<T>::map(Function<unique_ptr<U>(T&)> mapper)
+{
+    return util::transformImpl(asGenFunction1(), [mapper](T& t) -> Any {
+        return util::make_any<U, unique_ptr<U>>(mapper(t));
+    });
+}
+
+// template <typename T>
+// template <typename U>
+// Generator<U> GeneratorBase<T>::map(Function<unique_ptr<U>(T&)> mapper)
+// {
+//     return util::transformImpl(asGenFunction1(), mapper);
+// }
 
 template <typename T>
 template <typename Criteria>

@@ -16,7 +16,7 @@ Shrinkable<StringLike> shrinkStringLike(const StringLike& str, size_t minSize, s
             });
 
     return shrinkRear.concat([minSize = minSize + 1, bytePositions](const Shrinkable<StringLike>& shr) {
-        auto& str = shr.getRef();
+        const auto& str = shr.getRef();
         size_t maxSizeCopy = str.charsize();
         if (maxSizeCopy <= minSize)
             return Shrinkable<StringLike>::StreamType::empty();

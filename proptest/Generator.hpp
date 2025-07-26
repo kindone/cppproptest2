@@ -31,6 +31,21 @@ struct GeneratorCommon {
     Function1<ShrinkableBase> func;
 };
 
+namespace util {
+
+// Helper trait to detect std::unique_ptr
+
+template <typename>
+struct is_unique_ptr : false_type {};
+
+template <typename T, typename D>
+struct is_unique_ptr<std::unique_ptr<T, D>> : true_type {};
+
+template <typename T>
+inline constexpr bool is_unique_ptr_v = is_unique_ptr<T>::value;
+
+} // namespace util
+
 template <typename T>
 struct PROPTEST_API GeneratorBase
 {
@@ -43,7 +58,7 @@ public:
      * @brief Higher-order function that returns an altered Generator for type `U`, based on this Generator's generated
      * value of type `T`
      *
-     * Similar to \ref flatMap, whereas the function in `map` returns a `U` but the function in `flatMap` returns a
+     * @details Similar to \ref flatMap, whereas the function in `map` returns a `U` but the function in `flatMap` returns a
      * `Generator<U>`. This gives greater simplicity
      *
      * @tparam U Target type
@@ -51,11 +66,28 @@ public:
      * @return Generator<U> Generator for type `U`
      */
     template <typename U>
+        requires (!util::is_unique_ptr_v<U>)
     Generator<U> map(Function<U(T&)> mapper);
 
     /**
-     * @brief Higher-order function that returns an altered Generator for type `U`,  based on this Generator's generated
+     * @brief Higher-order function that returns an altered Generator for type `U`, based on this Generator's generated
      * value of type `T`
+     *
+     * @details Similar to \ref flatMap, whereas the function in `map` returns a `U` but the function in `flatMap` returns a
+     * `Generator<U>`. This gives greater simplicity.
+     * This variant with the functor returning unique_ptr reduces copying of objects and can handle non-copyables
+     *
+     * @tparam U Target type
+     * @param mapper Function that takes a value of type `T` and returns a unique_ptr for type `U`
+     * @return Generator<U> Generator for type `U`
+     */
+    template <typename U>
+        requires (!util::is_unique_ptr_v<U>)
+    Generator<U> map(Function<unique_ptr<U>(T&)> mapper);
+
+    /**
+     * @brief Higher-order function that returns an altered Generator for type `U`,  based on this Generator's generated
+     * value of type `T` (deduces type parameter `T`)
      *
      * @tparam F Callable type
      * @tparam U Target type
@@ -63,9 +95,26 @@ public:
      * @return Generator<U> Generator for type `U`
      */
     template <invocable<T&> F>
+        requires (!util::is_unique_ptr_v<invoke_result_t<F, T&>>)
     auto map(F&& mapper) -> Generator<invoke_result_t<F, T&>>
     {
         return map<invoke_result_t<F, T&>>(util::forward<F>(mapper));
+    }
+
+    /**
+     * @brief Higher-order function that returns an altered Generator for type `U`,  based on this Generator's generated
+     * value of type `T` (deduces type parameter `T`)
+     *
+     * @tparam F Callable type
+     * @tparam U Target type
+     * @param mapper Function that takes a value of type `T` and returns a unique_ptr for type `U`
+     * @return Generator<U> Generator for type `U`
+     */
+    template <invocable<T&> F>
+        requires (util::is_unique_ptr_v<invoke_result_t<F, T&>>)
+    auto map(F&& mapper) -> Generator<typename invoke_result_t<F, T&>::element_type>
+    {
+        return map<typename invoke_result_t<F, T&>::element_type>(util::forward<F>(mapper));
     }
 
     /**
