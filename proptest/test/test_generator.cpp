@@ -22,12 +22,12 @@ TEST(GenIntegral, basic)
 TEST(Generator, tupleOf)
 {
     Random rand(getCurrentTime());
-    auto gen = tupleOf(interval<int>(0, 10), interval<int>(0, 10));
+    auto gen = tupleOf(interval<int>(0, 10), interval<int>(-10, -1));
     tuple<int, int> val = gen(rand).getRef();
     EXPECT_TRUE(get<0>(val) >= 0);
     EXPECT_TRUE(get<0>(val) <= 10);
-    EXPECT_TRUE(get<1>(val) >= 0);
-    EXPECT_TRUE(get<1>(val) <= 10);
+    EXPECT_TRUE(get<1>(val) >= -10);
+    EXPECT_TRUE(get<1>(val) <= -1);
 }
 
 TEST(Generator, performance_vector)
@@ -109,15 +109,15 @@ TEST(Generator, monadic)
 TEST(AnyGenerator, basic)
 {
     Random rand(getCurrentTime());
-    auto gen = interval<int>(0, 10);
+    auto gen = interval<int>(-10, -1);
     AnyGenerator anyGen(gen);
     auto anyShr = anyGen(rand);
-    EXPECT_GE(anyShr.getAny().getRef<int>(), 0);
-    EXPECT_LE(anyShr.getAny().getRef<int>(), 10);
+    EXPECT_GE(anyShr.getAny().getRef<int>(), -10);
+    EXPECT_LE(anyShr.getAny().getRef<int>(), -1);
 
     auto shr = anyGen.generate<int>(rand);
-    EXPECT_GE(shr.getRef(), 0);
-    EXPECT_LE(shr.getRef(), 10);
+    EXPECT_GE(shr.getRef(), -10);
+    EXPECT_LE(shr.getRef(), -1);
 }
 
 TEST(AnyGenerator, arbitrary)

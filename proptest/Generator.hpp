@@ -53,6 +53,14 @@ public:
     template <typename U>
     Generator<U> map(Function<U(T&)> mapper);
 
+    // TODO: doc
+    template <typename U>
+    Generator<U> map(Function<Any(T&)> mapper);
+
+    // // TODO: doc
+    // template <typename U>
+    // Generator<U> map(Function<unique_ptr<U>(T&)> mapper);
+
     /**
      * @brief Higher-order function that returns an altered Generator for type `U`,  based on this Generator's generated
      * value of type `T`

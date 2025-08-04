@@ -1,6 +1,7 @@
 #include "proptest/util/function.hpp"
 #include "proptest/std/memory.hpp"
 #include "proptest/std/io.hpp"
+#include "proptest/test/testutil.hpp"
 #include "proptest/test/gtest.hpp"
 
 using namespace proptest;
@@ -67,6 +68,27 @@ TEST(Function, make_function)
     EXPECT_EQ(function(1,2), 3);
 }
 */
+
+TEST(Function, complex)
+{
+    auto complexTupFunc = [](const tuple<int,string,vector<int>>& tup) { return Animal(get<0>(tup), get<1>(tup), get<2>(tup)); };
+
+    Function<Animal(tuple<int,string,vector<int>>)> function(complexTupFunc);
+    auto tup = util::make_tuple(1, "hello", vector<int>{1,2,3});
+    auto result = function(tup);
+    EXPECT_EQ(result.numFeet, 1);
+    EXPECT_EQ(result.name, "hello");
+    EXPECT_EQ(result.measures.size(), 3);
+    EXPECT_EQ(result.measures[0], 1);
+    EXPECT_EQ(result.measures[1], 2);
+    EXPECT_EQ(result.measures[2], 3);
+
+    auto func2 = function;
+    auto result2 = func2(tup);
+    EXPECT_EQ(result2.numFeet, 1);
+    EXPECT_EQ(result2.name, "hello");
+    EXPECT_EQ(result2.measures.size(), 3);
+}
 
 TEST(Function, assign_functor)
 {

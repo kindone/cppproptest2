@@ -32,8 +32,16 @@ T toCallableArg(const decay_t<T>& value) {
 
 } // namespace util
 
-template <typename Callable, typename RET, typename...ARGS>
-concept isCallableOf = (invocable<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...> && (is_same_v<RET,void> || is_constructible_v<RET, invoke_result_t<Callable, invoke_result_t<decltype(util::toCallableArg<ARGS>), ARGS>...>>));
+
+template <typename T>
+using NormalizedType = std::invoke_result_t<decltype(util::toCallableArg<T>), T>;
+
+template <typename Callable, typename RET, typename... ARGS>
+concept isCallableOf =
+    std::invocable<Callable, NormalizedType<ARGS>...> &&
+    (std::same_as<RET, void> ||
+     std::constructible_from<RET,
+         const std::invoke_result_t<Callable, NormalizedType<ARGS>...>&>);
 
 template <typename RET, typename...ARGS>
 struct CallableHolderBase {

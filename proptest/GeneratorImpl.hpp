@@ -20,6 +20,20 @@ Generator<U> GeneratorBase<T>::map(Function<U(T&)> mapper)
 }
 
 template <typename T>
+template <typename U>
+Generator<U> GeneratorBase<T>::map(Function<Any(T&)> mapper)
+{
+    return util::transformImpl(asGenFunction1(), mapper);
+}
+
+// template <typename T>
+// template <typename U>
+// Generator<U> GeneratorBase<T>::map(Function<unique_ptr<U>(T&)> mapper)
+// {
+//     return util::transformImpl(asGenFunction1(), mapper);
+// }
+
+template <typename T>
 template <typename Criteria>
 Generator<T> GeneratorBase<T>::filter(Criteria&& criteria)
 {

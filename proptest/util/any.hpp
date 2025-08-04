@@ -17,15 +17,10 @@ struct PROPTEST_API AnyHolder {
     virtual ~AnyHolder() {}
 
     template <typename T>
-    auto getRef() const {
+    std::conditional_t<std::is_fundamental_v<T> || std::is_reference_v<T> || std::is_pointer_v<T>, T, const T&> getRef() const {
+        // static_assert(!std::is_pointer_v<T>, "getRef<T>() must not be called with a pointer type. Use the base type only.");
         static_assert(!std::is_reference_v<T>, "getRef<T>() must not be called with a reference type. Use the base type only.");
-        if constexpr (std::is_fundamental_v<T>) {
-            // Return by value for fundamental types
-            return *static_cast<const T*>(rawPtr());
-        } else {
-            // Always return by const reference for non-fundamental types
-            return *static_cast<const T*>(rawPtr());
-        }
+        return *static_cast<const T*>(rawPtr());
     }
 
     template <typename T>
@@ -140,16 +135,23 @@ struct PROPTEST_API Any {
     template <typename T>
         requires (!is_lvalue_reference_v<T>)
     Any(T&& t) {
-        if constexpr(is_fundamental_v<T> || is_copy_constructible_v<T>) {
+        if constexpr(is_fundamental_v<T>) {
             ptr = util::make_shared<AnyVal<T>>(util::move(t));
         }
+        else if constexpr(is_copy_constructible_v<T>) {
+            ptr = util::make_shared<AnyVal<T>>(t);
+        }
+        else if constexpr(is_move_constructible_v<T>) {
+            ptr = util::make_shared<AnyRef<T>>(util::move(t));
+        }
         else {
-            ptr = util::make_shared<AnyRef<T>>(util::make_unique<T>(util::move(t)));
+            throw runtime_error(__FILE__, __LINE__, "Any cannot be constructed from a type that is neither copy-constructible nor move-constructible: " + string(typeid(T).name()));
         }
     }
 
     template <typename T>
     Any(const T& t) {
+        static_assert(is_same_v<decay_t<T>, Any> || is_move_constructible_v<T> || is_copy_constructible_v<T>);
         if constexpr(is_lvalue_reference_v<T>) {
             ptr = util::make_shared<AnyLValRef<decay_t<T>>>(t);
         }
