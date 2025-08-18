@@ -16,21 +16,6 @@
 
 namespace proptest {
 
-/* Type-erased type */
-struct GeneratorCommon {
-    GeneratorCommon(const GeneratorCommon& other) : func(other.func) {}
-
-    GeneratorCommon(const Function1<ShrinkableBase>& _func) : func(_func) {}
-
-    template <typename T>
-    GeneratorCommon(const Generator<T>& gen) : func(gen.func) {}
-
-    template <typename T>
-    GeneratorCommon(const Arbi<T>& arbi) : func([arbi](Random& rand) -> ShrinkableBase { return arbi(rand); }) {}
-
-    Function1<ShrinkableBase> func;
-};
-
 namespace util {
 
 // Helper trait to detect std::unique_ptr

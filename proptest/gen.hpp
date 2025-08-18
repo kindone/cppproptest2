@@ -160,4 +160,3 @@ auto integers(T start, T count) -> decltype(proptest::integers<T>(start, count))
 } // namespace gen
 
 } // namespace proptest
-
