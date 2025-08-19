@@ -78,7 +78,7 @@ TEST(Function, complex)
     auto result = function(tup);
     EXPECT_EQ(result.numFeet, 1);
     EXPECT_EQ(result.name, "hello");
-    EXPECT_EQ(result.measures.size(), 3);
+    EXPECT_EQ(result.measures.size(), 3ULL);
     EXPECT_EQ(result.measures[0], 1);
     EXPECT_EQ(result.measures[1], 2);
     EXPECT_EQ(result.measures[2], 3);
@@ -87,7 +87,7 @@ TEST(Function, complex)
     auto result2 = func2(tup);
     EXPECT_EQ(result2.numFeet, 1);
     EXPECT_EQ(result2.name, "hello");
-    EXPECT_EQ(result2.measures.size(), 3);
+    EXPECT_EQ(result2.measures.size(), 3ULL);
 }
 
 TEST(Function, assign_functor)

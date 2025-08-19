@@ -431,6 +431,8 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
     vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
     auto tupleGen = tupleOf(gen::interval(1,10));
+
+    // flatMap can always be a work-around
     auto nonCopyableGen = tupleOf(gen::interval(1,10)).flatMap<NonCopyable>(
         [](const tuple<int>& tup) {
             return gen::just(util::make_any<NonCopyable>(get<0>(tup)));
@@ -443,7 +445,8 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
         },
         nonCopyableGen);
 
-    auto nonCopyableGen2 = tupleOf(gen::interval(1,10)).map([](const tuple<int>& tup) {
+    // unique_ptr returning version
+    auto nonCopyableGen2 = tupleOf(gen::interval(1,10)).map<NonCopyable>([](const tuple<int>& tup) {
         return util::make_unique<NonCopyable>(get<0>(tup));
     });
 
@@ -453,6 +456,18 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
             PROP_EXPECT_LE(c.a, 10);
         },
         nonCopyableGen2);
+
+    // identical to nonCopyableGen2, just type deduced map
+    auto nonCopyableGen3 = tupleOf(gen::interval(1,10)).map([](const tuple<int>& tup) {
+        return util::make_unique<NonCopyable>(get<0>(tup));
+    });
+
+    EXPECT_FOR_ALL(
+        [](const NonCopyable& c) {
+            PROP_EXPECT_GE(c.a, 1);
+            PROP_EXPECT_LE(c.a, 10);
+        },
+        nonCopyableGen3);
 }
 
 TEST(Property, TestCheckArbitraryWithConstructNonEmptyConstructible)
