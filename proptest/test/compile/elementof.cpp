@@ -11,7 +11,7 @@ struct Cat
 
 TEST(Compile, elementOf)
 {
-    elementOf<int>(0, 1, 2);
-    elementOf<int>(gen::weightedVal(0, 0.1), 1, 2);
-    elementOf<int>(gen::weightedVal(0, 0.1), gen::weightedVal<int>(1, 0.1), gen::weightedVal(2, 0.8));
+    gen::elementOf<int>(0, 1, 2);
+    gen::elementOf<int>(gen::weightedVal(0, 0.1), 1, 2);
+    gen::elementOf<int>(gen::weightedVal(0, 0.1), gen::weightedVal<int>(1, 0.1), gen::weightedVal(2, 0.8));
 }

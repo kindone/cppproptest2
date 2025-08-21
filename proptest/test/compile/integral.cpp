@@ -10,7 +10,7 @@ TEST(Compile, integral)
     auto gen = Arbi<int32_t>();
     gen(rand);
 
-    inRange<int>(0, 10);
-    interval<int>(0, 10);
-    integers<int>(0, 10);
+    gen::inRange<int>(0, 10);
+    gen::interval<int>(0, 10);
+    gen::integers<int>(0, 10);
 }

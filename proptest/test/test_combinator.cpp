@@ -225,7 +225,7 @@ TEST(Chain, chainTwice)
         cout << serializeShrinkable(result) << endl;
     }
 
-    auto gen2 = chain(gen, [](const tuple<int, int>&) -> Generator<int> { return gen::interval(0, 4); });
+    auto gen2 = gen::chain(gen, [](const tuple<int, int>&) -> Generator<int> { return gen::interval(0, 4); });
 
     for(int i = 0; i < 5; i++)
     {

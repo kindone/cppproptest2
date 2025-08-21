@@ -20,7 +20,7 @@ TEST(Compile, define_arbitrary_container_without_element_arbitrary)
 {
     // Arbi<vector<MyObj>> should works even if Arbi<MyObj> is not defined
     Random rand(1);
-    auto myObjGen = interval(10, 20).map<MyObj>([](int a) { return MyObj(a); });
+    auto myObjGen = gen::interval(10, 20).map<MyObj>([](int a) { return MyObj(a); });
     auto myObjsGen = Arbi<vector<MyObj>>(myObjGen, 1,2);
     auto shr = myObjsGen(rand);
 
@@ -29,7 +29,7 @@ TEST(Compile, define_arbitrary_container_without_element_arbitrary)
 
 namespace proptest {
 DEFINE_ARBITRARY(MyObj, []() {
-    auto intGen = interval(10, 20);
+    auto intGen = gen::interval(10, 20);
     return intGen.map<MyObj>([](int i) { return MyObj(i); });
 });
 }

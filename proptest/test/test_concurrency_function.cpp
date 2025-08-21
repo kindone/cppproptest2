@@ -34,19 +34,19 @@ TEST(concurrency_function, WithoutModel)
         });
     });
 
-    auto popBackGen = just(SimpleAction<vector<int>>([](vector<int>& obj) {
+    auto popBackGen = gen::just(SimpleAction<vector<int>>([](vector<int>& obj) {
         lock_guard<mutex> guard(getMutex());
         if (obj.empty())
             return;
         obj.pop_back();
     }));
 
-    auto clearGen = just(SimpleAction<vector<int>>([](vector<int>& obj) {
+    auto clearGen = gen::just(SimpleAction<vector<int>>([](vector<int>& obj) {
         lock_guard<mutex> guard(getMutex());
         obj.clear();
     }));
 
-    auto actionGen = oneOf<SimpleAction<vector<int>>>(pushBackGen, popBackGen, clearGen);
+    auto actionGen = gen::oneOf<SimpleAction<vector<int>>>(pushBackGen, popBackGen, clearGen);
 
     auto prop = concurrency<vector<int>>(Arbi<vector<int>>(), actionGen);
     prop.go();
@@ -66,19 +66,19 @@ TEST(concurrency_function, WithModel)
         });
     });
 
-    auto popBackGen = just(Action<vector<int>, Model>([](vector<int>& obj, Model&) {
+    auto popBackGen = gen::just(Action<vector<int>, Model>([](vector<int>& obj, Model&) {
         lock_guard<mutex> guard(getMutex());
         if (obj.empty())
             return;
         obj.pop_back();
     }));
 
-    auto clearGen = just(Action<vector<int>, Model>([](vector<int>& obj, Model&) {
+    auto clearGen = gen::just(Action<vector<int>, Model>([](vector<int>& obj, Model&) {
         lock_guard<mutex> guard(getMutex());
         obj.clear();
     }));
 
-    auto actionGen = oneOf<Action<vector<int>, Model>>(pushBackGen, popBackGen, clearGen);
+    auto actionGen = gen::oneOf<Action<vector<int>, Model>>(pushBackGen, popBackGen, clearGen);
 
     auto prop = concurrency<vector<int>, Model>(
         Arbi<vector<int>>(), [](const vector<int>&) { return Model(); }, actionGen);
@@ -90,7 +90,7 @@ TEST(concurrency_function, bitmap)
 {
     using Bitmap = util::Bitmap;
 
-    auto acquireGen = just(SimpleAction<Bitmap>("Acquire", [](Bitmap& bitmap) {
+    auto acquireGen = gen::just(SimpleAction<Bitmap>("Acquire", [](Bitmap& bitmap) {
         [[maybe_unused]] int pos = bitmap.acquire();
         bitmap.unacquire(pos);
     }));
@@ -106,8 +106,8 @@ TEST(concurrency_function, bitmap)
         });
     });
 
-    auto actionGen = oneOf<SimpleAction<Bitmap>>(acquireGen/*, unacquireGen*/);
+    auto actionGen = gen::oneOf<SimpleAction<Bitmap>>(acquireGen/*, unacquireGen*/);
     auto prop = concurrency<Bitmap>(
-        just<Bitmap>(Bitmap()), actionGen);
+        gen::just<Bitmap>(Bitmap()), actionGen);
     prop.go();
 }

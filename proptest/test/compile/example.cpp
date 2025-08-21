@@ -13,7 +13,7 @@ TEST(Example, DefaultGen)
 
 TEST(Example, CustomGen)
 {
-    auto intGen = elementOf<int>(2, 4, 6);
+    auto intGen = gen::elementOf<int>(2, 4, 6);
 
     forAll([](int num) {
         cout << num << endl;
@@ -34,7 +34,7 @@ TEST(Example, property)
 
 TEST(Example, TemplatedGen)
 {
-    auto intGen = interval<int>(2, 100000);
+    auto intGen = gen::interval<int>(2, 100000);
     auto stringIntGen = intGen.map([](const int& num) {
         return to_string(num);/// "2", "4", "6"
     });
@@ -53,7 +53,7 @@ TEST(Example, TemplatedGen)
 
 TEST(Example, MapGen)
 {
-    auto intGen = elementOf<int>(2, 4, 6);
+    auto intGen = gen::elementOf<int>(2, 4, 6);
     auto stringIntGen = intGen.map([](const int& num) {
         return to_string(num);
     });

@@ -51,7 +51,7 @@ TEST(PropTest, TestTransform)
     Arbi<int> gen;
 
     {
-        Generator<string> stringGen = transform<int,string>(
+        Generator<string> stringGen = gen::transform<int,string>(
             gen, +[](const int& value) { return "(" + to_string(value) + ")"; });
 
         for (int i = 0; i < 10; i++) {
@@ -68,7 +68,7 @@ TEST(PropTest, TestTransform)
             }
         }
 
-        Generator<vector<string>> vectorGen = transform<string, vector<string>>(
+        Generator<vector<string>> vectorGen = gen::transform<string, vector<string>>(
             stringGen, +[](const string& value) {
                 vector<string> vec;
                 vec.push_back(value);
@@ -113,7 +113,7 @@ TEST(PropTest, TestTranform2)
 {
     int64_t seed = getCurrentTime();
     Random rand(seed);
-    static Generator<uint8_t> gen = transform<uint8_t, uint8_t>(
+    static Generator<uint8_t> gen = gen::transform<uint8_t, uint8_t>(
         Arbi<uint8_t>(), +[](const uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
 
     for (int i = 0; i < 10; i++)
@@ -123,7 +123,7 @@ TEST(PropTest, TestTranform2)
 TEST(PropTest, TestDependency)
 {
     auto intGen = gen::interval(0, 2);
-    auto pairGen = dependency<int, vector<int>>(
+    auto pairGen = gen::dependency<int, vector<int>>(
         intGen, +[](const int& in) {
             auto intGen = gen::interval<int>(0, 8);
             auto vecGen = Arbi<vector<int>>(intGen);
@@ -215,10 +215,10 @@ TEST(PropTest, TestDependency2)
 
 TEST(PropTest, TestDependency3)
 {
-    auto nullableIntegers = dependency<bool, int>(
+    auto nullableIntegers = gen::dependency<bool, int>(
         Arbi<bool>(), +[](const bool& isNull) -> GenFunction<int> {
             if (isNull)
-                return just(0);
+                return gen::just(0);
             else
                 return gen::interval<int>(10, 20);
         });
@@ -251,8 +251,8 @@ TEST(PropTest, TestDependency4)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto intGen = elementOf<int>(0, 1, 2, 3);
-    auto intStringGen = dependency<int, string>(intGen, [](int& value) {
+    auto intGen = gen::elementOf<int>(0, 1, 2, 3);
+    auto intStringGen = gen::dependency<int, string>(intGen, [](int& value) {
         auto gen = Arbi<string>();
         gen.setMaxSize(value);
         return gen;
@@ -331,8 +331,8 @@ TEST(PropTest, TestDerive)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto intGen = elementOf<int>(2, 4, 6);
-    auto stringGen = derive<int, string>(intGen, [](const int& value) {
+    auto intGen = gen::elementOf<int>(2, 4, 6);
+    auto stringGen = gen::derive<int, string>(intGen, [](const int& value) {
         auto gen = Arbi<string>();
         gen.setMaxSize(value);
         return gen;
@@ -349,7 +349,7 @@ TEST(PropTest, TestDerive2)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto intGen = elementOf<int>(2, 4, 6);
+    auto intGen = gen::elementOf<int>(2, 4, 6);
     auto stringGen = intGen.flatMap<string>([](const int& value) {
         auto gen = Arbi<string>();
         gen.setMaxSize(value);
@@ -370,7 +370,7 @@ TEST(PropTest, TestAccumulate)
 
     auto gen1 = gen::interval<int>(0, 1).map([](const int& num) { return list<int>{num}; });
 
-    [[maybe_unused]] auto gen = accumulate(
+    [[maybe_unused]] auto gen = gen::accumulate(
         gen1,
         [](const list<int>& nums) {
             auto last = nums.back();
@@ -396,7 +396,7 @@ TEST(PropTest, TestAggregate)
 
     auto gen1 = gen::interval<int>(0, 1);
 
-    [[maybe_unused]] auto gen = aggregate(
+    [[maybe_unused]] auto gen = gen::aggregate(
         gen1, [](int num) { return gen::interval(num, num + 2); }, 2, 4);
 
     for (int i = 0; i < 10; i++) {
@@ -472,8 +472,8 @@ TEST(PropTest, TestRecursive)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    [[maybe_unused]] auto emptyBoxGen = construct<Box>();
-    GenFunction<Box> boxGen = construct<Box, vector<Box>&>(Arbi<vector<Box>>(reference(boxGen)).setSize(0, 2));
+    [[maybe_unused]] auto emptyBoxGen = gen::construct<Box>();
+    GenFunction<Box> boxGen = gen::construct<Box, vector<Box>&>(Arbi<vector<Box>>(gen::reference(boxGen)).setSize(0, 2));
     auto tree = boxGen(rand).getRef();
     cout << "tree: " << proptest::Show<Box>(tree) << endl;
 }
@@ -485,11 +485,11 @@ TEST(PropTest, TestRecursive2)
     Random rand(seed);
 
     auto intGen = Arbi<int>();
-    auto leafGen = construct<Node, int>(intGen);
+    auto leafGen = gen::construct<Node, int>(intGen);
     auto leafVecGen = Arbi<vector<Node>>(leafGen).setSize(1, 2);
-    auto branch1Gen = construct<Node, int, vector<Node>&>(intGen, leafVecGen);
-    GenFunction<Node> branchNGen = construct<Node, int, vector<Node>&>(
-        intGen, Arbi<vector<Node>>(oneOf<Node>(branch1Gen, reference(branchNGen))).setSize(1, 2));
+    auto branch1Gen = gen::construct<Node, int, vector<Node>&>(intGen, leafVecGen);
+    GenFunction<Node> branchNGen = gen::construct<Node, int, vector<Node>&>(
+        intGen, Arbi<vector<Node>>(gen::oneOf<Node>(branch1Gen, gen::reference(branchNGen))).setSize(1, 2));
     auto tree = branchNGen(rand).getRef();
     cout << "tree: " << proptest::Show<Node>(tree) << endl;
 }
@@ -499,7 +499,7 @@ TEST(PropTest, TestRecursive3)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    [[maybe_unused]] auto emptyBoxGen = construct<Box>();
+    [[maybe_unused]] auto emptyBoxGen = gen::construct<Box>();
     struct BoxGen
     {
         BoxGen(int _level) : level(_level) {}
@@ -507,9 +507,9 @@ TEST(PropTest, TestRecursive3)
         Shrinkable<Box> operator()(Random& rand)
         {
             if (level > 0)
-                return construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen(level - 1)).setSize(0, 10))(rand);
+                return gen::construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen(level - 1)).setSize(0, 10))(rand);
             else
-                return construct<Box>()(rand);
+                return gen::construct<Box>()(rand);
         }
 
         int level;
@@ -521,9 +521,9 @@ TEST(PropTest, TestRecursive3)
 
     Function<GenFunction<Box>(int)> BoxGen2 = [&BoxGen2](int level) -> GenFunction<Box> {
         if (level > 0)
-            return construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen2(level - 1)).setSize(0, 10));
+            return gen::construct<Box, vector<Box>&>(Arbi<vector<Box>>(BoxGen2(level - 1)).setSize(0, 10));
         else
-            return construct<Box>();
+            return gen::construct<Box>();
     };
 
     auto boxGen2 = BoxGen2(2);

@@ -105,11 +105,11 @@ TEST(Property, propertyBasic)
     prop.setSeed(0).forAll();
     // with specific arguments
     prop.example(string("hello"), 10, string("world"));
-    prop.forAll(elementOf<string>("", string("a")), just(10), elementOf<string>(string(""), string("b")));
+    prop.forAll(gen::elementOf<string>("", string("a")), gen::just(10), gen::elementOf<string>(string(""), string("b")));
 
     // with specific generators
     string empty("s");
-    prop.forAll(just<string>(empty), Arbi<int>(), just<string>(to_string(1)));
+    prop.forAll(gen::just<string>(empty), Arbi<int>(), gen::just<string>(to_string(1)));
 }
 
 TEST(Property, property_example)
@@ -185,8 +185,8 @@ public:
     Shrinkable<Bit> operator()(Random& rand) const override
     {
         static auto gen_v =
-            proptest::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
-        static auto gen_bit = construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
+            gen::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
+        static auto gen_bit = gen::construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
         return gen_bit(rand);
     }
 
@@ -510,7 +510,7 @@ TEST(Property, TestCheckArbitraryWithConstruct)
     auto tupleGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen);
     auto animalGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen).map<Animal>(
         [](const tuple<int,string,vector<int>>& tup) { return Animal(get<0>(tup), get<1>(tup), get<2>(tup)); });
-    auto animalGen2 = construct<Animal, int, string, vector<int>&>(gen::interval(1,10), Arbi<string>(), vecGen);
+    auto animalGen2 = gen::construct<Animal, int, string, vector<int>&>(gen::interval(1,10), Arbi<string>(), vecGen);
     auto animalVecGen = Arbi<vector<Animal>>(animalGen);
     animalVecGen.setMaxSize(20);
 

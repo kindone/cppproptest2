@@ -22,7 +22,7 @@ TYPED_TEST(ContainerTest, various_generators)
     //Arbitrary
     auto numGen1 = Arbi<uint32_t>();
     //Generator
-    auto numGen2 = inRange<uint32_t>(0,1);
+    auto numGen2 = gen::inRange<uint32_t>(0,1);
     //GenFunction
     auto numGen3 = [](Random&) -> Shrinkable<uint32_t> {
         return make_shrinkable<uint32_t>(0U);
