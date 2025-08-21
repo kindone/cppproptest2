@@ -14,7 +14,7 @@ template <>
 class Arbi<Animal> : public ArbiBase<Animal> {
     Shrinkable<Animal> operator()(Random& rand) const override
     {
-        auto tupleGen = tupleOf(Arbi<int>(), Arbi<string>(), Arbi<vector<int>>());
+        auto tupleGen = gen::tuple(Arbi<int>(), Arbi<string>(), Arbi<vector<int>>());
         auto gen = tupleGen.map<Animal>(+[](const tuple<int,string,vector<int>>& tup) {
             return Animal(get<0>(tup), get<1>(tup), get<2>(tup));
         });
@@ -122,10 +122,10 @@ TEST(PropTest, TestTranform2)
 
 TEST(PropTest, TestDependency)
 {
-    auto intGen = interval(0, 2);
+    auto intGen = gen::interval(0, 2);
     auto pairGen = dependency<int, vector<int>>(
         intGen, +[](const int& in) {
-            auto intGen = interval<int>(0, 8);
+            auto intGen = gen::interval<int>(0, 8);
             auto vecGen = Arbi<vector<int>>(intGen);
             vecGen.maxSize = in;
             vecGen.minSize = in;
@@ -154,17 +154,17 @@ TEST(PropTest, TestDependency2)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto numRowsGen = interval<int>(1000, 1000);
+    auto numRowsGen = gen::interval<int>(1000, 1000);
     auto numElementsGen = Arbi<uint16_t>();
-    auto dimGen = pairOf(numRowsGen, numElementsGen);
+    auto dimGen = gen::pair(numRowsGen, numElementsGen);
 
     auto rawGen = dimGen.pairWith<IndexVector>(
         +[](const Dimension& dimension) {
             int numRows = dimension.first;
             uint16_t numElements = dimension.second;
-            auto firstGen = interval<uint16_t>(0, numElements);
-            auto secondGen = Arbi<bool>();  // TODO true : false should be 2:1
-            auto indexGen = pairOf(firstGen, secondGen);
+            auto firstGen = gen::interval<uint16_t>(0, numElements);
+            auto secondGen = Arbi<bool>(0.75);
+            auto indexGen = gen::pair(firstGen, secondGen);
             auto indexVecGen = Arbi<IndexVector>(indexGen);
             indexVecGen.setSize(numRows);
             return indexVecGen;
@@ -220,14 +220,14 @@ TEST(PropTest, TestDependency3)
             if (isNull)
                 return just(0);
             else
-                return interval<int>(10, 20);
+                return gen::interval<int>(10, 20);
         });
 
     auto gen = Arbi<bool>().pairWith<int>(+[](const bool& value) {
         if (value)
-            return interval(0, 10);
+            return gen::interval(0, 10);
         else
-            return interval(10, 20);
+            return gen::interval(10, 20);
     });
 
     int64_t seed = getCurrentTime();
@@ -282,18 +282,18 @@ TEST(PropTest, TestChain2)
 
     auto tuple2Gen = Arbi<bool>().tupleWith<int>(+[](const bool& value) {
         if (value)
-            return interval(0, 10);
+            return gen::interval(0, 10);
         else
-            return interval(10, 20);
+            return gen::interval(10, 20);
     });
     auto tuple3Gen = tuple2Gen.tupleWith<string>(+[](const tuple<bool, int>& tup) {
         cout << tup << endl;
         if (get<0>(tup)) {
-            auto gen = Arbi<string>(interval<char>('A', 'M'));
+            auto gen = Arbi<string>(gen::interval<char>('A', 'M'));
             gen.setSize(1, 3);
             return gen;
         } else {
-            auto gen = Arbi<string>(interval<char>('N', 'Z'));
+            auto gen = Arbi<string>(gen::interval<char>('N', 'Z'));
             gen.setSize(1, 3);
             return gen;
         }
@@ -301,9 +301,9 @@ TEST(PropTest, TestChain2)
 
     auto tuple3Gen2 = tuple2Gen.tupleWith<int>(+[](const tuple<bool, int>& tup) {
         if (get<0>(tup)) {
-            return interval(10, 20);
+            return gen::interval(10, 20);
         } else {
-            return interval(20, 30);
+            return gen::interval(20, 30);
         }
     });
 
@@ -368,13 +368,13 @@ TEST(PropTest, TestAccumulate)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto gen1 = interval<int>(0, 1).map([](const int& num) { return list<int>{num}; });
+    auto gen1 = gen::interval<int>(0, 1).map([](const int& num) { return list<int>{num}; });
 
     [[maybe_unused]] auto gen = accumulate(
         gen1,
         [](const list<int>& nums) {
             auto last = nums.back();
-            return interval(last, last + 1).map([nums](const int& num) {
+            return gen::interval(last, last + 1).map([nums](const int& num) {
                 auto newList = list<int>(nums);
                 newList.push_back(num);
                 return newList;
@@ -394,10 +394,10 @@ TEST(PropTest, TestAggregate)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto gen1 = interval<int>(0, 1);
+    auto gen1 = gen::interval<int>(0, 1);
 
     [[maybe_unused]] auto gen = aggregate(
-        gen1, [](int num) { return interval(num, num + 2); }, 2, 4);
+        gen1, [](int num) { return gen::interval(num, num + 2); }, 2, 4);
 
     for (int i = 0; i < 10; i++) {
         Shrinkable<vector<int>> shr = gen(rand);

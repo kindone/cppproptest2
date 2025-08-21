@@ -306,7 +306,7 @@ bool forAll(Callable&& callable, ExplicitGens&&... gens)
     // If property callable is defined with two arguments: int and float,
     // matrix() requires as arguments the callable and two more of types initializer_list<int> and initializer_list<float>.
 lists
-    // examples are auto-generated as Cartesian propduct of the lists:
+    // examples are auto-generated as Cartesian product of the lists:
     //   {1, 0.2f}, {1, 0.3f}, {2, 0.2f}, {2, 0.3f}, {3, 0.2f}, {3, 0.3f}
     proptest::matrix([](int i, float f) {
         // ...
@@ -314,7 +314,7 @@ lists
 * @endcode
 *
 * @tparam Callable property callable type in either `(ARGS...) -> bool` (success/fail by boolean return value) or
-* `(ARGS...) -> void` (fail if exception is thrown, success eitherwise)
+* `(ARGS...) -> void` (fail if exception is thrown, success otherwise)
 * @tparam ARGS variadic types for callable and the initializer_lists
 * @param callable passed as any callable such as `std::function`, functor object, function pointer
 * @param lists Lists of valid arguments (types must be in same order as in parameters of the callable)

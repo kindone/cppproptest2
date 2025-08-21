@@ -108,54 +108,6 @@ using optional = Arbi<::proptest::optional<T>>;
 template <typename T>
 using shared_ptr = Arbi<::proptest::shared_ptr<T>>;
 
-// ============================================================================
-// TUPLE AND PAIR GENERATORS
-// ============================================================================
-
-/**
- * @brief Tuple and pair generators
- */
-template <typename T1, typename T2>
-using pair = Arbi<::proptest::pair<T1, T2>>;
-
-template <typename... Ts>
-using tuple = Arbi<::proptest::tuple<Ts...>>;
-
-// ============================================================================
-// NUMERIC RANGE GENERATORS
-// ============================================================================
-
-/**
- * @brief Numeric range generators
- */
-template <typename T>
-auto natural(T max) -> decltype(proptest::natural<T>(max)) {
-    return proptest::natural<T>(max);
-}
-
-template <typename T>
-auto nonNegative(T max) -> decltype(proptest::nonNegative<T>(max)) {
-    return proptest::nonNegative<T>(max);
-}
-
-template <typename T>
-auto interval(T min, T max) -> decltype(proptest::interval<T>(min, max)) {
-    return proptest::interval<T>(min, max);
-}
-
-template <typename T>
-auto inRange(T from, T to) -> decltype(proptest::inRange<T>(from, to)) {
-    return proptest::inRange<T>(from, to);
-}
-
-template <typename T>
-auto integers(T start, T count) -> decltype(proptest::integers<T>(start, count)) {
-    return proptest::integers<T>(start, count);
-}
-
-// ============================================================================
-// UTILITY FUNCTIONS
-// ============================================================================
 
 } // namespace gen
 

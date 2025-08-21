@@ -9,7 +9,7 @@ size_t Arbi<string>::defaultMaxSize = 200;
 
 // defaults to ascii characters
 
-Arbi<string>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<string>(_minSize, _maxSize), elemGen(interval<char>(0x1, 0x7f)) {}
+Arbi<string>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<string>(_minSize, _maxSize), elemGen(gen::interval<char>(0x1, 0x7f)) {}
 
 Arbi<string>::Arbi(Generator<char> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer<string>(_minSize, _maxSize), elemGen(_elemGen) {}
 

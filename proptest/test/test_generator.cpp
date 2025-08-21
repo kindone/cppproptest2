@@ -19,11 +19,11 @@ TEST(GenIntegral, basic)
     EXPECT_TRUE(val <= std::numeric_limits<int>::max());
 }
 
-TEST(Generator, tupleOf)
+TEST(Generator, tuple)
 {
     Random rand(getCurrentTime());
-    auto gen = tupleOf(interval<int>(0, 10), interval<int>(-10, -1));
-    tuple<int, int> val = gen(rand).getRef();
+    auto gen = gen::tuple(gen::interval<int>(0, 10), gen::interval<int>(-10, -1));
+    auto val = gen(rand).getRef();
     EXPECT_TRUE(get<0>(val) >= 0);
     EXPECT_TRUE(get<0>(val) <= 10);
     EXPECT_TRUE(get<1>(val) >= -10);

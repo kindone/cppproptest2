@@ -91,7 +91,6 @@ Shrinkable<uint64_t> generateInteger(Random& rand, uint64_t min, uint64_t max) {
 // }
 
 
-DEFINE_FOR_ALL_INTTYPES(DEFINE_INTEGERS);
 
 Shrinkable<char> Arbi<char>::operator()(Random& rand) const
 {
@@ -148,12 +147,13 @@ Shrinkable<uint64_t> Arbi<uint64_t>::operator()(Random& rand) const
 //     return generateInteger<unsigned long>(rand);
 // }
 
-// template instantiation
-// DEFINE_FOR_ALL_INTTYPES(DEFINE_GENERATEINTEGER);
-DEFINE_FOR_ALL_INTTYPES(DEFINE_NATURAL);
-DEFINE_FOR_ALL_INTTYPES(DEFINE_NONNEGATIVE);
-DEFINE_FOR_ALL_INTTYPES(DEFINE_INTERVAL);
-DEFINE_FOR_ALL_INTTYPES(DEFINE_INRANGE);
-
+// template instantiation for gen namespace
+namespace gen {
+DEFINE_FOR_ALL_INTTYPES(DEFINE_GEN_NATURAL);
+DEFINE_FOR_ALL_INTTYPES(DEFINE_GEN_NONNEGATIVE);
+DEFINE_FOR_ALL_INTTYPES(DEFINE_GEN_INTERVAL);
+DEFINE_FOR_ALL_INTTYPES(DEFINE_GEN_INRANGE);
+DEFINE_FOR_ALL_INTTYPES(DEFINE_GEN_INTEGERS);
+} // namespace gen
 
 }  // namespace proptest

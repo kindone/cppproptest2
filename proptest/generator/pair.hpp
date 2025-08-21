@@ -12,28 +12,43 @@
 
 namespace proptest {
 
+namespace gen {
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for pair<T1, T2>
  * @details shrinking is done by one parameter and then continues to the next
  */
 template <typename T1, typename T2>
-Generator<pair<T1,T2>> pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2)
+Generator<pair<T1,T2>> pair(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2)
 {
     // generator
     return generator(
-        [gen1, gen2](Random& rand) mutable -> Shrinkable<pair<T1,T2>>{
+        [gen1, gen2](Random& rand) mutable -> Shrinkable<::proptest::pair<T1,T2>>{
             return shrinkPair<T1,T2>(gen1(rand), gen2(rand));
         });
 }
 
 template <GenLike GEN1, GenLike GEN2>
-decltype(auto) pairOf(GEN1&& gen1, GEN2&& gen2)
+decltype(auto) pair(GEN1&& gen1, GEN2&& gen2)
 {
     using T1 = typename function_traits<GEN1>::return_type::type;
     using T2 = typename function_traits<GEN2>::return_type::type;
-    return pairOf<T1,T2>(util::forward<GEN1>(gen1), util::forward<GEN2>(gen2));
+    return pair<T1,T2>(util::forward<GEN1>(gen1), util::forward<GEN2>(gen2));
 }
+
+// Legacy aliases for backward compatibility
+template <typename T1, typename T2>
+auto pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2) {
+    return pair<T1, T2>(gen1, gen2);
+}
+
+template <GenLike GEN1, GenLike GEN2>
+decltype(auto) pairOf(GEN1&& gen1, GEN2&& gen2) {
+    return pair(util::forward<GEN1>(gen1), util::forward<GEN2>(gen2));
+}
+
+} // namespace gen
 
 /**
  * @ingroup Generators

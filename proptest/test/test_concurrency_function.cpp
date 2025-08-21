@@ -95,7 +95,7 @@ TEST(concurrency_function, bitmap)
         bitmap.unacquire(pos);
     }));
 
-    [[maybe_unused]] auto unacquireGen = integers<int>(0, Bitmap::size).map<SimpleAction<Bitmap>>(+[](const int& pos) {
+    [[maybe_unused]] auto unacquireGen = gen::integers<int>(0, Bitmap::size).map<SimpleAction<Bitmap>>(+[](const int& pos) {
         return SimpleAction<Bitmap>("Unacquire", [pos](Bitmap& bitmap) {
             try {
                 bitmap.unacquire(pos);

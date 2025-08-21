@@ -17,20 +17,20 @@ TEST(Compile, map_keygen)
 {
     auto mapGen = Arbi<map<int, int>>();
     auto intArbi = Arbi<int>();
-    auto intGen = inRange(0,1);
+    auto intGen = gen::inRange(0,1);
     auto intGenFunc = +[](Random&) -> Shrinkable<int> {
         return make_shrinkable<int>(0);
     };
 
-    auto pairGen1 = pairOf(intArbi, intArbi);
-    auto pairGen2 = pairOf(intArbi, intGen);
-    auto pairGen3 = pairOf(intArbi, intGenFunc);
-    auto pairGen4 = pairOf(intGen, intArbi);
-    auto pairGen5 = pairOf(intGen, intGen);
-    auto pairGen6 = pairOf(intGen, intGenFunc);
-    auto pairGen7 = pairOf(intGenFunc, intArbi);
-    auto pairGen8 = pairOf(intGenFunc, intGen);
-    auto pairGen9 = pairOf(intGenFunc, intGenFunc);
+    auto pairGen1 = gen::pair(intArbi, intArbi);
+    auto pairGen2 = gen::pair(intArbi, intGen);
+    auto pairGen3 = gen::pair(intArbi, intGenFunc);
+    auto pairGen4 = gen::pair(intGen, intArbi);
+    auto pairGen5 = gen::pair(intGen, intGen);
+    auto pairGen6 = gen::pair(intGen, intGenFunc);
+    auto pairGen7 = gen::pair(intGenFunc, intArbi);
+    auto pairGen8 = gen::pair(intGenFunc, intGen);
+    auto pairGen9 = gen::pair(intGenFunc, intGenFunc);
     mapGen.setPairGen(pairGen1);
     mapGen.setPairGen(pairGen2);
     mapGen.setPairGen(pairGen3);

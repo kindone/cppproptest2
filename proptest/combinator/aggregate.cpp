@@ -7,7 +7,7 @@ namespace util {
 
 GeneratorCommon aggregateImpl(Function1<ShrinkableBase> gen1, Function1<Function1<ShrinkableBase>> gen2gen, size_t minSize, size_t maxSize)
 {
-    auto intervalGen = interval<uint64_t>(minSize, maxSize);
+    auto intervalGen = gen::interval<uint64_t>(minSize, maxSize);
 
     auto deriveAggregate = [gen1, gen2gen, minSize](const uint64_t& size) {
         if (size == 0)

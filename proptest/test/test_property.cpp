@@ -37,7 +37,7 @@ struct NonEmptyConstructible
 
 TEST(Property, NonCopyable)
 {
-    auto nonCopyableGen = interval(0, 10).map<NonCopyable>([](int n) {
+    auto nonCopyableGen = gen::interval(0, 10).map<NonCopyable>([](int n) {
         return util::make_unique<NonCopyable>(n);
     });
 
@@ -60,7 +60,7 @@ TEST(Property, forAll)
         PROP_ASSERT(0 <= a && a <= 10);
         PROP_ASSERT(20 <= b && b <= 30);
         return true;
-    }, interval(0, 10), interval(20, 30));
+    }, gen::interval(0, 10), gen::interval(20, 30));
 }
 
 
@@ -430,10 +430,10 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
     auto vecGen = Arbi<vector<int>>();
     vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
-    auto tupleGen = tupleOf(gen::interval(1,10));
+    auto tupleGen = gen::tuple(gen::interval(1,10));
 
     // flatMap can always be a work-around
-    auto nonCopyableGen = tupleOf(gen::interval(1,10)).flatMap<NonCopyable>(
+    auto nonCopyableGen = gen::tuple(gen::interval(1,10)).flatMap<NonCopyable>(
         [](const tuple<int>& tup) {
             return gen::just(util::make_any<NonCopyable>(get<0>(tup)));
         });
@@ -446,7 +446,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
         nonCopyableGen);
 
     // unique_ptr returning version
-    auto nonCopyableGen2 = tupleOf(gen::interval(1,10)).map<NonCopyable>([](const tuple<int>& tup) {
+    auto nonCopyableGen2 = gen::tuple(gen::interval(1,10)).map<NonCopyable>([](const tuple<int>& tup) {
         return util::make_unique<NonCopyable>(get<0>(tup));
     });
 
@@ -458,7 +458,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
         nonCopyableGen2);
 
     // identical to nonCopyableGen2, just type deduced map
-    auto nonCopyableGen3 = tupleOf(gen::interval(1,10)).map([](const tuple<int>& tup) {
+    auto nonCopyableGen3 = gen::tuple(gen::interval(1,10)).map([](const tuple<int>& tup) {
         return util::make_unique<NonCopyable>(get<0>(tup));
     });
 
@@ -507,8 +507,8 @@ TEST(Property, TestCheckArbitraryWithConstruct)
     auto vecGen = Arbi<vector<int>>();
     vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
-    auto tupleGen = tupleOf(gen::interval(1,10), Arbi<string>(), vecGen);
-    auto animalGen = tupleOf(gen::interval(1,10), Arbi<string>(), vecGen).map<Animal>(
+    auto tupleGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen);
+    auto animalGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen).map<Animal>(
         [](const tuple<int,string,vector<int>>& tup) { return Animal(get<0>(tup), get<1>(tup), get<2>(tup)); });
     auto animalGen2 = construct<Animal, int, string, vector<int>&>(gen::interval(1,10), Arbi<string>(), vecGen);
     auto animalVecGen = Arbi<vector<Animal>>(animalGen);

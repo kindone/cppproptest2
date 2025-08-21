@@ -21,7 +21,7 @@ Generator<int64_t> intervals(initializer_list<Interval> intervals)
     auto genVec = util::make_shared<WeightedVec>();
     genVec->reserve(intervals.size());
     for (auto interval : intervals) {
-        genVec->push_back(weightedGen(proptest::interval<int64_t>(interval.min, interval.max),
+        genVec->push_back(weightedGen(gen::interval<int64_t>(interval.min, interval.max),
                                                static_cast<double>(interval.size()) / sum));
     }
 
@@ -45,7 +45,7 @@ Generator<uint64_t> uintervals(initializer_list<UInterval> intervals)
 
     genVec->reserve(intervals.size());
     for (auto interval : intervals) {
-        genVec->push_back(weightedGen(proptest::interval<uint64_t>(interval.min, interval.max),
+        genVec->push_back(weightedGen(gen::interval<uint64_t>(interval.min, interval.max),
                                                 static_cast<double>(interval.size()) / sum));
     }
 

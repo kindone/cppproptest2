@@ -92,7 +92,7 @@ TEST(Arbitrary, list_int)
         EXPECT_LE(shr.getRef().size(), Arbi<list<int>>::defaultMaxSize);
     }
 
-    auto arbi3 = Arbi<list<int>>(interval<int>(0, 9));
+    auto arbi3 = Arbi<list<int>>(gen::interval<int>(0, 9));
     for(int i = 0; i < 2; i++) {
         auto shr = arbi3(rand);
         const auto& l = shr.getRef();
@@ -120,7 +120,7 @@ TEST(Arbitrary, vector_int)
         EXPECT_LE(shr.getRef().size(), Arbi<vector<int>>::defaultMaxSize);
     }
 
-    auto arbi3 = Arbi<vector<int>>(interval<int>(0, 9));
+    auto arbi3 = Arbi<vector<int>>(gen::interval<int>(0, 9));
     for(int i = 0; i < 2; i++) {
         auto shr = arbi3(rand);
         const auto& l = shr.getRef();
@@ -158,7 +158,7 @@ TEST(Arbitrary, map_int_int)
 TEST(Arbitrary, pair_int_string)
 {
     Random rand(getCurrentTime());
-    auto arbi = Arbi<pair<int,string>>(interval(0,10), interval(0,10).map<string>([](int n) { return to_string(n); }));
+    auto arbi = Arbi<pair<int,string>>(gen::interval(0,10), gen::interval(0,10).map<string>([](int n) { return to_string(n); }));
     for(int i = 0; i < 10; i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
@@ -172,7 +172,7 @@ TEST(Arbitrary, pair_int_string)
 TEST(Arbitrary, tuple_int_string)
 {
     Random rand(getCurrentTime());
-    auto arbi = Arbi<tuple<int,string>>(interval(0,10), interval(0,10).map<string>([](int n) { return to_string(n); }));
+    auto arbi = Arbi<tuple<int,string>>(gen::interval(0,10), gen::interval(0,10).map<string>([](int n) { return to_string(n); }));
     for(int i = 0; i < 10; i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
@@ -202,7 +202,7 @@ TEST(Arbitrary, string_default)
 TEST(Arbitrary, string_customchars)
 {
     Random rand(getCurrentTime());
-    auto arbi = Arbi<string>(interval<char>('0','9'));
+    auto arbi = Arbi<string>(gen::interval<char>('0','9'));
     for(int i = 0; i < 100; i++) {
         auto str = arbi(rand).getRef();
         for(auto c : str) {
@@ -245,7 +245,7 @@ TYPED_TEST(StringLikeTest, Arbitrary)
 TYPED_TEST(StringLikeTest, Arbitrary_customchars)
 {
     Random rand(getCurrentTime());
-    auto arbi = Arbi<TypeParam>(interval<uint32_t>('0','9'));
+    auto arbi = Arbi<TypeParam>(gen::interval<uint32_t>('0','9'));
     for(int i = 0; i < 10; i++) {
         auto str = arbi(rand).getRef();
         for(auto c : str) {

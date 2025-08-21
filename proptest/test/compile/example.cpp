@@ -58,7 +58,7 @@ TEST(Example, MapGen)
         return to_string(num);
     });
 
-    auto pairGen = pairOf(intGen, stringIntGen);
+    auto pairGen = gen::pair(intGen, stringIntGen);
 
     Arbi<map<int, string>> mapGen;
 
