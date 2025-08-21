@@ -13,5 +13,5 @@ TEST(Compile, string)
 
 TEST(Compile, stringGen)
 {
-    Arbi<string>(interval('A', 'Z'));
+    Arbi<string>(gen::interval('A', 'Z'));
 }

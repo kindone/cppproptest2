@@ -12,8 +12,8 @@ TEST(Compile, tuple)
 
     Arbi<bool>().tupleWith(+[](const bool& value) {
         if (value)
-            return interval(0, 10);
+            return gen::interval(0, 10);
         else
-            return interval(10, 20);
+            return gen::interval(10, 20);
     });
 }

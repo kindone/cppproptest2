@@ -7,7 +7,7 @@ using namespace proptest;
 TEST(Compile, lazy)
 {
     Random rand(3);
-    auto gen = lazy([]() { return 5; });
+    auto gen = gen::lazy([]() { return 5; });
 
     gen(rand);
 }
