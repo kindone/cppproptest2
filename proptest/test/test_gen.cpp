@@ -30,7 +30,7 @@ TEST(GenNamespace, BasicTypeGenerators)
     auto stringGen = gen::string();
     for(int i = 0; i < 10; i++) {
         auto result = stringGen(rand);
-        EXPECT_LE(result.getRef().size(), Arbi<string>::defaultMaxSize);
+        EXPECT_LE(result.getRef().size(), gen::string::defaultMaxSize);
     }
 
     // Test utf8string generator

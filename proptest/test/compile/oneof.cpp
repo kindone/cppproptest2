@@ -6,9 +6,9 @@ using namespace proptest;
 
 TEST(Compile, oneOf)
 {
-    gen::oneOf<int>(Arbi<int>(), Arbi<int>(), Arbi<int>());
+    gen::oneOf<int>(gen::int32(), gen::int32(), gen::int32());
     // this should fail:
-    // oneOf<int>(weightedGen<int>(Arbi<int>(), 0.1), Arbi<double>(), Arbi<int>());
-    gen::oneOf<int>(gen::weightedGen<int>(Arbi<int>(), 0.1), gen::weightedGen(Arbi<int>(), 0.1),
-               gen::weightedGen(Arbi<int>(), 0.8));
+    // oneOf<int>(weightedGen<int>(gen::int32(), 0.1), gen::float64(), genn::int());
+    gen::oneOf<int>(gen::weightedGen<int>(gen::int32(), 0.1), gen::weightedGen(gen::int32(), 0.1),
+               gen::weightedGen(gen::int32(), 0.8));
 }

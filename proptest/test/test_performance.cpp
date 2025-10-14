@@ -557,8 +557,8 @@ TEST(Performance, ArbiBool)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<bool>();
-        gen(rand);
+        auto generator = gen::boolean();
+        generator(rand);
     }
 }
 
@@ -567,8 +567,8 @@ TEST(Performance, ArbiInt)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<int>();
-        gen(rand);
+        auto generator = gen::int32();
+        generator(rand);
     }
 }
 
@@ -577,8 +577,8 @@ TEST(Performance, ArbiString)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<string>();
-        gen(rand);
+        auto generator = gen::string();
+        generator(rand);
     }
 }
 
@@ -587,8 +587,8 @@ TEST(Performance, ArbiList)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<list<int>>(1, 2);
-        gen(rand);
+        auto generator = gen::list<int>(1, 2);
+        generator(rand);
     }
 }
 
@@ -597,8 +597,8 @@ TEST(Performance, ArbiVectorInt)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<vector<int>>(1, 2);
-        gen(rand);
+        auto generator = gen::vector<int>(1, 2);
+        generator(rand);
     }
 }
 
@@ -607,8 +607,8 @@ TEST(Performance, ArbiVectorBool)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<vector<bool>>(1, 2);
-        gen(rand);
+        auto generator = gen::vector<bool>(1, 2);
+        generator(rand);
     }
 }
 
@@ -617,8 +617,8 @@ TEST(Performance, ArbiPair)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<pair<int,int>>();
-        gen(rand);
+        auto generator = Arbi<pair<int,int>>();
+        generator(rand);
     }
 }
 
@@ -627,8 +627,8 @@ TEST(Performance, ArbiTuple)
     Random rand(seed);
     for(int i = 0; i < 100000; i++)
     {
-        auto gen = Arbi<tuple<int,int>>();
-        gen(rand);
+        auto generator = Arbi<tuple<int,int>>();
+        generator(rand);
     }
 }
 
@@ -637,7 +637,7 @@ TEST(Performance, ArbiSet)
     Random rand(seed);
     for(int i = 0; i < 10000; i++)
     {
-        auto gen = Arbi<set<int>>();
-        gen(rand);
+        auto generator = gen::set<int>();
+        generator(rand);
     }
 }

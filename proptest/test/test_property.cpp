@@ -109,7 +109,7 @@ TEST(Property, propertyBasic)
 
     // with specific generators
     string empty("s");
-    prop.forAll(gen::just<string>(empty), Arbi<int>(), gen::just<string>(to_string(1)));
+    prop.forAll(gen::just<string>(empty), gen::int32(), gen::just<string>(to_string(1)));
 }
 
 TEST(Property, property_example)
@@ -185,8 +185,8 @@ public:
     Shrinkable<Bit> operator()(Random& rand) const override
     {
         static auto gen_v =
-            gen::transform<uint8_t, uint8_t>(Arbi<uint8_t>(), [](uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
-        static auto gen_bit = gen::construct<Bit, uint8_t, bool>(gen_v, Arbi<bool>());
+            gen::transform<uint8_t, uint8_t>(gen::uint8(), [](uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
+        static auto gen_bit = gen::construct<Bit, uint8_t, bool>(gen_v, gen::boolean());
         return gen_bit(rand);
     }
 
@@ -324,7 +324,7 @@ TEST(Property, TestVectorCheckFail)
     show(cout, tup);
     cout << endl;
 
-    auto vecGen = Arbi<vector<int>>();
+    auto vecGen = gen::vector<int>();
     vecGen.setMaxSize(32);
 
     forAll(
@@ -427,7 +427,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto vecGen = Arbi<vector<int>>();
+    auto vecGen = gen::vector<int>();
     vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
     auto tupleGen = gen::tuple(gen::interval(1,10));
@@ -504,14 +504,14 @@ TEST(Property, TestCheckArbitraryWithConstruct)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto vecGen = Arbi<vector<int>>();
+    auto vecGen = gen::vector<int>();
     vecGen.setMinSize(1);
     vecGen.setMaxSize(20);
-    auto tupleGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen);
-    auto animalGen = gen::tuple(gen::interval(1,10), Arbi<string>(), vecGen).map<Animal>(
+    auto tupleGen = gen::tuple(gen::interval(1,10), gen::string(), vecGen);
+    auto animalGen = gen::tuple(gen::interval(1,10), gen::string(), vecGen).map<Animal>(
         [](const tuple<int,string,vector<int>>& tup) { return Animal(get<0>(tup), get<1>(tup), get<2>(tup)); });
-    auto animalGen2 = gen::construct<Animal, int, string, vector<int>&>(gen::interval(1,10), Arbi<string>(), vecGen);
-    auto animalVecGen = Arbi<vector<Animal>>(animalGen);
+    auto animalGen2 = gen::construct<Animal, int, string, vector<int>&>(gen::interval(1,10), gen::string(), vecGen);
+    auto animalVecGen = gen::vector<Animal>(animalGen);
     animalVecGen.setMaxSize(20);
 
     auto func = [](const proptest::tuple<int, string, vector<int>>& tup) {

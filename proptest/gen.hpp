@@ -108,6 +108,10 @@ using optional = Arbi<::proptest::optional<T>>;
 template <typename T>
 using shared_ptr = Arbi<::proptest::shared_ptr<T>>;
 
+// template <typename T1, typename T2>
+// using pair = Arbi<::proptest::pair<T1, T2>>;
+
+
 
 } // namespace gen
 

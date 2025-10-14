@@ -32,7 +32,7 @@ int getMaximumDay(int year, int month) {
     return 31;
 }
 
-auto yearMonthGen = gen::tupleOf(gen::interval(0, 9999), gen::interval(1,12));
+auto yearMonthGen = gen::tuple(gen::interval(0, 9999), gen::interval(1,12));
 
 // combines (int,int) and int into (int,int,int)
 auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMonth) {
@@ -44,13 +44,40 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 
 ```
 
-## Generating a fixed point decimal with precision `p` and scale `s`
+*## Generating a fixed point decimal with precision `p` and scale `s`
 
 * A `Decimal(p, s)` is a fixed point decimal with a precision `p` and a scale `s`.
 * It means there are `p` number of digits with `s` number of decimals, like `123.45` being a `Decimal(5,2)`.
 * We can first generate `p - s` number of numeric characters that does not start with `'0'`.
 * Then we can generate rest `s` number of numeric characters and concatenate the two strings with `.`.
-* We can generate a sign character in front of the new string to complete the decimal
+* We can generate a sign character in front of the new string to complete the decimal*
+
+```cpp
+
+    auto precisionGen = gen::interval(1, maxPrecision);
+    auto scaleGen = gen::interval(minScale, maxScale);
+    auto tupleGen = gen::tuple(precisionGen, scaleGen);
+
+    auto decimalGen = tupleGen.template flatMap<Decimal>([](const std::tuple<int, int>& tup) -> GenFunction<federation::Decimal> {
+        int precision = std::get<0>(tup);
+        int scale = std::get<1>(tup);
+        // decide digits of precision
+        auto signGen = gen::boolean(); // true: neg, false: pos
+        auto firstGen = gen::interval<char>('1', '9');
+        auto stringGen = gen::string(gen::interval('0', '9'));
+        stringGen.setSize(precision-1);
+        auto decTupleGen = gen::tuple(signGen, firstGen, stringGen);
+        return decTupleGen.map<federation::Decimal>([scale](const ltt::tuple<bool, char, _STL::string>& decTup) {
+            bool isNeg = std::get<0>(decTup);
+            char first = std::get<1>(decTup);
+            std::string rest = std::get<2>(decTup);
+            std::stringstream digits;
+            digits << first << rest;
+            return Decimal(digits.str(), scale, isNeg);
+        });
+    });
+
+```
 
 ## Generating a chess move
 
@@ -62,7 +89,7 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 
 using GenT = std::pair<ChessBoard, ChessMove>;
 
-auto genT = just(std::make_pair(
+auto genT = gen::just(std::make_pair(
     ChessBoard::initialBoard(), // Function to create a starting chessboard
     ChessMove::nullMove()       // Placeholder for the initial move
 ));
@@ -75,7 +102,7 @@ auto gen2GenT = [](const std::pair<ChessBoard, ChessMove>& prev) {
   auto legalMoves = generateLegalMoves(currentBoard);
 
   // 3. Create a generator that selects from 'legalMoves'.
-  auto moveGen = elementOf(legalMoves);
+  auto moveGen = gen::elementOf(legalMoves);
 
   // 4.  For each chosen 'move', apply it to 'currentBoard'
   //     to get the new board state.

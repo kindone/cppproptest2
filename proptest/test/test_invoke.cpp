@@ -1,8 +1,6 @@
 #include "proptest/util/matrix.hpp"
 #include "proptest/util/invoke.hpp"
-#include "proptest/generator/integral.hpp"
-#include "proptest/generator/floating.hpp"
-#include "proptest/generator/string.hpp"
+#include "proptest/gen.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/test/gtest.hpp"
 
@@ -31,9 +29,9 @@ TEST(invoke, basic)
         cout << a << ", " << b << ", " << c << endl;
         return a;
     };
-    util::invokeExplicit(func, Arbi<int>(), Arbi<double>(), Arbi<string>());
+    util::invokeExplicit(func, gen::int32(), gen::float64(), gen::string());
     util::invoke(func);
-    util::invoke(func, Arbi<int>());
+    util::invoke(func, gen::int32());
 }
 
 TEST(invoke, void)
@@ -41,7 +39,7 @@ TEST(invoke, void)
     Function<void(int,double,string)> func = [](int a, double b, string c) {
         cout << a << ", " << b << ", " << c << endl;
     };
-    util::invokeExplicit(func, Arbi<int>(), Arbi<double>(), Arbi<string>());
+    util::invokeExplicit(func, gen::int32(), gen::float64(), gen::string());
     util::invoke(func);
-    util::invoke(func, Arbi<int>());
+    util::invoke(func, gen::int32());
 }

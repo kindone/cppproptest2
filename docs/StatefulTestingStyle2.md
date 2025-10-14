@@ -109,14 +109,14 @@ With our `Action`s properly defined, we can generate a sequence of `Action`s.
         auto actionListGen = actionListGenOf<SimpleAction<MyVector>>(
         // int -> PushBack(int)
         transform<int, std::shared_ptr<SimpleAction<MyVector>>>(
-            Arbi<int>(), [](const int& value) { return std::make_shared<PushBack>(value); }),
+            gen::int32(), [](const int& value) { return std::make_shared<PushBack>(value); }),
 
         // Popback()
         just<std::shared_ptr<SimpleAction<MyVector>>>([]() { return std::make_shared<PopBack>(); }),
 
         // (int, int) -> SetAt(int, int)
         transform<int, std::shared_ptr<SimpleAction<MyVector>>>(
-            Arbi<std::pair<int,int>>(), [](const std:;pair<int,int>& posAndVal) { return std::make_shared<SetAt>(posAndVal.first, posAndVal.second); }),
+            gen::pair<int,int>(), [](const std::pair<int,int>& posAndVal) { return std::make_shared<SetAt>(posAndVal.first, posAndVal.second); }),
 
         // Clear()
         just<std::shared_ptr<SimpleAction<MyVector>>>([]() { return std::make_shared<Clear>(); })

@@ -1,8 +1,6 @@
 #include "proptest/stateful/stateful_function.hpp"
 #include "proptest/test/testutil.hpp"
-#include "proptest/generator/integral.hpp"
-#include "proptest/generator/vector.hpp"
-#include "proptest/combinator/combinators.hpp"
+#include "proptest/gen.hpp"
 
 using namespace proptest;
 using namespace proptest::stateful;
@@ -17,7 +15,7 @@ TEST(stateful_function, basic)
 {
     using T = vector<int>;
 
-    auto pushBackGen = Arbi<int>().map<SimpleAction<T>>([](int value) {
+    auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
         return SimpleAction<T>([value](T& obj) {
             auto size = obj.size();
             obj.push_back(value);
@@ -62,7 +60,7 @@ TEST(stateful_function, basic_model)
     using T = vector<int>;
     using Model = VectorModel2;
 
-    auto pushBackGen = Arbi<int>().map<Action<T, Model>>([](int value) {
+    auto pushBackGen = gen::int32().map<Action<T, Model>>([](int value) {
         stringstream str;
         str << "PushBack(" << value << ")";
         return Action<T, Model>(str.str(), [value](T& obj, Model&) {

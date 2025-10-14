@@ -20,7 +20,7 @@ TYPED_TEST(ContainerTest, various_generators)
 {
     Random rand(1);
     //Arbitrary
-    auto numGen1 = Arbi<uint32_t>();
+    auto numGen1 = gen::uint32();
     //Generator
     auto numGen2 = gen::inRange<uint32_t>(0,1);
     //GenFunction

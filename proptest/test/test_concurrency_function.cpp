@@ -26,7 +26,7 @@ public:
 
 TEST(concurrency_function, WithoutModel)
 {
-    auto pushBackGen = Arbi<int>().map<SimpleAction<vector<int>>>([](const int& value) {
+    auto pushBackGen = gen::int32().map<SimpleAction<vector<int>>>([](const int& value) {
         return SimpleAction<vector<int>>([value](vector<int>& obj) {
             // cout << "PushBack(" << value << ")" << endl;
             lock_guard<mutex> guard(getMutex());
@@ -48,7 +48,7 @@ TEST(concurrency_function, WithoutModel)
 
     auto actionGen = gen::oneOf<SimpleAction<vector<int>>>(pushBackGen, popBackGen, clearGen);
 
-    auto prop = concurrency<vector<int>>(Arbi<vector<int>>(), actionGen);
+    auto prop = concurrency<vector<int>>(gen::vector<int>(), actionGen);
     prop.go();
 }
 
@@ -58,7 +58,7 @@ TEST(concurrency_function, WithModel)
     {
     };
 
-    auto pushBackGen = Arbi<int>().map<Action<vector<int>, Model>>([](const int& value) {
+    auto pushBackGen = gen::int32().map<Action<vector<int>, Model>>([](const int& value) {
         return Action<vector<int>, Model>([value](vector<int>& obj, Model&) {
             // cout << "PushBack(" << value << ")" << endl;
             lock_guard<mutex> guard(getMutex());
@@ -81,7 +81,7 @@ TEST(concurrency_function, WithModel)
     auto actionGen = gen::oneOf<Action<vector<int>, Model>>(pushBackGen, popBackGen, clearGen);
 
     auto prop = concurrency<vector<int>, Model>(
-        Arbi<vector<int>>(), [](const vector<int>&) { return Model(); }, actionGen);
+        gen::vector<int>(), [](const vector<int>&) { return Model(); }, actionGen);
     prop.setMaxConcurrency(2);
     prop.go();
 }

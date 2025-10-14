@@ -25,4 +25,7 @@ TEST(Compile, just)
     auto gen2 = gen::just<NonCopyable>(util::make_any<NonCopyable>(2));
     // getRef<NonCopyable>() is not allowed by new contract (non-copyable type)
     EXPECT_EQ(gen2(rand).getRef().a, 2);
+
+    auto gen3 = gen::lazy<NonCopyable>([]() { return util::make_unique<NonCopyable>(3); });
+    EXPECT_EQ(gen2(rand).getRef().a, 3);
 }

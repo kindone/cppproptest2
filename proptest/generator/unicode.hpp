@@ -1,14 +1,15 @@
 #pragma once
 
 #include "proptest/api.hpp"
-#include "proptest/Shrinkable.hpp"
+#include "proptest/Arbitrary.hpp"
 #include "proptest/Random.hpp"
 
 namespace proptest {
 
-struct PROPTEST_API UnicodeGen
-{
-    Shrinkable<uint32_t> operator()(Random& rand);
-};
+namespace gen {
+
+PROPTEST_API Generator<uint32_t> unicode();
+
+} // namespace gen
 
 }  // namespace proptest

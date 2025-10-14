@@ -7,6 +7,6 @@ using namespace proptest;
 TEST(Compile, floating)
 {
     Random rand(1);
-    auto gen = Arbi<float>();
+    auto gen = gen::float32();
     gen(rand);
 }

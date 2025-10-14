@@ -191,7 +191,7 @@ TEST(PropTest, TestChain)
     int64_t seed = getCurrentTime();
     Random rand(seed);
 
-    auto nullableIntegers = Arbi<bool>().tupleWith<int>(+[](const bool& isNull) -> GenFunction<int> {
+    auto nullableIntegers = gen::boolean().tupleWith<int>(+[](const bool& isNull) -> GenFunction<int> {
         if (isNull)
             return gen::just(0);
         else

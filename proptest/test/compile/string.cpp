@@ -7,11 +7,11 @@ using namespace proptest;
 TEST(Compile, string)
 {
     Random rand(1);
-    auto gen = Arbi<string>();
+    auto gen = gen::string();
     gen(rand);
 }
 
 TEST(Compile, stringGen)
 {
-    Arbi<string>(gen::interval('A', 'Z'));
+    gen::string(gen::interval('A', 'Z'));
 }

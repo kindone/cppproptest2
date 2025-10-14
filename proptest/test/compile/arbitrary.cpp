@@ -21,7 +21,7 @@ TEST(Compile, define_arbitrary_container_without_element_arbitrary)
     // Arbi<vector<MyObj>> should works even if Arbi<MyObj> is not defined
     Random rand(1);
     auto myObjGen = gen::interval(10, 20).map<MyObj>([](int a) { return MyObj(a); });
-    auto myObjsGen = Arbi<vector<MyObj>>(myObjGen, 1,2);
+    auto myObjsGen = gen::vector<MyObj>(myObjGen, 1,2);
     auto shr = myObjsGen(rand);
 
     cout << shr.getRef()[0].a << endl;

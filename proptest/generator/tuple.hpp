@@ -7,10 +7,10 @@
 
 namespace proptest {
 
-namespace gen {
+namespace util {
 
 template <typename...ARGS>
-decltype(auto) tuple(const shared_ptr<vector<AnyGenerator>>& genVec)
+decltype(auto) tupleOf(const shared_ptr<vector<AnyGenerator>>& genVec)
 {
     if(genVec->size() != sizeof...(ARGS))
         throw invalid_argument(__FILE__, __LINE__, "tuple: genVec size does not match number of arguments");
@@ -27,10 +27,14 @@ decltype(auto) tuple(const shared_ptr<vector<AnyGenerator>>& genVec)
 }
 
 template <typename...ARGS>
-decltype(auto) tuple(util::TypeList<ARGS...>, const shared_ptr<vector<AnyGenerator>>& genVec)
+decltype(auto) tupleOf(util::TypeList<ARGS...>, const shared_ptr<vector<AnyGenerator>>& genVec)
 {
-    return tuple<ARGS...>(genVec);
+    return tupleOf<ARGS...>(genVec);
 }
+
+} // namespace util
+
+namespace gen {
 
 /**
  * @file tuple.hpp
@@ -48,23 +52,7 @@ decltype(auto) tuple(GEN0&& gen0, GENS&&... gens)
     using ArgTypeList = util::TypeList<typename function_traits<GEN0>::return_type::type, typename function_traits<GENS>::return_type::type...>;
     auto genVec = util::make_shared<vector<AnyGenerator>, initializer_list<AnyGenerator>>({generator(gen0), generator(gens)...});
     // generator
-    return tuple(ArgTypeList{}, genVec);
-}
-
-// Legacy aliases for backward compatibility
-template <typename...ARGS>
-decltype(auto) tupleOf(const shared_ptr<vector<AnyGenerator>>& genVec) {
-    return tuple<ARGS...>(genVec);
-}
-
-template <typename...ARGS>
-decltype(auto) tupleOf(util::TypeList<ARGS...> typeList, const shared_ptr<vector<AnyGenerator>>& genVec) {
-    return tuple(typeList, genVec);
-}
-
-template <GenLike GEN0, GenLike... GENS>
-decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens) {
-    return tuple(util::forward<GEN0>(gen0), util::forward<GENS>(gens)...);
+    return util::tupleOf(ArgTypeList{}, genVec);
 }
 
 } // namespace gen

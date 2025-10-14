@@ -36,31 +36,42 @@ forAll([](SomeNewType x, SomeOtherType y) {
 
 ### Built-in Arbitraries
 
-`cppproptest` provides a set of built-in generators for generation of types that are often used in practice. These built-in generators are in the form of Arbitraries. You can access an arbitrary for `T` with `proptest::Arbitrary<T>`. Some of them are defined as template classes with type parameters for universality. For example, `Arbitrary<vector<T>>` defines a generator for a vector of any given type `T`, assuming you have an arbitrary for `T` already defined, or you have provided a custom generator for `T` as an argument for the vector arbitrary's constructor. Arbitraries of Commonly used standard containers are defined with type parameters so that you can generate such containers for the elemental types you desire.
+`cppproptest` provides a set of built-in generators for generation of types that are often used in practice. These built-in generators are in the form of Arbitraries. You can access an arbitrary for `T` with `proptest::Arbitrary<T>`. Some of them are defined as template classes with type parameters for universality. For example, `protest::Arbitrary<vector<T>>` defines a generator for a vector of any given type `T`, assuming you have an arbitrary for `T` already defined, or you have provided a custom generator for `T` as an argument for the vector arbitrary's constructor.
+
+```cpp
+
+auto intVectorGenA = proptest::Arbitrary<std::vector<int>>(); // defaults to proptest::Arbitrary<int>()
+auto intVectorGenB = proptest::Arbitrary<std::vector<int>>(gen::inRange(1,10)); // custom element generator
+
+auto fooVectorGen = proptest::Arbitrary<std::vector<Foo>>(fooGen); // custom generator for T
+auto fooVectorGen = proptest::Arbitrary<std::vector<Foo>>(); // BUILD fails: proptest::Arbitrary<Foo> not available
+```
+
+Arbitraries of Commonly used standard containers are defined with type parameters so that you can generate such containers for the elemental types you desire.
 
 Here's quick reference for built-in arbitraries:
 
-| Generator                                   | Purpose                          | Examples                            |
+| Arbitrary                                   | Alias                            | Examples                            |
 | ------------------------------------------- | -------------------------------- | ----------------------------------- |
-| `Arbi<bool>()`                              | Generate a boolean               | `true` or `false`                   |
-| `Arbi<char>()`                              | Generate a character             | `'c'` or `'%'`                      |
-| `Arbi<int>()`, `Arbi<uint64_t>()`, ...      | Generate an integer              | `12` or `-1133`                     |
-| `Arbi<float>()`, `Arbi<double>()`           | Generate a floating point number | `3.4` or `-1.4e3`                   |
+| `Arbi<bool>()`                              | `gen::boolean()`                 | `true` or `false`                   |
+| `Arbi<char>()`                              | `gen::character()`               | `'c'` or `'%'`                      |
+| `Arbi<int>()`, `Arbi<uint64_t>()`, ...      | `gen::int32()`, `gen::uint64()`...| `12` or `-1133`                     |
+| `Arbi<float>()`, `Arbi<double>()`           | `gen::float32()`, `gen::float64()`| `3.4` or `-1.4e3`                   |
 
 * Boolean type:`bool`
 * Character type: `char`
 * Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
 * Floating point types: `float`, `double`
 
-| Generator                                   | Purpose                          | Examples                            |
-| ------------------------------------------- | -------------------------------- | ----------------------------------- |
-| `Arbi<std::string>()`, `Arbi<UTF8String>()` | Generate a string                | `"world"` or `"あ叶葉말"`             |
-| `Arbi<std::pair<T1,T2>>()`                  | Generate a pair                  | `{1, "xv"}` or `{true, 3.4}`        |
-| `Arbi<std::tuple<Ts...>>()`                 | Generate a tuple                 | `{1, "xv", true}` or `{true, 3.4}`  |
-| `Arbi<std::list<T>>()`                      | Generate a list                  | `{10, -4, 0}` or `{"k", "&"}`       |
-| `Arbi<std::vector<T>>()`                    | Generate a vector                | `{10, -4, 0}` or `{"k", "&"}`       |
-| `Arbi<std::set<T>>()`                       | Generate a set                   | set `{1, 3, 4}` but not `{1, 1, 3}` |
-| `Arbi<std::map<K,V>>()`                     | Generate a map                   | map of `"Bob" -> 25, "Alice" -> 30` |
+| Arbitrary                                   | Alias                                | Examples                            |
+| ------------------------------------------- | ------------------------------------ | ----------------------------------- |
+| `Arbi<std::string>()`, `Arbi<UTF8String>()` | `gen::string()`, `gen::utf8string()` | `"world"` or `"あ叶葉말"`             |
+| `Arbi<std::pair<T1,T2>>()`                  | `gen::pair<T1,T2>()`                 | `{1, "xv"}` or `{true, 3.4}`        |
+| `Arbi<std::tuple<Ts...>>()`                 | `gen::tuple<Ts...>()`                | `{1, "xv", true}` or `{true, 3.4}`  |
+| `Arbi<std::list<T>>()`                      | `gen::list<T>()`                     | `{10, -4, 0}` or `{"k", "&"}`       |
+| `Arbi<std::vector<T>>()`                    | `gen::vector<T>()`                   | `{10, -4, 0}` or `{"k", "&"}`       |
+| `Arbi<std::set<T>>()`                       | `gen::set<T>()`                      | set `{1, 3, 4}` but not `{1, 1, 3}` |
+| `Arbi<std::map<K,V>>()`                     | `gen::map<K,V>()`                    | map of `"Bob" -> 25, "Alice" -> 30` |
 
 * String types:
     * `std::string` (defaults to generate ASCII character strings in \[0x01, 0x7F\] range)

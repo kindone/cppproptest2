@@ -7,7 +7,7 @@ using namespace proptest;
 TEST(Compile, map)
 {
     Random rand(3);
-    auto gen = Arbi<map<string, string>>();
+    auto gen = gen::map<string, string>();
     gen(rand);
     gen.map([](const map<string, string>&) { return 0; });
     gen.map<int>([](const map<string, string>&) { return 0; });
@@ -15,8 +15,8 @@ TEST(Compile, map)
 
 TEST(Compile, map_keygen)
 {
-    auto mapGen = Arbi<map<int, int>>();
-    auto intArbi = Arbi<int>();
+    auto mapGen = gen::map<int, int>();
+    auto intArbi = gen::int32();
     auto intGen = gen::inRange(0,1);
     auto intGenFunc = +[](Random&) -> Shrinkable<int> {
         return make_shrinkable<int>(0);

@@ -22,10 +22,26 @@ namespace gen {
  * combinator, but it generates a value in lazily.
  */
 template <typename T, typename LazyEval>
-    requires(is_convertible_v<LazyEval&&, function<T()>>)
+    requires(constructible_from<T, invoke_result_t<LazyEval>>)
 Generator<T> lazy(LazyEval&& lazyEval)
 {
     Function<T()> lazyEvalFunc = lazyEval;
+    return generator([lazyEvalFunc](Random&) { return make_shrinkable<T>(lazyEvalFunc()); });
+}
+
+/**
+ * @ingroup Combinators
+ * @brief Generator combinator for generating a value of type T by calling a function<T()>
+ * @tparam T generated type from resultant generator
+ * @tparam LazyEval callable type with signature void -> unique_ptr<T>
+ * @details This is intended to support lazy evaluation for generating a constant value. It's similar to `just`
+ * combinator, but it generates a value in lazily.
+ */
+template <typename T, typename LazyEval>
+    requires(constructible_from<unique_ptr<T>, invoke_result_t<LazyEval>>)
+Generator<T> lazy(LazyEval&& lazyEval)
+{
+    Function<unique_ptr<T>()> lazyEvalFunc = lazyEval;
     return generator([lazyEvalFunc](Random&) { return make_shrinkable<T>(lazyEvalFunc()); });
 }
 

@@ -65,7 +65,7 @@ auto popBackGen = just(SimpleAction<MyVector>([](MyVector& obj) {
 Notice the usage of `just` generator combinator which will always generate the same action. Compare with following `push_back()`'s action generator that requires an integer argument:
 
 ```cpp
-auto pushBackGen = Arbi<int>().map<SimpleAction<MyVector>>([](int value) {
+auto pushBackGen = gen::int32().map<SimpleAction<MyVector>>([](int value) {
     return SimpleAction<MyVector>([value](MyVector& obj) {
         obj.push_back(value);
     });
@@ -123,7 +123,7 @@ TEST(MyVectorTest, Stateful)
         PROP_ASSERT(obj.size() == size - 1);
     }));
 
-    auto pushBackGen = Arbi<int>().map<SimpleAction<MyVector>>([](int value) {
+    auto pushBackGen = gen::int32().map<SimpleAction<MyVector>>([](int value) {
         return [value](MyVector& obj) {
             int size = obj.size();
             obj.push_back(value);
@@ -215,7 +215,7 @@ TEST(MyVectorTest, Stateful)
         PROP_ASSERT(cnt.num == obj.size());
     }));
 
-    auto pushBackGen = Arbi<int>().map<Action<MyVector, Counter>>([](int value) {
+    auto pushBackGen = gen::int32().map<Action<MyVector, Counter>>([](int value) {
         return [value](MyVector& obj) {
             obj.push_back(value);
             cnt.num++;
@@ -260,7 +260,7 @@ auto clearGen = just(SimpleAction<MyVector>>("Clear", [](MyVector& obj) {
 }));
 
 // action with arguments can be printed nicely with a stringstream
-auto pushBackGen = Arbi<int>().map<SimpleAction<MyVector>>([](int value) {
+auto pushBackGen = gen::int32().map<SimpleAction<MyVector>>([](int value) {
     std::stringstream str;
     str << "PushBack(" << value << ")";
     return SimpleAction(str.str(), [value](MyVector& obj) {

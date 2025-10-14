@@ -48,7 +48,7 @@ TEST(Example, TemplatedGen)
             cout << ", " << numStrings[i];
         cout << " ]" << endl;
 
-    }, stringIntGen, Arbi<vector<string>>(stringIntGen) );
+    }, stringIntGen, gen::vector<string>(stringIntGen) );
 }
 
 TEST(Example, MapGen)
@@ -60,7 +60,7 @@ TEST(Example, MapGen)
 
     auto pairGen = gen::pair(intGen, stringIntGen);
 
-    Arbi<map<int, string>> mapGen;
+    gen::map<int, string> mapGen;
 
     forAll([]([[maybe_unused]] string str, [[maybe_unused]] map<int, string> nameAgeMap) {
         //cout << str << endl;

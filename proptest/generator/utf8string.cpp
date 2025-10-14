@@ -9,7 +9,7 @@ namespace proptest {
 size_t Arbi<UTF8String>::defaultMinSize = 0;
 size_t Arbi<UTF8String>::defaultMaxSize = 200;
 
-Arbi<UTF8String>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<UTF8String>(_minSize, _maxSize), elemGen(UnicodeGen()) {}
+Arbi<UTF8String>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<UTF8String>(_minSize, _maxSize), elemGen(gen::unicode()) {}
 
 Arbi<UTF8String>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer<UTF8String>(_minSize, _maxSize), elemGen(_elemGen) {}
 /*

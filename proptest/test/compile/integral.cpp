@@ -7,7 +7,7 @@ using namespace proptest;
 TEST(Compile, integral)
 {
     Random rand(1);
-    auto gen = Arbi<int32_t>();
+    auto gen = gen::int32();
     gen(rand);
 
     gen::inRange<int>(0, 10);

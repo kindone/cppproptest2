@@ -9,7 +9,7 @@ namespace proptest {
 size_t Arbi<UTF16BEString>::defaultMinSize = 0;
 size_t Arbi<UTF16BEString>::defaultMaxSize = 200;
 
-Arbi<UTF16BEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(UnicodeGen()) {}
+Arbi<UTF16BEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(gen::unicode()) {}
 
 Arbi<UTF16BEString>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(_elemGen) {}
 
@@ -68,7 +68,7 @@ Shrinkable<UTF16BEString> Arbi<UTF16BEString>::operator()(Random& rand) const
 size_t Arbi<UTF16LEString>::defaultMinSize = 0;
 size_t Arbi<UTF16LEString>::defaultMaxSize = 200;
 
-Arbi<UTF16LEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(UnicodeGen()) {}
+Arbi<UTF16LEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(gen::unicode()) {}
 
 Arbi<UTF16LEString>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(_elemGen) {}
 
