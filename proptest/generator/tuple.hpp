@@ -47,7 +47,7 @@ namespace gen {
  * @brief Generator combinator for tuple<T1, ..., Tn> with given generators for T1, ..., Tn
  */
 template <GenLike GEN0, GenLike... GENS>
-decltype(auto) tuple(GEN0&& gen0, GENS&&... gens)
+decltype(auto) tupleOf(GEN0&& gen0, GENS&&... gens)
 {
     using ArgTypeList = util::TypeList<typename function_traits<GEN0>::return_type::type, typename function_traits<GENS>::return_type::type...>;
     auto genVec = util::make_shared<vector<AnyGenerator>, initializer_list<AnyGenerator>>({generator(gen0), generator(gens)...});

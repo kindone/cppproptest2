@@ -27,5 +27,5 @@ TEST(Compile, just)
     EXPECT_EQ(gen2(rand).getRef().a, 2);
 
     auto gen3 = gen::lazy<NonCopyable>([]() { return util::make_unique<NonCopyable>(3); });
-    EXPECT_EQ(gen2(rand).getRef().a, 3);
+    EXPECT_EQ(gen3(rand).getRef().a, 3);
 }

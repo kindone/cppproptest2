@@ -152,25 +152,29 @@ forAll([](std::vector<int> numbers, std::map<std::string, int> data) {
 |-------|----------|-------------|
 | `gen::pair<T1,T2>` | `Arbi<std::pair<T1,T2>>` | Pairs |
 | `gen::tuple<Ts...>` | `Arbi<std::tuple<Ts...>>` | Tuples |
+| `gen::pairOf` |  | Pairs (type params inferred) |
+| `gen::tupleOf` |  | Tuples (type params inferred)|
 
-Pair and tuple generators take optional element generators as arguments.
+`gen::pair` and `gen::tuple` generators take optional element generators as arguments. The generators are optional only if the types have `Arbitrary` defined.
+
+`gen::pairOf` and `gen::tupleOf` is a convenient wrapper that allows omitting type parameters. You can see the subtle differences below:
 
 ```cpp
 // Basic pair and tuple generators
-auto intStringPairGen = gen::pair<int, std::string>();
-auto intBoolStringTupleGen = gen::tuple<int, bool, std::string>();
+auto intStringPairGen = gen::pair<int, std::string>(/* generators optional */);
+auto intBoolStringTupleGen = gen::tuple<int, bool, std::string>(/* generators optional */);
 
 // Pairs and tuples with custom element generators
-auto smallIntUppercaseStringPairGen = gen::pair<int, std::string>(
+auto smallIntUppercaseStringPairGen = gen::pairOf(
     gen::interval<int>(1, 100),
     gen::string(gen::interval<char>('A', 'Z'))
-);
+); // generator for pair<int, string>
 
-auto customTupleGen = gen::tuple<int, bool, std::string>(
+auto customTupleGen = gen::tupleOf(
     gen::interval<int>(-50, 50),
     gen::boolean(),
     gen::string(gen::interval<char>('a', 'z'))
-);
+); // generator for tuple<int, bool, string>
 
 // Usage in forAll
 forAll([](std::pair<int, std::string> data, std::tuple<int, bool, std::string> info) {
@@ -235,6 +239,15 @@ forAll([](int64_t multiRange) {
     // Property test with multi-interval integers
 }, gen::intervals({gen::Interval(-100, -1), gen::Interval(1, 100)}));
 ```
+
+## Access to an Arbitrary
+
+While arbitraries (default generator) for type `T` can be accessed using `proptest::Arbitary<T>`, a proxy in `gen` namespace is also provided. You may find it useful if type should be parameterized:
+
+| Function | Description |
+|----------|-------------|
+| `gen::arbitrary<T>(...)` | alias to `proptest::Arbitrary<T>` |
+
 
 ## Combinator Functions
 

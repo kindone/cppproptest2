@@ -14,7 +14,7 @@ template <>
 class Arbi<Animal> : public ArbiBase<Animal> {
     Shrinkable<Animal> operator()(Random& rand) const override
     {
-        auto tupleGen = gen::tuple(gen::int32(), gen::string(), gen::vector<int>());
+        auto tupleGen = gen::tupleOf(gen::int32(), gen::string(), gen::vector<int>());
         auto gen = tupleGen.map<Animal>(+[](const tuple<int,string,vector<int>>& tup) {
             return Animal(get<0>(tup), get<1>(tup), get<2>(tup));
         });
@@ -156,7 +156,7 @@ TEST(PropTest, TestDependency2)
 
     auto numRowsGen = gen::interval<int>(1000, 1000);
     auto numElementsGen = gen::uint16();
-    auto dimGen = gen::pair(numRowsGen, numElementsGen);
+    auto dimGen = gen::pairOf(numRowsGen, numElementsGen);
 
     auto rawGen = dimGen.pairWith<IndexVector>(
         +[](const Dimension& dimension) {
@@ -164,7 +164,7 @@ TEST(PropTest, TestDependency2)
             uint16_t numElements = dimension.second;
             auto firstGen = gen::interval<uint16_t>(0, numElements);
             auto secondGen = gen::boolean(0.75);
-            auto indexGen = gen::pair(firstGen, secondGen);
+            auto indexGen = gen::pairOf(firstGen, secondGen);
             auto indexVecGen = Arbi<IndexVector>(indexGen);
             indexVecGen.setSize(numRows);
             return indexVecGen;

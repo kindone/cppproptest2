@@ -8,7 +8,7 @@ TEST(Compile, pair)
 {
     Random rand(1);
     // auto gen = gen::pair<int8_t, uint8_t>(); FIXME (fall back to arbitrary)
-    auto gen = gen::pair(gen::int8(), gen::uint8());
+    auto gen = gen::pairOf(gen::int8(), gen::uint8());
     gen(rand);
 
     gen::boolean().pairWith(+[](const bool& value) {

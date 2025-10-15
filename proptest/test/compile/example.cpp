@@ -58,7 +58,7 @@ TEST(Example, MapGen)
         return to_string(num);
     });
 
-    auto pairGen = gen::pair(intGen, stringIntGen);
+    auto pairGen = gen::pairOf(intGen, stringIntGen);
 
     gen::map<int, string> mapGen;
 

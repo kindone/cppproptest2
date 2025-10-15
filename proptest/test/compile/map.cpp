@@ -22,15 +22,15 @@ TEST(Compile, map_keygen)
         return make_shrinkable<int>(0);
     };
 
-    auto pairGen1 = gen::pair(intArbi, intArbi);
-    auto pairGen2 = gen::pair(intArbi, intGen);
-    auto pairGen3 = gen::pair(intArbi, intGenFunc);
-    auto pairGen4 = gen::pair(intGen, intArbi);
-    auto pairGen5 = gen::pair(intGen, intGen);
-    auto pairGen6 = gen::pair(intGen, intGenFunc);
-    auto pairGen7 = gen::pair(intGenFunc, intArbi);
-    auto pairGen8 = gen::pair(intGenFunc, intGen);
-    auto pairGen9 = gen::pair(intGenFunc, intGenFunc);
+    auto pairGen1 = gen::pairOf(intArbi, intArbi);
+    auto pairGen2 = gen::pairOf(intArbi, intGen);
+    auto pairGen3 = gen::pairOf(intArbi, intGenFunc);
+    auto pairGen4 = gen::pairOf(intGen, intArbi);
+    auto pairGen5 = gen::pairOf(intGen, intGen);
+    auto pairGen6 = gen::pairOf(intGen, intGenFunc);
+    auto pairGen7 = gen::pairOf(intGenFunc, intArbi);
+    auto pairGen8 = gen::pairOf(intGenFunc, intGen);
+    auto pairGen9 = gen::pairOf(intGenFunc, intGenFunc);
     mapGen.setPairGen(pairGen1);
     mapGen.setPairGen(pairGen2);
     mapGen.setPairGen(pairGen3);

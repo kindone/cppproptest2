@@ -7,7 +7,7 @@ using namespace proptest;
 TEST(Compile, tuple)
 {
     Random rand(1);
-    auto gen = gen::tuple(gen::int8(), gen::uint8(), gen::float32());
+    auto gen = gen::tupleOf(gen::int8(), gen::uint8(), gen::float32());
     gen(rand);
 
     gen::boolean().tupleWith(+[](const bool& value) {

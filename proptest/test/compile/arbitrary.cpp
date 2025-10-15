@@ -15,6 +15,13 @@ struct MyObj2 {
 
 using namespace proptest;
 
+TEST(Compile, gen_arbitrary)
+{
+    gen::arbitrary<int>();
+    gen::arbitrary<string>();
+    gen::arbitrary<vector<int>>();
+    gen::arbitrary<map<int, string>>();
+}
 
 TEST(Compile, define_arbitrary_container_without_element_arbitrary)
 {
@@ -40,6 +47,11 @@ TEST(Compile, using_defined_arbitrary)
     auto myObjGen = Arbi<MyObj>();
     auto shr = myObjGen(rand);
     cout << shr.getRef().a << endl;
+}
+
+TEST(Compile, gen_arbitrary_myobj)
+{
+    gen::arbitrary<MyObj>();
 }
 
 // TEST(Compile, using_undefined_arbitrary)

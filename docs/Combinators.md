@@ -76,17 +76,18 @@ Some utility generators for integers are provided
 
 Generators for different types can be combined to produce a `std::pair` or `std::tuple`.
 
-* `gen::pair<T1, T2>(gen1, gen2)` : generates a `std::pair<T1,T2>` based on the results of generators `gen1` and `gen2`.
+* `gen::pairOf<T1, T2>(gen1, gen2)` : generates a `std::pair<T1,T2>` based on the results of generators `gen1` and `gen2`.
 
     ```cpp
-    auto pairGen = gen::pair(gen::int32(), gen::string());
+    auto pairGen = gen::pairOf(gen::int32(), gen::string());
     ```
 
-* `gen::tuple<T1, ..., TN>(gen1, ..., genN)`: generates a `std::tuple<T1,...,TN>` based on result of generators `gen1` through `genN`
+* `gen::tupleOf<T1, ..., TN>(gen1, ..., genN)`: generates a `std::tuple<T1,...,TN>` based on result of generators `gen1` through `genN`
 
     ```cpp
-    auto tupleGen = gen::tuple(gen::int32(), gen::string(), gen::float64());
+    auto tupleGen = gen::tupleOf(gen::int32(), gen::string(), gen::float64());
     ```
+They are basically convenient wrappers of `gen::pair<T1,T2>(gen1, gen2)` and `gen::tuple<T1,..Tn>(gen1, ..., genN)` that supports type inference.
 
 &nbsp;
 
@@ -229,7 +230,7 @@ You may want to include dependencies between generated values. Two combinators f
 * `gen::chain<Ts..., U>(genTuple, genUFromTuple)`: similar to `gen::dependency`, but operates on tuples. It takes a generator `genTuple` for `std::tuple<Ts...>` and a function `genUFromTuple`. This function receives the generated tuple (`const std::tuple<Ts...>&`) and returns a `Generator<U>`. The final result is a generator for `std::tuple<Ts..., U>`. `gen::chain` can be repeatedly applied to build tuples with multiple dependent elements.
 
     ```cpp
-    auto yearMonthGen = gen::tuple(gen::interval(0, 9999), gen::interval(1,12));
+    auto yearMonthGen = gen::tupleOf(gen::interval(0, 9999), gen::interval(1,12));
     // number of days of month depends on month (28~31 days) and year (whether it's a leap year)
     auto yearMonthDayGen = gen::chain<std::tuple<int, int>, int>(yearMonthGen, [](std::tuple<int,int>& yearMonth) {
         int year = std::get<0>(yearMonth);
@@ -248,7 +249,7 @@ You may want to include dependencies between generated values. Two combinators f
         }
     }); // yearMonthDayGen generates std::tuple<int, int, int> of (year, month, day)
     // Assuming helper functions: isLeapYear(int), monthHas31Days(int), monthHas30Days(int) exist
-    auto yearMonthGen = gen::tuple(gen::interval(1900, 2100), gen::interval(1, 12));
+    auto yearMonthGen = gen::tupleOf(gen::interval(1900, 2100), gen::interval(1, 12));
     // number of days in a month depends on the month and whether the year is a leap year
     auto yearMonthDayGen = gen::chain<int, int, int>(yearMonthGen, [](const std::tuple<int, int>& yearMonth) -> Generator<int> {
         int year = std::get<0>(yearMonth);
@@ -270,11 +271,11 @@ Actually, you can often achieve a similar goal using the `gen::filter` combinato
 
 ```cpp
     // generate any year,month,day combination
-    auto yearMonthDayGen = gen::tuple(gen::interval(0, 9999), gen::interval(1,12), gen::interval(1,31));
+    auto yearMonthDayGen = gen::tupleOf(gen::interval(0, 9999), gen::interval(1,12), gen::interval(1,31));
     // apply filter
     auto validYearMonthDayGen = yearMonthDayGen.filter([](std::tuple<int,int,int>& ymd) {
     // generate any year, month, day combination first
-    auto anyYearMonthDayGen = gen::tuple(gen::interval(1900, 2100), gen::interval(1, 12), gen::interval(1, 31));
+    auto anyYearMonthDayGen = gen::tupleOf(gen::interval(1900, 2100), gen::interval(1, 12), gen::interval(1, 31));
     // then apply filter to keep only valid dates
     auto validYearMonthDayGen = anyYearMonthDayGen.filter([](const std::tuple<int, int, int>& ymd) {
         int year = std::get<0>(ymd);
