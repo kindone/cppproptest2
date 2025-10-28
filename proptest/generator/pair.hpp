@@ -7,7 +7,7 @@
 
 /**
  * @file pair.hpp
- * @brief Arbitrary for pair<ARG1,ARG2> and utility function pairOf(gen1, gen2)
+ * @brief Arbitrary for pair<ARG1,ARG2> and utility function pair(gen1, gen2)
  */
 
 namespace proptest {
@@ -20,7 +20,7 @@ namespace gen {
  * @details shrinking is done by one parameter and then continues to the next
  */
 template <typename T1, typename T2>
-Generator<pair<T1,T2>> pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2)
+Generator<proptest::pair<T1,T2>> pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>& gen2)
 {
     // generator
     return generator(
@@ -30,7 +30,7 @@ Generator<pair<T1,T2>> pairOf(const GenFunction<T1>& gen1, const GenFunction<T2>
 }
 
 template <GenLike GEN1, GenLike GEN2>
-decltype(auto) pairOf(GEN1&& gen1, GEN2&& gen2)
+decltype(auto) pair(GEN1&& gen1, GEN2&& gen2)
 {
     using T1 = typename function_traits<GEN1>::return_type::type;
     using T2 = typename function_traits<GEN2>::return_type::type;

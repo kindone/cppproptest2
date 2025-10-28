@@ -152,12 +152,12 @@ forAll([](std::vector<int> numbers, std::map<std::string, int> data) {
 |-------|----------|-------------|
 | `gen::pair<T1,T2>` | `Arbi<std::pair<T1,T2>>` | Pairs |
 | `gen::tuple<Ts...>` | `Arbi<std::tuple<Ts...>>` | Tuples |
-| `gen::pairOf` |  | Pairs (type params inferred) |
-| `gen::tupleOf` |  | Tuples (type params inferred)|
+| `gen::pair` |  | Pairs (type params inferred) |
+| `gen::tuple` |  | Tuples (type params inferred)|
 
 `gen::pair` and `gen::tuple` generators take optional element generators as arguments. The generators are optional only if the types have `Arbitrary` defined.
 
-`gen::pairOf` and `gen::tupleOf` is a convenient wrapper that allows omitting type parameters. You can see the subtle differences below:
+`gen::pair` and `gen::tuple` each has a convenient wrapper that allows omitting type parameters. You can see the subtle differences below:
 
 ```cpp
 // Basic pair and tuple generators
@@ -165,12 +165,12 @@ auto intStringPairGen = gen::pair<int, std::string>(/* generators optional */);
 auto intBoolStringTupleGen = gen::tuple<int, bool, std::string>(/* generators optional */);
 
 // Pairs and tuples with custom element generators
-auto smallIntUppercaseStringPairGen = gen::pairOf(
+auto smallIntUppercaseStringPairGen = gen::pair(
     gen::interval<int>(1, 100),
     gen::string(gen::interval<char>('A', 'Z'))
 ); // generator for pair<int, string>
 
-auto customTupleGen = gen::tupleOf(
+auto customTupleGen = gen::tuple(
     gen::interval<int>(-50, 50),
     gen::boolean(),
     gen::string(gen::interval<char>('a', 'z'))

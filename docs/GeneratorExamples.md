@@ -32,7 +32,7 @@ int getMaximumDay(int year, int month) {
     return 31;
 }
 
-auto yearMonthGen = gen::tupleOf(gen::interval(0, 9999), gen::interval(1,12));
+auto yearMonthGen = gen::tuple(gen::interval(0, 9999), gen::interval(1,12));
 
 // combines (int,int) and int into (int,int,int)
 auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMonth) {
@@ -56,7 +56,7 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 
     auto precisionGen = gen::interval(1, maxPrecision);
     auto scaleGen = gen::interval(minScale, maxScale);
-    auto tupleGen = gen::tupleOf(precisionGen, scaleGen);
+    auto tupleGen = gen::tuple(precisionGen, scaleGen);
 
     auto decimalGen = tupleGen.template flatMap<Decimal>([](const std::tuple<int, int>& tup) -> GenFunction<federation::Decimal> {
         int precision = std::get<0>(tup);
@@ -66,7 +66,7 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
         auto firstGen = gen::interval<char>('1', '9');
         auto stringGen = gen::string(gen::interval('0', '9'));
         stringGen.setSize(precision-1);
-        auto decTupleGen = gen::tupleOf(signGen, firstGen, stringGen);
+        auto decTupleGen = gen::tuple(signGen, firstGen, stringGen);
         return decTupleGen.map<federation::Decimal>([scale](const ltt::tuple<bool, char, _STL::string>& decTup) {
             bool isNeg = std::get<0>(decTup);
             char first = std::get<1>(decTup);

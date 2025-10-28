@@ -17,7 +17,7 @@ TEST(GenIntegral, basic)
 TEST(Generator, tuple)
 {
     Random rand(getCurrentTime());
-    auto generator = gen::tupleOf(gen::interval<int>(0, 10), gen::interval<int>(-10, -1));
+    auto generator = gen::tuple(gen::interval<int>(0, 10), gen::interval<int>(-10, -1));
     auto val = generator(rand).getRef();
     EXPECT_TRUE(get<0>(val) >= 0);
     EXPECT_TRUE(get<0>(val) <= 10);

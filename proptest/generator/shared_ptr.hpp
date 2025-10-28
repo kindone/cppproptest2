@@ -6,7 +6,7 @@
 
 /**
  * @file shared_ptr.hpp
- * @brief Arbitrary for shared_ptr<T> and utility function pairOf(gen1, gen2)
+ * @brief Arbitrary for shared_ptr<T>
  */
 
 namespace proptest {

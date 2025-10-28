@@ -109,11 +109,29 @@ template <typename T>
 using shared_ptr = Arbi<::proptest::shared_ptr<T>>;
 
 template <typename T1, typename T2>
-using pair = Arbi<::proptest::pair<T1, T2>>;
+    requires (!GenLike<T1> && !GenLike<T2>)
+Arbi<::proptest::pair<T1, T2>> pair() {
+    return Arbi<::proptest::pair<T1, T2>>();
+}
+
+template <typename T1, typename T2>
+    requires (!GenLike<T1> && !GenLike<T2>)
+Arbi<::proptest::pair<T1, T2>> pair(GenFunction<T1> arg1Gen, GenFunction<T2> arg2Gen) {
+    return Arbi<::proptest::pair<T1, T2>>(arg1Gen, arg2Gen);
+}
 
 template <typename... ARGS>
-    requires (sizeof...(ARGS) > 0)
-using tuple = Arbi<::proptest::tuple<ARGS...>>;
+    requires (sizeof...(ARGS) > 0) && (... && !GenLike<ARGS>)
+Arbi<::proptest::tuple<ARGS...>> tuple() {
+    return Arbi<::proptest::tuple<ARGS...>>();
+}
+
+template <typename... ARGS>
+    requires (sizeof...(ARGS) > 0) && (... && !GenLike<ARGS>)
+Arbi<::proptest::tuple<ARGS...>> tuple(GenFunction<ARGS>... argGens) {
+    return Arbi<::proptest::tuple<ARGS...>>(argGens...);
+}
+
 
 template <typename T>
 using arbitrary = Arbi<T>;
