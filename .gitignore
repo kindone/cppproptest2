@@ -1,3 +1,4 @@
 BUILD/
 .venv
 site/
+.DS_Store
