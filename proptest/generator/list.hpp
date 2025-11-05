@@ -5,29 +5,46 @@
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/list.hpp"
 #include "proptest/std/vector.hpp"
+#include <concepts>
 
 /**
  * @file list.hpp
- * @brief Arbitrary for list<T>
+ * @brief Arbitrary for list-like containers
  */
 namespace proptest {
 
 /**
- * @ingroup Generators
- * @brief Arbitrary for list<T> with configurable element generator and min/max sizes
+ * @brief Concept for list-like containers that can be generated
+ *
+ * A list-like container must:
+ * - Have value_type
+ * - Support push_back operation
  */
-template <typename T>
-class PROPTEST_API Arbi<list<T>> final : public ArbiContainer<list<T>> {
+template <typename C>
+concept ListLikeContainer = requires(C& c, typename C::value_type v) {
+    typename C::value_type;
+    c.push_back(v);
+};
+
+/**
+ * @ingroup Generators
+ * @brief Arbitrary for list-like containers with push_back support (e.g., std::list) with configurable element generator and min/max sizes
+ */
+template <template <typename> class Container, typename T>
+    requires ListLikeContainer<Container<T>>
+class PROPTEST_API Arbi<Container<T>> final : public ArbiContainer<Container<T>> {
 public:
-    using List = list<T>;
-    using ArbiContainer<List>::minSize;
-    using ArbiContainer<List>::maxSize;
+    using ContainerType = Container<T>;
+    using ArbiContainer<ContainerType>::minSize;
+    using ArbiContainer<ContainerType>::maxSize;
     static size_t defaultMinSize;
     static size_t defaultMaxSize;
 
-    Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<list<T>>(_minSize, _maxSize), elemGen(Arbi<T>()) {}
+    Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize)
+        : ArbiContainer<ContainerType>(_minSize, _maxSize), elemGen(Arbi<T>()) {}
 
-    Arbi(GenFunction<T> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<list<T>>(_minSize, _maxSize), elemGen(_elemGen) {}
+    Arbi(GenFunction<T> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize)
+        : ArbiContainer<ContainerType>(_minSize, _maxSize), elemGen(_elemGen) {}
 
     Arbi setElemGen(GenFunction<T> _elemGen)
     {
@@ -35,7 +52,7 @@ public:
         return *this;
     }
 
-    Shrinkable<list<T>> operator()(Random& rand) const override
+    Shrinkable<ContainerType> operator()(Random& rand) const override
     {
         size_t size = rand.getRandomSize(minSize, maxSize + 1);
         auto shrinkVec = make_shrinkable<vector<ShrinkableBase>>();
@@ -43,16 +60,20 @@ public:
         for (size_t i = 0; i < size; i++)
             shrinkVec.getMutableRef().push_back(elemGen(rand));
 
-        return shrinkListLike<list, T>(shrinkVec, minSize);
+        return shrinkListLike<Container, T>(shrinkVec, minSize);
     }
 
 private:
     GenFunction<T> elemGen;
 };
 
-template <typename T>
-size_t Arbi<list<T>>::defaultMinSize = 0;
-template <typename T>
-size_t Arbi<list<T>>::defaultMaxSize = 200;
+// Static member definitions for all list-like containers
+template <template <typename> class Container, typename T>
+    requires ListLikeContainer<Container<T>>
+size_t Arbi<Container<T>>::defaultMinSize = 0;
+
+template <template <typename> class Container, typename T>
+    requires ListLikeContainer<Container<T>>
+size_t Arbi<Container<T>>::defaultMaxSize = 200;
 
 }  // namespace proptest

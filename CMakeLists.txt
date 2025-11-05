@@ -119,6 +119,7 @@ SET(proptest_testsources
     proptest/test/test_random.cpp
     proptest/test/test_arbitrary.cpp
     proptest/test/test_generator.cpp
+    proptest/test/test_container_variants.cpp
     proptest/test/test_combinator.cpp
     proptest/test/test_combinator2.cpp
     proptest/test/test_invoke.cpp
