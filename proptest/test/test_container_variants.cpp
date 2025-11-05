@@ -1,24 +1,21 @@
 #include "proptest/proptest.hpp"
 #include "proptest/generator/list.hpp"
 #include "proptest/generator/integral.hpp"
-#include <gtest/gtest.h>
+#include "proptest/test/gtest.hpp"
 
 using namespace proptest;
 
 // Alias for testing - simulates another list-like type
 template <typename T>
-using my_list = std::list<T>;
+using my_list = proptest::list<T>;
 
-TEST(ListVariants, std_list)
+TEST(ListVariants, default_list)
 {
-    auto listGen = Arbi<std::list<int>>();
+    auto listGen = Arbi<proptest::list<int>>();
     Random rand(getCurrentTime());
 
     auto shrinkable = listGen(rand);
-    auto& generatedList = shrinkable.getRef();
-
-    // Just verify we can generate a list
-    EXPECT_TRUE(generatedList.size() >= 0);
+    [[maybe_unused]] auto& generatedList = shrinkable.getRef();
 }
 
 TEST(ListVariants, my_list_alias)
@@ -27,15 +24,12 @@ TEST(ListVariants, my_list_alias)
     Random rand(getCurrentTime());
 
     auto shrinkable = mylistGen(rand);
-    auto& generatedList = shrinkable.getRef();
-
-    // Verify we can generate a list using the alias
-    EXPECT_TRUE(generatedList.size() >= 0);
+    [[maybe_unused]] auto& generatedList = shrinkable.getRef();
 }
 
 TEST(ListVariants, list_with_custom_generator)
 {
-    auto listGen = Arbi<std::list<int>>(interval(0, 100));
+    auto listGen = Arbi<proptest::list<int>>(gen::interval(0, 100));
     Random rand(getCurrentTime());
 
     auto shrinkable = listGen(rand);
@@ -50,7 +44,7 @@ TEST(ListVariants, list_with_custom_generator)
 
 TEST(ListVariants, my_list_with_custom_generator)
 {
-    auto mylistGen = Arbi<my_list<int>>(interval(0, 100));
+    auto mylistGen = Arbi<my_list<int>>(gen::interval(0, 100));
     Random rand(getCurrentTime());
 
     auto shrinkable = mylistGen(rand);

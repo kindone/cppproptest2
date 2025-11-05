@@ -40,7 +40,7 @@ TEST(GenNamespace, BasicTypeGenerators)
         gen::interval<uint32_t>('0', '9')
     ));
 
-    forAll([]([[maybe_unused]] std::string name, [[maybe_unused]] UTF8String alphanumeric) {
+    forAll([]([[maybe_unused]] string name, [[maybe_unused]] UTF8String alphanumeric) {
         // Property test with strings
         for(char c : alphanumeric) {
             EXPECT_TRUE(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9');

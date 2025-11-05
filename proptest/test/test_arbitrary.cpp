@@ -63,8 +63,8 @@ TEST(Arbitrary, int)
     auto val = arbi(rand).getRef();
     for(int i = 0; i < 5; i++)
         cout << arbi(rand).getRef() << endl;
-    EXPECT_TRUE(val >= std::numeric_limits<int>::min());
-    EXPECT_TRUE(val <= std::numeric_limits<int>::max());
+    EXPECT_TRUE(val >= numeric_limits<int>::min());
+    EXPECT_TRUE(val <= numeric_limits<int>::max());
 }
 
 TEST(Arbitrary, double)
@@ -263,8 +263,8 @@ TEST(Arbitrary, basic)
     auto val = arbi(rand).getRef();
     for(int i = 0; i < 10; i++)
         cout << arbi(rand).getRef() << endl;
-    EXPECT_TRUE(val >= std::numeric_limits<int>::min());
-    EXPECT_TRUE(val <= std::numeric_limits<int>::max());
+    EXPECT_TRUE(val >= numeric_limits<int>::min());
+    EXPECT_TRUE(val <= numeric_limits<int>::max());
 }
 
 TEST(Arbitrary, monadic)

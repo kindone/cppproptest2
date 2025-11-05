@@ -10,8 +10,8 @@ TEST(GenIntegral, basic)
     Random rand(getCurrentTime());
     auto gen = gen::interval<int>(0, 10);
     auto val = gen(rand).getRef();
-    EXPECT_TRUE(val >= std::numeric_limits<int>::min());
-    EXPECT_TRUE(val <= std::numeric_limits<int>::max());
+    EXPECT_TRUE(val >= numeric_limits<int>::min());
+    EXPECT_TRUE(val <= numeric_limits<int>::max());
 }
 
 TEST(Generator, tuple)
