@@ -29,7 +29,7 @@ struct PROPTEST_API Arbi : public ArbitraryBase<T>
 {
 
     Shrinkable<T> operator()(Random&) const override {
-        static_assert(is_same_v<T, void>, "Specialization for Arbi<T> must be defined before use");
+        static_assert(is_same_v<T, void>, "Arbitrary for type T (proptest::Arbi<T>) must be defined before use");
     }
 };
 

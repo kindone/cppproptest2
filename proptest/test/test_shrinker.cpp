@@ -11,6 +11,12 @@ using namespace proptest;
 
 TYPED_TEST(IntegralTest, shrinkIntegral_signed)
 {
+    auto shr = shrinkIntegral<TypeParam>(4);
+    EXPECT_EQ(serializeShrinkable(shr), "{value: 4, shrinks: [{value: 0}, {value: 2, shrinks: [{value: 1}]}, {value: 3}]}");
+}
+
+TYPED_TEST(IntegralTest, shrinkIntegral_signed1)
+{
     auto shr = shrinkIntegral<TypeParam>(8);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 8, shrinks: "
         "[{value: 0}, "
@@ -50,6 +56,12 @@ TYPED_TEST(IntegralTest, shrinkIntegral_signed2)
 }
 
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed)
+{
+    Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-4);
+    EXPECT_EQ(serializeShrinkable(shr), "{value: -4, shrinks: [{value: 0}, {value: -2, shrinks: [{value: -1}]}, {value: -3}]}");
+}
+
+TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed1)
 {
     Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8);
     EXPECT_EQ(serializeShrinkable(shr), "{value: -8, shrinks: "
@@ -114,6 +126,17 @@ TEST(FloatingShrinker, basic)
     // FIXME: shrinker  not good enough
     auto shr = shrinkFloat(1.0f);
     EXPECT_EQ(serializeShrinkable(shr), "{value: 1, shrinks: [{value: 0}, {value: 0.5, shrinks: [{value: 0.5}]}]}");
+}
+
+TEST(FloatingShrinker, examine_100)
+{
+    // Examine shrink tree for 100.0
+    auto shr = shrinkFloat(100.0);
+    proptest::cout << "Shrink tree for 100.0:" << proptest::endl;
+    proptest::cout << "======================" << proptest::endl;
+    printExhaustive(shr);
+    proptest::cout << proptest::endl << "Serialized format:" << proptest::endl;
+    proptest::cout << serializeShrinkable(shr) << proptest::endl;
 }
 
 
