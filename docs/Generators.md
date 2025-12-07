@@ -52,8 +52,14 @@ auto boolGen = gen::boolean(0.7); // true probability: defaults to 0.5 if not gi
 auto charGen = gen::character();
 auto intGen = gen::int32();
 auto uintGen = gen::uint32();
-auto floatGen = gen::float32();
-auto doubleGen = gen::float64();
+auto floatGen = gen::float32(); // Default: finite values only
+auto doubleGen = gen::float64(); // Default: finite values only
+
+// Floating point generators with special value probabilities
+auto floatWithNaN = gen::float32(0.1, 0.0, 0.0); // 10% NaN, 90% finite
+auto floatWithInf = gen::float32(0.0, 0.05, 0.05); // 5% +inf, 5% -inf, 90% finite
+auto floatWithAll = gen::float32(0.05, 0.05, 0.05); // 5% each special value, 85% finite
+auto doubleWithNaN = gen::float64(0.1, 0.0, 0.0); // Same API for double
 
 // Usage in forAll
 forAll([](bool b, char c, int32_t i, float f) {
@@ -240,6 +246,96 @@ forAll([](int64_t multiRange) {
 }, gen::intervals({gen::Interval(-100, -1), gen::Interval(1, 100)}));
 ```
 
+## Floating Point Generators
+
+Floating point generators (`gen::float32` and `gen::float64`) support configurable probabilities for special IEEE 754 values: NaN, positive infinity, and negative infinity.
+
+### Interface
+
+**Constructor signatures:**
+```cpp
+gen::float32(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
+gen::float64(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
+
+// Equivalent to:
+Arbi<float>(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
+Arbi<double>(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
+```
+
+**Parameters:**
+- **`nanProb`** (default: `0.0`): Probability of generating NaN, must be in range [0.0, 1.0]
+- **`posInfProb`** (default: `0.0`): Probability of generating positive infinity, must be in range [0.0, 1.0]
+- **`negInfProb`** (default: `0.0`): Probability of generating negative infinity, must be in range [0.0, 1.0]
+
+**Constraints:**
+- Each probability must be between 0.0 and 1.0 (inclusive)
+- The sum of all probabilities must be ≤ 1.0
+- The remaining probability (1.0 - sum) is used for generating finite values
+
+The constructor validates these requirements and throws `runtime_error` if they are not met.
+
+### Default Behavior
+
+By default, floating point generators produce only **finite values** (no NaN or infinity):
+
+```cpp
+// Default: generates only finite values
+auto floatGen = gen::float32();
+auto doubleGen = gen::float64();
+
+forAll([](float f, double d) {
+    PROP_ASSERT(isfinite(f));
+    PROP_ASSERT(isfinite(d));
+}, gen::float32(), gen::float64());
+```
+
+### Special Value Probabilities
+
+You can configure the probability of generating special values using constructor parameters:
+
+```cpp
+// Generate 10% NaN, 90% finite
+auto floatWithNaN = gen::float32(0.1, 0.0, 0.0);
+
+// Generate 5% +inf, 5% -inf, 90% finite
+auto floatWithInf = gen::float32(0.0, 0.05, 0.05);
+
+// Generate 5% each special value, 85% finite
+auto floatWithAll = gen::float32(0.05, 0.05, 0.05);
+
+// When sum = 1.0, no finite values are generated
+auto onlySpecial = gen::float32(0.5, 0.3, 0.2); // 50% NaN, 30% +inf, 20% -inf
+
+// Same API for double
+auto doubleWithNaN = gen::float64(0.1, 0.0, 0.0);
+
+// Usage in forAll
+forAll([](float f) {
+    PROP_STAT(std::isfinite(f));
+    PROP_STAT(std::isinf(f));
+    PROP_STAT(std::isnan(f));
+    PROP_STAT(val > 0);
+    PROP_STAT(val < 0);
+}, gen::float64(0.05, 0.05, 0.05));
+
+// Output stat example:
+//   isfinite(val):
+//     false: 138/1000 (13.8%)
+//     true: 862/1000 (86.2%)
+//   isinf(val):
+//     false: 900/1000 (90%)
+//     true: 100/1000 (10%)
+//   isnan(val):
+//     false: 962/1000 (96.2%)
+//     true: 38/1000 (3.8%)
+//   val < 0:
+//     false: 508/1000 (50.8%)
+//     true: 492/1000 (49.2%)
+//   val > 0:
+//     false: 530/1000 (53%)
+//     true: 470/1000 (47%)
+```
+
 ## Access to an Arbitrary
 
 While arbitraries (default generator) for type `T` can be accessed using `proptest::Arbitary<T>`, a proxy in `gen` namespace is also provided. You may find it useful if type should be parameterized:
@@ -341,6 +437,14 @@ There are utility functions for providing probabilities for each value or genera
 auto boolGen = gen::boolean();
 auto intGen = gen::int32();
 auto stringGen = gen::string();
+
+// Floating point - default (finite only)
+auto floatGen = gen::float32();
+auto doubleGen = gen::float64();
+
+// Floating point with special values
+auto floatWithNaN = gen::float32(0.1, 0.0, 0.0); // 10% NaN, 90% finite
+auto doubleWithInf = gen::float64(0.0, 0.05, 0.05); // 5% +inf, 5% -inf, 90% finite
 
 // Numeric ranges - these are function calls, not type aliases
 auto smallIntGen = gen::interval(1, 100);

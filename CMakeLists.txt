@@ -128,6 +128,8 @@ SET(proptest_testsources
     proptest/test/test_stateful_function.cpp
     proptest/test/test_concurrency_function.cpp
     proptest/test/test_performance.cpp
+    proptest/test/test_flatmap_edge_cases.cpp
+    proptest/test/test_floating.cpp
     proptest/test/testutil.cpp
 )
 

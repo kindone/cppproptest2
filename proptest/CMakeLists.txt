@@ -71,6 +71,7 @@ SET(proptest_testsources
     test/test_random.cpp
     test/test_arbitrary.cpp
     test/test_generator.cpp
+    test/test_floating.cpp
     test/test_combinator.cpp
     test/test_invoke.cpp
     test/test_property.cpp

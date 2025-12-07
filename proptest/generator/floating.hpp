@@ -6,6 +6,9 @@
 /**
  * @file floating.hpp
  * @brief Arbitrary for float and double
+ *
+ * By default, generates only finite values. Can optionally generate
+ * special values (NaN, +inf, -inf) with specified probabilities.
  */
 
 namespace proptest {
@@ -13,26 +16,69 @@ namespace proptest {
 /**
  * @ingroup Generators
  * @brief Arbitrary for float
+ *
+ * By default, generates only finite values. Can optionally generate
+ * NaN, +inf, and -inf with specified probabilities.
  */
 template <>
 struct PROPTEST_API Arbi<float> : public ArbiBase<float>
 {
 public:
+    /**
+     * @brief Constructor with optional probability parameters
+     * @param nanProb Probability of generating NaN (0.0 to 1.0, default: 0.0)
+     * @param posInfProb Probability of generating +inf (0.0 to 1.0, default: 0.0)
+     * @param negInfProb Probability of generating -inf (0.0 to 1.0, default: 0.0)
+     *
+     * The sum of nanProb, posInfProb, and negInfProb must be <= 1.0.
+     * The remaining probability (1.0 - sum) is used for finite values.
+     */
+    Arbi(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0);
+
     Shrinkable<float> operator()(Random& rand) const override;
+
     static constexpr float boundaryValues[] = {0.0, 1.0, -1.0};
+
+    Arbi(const Arbi<float>&) = default;
+
+private:
+    double nanProb;
+    double posInfProb;
+    double negInfProb;
 };
 
 /**
  * @ingroup Generators
  * @brief Arbitrary for double
+ *
+ * By default, generates only finite values. Can optionally generate
+ * NaN, +inf, and -inf with specified probabilities.
  */
 template <>
 struct PROPTEST_API Arbi<double> : public ArbiBase<double>
 {
 public:
+    /**
+     * @brief Constructor with optional probability parameters
+     * @param nanProb Probability of generating NaN (0.0 to 1.0, default: 0.0)
+     * @param posInfProb Probability of generating +inf (0.0 to 1.0, default: 0.0)
+     * @param negInfProb Probability of generating -inf (0.0 to 1.0, default: 0.0)
+     *
+     * The sum of nanProb, posInfProb, and negInfProb must be <= 1.0.
+     * The remaining probability (1.0 - sum) is used for finite values.
+     */
+    Arbi(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0);
+
     Shrinkable<double> operator()(Random& rand) const override;
 
     static constexpr double boundaryValues[] = {0.0, 1.0, -1.0};
+
+    Arbi(const Arbi<double>&) = default;
+
+private:
+    double nanProb;
+    double posInfProb;
+    double negInfProb;
 };
 
 namespace util {
