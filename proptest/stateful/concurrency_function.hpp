@@ -333,7 +333,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
         rearShrs.push_back(actionListGen(rand));
     }
 
-    ObjectType obj = initialShr.getRef();
+    ObjectType& obj = initialShr.getMutableRef();
     ModelType model = modelFactory ? modelFactory(obj) : ModelType();
     const auto& front = frontShr.getRef();
     vector<string> frontNames;
