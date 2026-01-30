@@ -329,3 +329,137 @@ Also, there are [Google Test](https://github.com/google/googletest) compatible m
 EXPECT_FOR_ALL(...); // non-fatal, shorthand for EXPECT_TRUE(proptest::forAll(...));
 ASSERT_FOR_ALL(...); // fatal, shorthand for ASSERT_TRUE(proptest::forAll(...));
 ```
+
+## Collecting Statistics and Tagging
+
+`cppproptest` provides macros for collecting statistics about test inputs and categorizing test cases. These are useful for understanding the distribution of generated values and ensuring that your property tests cover the cases you care about.
+
+### Statistics Collection with `PROP_STAT`
+
+`PROP_STAT(expression)` evaluates an expression (typically a boolean condition) for each test run and collects statistics about how often each result occurs. At the end of the test, a summary is printed showing the distribution of results.
+
+```cpp
+forAll([](float f) {
+    PROP_STAT(std::isfinite(f));
+    PROP_STAT(std::isinf(f));
+    PROP_STAT(std::isnan(f));
+    PROP_STAT(f > 0);
+    PROP_STAT(f < 0);
+}, gen::float32(0.05, 0.05, 0.05));
+
+// Output example:
+//   std::isfinite(f):
+//     false: 138/1000 (13.8%)
+//     true: 862/1000 (86.2%)
+//   std::isinf(f):
+//     false: 900/1000 (90%)
+//     true: 100/1000 (10%)
+//   std::isnan(f):
+//     false: 962/1000 (96.2%)
+//     true: 38/1000 (3.8%)
+//   f < 0:
+//     false: 508/1000 (50.8%)
+//     true: 492/1000 (49.2%)
+//   f > 0:
+//     false: 530/1000 (53%)
+//     true: 470/1000 (47%)
+```
+
+The expression passed to `PROP_STAT` is automatically converted to a string for the key, and the evaluated value becomes the statistic being tracked.
+
+### Custom Tagging with `PROP_TAG`
+
+`PROP_TAG(key, value)` allows you to categorize test cases with custom key-value pairs. Unlike `PROP_STAT`, both the key and value are expressions that are evaluated. This is useful when you want more control over the categorization labels.
+
+```cpp
+forAll([](int x) {
+    if (x < 0) {
+        PROP_TAG("sign", "negative");
+    } else if (x > 0) {
+        PROP_TAG("sign", "positive");
+    } else {
+        PROP_TAG("sign", "zero");
+    }
+
+    PROP_TAG("magnitude", x > 100 ? "large" : "small");
+});
+
+// Output will show distribution of tags:
+//   sign:
+//     negative: 487/1000 (48.7%)
+//     positive: 501/1000 (50.1%)
+//     zero: 12/1000 (1.2%)
+//   magnitude:
+//     large: 756/1000 (75.6%)
+//     small: 244/1000 (24.4%)
+```
+
+### Conditional Classification with `PROP_CLASSIFY`
+
+`PROP_CLASSIFY(condition, key, value)` is a convenience macro that combines a conditional check with tagging. It only applies the tag when the condition is true.
+
+```cpp
+forAll([](int x, int y) {
+    PROP_CLASSIFY(x == y, "relationship", "equal");
+    PROP_CLASSIFY(x > y, "relationship", "greater");
+    PROP_CLASSIFY(x < y, "relationship", "less");
+});
+```
+
+This is equivalent to:
+```cpp
+if (x == y) PROP_TAG("relationship", "equal");
+if (x > y) PROP_TAG("relationship", "greater");
+if (x < y) PROP_TAG("relationship", "less");
+```
+
+## Controlling Test Execution
+
+### Discarding Test Cases with `PROP_DISCARD`
+
+Sometimes a generated input doesn't meet preconditions for your property test. While you can `return` the property function or use `gen::filter()` to filter inputs at the generator level, you can also discard inputs within the property function using `PROP_DISCARD()`.
+
+```cpp
+forAll([](int x, int y) {
+    // Skip test cases where y is zero to avoid division by zero
+    if (y == 0) {
+        PROP_DISCARD();
+    }
+
+    int result = x / y;
+    PROP_ASSERT(result * y <= x);
+});
+```
+
+While returning early from property function has similar effect, `PROP_DISCARD()` can be called inside nested functions.
+When `PROP_DISCARD()` is called, the current test iteration is skipped and doesn't count toward the total number of runs. The test will generate additional inputs to meet the configured number of successful runs.
+
+**Note:** If too many test cases are discarded (e.g., your preconditions are too restrictive), the test may take a long time or fail to complete. In such cases, consider using `gen::filter()` (a.k.a `gen::suchThat()`) to filter at the generator level instead.
+
+### Early Success with `PROP_SUCCESS`
+
+`PROP_SUCCESS()` immediately marks the current test iteration as successful and skips any remaining assertions or checks in the property function.
+
+```cpp
+forAll([](int x, int y) {
+    // For trivial cases, skip expensive checks
+    if (x == 0 || y == 0) {
+        PROP_SUCCESS();
+    }
+
+    // Expensive property checks here
+    PROP_ASSERT(complexProperty(x, y));
+});
+```
+
+This is useful when you want to short-circuit property checking for certain inputs that you know will pass, allowing you to optimize test execution time. While returning early from property function has similar effect, `PROP_SUCCESS()` can be called inside nested functions.
+
+### Summary
+
+| Macro | Purpose | Use Case |
+|-------|---------|----------|
+| `PROP_STAT(expr)` | Collect statistics about expression values | Understanding input distribution |
+| `PROP_TAG(key, value)` | Categorize test cases with custom labels | Custom categorization of inputs |
+| `PROP_CLASSIFY(cond, key, value)` | Conditionally tag test cases | Simplified conditional tagging |
+| `PROP_DISCARD()` | Skip current test iteration | Inputs don't meet preconditions |
+| `PROP_SUCCESS()` | Mark current test iteration as passed and skip remaining checks | Early exit for trivial cases |
