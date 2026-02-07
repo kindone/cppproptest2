@@ -56,6 +56,7 @@ nav:
   - 'cppproptest':
     - README.md
     - 'Getting Started' : GettingStarted.md
+    - 'Step-by-Step Walkthrough' : Walkthrough.md
     - Property.md
     - 'Generating Inputs':
       - Generators.md

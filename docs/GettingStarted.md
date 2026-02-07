@@ -49,4 +49,4 @@ Note that `ASSERT_FOR_ALL` is a simple macro wrapping an `ASSERT_TRUE` google te
 
 **Next Steps:**
 - [Creating Your First Property Test: A Step-by-Step Walkthrough](Walkthrough.md) - Learn how to create property tests step-by-step
-- [Writing Property-based Tests](Property.md) - Complete API reference for property testing
+- [Property API Reference](Property.md) - Complete API reference for property testing

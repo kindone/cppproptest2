@@ -5,6 +5,7 @@ This guide walks you through creating property-based tests with `cppproptest` fr
 ## Prerequisites
 
 Before starting, make sure you have:
+
 - `cppproptest` integrated into your project (see [Getting Started](GettingStarted.md))
 - A test framework (Google Test is used in these examples)
 - Basic understanding of C++ lambdas
@@ -32,29 +33,33 @@ TEST(Arithmetic, AdditionIsCommutative)
 ### Breaking It Down
 
 1. **Includes**:
-   - `proptest/proptest.hpp` - Main header with all property testing functionality
-   - `<gtest/gtest.h>` - Google Test integration
+
+    - `proptest/proptest.hpp` - Main header with all property testing functionality
+    - `<gtest/gtest.h>` - Google Test integration
 
 2. **Using namespace**: `using namespace proptest;` gives you access to `forAll`, `property`, `gen`, etc.
 
 3. **Test structure**: This is a standard Google Test `TEST` macro. The property test runs inside it.
 
 4. **The `forAll` function**: This is the simplest way to run a property test. It:
-   - Takes a callable (here, a lambda) that defines your property
-   - Automatically generates random inputs for each parameter
-   - Runs the property multiple times (default: 1000 runs)
-   - Reports failures if the property doesn't hold
+
+    - Takes a callable (here, a lambda) that defines your property
+    - Automatically generates random inputs for each parameter
+    - Runs the property multiple times (default: 1000 runs)
+    - Reports failures if the property doesn't hold
 
    See [Property API Reference](Property.md) for complete details on `forAll` and other property testing functions.
 
 5. **The property function**:
-   - Parameters `int a, int b` - these will be randomly generated
-   - Return type `bool` - `true` means the property holds, `false` means it fails
-   - Body: `return a + b == b + a;` - the property we're testing
+
+    - Parameters `int a, int b` - these will be randomly generated
+    - Return type `bool` - `true` means the property holds, `false` means it fails
+    - Body: `return a + b == b + a;` - the property we're testing
 
 ### Running the Test
 
 When you run this test, `cppproptest` will:
+
 - Generate 1000 random pairs of integers
 - Call your lambda with each pair
 - Verify that `a + b == b + a` for all pairs
@@ -74,11 +79,13 @@ TEST(Arithmetic, AdditionIsCommutativeWithAssertions)
 ```
 
 **Key differences:**
+
 - No return type needed (implicitly `void`)
 - `PROP_ASSERT_EQ` provides detailed failure messages
 - Test case stops immediately on first failure (fatal assertion)
 
 **Available assertion macros:**
+
 - `PROP_ASSERT_EQ(A, B)` - Assert equality
 - `PROP_ASSERT_NE(A, B)` - Assert not equal
 - `PROP_ASSERT_LT(A, B)` - Assert less than
@@ -103,11 +110,13 @@ TEST(Arithmetic, AdditionWithCustomRange)
 ```
 
 **What changed:**
+
 - Added two generator arguments: `gen::interval(0, 100)`
 - `a` and `b` will now only be generated in the range [0, 100]
 - This is useful for testing specific ranges or avoiding problematic values
 
 **Some common generator functions:**
+
 - `gen::interval(min, max)` - Generate integers in a range
 - `gen::elementOf(values...)` - Generate one of the specified values
 - `gen::just(value)` - Always generate the same value
@@ -115,6 +124,7 @@ TEST(Arithmetic, AdditionWithCustomRange)
 - `gen::vector<T>()` - Generate random vectors
 
 **Learn more:**
+
 - [Generators](Generators.md) - Complete guide to all built-in generators
 - [Combinators](Combinators.md) - Combine generators to create new ones (e.g., `map`, `filter`, `flatMap`)
 - [Gen Namespace](GenNamespace.md) - Overview of the `gen` namespace
@@ -142,6 +152,7 @@ TEST(StringUtils, ReverseTwiceIsIdentity)
 **Property being tested:** Reversing a string twice should yield the original string.
 
 **What's happening:**
+
 - `original` is a randomly generated string (see [Generators - String Generators](Generators.md#string-generators) for string generation options)
 - We reverse it once, then reverse the result
 - We verify the final result equals the original
@@ -151,6 +162,7 @@ TEST(StringUtils, ReverseTwiceIsIdentity)
 In the examples so far, we've used different parameter styles - value types like `int a` and const references like `const std::string& original`. Both work identically with `cppproptest` while the latter is often preferred to avoid copy-construction.
 
 **Value types vs const references:**
+
 - **Value types**: `int`, `std::string`, `std::vector<int>` - Parameters are passed by value
 - **Const references**: `const int&`, `const std::string&`, `const std::vector<int>&` - Parameters are passed by const reference
 
@@ -168,6 +180,7 @@ forAll([](const std::string& s) { ... });
 ```
 
 **When to use which:**
+
 - **Use value types** for simple, cheap-to-copy types: `int`, `bool`, `char`, `double`, etc.
 - **Use const references** for larger or expensive-to-copy types: `std::string`, `std::vector<T>`, `std::map<K,V>`, custom structs, etc.
 
@@ -251,13 +264,17 @@ TEST(StringUtils, ReverseWithSetConfig)
 }
 ```
 
-**Benefits of `property()`:**
-- Can configure number of runs: `.setNumRuns(500)` - stops after this many runs
-- Can set maximum duration: `.setMaxDurationMs(5000)` - stops after this many milliseconds (whichever limit is reached first)
-- Can set random seed: `.setSeed(12345)` for reproducibility
-- Can batch configure: `.setConfig({.seed = 123, .numRuns = 500})` - configure multiple options at once (C++20)
+**Capability of `property()`:**
+
+with a `Property` object obtained from `property()` higher order function, you can perform various test combinations with custom configurations, using the same property function.
+
+- Can test with random examples: `.forAll()`
+    - Can set number of runs: `.setNumRuns(500)` - stops after this many runs
+    - Can set maximum duration: `.setMaxDurationMs(5000)` - stops after this many milliseconds (whichever limit is reached first)
+    - Can set random seed: `.setSeed(12345)` for reproducibility
+    - Can batch configure: `.setConfig({.seed = 123, .numRuns = 500})` - configure multiple options at once (C++20)
 - Can test specific examples: `.example("hello")`
-- Can test all combinations: `.matrix({"a", "ab", "abc"})`
+- Can test all possible combinations: `.matrix({"a", "ab", "abc"})`
 
 **Note:** When both `setNumRuns()` and `setMaxDurationMs()` are set, the test stops when either limit is reached - whichever comes first.
 
@@ -297,9 +314,9 @@ TEST(StringUtils, ReverseWithConfigAndGenerators)
 ```
 
 **When to use which:**
+
 - Use `forAll()` with configuration `{ ... }` for simple, one-off configurations
-- Use `property().setConfig({ ... }).forAll()` for batch configuration when you need to reuse the property object
-- Use `property().setX().forAll()` when you need fine-grained control or want to chain multiple operations (like `.example()` or `.matrix()`)
+- Use `property().setConfig({ ... }).forAll()` or `property().setX().setY().forAll()` when you need to reuse the property object to chain multiple operations (like `.example()` or `.matrix()`)
 
 See [Property API Reference](Property.md) for complete details on configuration options and methods.
 
@@ -387,17 +404,27 @@ TEST(Statistics, CollectingStats)
 ```
 
 **`PROP_STAT(condition)`:**
+
 - Tracks how often the condition is true or false
 - Doesn't fail the test if false
 - Useful for understanding input distribution
 - Statistics are printed at the end of the test run
-- The key is automatically derived from the condition expression
+- The key is automatically derived from the condition expression by the precompiler
 
 **`PROP_TAG(KEY, VALUE)`:**
+
 - Similar to `PROP_STAT`, but allows you to specify a custom key name
 - Tracks how often the VALUE is true or false with your custom KEY
 - Useful when you want more descriptive or grouped statistics
 - Doesn't fail the test if VALUE is false
+- Statistics are printed at the end of the test run
+
+**`PROP_CLASSIFY(condition, KEY, VALUE)`:**
+
+- Conditionally tags test cases only when the condition is true
+- Only applies the tag when the condition evaluates to true (unlike `PROP_TAG` which tracks both true and false)
+- Useful for categorizing test cases into groups based on conditions
+- Doesn't fail the test if condition is false
 - Statistics are printed at the end of the test run
 
 ```cpp
@@ -409,6 +436,20 @@ TEST(Statistics, UsingTags)
         PROP_TAG("in range", value >= 0 && value < 100);  // Key: "in range" (custom)
 
         PROP_ASSERT_GE(value * value, 0);
+    });
+}
+
+TEST(Statistics, UsingClassify)
+{
+    forAll([](int x, int y) {
+        // Only tag when conditions are true
+        PROP_CLASSIFY(x == y, "relationship", "equal");
+        PROP_CLASSIFY(x > y, "relationship", "greater");
+        PROP_CLASSIFY(x < y, "relationship", "less");
+        PROP_CLASSIFY(x % 2 == 0, "parity", "even");
+        PROP_CLASSIFY(y % 2 == 0, "parity", "even");
+
+        PROP_ASSERT_EQ(x + y, y + x);
     });
 }
 ```
@@ -435,6 +476,7 @@ TEST(StringUtils, ReverseWithGTestIntegration)
 ```
 
 **Difference:**
+
 - `forAll()` returns `bool` - you need to wrap it: `EXPECT_TRUE(forAll(...))`
 - `EXPECT_FOR_ALL(...)` - Shorthand for `EXPECT_TRUE(forAll(...))`
 - `ASSERT_FOR_ALL(...)` - Shorthand for `ASSERT_TRUE(forAll(...))`
@@ -456,6 +498,7 @@ TEST(Example, FailingProperty)
 ```
 
 **What happens on failure:**
+
 1. Test finds a counterexample (e.g., `vec = [42, 17, 99]`)
 2. Shrinking process tries to simplify it
 3. May find a simpler counterexample (e.g., `vec = [0]` or `vec = [1]`)
@@ -506,6 +549,7 @@ TEST(DataStructures, MapProperties)
 ```
 
 **Some built-in generators for containers:**
+
 - `gen::vector<T>()` - Vectors
 - `gen::map<K, V>()` - Maps
 - `gen::set<T>()` - Sets
@@ -540,6 +584,7 @@ TEST(Geometry, PointProperties)
 ```
 
 See [Custom Generator](CustomGenerator.md) for detailed instructions on creating custom generators, and [Combinators](Combinators.md) for using generator combinators like `map`, `filter`, and `flatMap`.
+
 See [Arbitraries](Arbitrary.md) for more on arbitraries(default generators) and how to make a new arbitrary out of a custom generator.
 
 ## Common Patterns and Best Practices
@@ -654,6 +699,7 @@ See [Shrinking](Shrinking.md) for details on how shrinking works and how to cust
 ## Next Steps
 
 Now that you understand the basics, explore:
+
 - [Generators](Generators.md) - Learn about all available generators
 - [Combinators](Combinators.md) - Combine generators to create new ones
 - [Shrinking](Shrinking.md) - Understand how counterexamples are simplified
@@ -663,6 +709,7 @@ Now that you understand the basics, explore:
 ## Summary
 
 Creating a property test involves:
+
 1. **Define the property** - Write a function/lambda that expresses what should always be true
 2. **Choose generators** - Specify how to generate inputs (or use defaults)
 3. **Run the test** - Use `forAll()` or `property().forAll()`

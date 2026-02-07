@@ -1,447 +1,421 @@
-# Writing Property-based Tests
+# Property API Reference
 
 > **New to property-based testing?** Start with the [Walkthrough](Walkthrough.md) for a step-by-step guide to creating your first property test. This page provides the complete API reference.
 
-## What you can do with `cppproptest`
+## Overview
+
+`cppproptest` provides a property-based testing framework where you define properties (invariants) that should hold for all inputs in a domain, rather than testing specific examples. The framework automatically generates random inputs and verifies your properties.
 
 ![Property functions and shorthands](images/property.svg)
-<!--
-```kroki-d2
 
-callable : Callable {
+## Quick Reference
 
-    func: |cpp
-    [](int a, int b) {
-    // test code
-    }
-    | {
-        style {
-            stroke: transparent
-            fill: transparent
-        }
-    }
+### Functions
 
-    style.fill : transparent
-    shape: page
-}
+| Function | Description | Returns |
+|----------|-------------|---------|
+| [`proptest::property(callable, ...generators)`](#proptestpropertycallable-generators) | Create a `Property` object from a callable | `Property` |
+| [`proptest::forAll(callable, ...)`](#proptestforallcallable-) | Create and run a property immediately | `bool` |
+| [`proptest::matrix(callable, ...lists)`](#proptestmatrixcallable-lists) | Create and run a matrix test immediately | `bool` |
 
-cont: "Property" {
+### Property Class Methods
 
-    property: |cpp
-    proptest::property(callable)
-    |
+| Method | Description | Returns |
+|--------|-------------|---------|
+| [`.forAll(...generators)`](#propertyforallgenerators) | Run property with random inputs | `bool` |
+| [`.example(...args)`](#propertyexampleargs) | Run property with specific inputs | `bool` |
+| [`.matrix(...lists)`](#propertymatrixlists) | Run property with Cartesian product of inputs | `bool` |
 
-    propertyforAll: |cpp
-    .forAll()
-    |
+### Configuration Methods
 
-    propertymatrix: |cpp
-    .matrix(...)
-    |
+All configuration methods return a reference to `Property`, allowing method chaining.
 
-    example : |cpp
-    .example(...)
-    |
-}
+| Method | Description | Parameters |
+|--------|-------------|------------|
+| [`.setSeed(seed)`](#propertysetseedseed) | Set random seed for reproducibility | `uint64_t seed` |
+| [`.setNumRuns(runs)`](#propertysetnumrunsruns) | Set number of test runs | `uint32_t runs` (default: 1000) |
+| [`.setMaxDurationMs(duration)`](#propertysetmaxdurationmsduration) | Set maximum test duration in milliseconds | `uint32_t durationMs` |
+| [`.setOnStartup(callback)`](#propertysetonstartupcallback) | Set callback called before each test run | `Function<void()> callback` |
+| [`.setOnCleanup(callback)`](#propertysetoncleanupcallback) | Set callback called after each test run | `Function<void()> callback` |
+| [`.setConfig(config)`](#propertysetconfigconfig) | Configure multiple options at once | `ForAllConfig` (designated initializers) |
 
-cont2 : Shorthands {
+### Macros
 
-    forAll: |cpp
-    proptest::forAll(callable)
-    |
+#### Assertion Macros
 
-    matrix: |cpp
-    proptest::matrix(callable, ...)
-    |
+| Macro | Type | Description |
+|-------|------|-------------|
+| [`PROP_ASSERT_EQ(A, B)`](#assertion-macros) | Fatal | Assert equality |
+| [`PROP_ASSERT_NE(A, B)`](#assertion-macros) | Fatal | Assert not equal |
+| [`PROP_ASSERT_LT(A, B)`](#assertion-macros) | Fatal | Assert less than |
+| [`PROP_ASSERT_LE(A, B)`](#assertion-macros) | Fatal | Assert less than or equal |
+| [`PROP_ASSERT_GT(A, B)`](#assertion-macros) | Fatal | Assert greater than |
+| [`PROP_ASSERT_GE(A, B)`](#assertion-macros) | Fatal | Assert greater than or equal |
+| [`PROP_EXPECT_EQ(A, B)`](#assertion-macros) | Non-fatal | Expect equality (continues on failure) |
+| [`PROP_EXPECT_NE(A, B)`](#assertion-macros) | Non-fatal | Expect not equal |
+| [`PROP_EXPECT_LT(A, B)`](#assertion-macros) | Non-fatal | Expect less than |
+| [`PROP_EXPECT_LE(A, B)`](#assertion-macros) | Non-fatal | Expect less than or equal |
+| [`PROP_EXPECT_GT(A, B)`](#assertion-macros) | Non-fatal | Expect greater than |
+| [`PROP_EXPECT_GE(A, B)`](#assertion-macros) | Non-fatal | Expect greater than or equal |
 
-    expectForAll: |cpp
-    EXPECT_FOR_ALL(callable)
-    |
+#### Statistics and Tagging Macros
 
-    assertForAll: |cpp
-    ASSERT_FOR_ALL(callable)
-    |
-}
+| Macro | Description |
+|-------|-------------|
+| [`PROP_STAT(expr)`](#prop_statexpression) | Collect statistics about expression values |
+| [`PROP_TAG(key, value)`](#prop_tagkey-value) | Categorize test cases with custom labels |
+| [`PROP_CLASSIFY(cond, key, value)`](#prop_classifycondition-key-value) | Conditionally tag test cases |
 
-cont.property -> cont.propertyForAll : random inputs
-cont.property -> cont.propertyMatrix : Cartesian products
-cont.property -> cont.example : specific inputs
+#### Test Control Macros
 
-cont.propertyForAll -- cont2.forAll : shorthand {
-  style: {
-    stroke-dash: 3
-  }
-}
+| Macro | Description |
+|-------|-------------|
+| [`PROP_DISCARD()`](#prop_discard) | Skip current test iteration (input doesn't meet preconditions) |
+| [`PROP_SUCCESS()`](#prop_success) | Mark current test iteration as passed and skip remaining checks |
 
-cont.propertyMatrix -- cont2.matrix : shorthand {
-  style: {
-    stroke-dash: 3
-  }
-}
+#### Google Test Integration Macros
 
-cont2.forAll -- cont2.expectForAll : Google Test EXPECT_TRUE {
-    style.stroke-dash: 3
-}
+| Macro | Description |
+|-------|-------------|
+| [`EXPECT_FOR_ALL(...)`](#expect_for_all) | Run `forAll` with `EXPECT_TRUE` (non-fatal) |
+| [`ASSERT_FOR_ALL(...)`](#assert_for_all) | Run `forAll` with `ASSERT_TRUE` (fatal) |
 
-cont2.forAll -- cont2.assertForAll : Google Test ASSERT_TRUE {
-    style.stroke-dash: 3
-}
+&nbsp;
+
+---
+
+## Functions
+
+### `proptest::property(callable, ...generators)`
+
+Creates a `Property` object from a callable (function, functor, or lambda).
+
+**Parameters:**
+
+- `callable`: A callable that defines the property. Can return `bool` or `void` (using assertions).
+- `...generators`: Optional generators for property parameters. If not provided, uses default generators (`Arbi<T>`) for each parameter type.
+
+**Returns:** `Property` object
+
+**Example:**
+```cpp
+auto prop = property([](int a, int b) -> bool {
+    return a + b == b + a;
+});
+
+// With custom generators
+auto prop2 = property([](int a, int b) -> bool {
+    return a + b == b + a;
+}, gen::interval(0, 100), gen::interval(0, 100));
 ```
 
--->
+**See also:** [Generators](Generators.md), [Arbitrary](Arbitrary.md), [Custom Generator](CustomGenerator.md)
 
-Here's the list of property-based test functions and macros you can use in `cppproptest`:
+### `proptest::forAll(callable, ...)`
 
-#### Property Function and Its Test Methods
+Shorthand for `property(callable).forAll()`. Creates and immediately runs a property test.
 
-You can define a property with a criteria function and certain input domain. You can choose to verify the criteria function with randomly generated inputs (`forAll()`) or with manually specified ones (`example()`). You can also exhaustively test all combinations of inputs based on the values you provided (`matrix()`).
+**Parameters:**
 
-| Name                                                        | Description                                       | Remark                           |
-| :---------------------------------------------------------- | :------------------------------------------------ | :------------------------------- |
-| `proptest::property()` &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; | Define a property based on a callable             |                                  |
-| &nbsp;&nbsp;&nbsp;&nbsp;`.forAll()`                         | Run the property with random inputs               |                                  |
-| &nbsp;&nbsp;&nbsp;&nbsp;`.matrix()`                         | Run the property with Cartesian product of inputs | Input list as `initializer_list` |
-| &nbsp;&nbsp;&nbsp;&nbsp;`.example()`                        | Run the property with specific inputs             |                                  |
-| &nbsp;&nbsp;&nbsp;&nbsp;`.setConfig()`                      | Configure multiple options at once                |                                  |
+- `callable`: A callable that defines the property
+- `...`: Optional configuration (C++20 designated initializers) and/or generators
 
+**Returns:** `bool` - `true` if all test runs passed, `false` otherwise
 
-#### Shorthands for Property Test Methods
-
-You can use convenient shorthands for above methods.
-
-| Name                             | Description                              | Remark                                                |
-| :------------------------------- | :--------------------------------------- | :---------------------------------------------------- |
-| `proptest::forAll()`&nbsp;&nbsp; | Define and run a property immediately    | Shorthand for `proptest::property(callable).forAll()`. Can also accept configuration using designated initializers. |
-| `proptest::matrix()`             | Define and run a matrix test immediately | Shorthand for `proptest::property(callable).matrix()` |
-
-#### Google Test Assertion Macros
-
-You can wrap around a property test with Google Tests' macro so that you make Google Test consider the property test failure as a test failure (otherwise, the property test will only print the failure information to standard output and return `false`.).
-
-| Name                                       | Description                                                 | Remark                                             |
-| :----------------------------------------- | :---------------------------------------------------------- | :------------------------------------------------- |
-| `EXPECT_FOR_ALL()`&nbsp;&nbsp;&nbsp;&nbsp; | Run `proptest::forAll` with `EXPECT_TRUE` Google Test macro | Shorthand for `EXPECT_TRUE(proptest::forAll(...))` |
-| `ASSERT_FOR_ALL()`                         | Run `proptest::forAll` with `ASSERT_TRUE` Google Test macro | Shorthand for `ASSERT_TRUE(proptest::forAll(...))` |
-
-
-## Defining and running a `property` test
-
-`property()` defines a property with optional configurations. By calling `property()`, you are creating a `Property` object. `forAll()` is the shorthand for calling `Property`'s method `forAll()`. `Property::forAll()` performs property-based test using supplied callable (function, functor, or lambda). While `forAll()` would work most of the time, `property()` in combination with its methods `.forAll()`, `.example()`, `.matrix()` can be more versatile and configurable at times.
-
+**Example:**
 ```cpp
+// Simple usage
 forAll([](int a, int b) -> bool {
     return a + b == b + a;
 });
-```
 
-is equivalent to:
-
-```cpp
-property([](int a, int b) -> bool {
-    return a + b == b + a;
-}).forAll();
-```
-
-### Defining a Property
-
-Defining a property requires a callable. For example, a lambda as following is such a callable with an `int` as parameter:
-
-```cpp
-[](int a) -> bool {
-    return a >= 0;
-}
-```
-
-Arguments are generated automatically by the library and the return value of the function will indicate success(`true`) or failure(`false`) of the property.
-Asserts can also be used to mark successes and failures. If you prefer not to use boolean return value to indicate success/fail, you can use void return type and use assertions instead:
-
-```cpp hl_lines="2"
-[](int a) {
-    PROP_ASSERT_GE(a, 0);
-}
-```
-
-### Generators and Arbitraries under the hood
-
-In above case, the function is called with an integer argument randomly generated by the test library. The library will repeatedly feed in some random values into the function for given number of runs.
-
-Under the hood, the library requires a generator for each of given parameter types. For each parameter, either an `Arbi<T>` (an arbitrary, the default generator for type `T`) should be defined ahead, or a custom generator must be provided. In above example, a predefined generator `Arbi<int>` is used to generate an integer argument.
-
-You can provide a custom generator as additional argument(s) to `property()` function, as following:
-
-```cpp hl_lines="3"
-property([](int a, int b) -> bool {
-    return true;
-}, myIntGenerator);
-```
-
-Any remaining parameter in the property function with no custom generator supplied will be generated using an arbitrary. In above example, `int a` is generated using `myIntGenerator` as it was supplied in the arguments, while `int b` will be generated using `Arbi<int>`, as no custom generator was supplied. If there is no arbitrary defined for a type and no custom generator is supplied either, a compile error will be emitted, as the library cannot test a property without a generator for the input type.
-
-Many primitive types and standard containers have their default generators `Arbi<T>` defined by the library for convenience.
-You can find more about generators and see the full list of built-in Arbitraries in [Generators](Generators.md) page.
-
-
-## Testing a Property
-
-Once a property has been defined, you can run a simple randomized test based on the defined property with `Property::forAll()`.
-
-```cpp hl_lines="5"
-auto prop = property([](int a, int b) -> bool {
-    return true;
-}, myIntGenerator);
-
-prop.forAll();
-```
-
-It will repeatedly call the lambda with different input combinations of `a` and `b` then stops after some designated number of runs or a time duration. If a property fails with an input combination by the lambda returning `false` or encountering an assertion failure, the test stops there and the library will provide some information on the failed case. If possible the library will simplify the failed case with a process called **shrinking**. See [Shrinking](Shrinking.md) page for more information on this process.
-
-#### Specifying generators with `Property::forAll()`
-
-While you can define a property with or without specifying generators, you can additionally specify or override some of the generators when calling `.forAll()`, by passing the generators as arguments.
-
-```cpp
-// a is fixed to INT_MAX, while b is randomly generated
-prop.forAll(just<int>(INT_MIN));
-
-// specifying generator for both a and b
-prop.forAll(just<int>(INT_MIN), inRange<int>(-100, 100));
-```
-
-In above example, `proptest::just()` is a [generator combinator](Combinators.md) that simply keeps generating a single value. `proptest::inRange` is another example of generator combinator. It generates a numeric value within a given range.
-
-#### Specifying example inputs with `Property::example()`
-
-While having a randomized set of inputs is powerful, you might want to test the property with specific combination of inputs to ensure those combinations are always tested. This can be accomplished using `.example(...)`. You need to specify all the parameters needed to call the callable:
-
-```cpp
-// define a property
-auto prop = property([](int a, int b) -> bool {
-    return a + b == b + a;
-});
-
-// check specific examples
-prop.example(INT_MIN, INT_MIN);
-prop.example(INT_MIN, INT_MAX);
-prop.example(INT_MAX, INT_MIN);
-prop.example(INT_MAX, INT_MAX);
-```
-
-
-#### Specifying full matrix of inputs with `Property::matrix()`
-
-While `.example()` provides a way to test certain examples by specifying each one of them, you might want to go even further to test all combinations of concerned inputs (e.g. all defined enum values) by taking a Cartesian product of the input parameters. In above example,taking `{INT_MIN, INT_MAX}` for `a` and another `{INT_MIN, INT_MAX}` for `b` and multiply them as if it was a matrix multiplication. This will result in four combinations `{(INT_MIN, INT_MIN), (INT_MIN, INT_MAX), (INT_MAX, INT_MIN), (INT_MAX, INT_MAX)}`. `.matrix()` lets you do exactly this kind of combination test:
-
-```cpp
-// equivalent to above using four `prop.example()`
-prop.matrix({INT_MIN, INT_MAX}, {INT_MIN, INT_MAX});
-// arbitrary size of the list can be used
-prop.matrix({INT_MIN, 0, INT_MAX}, {INT_MIN, 0, 1, INT_MAX});
-```
-
-
-## Configuring test runs
-
-#### Setting number of runs
-
-You can set the number of runs with `Property::setNumRuns(int num)`. The default number of runs is `1000`.
-
-```cpp
-auto prop = property([](int a, int b) -> bool {
-    // ...
-});
-prop.setNumRuns(100).forAll();
-```
-
-You can set default number of runs affected globally by calling the static method `PropertyBase::setDefaultNumRuns(int num)`. Subsequent properties will follow this number of runs unless specified with `setNumRuns()`.
-
-```cpp
-PropertyBase::setDefaultNumRuns(100);
-```
-
-#### Setting the random seed
-
-A property can be configured a specific random seed. This can be done by calling `Property::setSeed(unsigned long seed)`.
-
-```cpp
-auto prop = property([](int a, int b) -> bool {
-    // ...
-});
-prop.setSeed(savedSeed).forAll();
-```
-
-If no random seed is specified, current timestamp in milliseconds is used. You can override these unspecified random seeds globally with an environment variable `PROPTEST_SEED`. This comes in handy when you have encountered a failure and its random seed value is available for reproduction:
-
-```Shell
-# ... failed test with random seed 15665312
-$ PROPTEST_SEED=15665312 ./my_proptest
-```
-
-#### Setting maximum test duration
-
-You can set maximum duration for a property test run by calling `Property::setMaxDurationMs()`. This will limit the time regardless of number of runs. It can be useful if your time resource is limited or if you have some external timeout duration configured.
-
-```cpp
-prop.setMaxDurationMs(60000); // will run the test for maximum of 60 seconds, if number of runs does not run out first.
-```
-
-#### Chaining configurations
-
-You can chain the configurations for a property as following, for ease of use:
-
-```cpp
-auto prop = property([](int a, int b) -> bool {
-    // ...
-});
-prop.setSeed(savedSeed).setNumRuns(1000000).setMaxDurationMs(60000).forAll();
-```
-
-#### Batch configuration with `setConfig()` (C++20)
-
-Instead of chaining multiple `setX()` calls, you can use `setConfig()` to configure multiple options at once using C++20's designated initializers:
-
-```cpp
-auto prop = property([](int a, int b) -> bool {
-    // ...
-});
-
-// Batch configuration using setConfig()
-prop.setConfig({
-    .seed = savedSeed,
-    .numRuns = 1000000,
-    .maxDurationMs = 60000
-}).forAll();
-```
-
-This is equivalent to chaining individual setters but provides a cleaner syntax. You can still chain `setConfig()` with other methods:
-
-```cpp
-prop.setConfig({
-    .seed = 123,
-    .numRuns = 500
-}).example(42);  // Can chain with example()
-```
-
-#### Configuring `forAll()` directly
-
-Instead of using `property().setX().forAll()`, you can configure `forAll()` directly using designated initializers (C++20 feature):
-
-```cpp
-// Configure forAll with seed and number of runs
+// With configuration
 forAll([](int a, int b) -> bool {
-    // ...
+    return a + b == b + a;
 }, {
     .seed = 12345,
     .numRuns = 500
 });
 
-// Configure with all options
+// With generators
 forAll([](int a, int b) -> bool {
-    // ...
-}, {
+    return a + b == b + a;
+}, gen::interval(0, 100), gen::interval(0, 100));
+```
+
+### `proptest::matrix(callable, ...lists)`
+
+Shorthand for `property(callable).matrix(...)`. Creates and immediately runs a matrix test (Cartesian product).
+
+**Parameters:**
+
+- `callable`: A callable that defines the property
+- `...lists`: `initializer_list` for each parameter, representing all values to test
+
+**Returns:** `bool`
+
+**Example:**
+```cpp
+matrix([](int a, int b) -> bool {
+    return a + b == b + a;
+}, {1, 2, 3}, {4, 5, 6});
+```
+
+&nbsp;
+
+---
+
+## Property Class
+
+The `Property` class represents a property test with configurable execution options.
+
+### `Property::forAll(...generators)`
+
+Runs the property with randomly generated inputs.
+
+**Parameters:**
+
+- `...generators`: Optional generators to override or supplement those specified at property creation
+
+**Returns:** `bool` - `true` if all test runs passed, `false` otherwise
+
+**Example:**
+```cpp
+auto prop = property([](int a, int b) -> bool {
+    return a + b == b + a;
+});
+
+prop.forAll();  // Use default generators
+prop.forAll(gen::interval(0, 100), gen::interval(0, 100));  // Override generators
+```
+
+**See also:** [Testing a Property](#testing-a-property), [Configuring test runs](#configuring-test-runs)
+
+### `Property::example(...args)`
+
+Runs the property once with specific input values.
+
+**Parameters:**
+
+- `...args`: Arguments matching the property function's parameters
+
+**Returns:** `bool` - `true` if the property holds for the given inputs, `false` otherwise
+
+**Example:**
+```cpp
+auto prop = property([](int a, int b) -> bool {
+    return a + b == b + a;
+});
+
+prop.example(5, 10);
+prop.example(INT_MIN, INT_MAX);
+```
+
+### `Property::matrix(...lists)`
+
+Runs the property for all combinations of input values (Cartesian product).
+
+**Parameters:**
+
+- `...lists`: `initializer_list` for each parameter
+
+**Returns:** `bool` - `true` if all combinations passed, `false` otherwise
+
+**Example:**
+```cpp
+auto prop = property([](int a, int b) -> bool {
+    return a + b == b + a;
+});
+
+// Tests all 9 combinations: (1,4), (1,5), (1,6), (2,4), (2,5), (2,6), (3,4), (3,5), (3,6)
+prop.matrix({1, 2, 3}, {4, 5, 6});
+```
+
+&nbsp;
+
+---
+
+## Configuration
+
+All configuration methods return a reference to `Property`, allowing method chaining.
+
+### `Property::setSeed(seed)`
+
+Sets the random seed for test execution. Useful for reproducibility.
+
+**Parameters:**
+
+- `seed`: `uint64_t` - Random seed value
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setSeed(12345).forAll();
+```
+
+**Note:** If no seed is specified, current timestamp in milliseconds is used. You can also set it via environment variable `PROPTEST_SEED`.
+
+### `Property::setNumRuns(runs)`
+
+Sets the number of test runs to execute.
+
+**Parameters:**
+
+- `runs`: `uint32_t` - Number of runs (default: 1000)
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setNumRuns(500).forAll();
+```
+
+**Note:** You can set a global default using `PropertyBase::setDefaultNumRuns(num)`.
+
+### `Property::setMaxDurationMs(duration)`
+
+Sets the maximum duration for test execution in milliseconds. Test stops when either the number of runs or duration limit is reached (whichever comes first).
+
+**Parameters:**
+
+- `duration`: `uint32_t` - Maximum duration in milliseconds
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setMaxDurationMs(5000).forAll();  // Run for at most 5 seconds
+```
+
+### `Property::setOnStartup(callback)`
+
+Sets a callback function called before each test run.
+
+**Parameters:**
+
+- `callback`: `Function<void()>` - Callback function
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setOnStartup([]() {
+    std::cout << "Starting test run" << std::endl;
+}).forAll();
+```
+
+### `Property::setOnCleanup(callback)`
+
+Sets a callback function called after each test run.
+
+**Parameters:**
+
+- `callback`: `Function<void()>` - Callback function
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setOnCleanup([]() {
+    std::cout << "Test run complete" << std::endl;
+}).forAll();
+```
+
+### `Property::setConfig(config)`
+
+Configures multiple options at once using designated initializers.
+
+**Parameters:**
+
+- `config`: `ForAllConfig` - Configuration struct with optional fields:
+  - `.seed`: `uint64_t`
+  - `.numRuns`: `uint32_t`
+  - `.maxDurationMs`: `uint32_t`
+  - `.onStartup`: `Function<void()>`
+  - `.onCleanup`: `Function<void()>`
+
+**Returns:** `Property&`
+
+**Example:**
+```cpp
+prop.setConfig({
     .seed = 12345,
     .numRuns = 1000,
-    .maxDurationMs = 5000,
-    .onStartup = []() { std::cout << "Starting test" << std::endl; },
-    .onCleanup = []() { std::cout << "Test complete" << std::endl; }
+    .maxDurationMs = 5000
+}).forAll();
+```
+
+**Note:** All fields are optional. This is equivalent to chaining individual setters.
+
+&nbsp;
+
+---
+
+## Assertion Macros
+
+Assertion macros verify conditions within property functions. Fatal assertions (`PROP_ASSERT_*`) stop test execution on failure, while non-fatal expectations (`PROP_EXPECT_*`) continue testing.
+
+**Fatal Assertions:**
+
+- `PROP_ASSERT(condition)` - Assert condition is true
+- `PROP_ASSERT_TRUE(condition)` - Assert condition is true
+- `PROP_ASSERT_FALSE(condition)` - Assert condition is false
+- `PROP_ASSERT_EQ(A, B)` - Assert equality
+- `PROP_ASSERT_NE(A, B)` - Assert not equal
+- `PROP_ASSERT_LT(A, B)` - Assert less than
+- `PROP_ASSERT_LE(A, B)` - Assert less than or equal
+- `PROP_ASSERT_GT(A, B)` - Assert greater than
+- `PROP_ASSERT_GE(A, B)` - Assert greater than or equal
+- `PROP_ASSERT_STREQ(A, B, N)` - Assert string equality (first N characters)
+
+**Non-fatal Expectations:**
+
+- `PROP_EXPECT(condition)` - Expect condition is true
+- `PROP_EXPECT_TRUE(condition)` - Expect condition is true
+- `PROP_EXPECT_FALSE(condition)` - Expect condition is false
+- `PROP_EXPECT_EQ(A, B)` - Expect equality
+- `PROP_EXPECT_NE(A, B)` - Expect not equal
+- `PROP_EXPECT_LT(A, B)` - Expect less than
+- `PROP_EXPECT_LE(A, B)` - Expect less than or equal
+- `PROP_EXPECT_GT(A, B)` - Expect greater than
+- `PROP_EXPECT_GE(A, B)` - Expect greater than or equal
+- `PROP_EXPECT_STREQ(A, B, N)` - Expect string equality (first N characters)
+
+**Example:**
+```cpp
+forAll([](int a, int b) {
+    PROP_ASSERT_EQ(a + b, b + a);  // Fatal - stops on failure
+    PROP_EXPECT_GE(a + b, a);      // Non-fatal - continues on failure
 });
-
-// Configuration with explicit generators
-forAll([](int a, int b) -> bool {
-    // ...
-}, {
-    .seed = 0,
-    .numRuns = 100
-}, gen::interval(0, 100), gen::int32());
 ```
 
-**Configuration options:**
-- `.seed` - Set random seed for reproducibility (`uint64_t`)
-- `.numRuns` - Set number of test runs (`uint32_t`)
-- `.maxDurationMs` - Set maximum duration in milliseconds (`uint32_t`)
-- `.onStartup` - Callback function called before each run (`Function<void()>`)
-- `.onCleanup` - Callback function called after each run (`Function<void()>`)
+**See also:** [Controlling Test Execution](#controlling-test-execution)
 
-All configuration options are optional. If not specified, default values are used. This syntax is equivalent to using `property().setConfig({...}).forAll()`.
+&nbsp;
 
+## Statistics and Tagging Macros
 
-## Using Assertions
+### `PROP_STAT(expression)`
 
-`cppproptest` provides assertion(fatal)/expectation(non-fatal) macros based on the popular [Google Test](https://github.com/google/googletest) library.
+Collects statistics about expression values. The expression is evaluated for each test run, and a summary is printed at the end showing the distribution of results.
 
-```cpp
-// PROP_EXPECT*: non-fatal, continues upon failure
-PROP_EXPECT(condition);
-PROP_EXPECT_TRUE(condition);
-PROP_EXPECT_FALSE(condition);
-PROP_EXPECT_EQ(A, B);
-PROP_EXPECT_NE(A, B);
-PROP_EXPECT_LT(A, B);
-PROP_EXPECT_GT(A, B);
-PROP_EXPECT_LE(A, B);
-PROP_EXPECT_GE(A, B);
-PROP_EXPECT_STREQ(A, B, N);
-
-// PROP_ASSERT*: fatal, breaks test upon failure
-PROP_ASSERT(condition);
-PROP_ASSERT_TRUE(condition);
-PROP_ASSERT_FALSE(condition);
-PROP_ASSERT_EQ(A, B);
-PROP_ASSERT_NE(A, B);
-PROP_ASSERT_LT(A, B);
-PROP_ASSERT_GT(A, B);
-PROP_ASSERT_LE(A, B);
-PROP_ASSERT_GE(A, B);
-PROP_ASSERT_STREQ(A, B, N);
-```
-
-Also, there are [Google Test](https://github.com/google/googletest) compatible macros for `forAll` that fails the gtest test case or suite upon a property test failure (since with a bare `forAll`, the failures won't behave as gtest failure):
-
-```cpp
-EXPECT_FOR_ALL(...); // non-fatal, shorthand for EXPECT_TRUE(proptest::forAll(...));
-ASSERT_FOR_ALL(...); // fatal, shorthand for ASSERT_TRUE(proptest::forAll(...));
-```
-
-## Collecting Statistics and Tagging
-
-`cppproptest` provides macros for collecting statistics about test inputs and categorizing test cases. These are useful for understanding the distribution of generated values and ensuring that your property tests cover the cases you care about.
-
-### Statistics Collection with `PROP_STAT`
-
-`PROP_STAT(expression)` evaluates an expression (typically a boolean condition) for each test run and collects statistics about how often each result occurs. At the end of the test, a summary is printed showing the distribution of results.
-
+**Example:**
 ```cpp
 forAll([](float f) {
     PROP_STAT(std::isfinite(f));
-    PROP_STAT(std::isinf(f));
-    PROP_STAT(std::isnan(f));
     PROP_STAT(f > 0);
     PROP_STAT(f < 0);
 }, gen::float32(0.05, 0.05, 0.05));
-
-// Output example:
-//   std::isfinite(f):
-//     false: 138/1000 (13.8%)
-//     true: 862/1000 (86.2%)
-//   std::isinf(f):
-//     false: 900/1000 (90%)
-//     true: 100/1000 (10%)
-//   std::isnan(f):
-//     false: 962/1000 (96.2%)
-//     true: 38/1000 (3.8%)
-//   f < 0:
-//     false: 508/1000 (50.8%)
-//     true: 492/1000 (49.2%)
-//   f > 0:
-//     false: 530/1000 (53%)
-//     true: 470/1000 (47%)
 ```
 
-The expression passed to `PROP_STAT` is automatically converted to a string for the key, and the evaluated value becomes the statistic being tracked.
+**See also:** [Test Strategies](TestStrategies.md)
 
-### Custom Tagging with `PROP_TAG`
+### `PROP_TAG(key, value)`
 
-`PROP_TAG(key, value)` allows you to categorize test cases with custom key-value pairs. Unlike `PROP_STAT`, both the key and value are expressions that are evaluated. This is useful when you want more control over the categorization labels.
+Categorizes test cases with custom key-value pairs. Both key and value are expressions that are evaluated.
 
+**Example:**
 ```cpp
 forAll([](int x) {
     if (x < 0) {
@@ -451,24 +425,14 @@ forAll([](int x) {
     } else {
         PROP_TAG("sign", "zero");
     }
-
-    PROP_TAG("magnitude", x > 100 ? "large" : "small");
 });
-
-// Output will show distribution of tags:
-//   sign:
-//     negative: 487/1000 (48.7%)
-//     positive: 501/1000 (50.1%)
-//     zero: 12/1000 (1.2%)
-//   magnitude:
-//     large: 756/1000 (75.6%)
-//     small: 244/1000 (24.4%)
 ```
 
-### Conditional Classification with `PROP_CLASSIFY`
+### `PROP_CLASSIFY(condition, key, value)`
 
-`PROP_CLASSIFY(condition, key, value)` is a convenience macro that combines a conditional check with tagging. It only applies the tag when the condition is true.
+Convenience macro that conditionally applies a tag. Equivalent to `if (condition) PROP_TAG(key, value)`.
 
+**Example:**
 ```cpp
 forAll([](int x, int y) {
     PROP_CLASSIFY(x == y, "relationship", "equal");
@@ -477,60 +441,230 @@ forAll([](int x, int y) {
 });
 ```
 
-This is equivalent to:
-```cpp
-if (x == y) PROP_TAG("relationship", "equal");
-if (x > y) PROP_TAG("relationship", "greater");
-if (x < y) PROP_TAG("relationship", "less");
-```
+&nbsp;
 
-## Controlling Test Execution
+## Test Control Macros
 
-### Discarding Test Cases with `PROP_DISCARD`
+### `PROP_DISCARD()`
 
-Sometimes a generated input doesn't meet preconditions for your property test. While you can `return` the property function or use `gen::filter()` to filter inputs at the generator level, you can also discard inputs within the property function using `PROP_DISCARD()`.
+Skips the current test iteration. The iteration doesn't count toward the total number of runs, and the test will generate additional inputs to meet the configured number of successful runs.
 
+**Use case:** When generated inputs don't meet preconditions for your property test.
+
+**Example:**
 ```cpp
 forAll([](int x, int y) {
-    // Skip test cases where y is zero to avoid division by zero
     if (y == 0) {
-        PROP_DISCARD();
+        PROP_DISCARD();  // Skip division by zero cases
     }
-
     int result = x / y;
     PROP_ASSERT(result * y <= x);
 });
 ```
 
-While returning early from property function has similar effect, `PROP_DISCARD()` can be called inside nested functions.
-When `PROP_DISCARD()` is called, the current test iteration is skipped and doesn't count toward the total number of runs. The test will generate additional inputs to meet the configured number of successful runs.
+**Note:** If too many cases are discarded, consider using `gen::filter()` at the generator level instead. See [Combinators](Combinators.md).
 
-**Note:** If too many test cases are discarded (e.g., your preconditions are too restrictive), the test may take a long time or fail to complete. In such cases, consider using `gen::filter()` (a.k.a `gen::suchThat()`) to filter at the generator level instead.
+### `PROP_SUCCESS()`
 
-### Early Success with `PROP_SUCCESS`
+Immediately marks the current test iteration as successful and skips any remaining assertions or checks in the property function.
 
-`PROP_SUCCESS()` immediately marks the current test iteration as successful and skips any remaining assertions or checks in the property function.
+**Use case:** Early exit for trivial cases that you know will pass, optimizing test execution time.
 
+**Example:**
 ```cpp
 forAll([](int x, int y) {
-    // For trivial cases, skip expensive checks
     if (x == 0 || y == 0) {
-        PROP_SUCCESS();
+        PROP_SUCCESS();  // Skip expensive checks for trivial cases
     }
-
-    // Expensive property checks here
     PROP_ASSERT(complexProperty(x, y));
 });
 ```
 
-This is useful when you want to short-circuit property checking for certain inputs that you know will pass, allowing you to optimize test execution time. While returning early from property function has similar effect, `PROP_SUCCESS()` can be called inside nested functions.
+&nbsp;
 
-### Summary
+## Google Test Integration Macros
 
-| Macro | Purpose | Use Case |
-|-------|---------|----------|
-| `PROP_STAT(expr)` | Collect statistics about expression values | Understanding input distribution |
-| `PROP_TAG(key, value)` | Categorize test cases with custom labels | Custom categorization of inputs |
-| `PROP_CLASSIFY(cond, key, value)` | Conditionally tag test cases | Simplified conditional tagging |
-| `PROP_DISCARD()` | Skip current test iteration | Inputs don't meet preconditions |
-| `PROP_SUCCESS()` | Mark current test iteration as passed and skip remaining checks | Early exit for trivial cases |
+### `EXPECT_FOR_ALL(...)`
+
+Shorthand for `EXPECT_TRUE(proptest::forAll(...))`. Non-fatal - continues testing on failure.
+
+**Example:**
+```cpp
+TEST(Arithmetic, Commutativity)
+{
+    EXPECT_FOR_ALL([](int a, int b) {
+        PROP_ASSERT_EQ(a + b, b + a);
+    });
+}
+```
+
+### `ASSERT_FOR_ALL(...)`
+
+Shorthand for `ASSERT_TRUE(proptest::forAll(...))`. Fatal - stops test execution on failure.
+
+**Example:**
+```cpp
+TEST(Arithmetic, Commutativity)
+{
+    ASSERT_FOR_ALL([](int a, int b) {
+        PROP_ASSERT_EQ(a + b, b + a);
+    });
+}
+```
+
+&nbsp;
+
+---
+
+## Usage Examples
+
+### Basic Property Test
+
+```cpp
+#include "proptest/proptest.hpp"
+#include <gtest/gtest.h>
+
+using namespace proptest;
+
+TEST(Arithmetic, AdditionIsCommutative)
+{
+    forAll([](int a, int b) -> bool {
+        return a + b == b + a;
+    });
+}
+```
+
+### Using Assertions
+
+```cpp
+TEST(Arithmetic, AdditionIsCommutativeWithAssertions)
+{
+    forAll([](int a, int b) {
+        PROP_ASSERT_EQ(a + b, b + a);
+    });
+}
+```
+
+### Custom Generators
+
+```cpp
+TEST(Arithmetic, AdditionWithCustomRange)
+{
+    forAll([](int a, int b) {
+        PROP_ASSERT_EQ(a + b, b + a);
+    }, gen::interval(0, 100), gen::interval(0, 100));
+}
+```
+
+### Configuration
+
+```cpp
+TEST(StringUtils, ReverseWithConfiguration)
+{
+    auto prop = property([](const std::string& original) {
+        std::string reversed = reverseString(original);
+        std::string reversedTwice = reverseString(reversed);
+        PROP_ASSERT_EQ(original, reversedTwice);
+    });
+
+    prop.setNumRuns(500)
+        .setSeed(12345)
+        .setMaxDurationMs(5000)
+        .forAll();
+}
+```
+
+### Batch Configuration
+
+```cpp
+TEST(StringUtils, ReverseWithBatchConfig)
+{
+    auto prop = property([](const std::string& original) {
+        std::string reversed = reverseString(original);
+        std::string reversedTwice = reverseString(reversed);
+        PROP_ASSERT_EQ(original, reversedTwice);
+    });
+
+    prop.setConfig({
+        .seed = 12345,
+        .numRuns = 500,
+        .maxDurationMs = 5000
+    }).forAll();
+}
+```
+
+### Testing Specific Examples
+
+```cpp
+TEST(StringUtils, ReverseEdgeCases)
+{
+    auto prop = property([](const std::string& s) {
+        PROP_ASSERT_EQ(s.length(), reverseString(s).length());
+    });
+
+    prop.example("");
+    prop.example("a");
+    prop.example("hello world");
+}
+```
+
+### Matrix Testing
+
+```cpp
+TEST(Arithmetic, BoundaryCases)
+{
+    auto prop = property([](int a, int b) -> bool {
+        return a + b == b + a;
+    });
+
+    prop.matrix({INT_MIN, 0, INT_MAX}, {INT_MIN, 0, INT_MAX});
+}
+```
+
+### Statistics Collection
+
+```cpp
+TEST(Statistics, InputDistribution)
+{
+    forAll([](int value) {
+        PROP_STAT(value > 0);
+        PROP_STAT(value < 0);
+        PROP_STAT(value == 0);
+        PROP_TAG("magnitude", value > 100 ? "large" : "small");
+
+        PROP_ASSERT_GE(value * value, 0);
+    });
+}
+```
+
+### Discarding Invalid Inputs
+
+```cpp
+TEST(Division, NonZeroDenominator)
+{
+    forAll([](int x, int y) {
+        if (y == 0) {
+            PROP_DISCARD();  // Skip division by zero
+        }
+        int result = x / y;
+        PROP_ASSERT(result * y <= x);
+    });
+}
+```
+
+&nbsp;
+
+---
+
+## Related Topics
+
+- [Walkthrough](Walkthrough.md) - Step-by-step guide to creating property tests
+- [Generators](Generators.md) - Complete guide to input generators
+- [Arbitrary](Arbitrary.md) - Default generators for types
+- [Custom Generator](CustomGenerator.md) - Creating generators for custom types
+- [Combinators](Combinators.md) - Combining and transforming generators
+- [Generator Examples](GeneratorExamples.md) - Real-world generator usage
+- [Shrinking](Shrinking.md) - How counterexamples are simplified
+- [Test Strategies](TestStrategies.md) - Advanced testing techniques
+- [Stateful Testing](StatefulTesting.md) - Testing state machines
+- [Concurrency Testing](ConcurrencyTesting.md) - Testing concurrent code
