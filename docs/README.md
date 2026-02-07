@@ -33,7 +33,7 @@ example -> property : forAll()
 * [Stateful testing support](StatefulTesting.md) for testing state changes
 * [Concurrency testing support](ConcurrencyTesting.md) for testing concurrent state changes
 
-You can get started with `cppproptest` on this [page](GettingStarted.md).
+You can get started with `cppproptest` on this [page](GettingStarted.md). For a step-by-step guide to creating your first property test, see the [Walkthrough](Walkthrough.md).
 
 &nbsp;
 

@@ -1,5 +1,7 @@
 # Writing Property-based Tests
 
+> **New to property-based testing?** Start with the [Walkthrough](Walkthrough.md) for a step-by-step guide to creating your first property test. This page provides the complete API reference.
+
 ## What you can do with `cppproptest`
 
 ![Property functions and shorthands](images/property.svg)
