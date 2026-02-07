@@ -102,6 +102,7 @@ You can define a property with a criteria function and certain input domain. You
 | &nbsp;&nbsp;&nbsp;&nbsp;`.forAll()`                         | Run the property with random inputs               |                                  |
 | &nbsp;&nbsp;&nbsp;&nbsp;`.matrix()`                         | Run the property with Cartesian product of inputs | Input list as `initializer_list` |
 | &nbsp;&nbsp;&nbsp;&nbsp;`.example()`                        | Run the property with specific inputs             |                                  |
+| &nbsp;&nbsp;&nbsp;&nbsp;`.setConfig()`                      | Configure multiple options at once                |                                  |
 
 
 #### Shorthands for Property Test Methods
@@ -110,7 +111,7 @@ You can use convenient shorthands for above methods.
 
 | Name                             | Description                              | Remark                                                |
 | :------------------------------- | :--------------------------------------- | :---------------------------------------------------- |
-| `proptest::forAll()`&nbsp;&nbsp; | Define and run a property immediately    | Shorthand for `proptest::property(callable).forAll()` |
+| `proptest::forAll()`&nbsp;&nbsp; | Define and run a property immediately    | Shorthand for `proptest::property(callable).forAll()`. Can also accept configuration using designated initializers. |
 | `proptest::matrix()`             | Define and run a matrix test immediately | Shorthand for `proptest::property(callable).matrix()` |
 
 #### Google Test Assertion Macros
@@ -293,6 +294,74 @@ auto prop = property([](int a, int b) -> bool {
 });
 prop.setSeed(savedSeed).setNumRuns(1000000).setMaxDurationMs(60000).forAll();
 ```
+
+#### Batch configuration with `setConfig()` (C++20)
+
+Instead of chaining multiple `setX()` calls, you can use `setConfig()` to configure multiple options at once using C++20's designated initializers:
+
+```cpp
+auto prop = property([](int a, int b) -> bool {
+    // ...
+});
+
+// Batch configuration using setConfig()
+prop.setConfig({
+    .seed = savedSeed,
+    .numRuns = 1000000,
+    .maxDurationMs = 60000
+}).forAll();
+```
+
+This is equivalent to chaining individual setters but provides a cleaner syntax. You can still chain `setConfig()` with other methods:
+
+```cpp
+prop.setConfig({
+    .seed = 123,
+    .numRuns = 500
+}).example(42);  // Can chain with example()
+```
+
+#### Configuring `forAll()` directly
+
+Instead of using `property().setX().forAll()`, you can configure `forAll()` directly using designated initializers (C++20 feature):
+
+```cpp
+// Configure forAll with seed and number of runs
+forAll([](int a, int b) -> bool {
+    // ...
+}, {
+    .seed = 12345,
+    .numRuns = 500
+});
+
+// Configure with all options
+forAll([](int a, int b) -> bool {
+    // ...
+}, {
+    .seed = 12345,
+    .numRuns = 1000,
+    .maxDurationMs = 5000,
+    .onStartup = []() { std::cout << "Starting test" << std::endl; },
+    .onCleanup = []() { std::cout << "Test complete" << std::endl; }
+});
+
+// Configuration with explicit generators
+forAll([](int a, int b) -> bool {
+    // ...
+}, {
+    .seed = 0,
+    .numRuns = 100
+}, gen::interval(0, 100), gen::int32());
+```
+
+**Configuration options:**
+- `.seed` - Set random seed for reproducibility (`uint64_t`)
+- `.numRuns` - Set number of test runs (`uint32_t`)
+- `.maxDurationMs` - Set maximum duration in milliseconds (`uint32_t`)
+- `.onStartup` - Callback function called before each run (`Function<void()>`)
+- `.onCleanup` - Callback function called after each run (`Function<void()>`)
+
+All configuration options are optional. If not specified, default values are used. This syntax is equivalent to using `property().setConfig({...}).forAll()`.
 
 
 ## Using Assertions

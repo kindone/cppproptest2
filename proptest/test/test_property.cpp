@@ -612,3 +612,176 @@ TEST(Property, PropertyTimed)
 
     EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), 2000);
 }
+
+TEST(Property, forAllConfigSeed)
+{
+    // Test forAll with seed configuration
+    forAll([](int) {
+        return true;
+    }, {
+        .seed = 42,
+        .numRuns = 10
+    });
+}
+
+TEST(Property, forAllWithConfigAll)
+{
+    // Test forAll with all configuration options
+    bool startupCalled = false;
+    bool cleanupCalled = false;
+
+    forAll([](int) {
+        return true;
+    }, {
+        .seed = 123,
+        .numRuns = 5,
+        .maxDurationMs = 1000,
+        .onStartup = [&]() { startupCalled = true; },
+        .onCleanup = [&]() { cleanupCalled = true; }
+    });
+
+    EXPECT_TRUE(startupCalled);
+    EXPECT_TRUE(cleanupCalled);
+}
+
+TEST(Property, forAllConfigWithGenerators)
+{
+    // Test forAll with configuration and explicit generators
+    forAll([](int x) {
+        return x >= 0;
+    }, {
+        .seed = 0,
+        .numRuns = 100
+    }, gen::interval(0, 100));
+}
+
+TEST(Property, forAllPartialConfig)
+{
+    // Test forAll with partial configuration (only some options set)
+    forAll([](int) {
+        return true;
+    }, {
+        .numRuns = 50
+        // seed, maxDurationMs, etc. not set - should use defaults
+    });
+}
+
+TEST(Property, forAllConfigSeedReproducibility)
+{
+    // Test that seed configuration provides reproducibility
+    int firstRun = 0;
+    int secondRun = 0;
+
+    // First run with seed
+    forAll([&](int x) {
+        firstRun = x;
+        PROP_STAT(x > 0);
+        return true;
+    }, {
+        .seed = 999,
+        .numRuns = 1
+    });
+
+    // Second run with same seed - should get same value
+    forAll([&](int x) {
+        secondRun = x;
+        return true;
+    }, {
+        .seed = 999,
+        .numRuns = 1
+    });
+
+    EXPECT_EQ(firstRun, secondRun);
+}
+
+TEST(Property, propertySetConfigBasic)
+{
+    // Test Property::setConfig() with basic configuration
+    auto prop = property([](int) {
+        return true;
+    });
+
+    prop.setConfig({
+        .seed = 42,
+        .numRuns = 10
+    }).forAll();
+}
+
+TEST(Property, propertySetConfigAll)
+{
+    // Test Property::setConfig() with all configuration options
+    bool startupCalled = false;
+    bool cleanupCalled = false;
+
+    auto prop = property([](int) {
+        return true;
+    });
+
+    prop.setConfig({
+        .seed = 123,
+        .numRuns = 5,
+        .maxDurationMs = 1000,
+        .onStartup = [&]() { startupCalled = true; },
+        .onCleanup = [&]() { cleanupCalled = true; }
+    }).forAll();
+
+    EXPECT_TRUE(startupCalled);
+    EXPECT_TRUE(cleanupCalled);
+}
+
+TEST(Property, propertySetConfigChaining)
+{
+    // Test that setConfig() can be chained with other methods
+    auto prop = property([](int) {
+        return true;
+    });
+
+    // setConfig can be chained with forAll
+    prop.setConfig({
+        .seed = 0,
+        .numRuns = 50
+    }).forAll();
+
+    // Can also chain with example
+    prop.setConfig({
+        .seed = 999
+    }).example(42);
+}
+
+TEST(Property, propertySetConfigPartial)
+{
+    // Test Property::setConfig() with partial configuration
+    auto prop = property([](int) {
+        return true;
+    });
+
+    prop.setConfig({
+        .numRuns = 25
+        // seed, maxDurationMs, etc. not set - should use defaults
+    }).forAll();
+}
+
+TEST(Property, propertySetConfig_vs_individualSetters)
+{
+    // Test that setConfig() produces same result as individual setters
+    int configRun = 0;
+    int individualRun = 0;
+
+    // Using setConfig
+    forAll([&](int x) {
+        configRun = x;
+        return true;
+    }, {
+        .seed = 555,
+        .numRuns = 1
+    });
+
+    // Using individual setters
+    auto prop = property([&](int x) {
+        individualRun = x;
+        return true;
+    });
+    prop.setSeed(555).setNumRuns(1).forAll();
+
+    EXPECT_EQ(configRun, individualRun);
+}

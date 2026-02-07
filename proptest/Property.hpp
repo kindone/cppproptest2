@@ -18,6 +18,70 @@
 namespace proptest {
 
 /**
+ * @brief Configuration struct for forAll() and Property::setConfig() with optional parameters
+ * @details Allows configuration of property tests using designated initializers (C++20).
+ * All fields are optional and can be set using designated initializer syntax.
+ *
+ * Usage:
+ * @code
+ * forAll([](int x) { ... }, {
+ *     .seed = 123,
+ *     .numRuns = 100,
+ *     .maxDurationMs = 5000
+ * });
+ *
+ * property([](int x) { ... })
+ *     .setConfig({
+ *         .seed = 123,
+ *         .numRuns = 100
+ *     })
+ *     .forAll();
+ * @endcode
+ */
+struct ForAllConfig {
+    optional<uint64_t> seed;
+    optional<uint32_t> numRuns;
+    optional<uint32_t> maxDurationMs;
+    optional<Function<void()>> onStartup;
+    optional<Function<void()>> onCleanup;
+};
+
+// Forward declaration
+template <typename... ARGS>
+    requires (sizeof...(ARGS) > 0)
+class Property;
+
+namespace util {
+
+/**
+ * @brief Helper function to apply configuration to a Property object
+ * @tparam ARGS Property argument types
+ * @param prop Property object to configure
+ * @param config Configuration to apply
+ */
+template <typename... ARGS>
+void applyConfig(Property<ARGS...>& prop, const ForAllConfig& config)
+{
+    if (config.seed.has_value()) {
+        prop.setSeed(config.seed.value());
+    }
+    if (config.numRuns.has_value()) {
+        prop.setNumRuns(config.numRuns.value());
+    }
+    if (config.maxDurationMs.has_value()) {
+        prop.setMaxDurationMs(config.maxDurationMs.value());
+    }
+    if (config.onStartup.has_value()) {
+        prop.setOnStartup(config.onStartup.value());
+    }
+    if (config.onCleanup.has_value()) {
+        prop.setOnCleanup(config.onCleanup.value());
+    }
+}
+
+} // namespace util
+
+/**
  * @brief Holder class for properties
  * @details When a property is defined using `proptest::property` or `proptest::forAll`, a `Property` object is created
  * to hold the property.
@@ -94,6 +158,32 @@ public:
     Property& setMaxDurationMs(uint32_t durationMs)
     {
         maxDurationMs = durationMs;
+        return *this;
+    }
+
+    /**
+     * @brief Sets multiple configuration options at once using designated initializers (C++20)
+     *
+     * Allows batch configuration of property tests using designated initializers.
+     * Equivalent to chaining multiple setX() calls, but provides a cleaner syntax.
+     *
+     * Usage:
+     * @code
+     * property([](int x) { ... })
+     *     .setConfig({
+     *         .seed = 123,
+     *         .numRuns = 100,
+     *         .maxDurationMs = 5000
+     *     })
+     *     .forAll();
+     * @endcode
+     *
+     * @param config Configuration options (using designated initializers)
+     * @return Property& `Property` object itself for chaining
+     */
+    Property& setConfig(const ForAllConfig& config)
+    {
+        util::applyConfig(*this, config);
         return *this;
     }
 
@@ -277,6 +367,39 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
     // callable to Function
     return util::createProperty(FuncType(callable), util::move(genVec));
 }
+
+/**
+ * @brief Immediately executes a randomized property test with configuration
+ *
+ * Allows configuration using designated initializers (C++20).
+ * Equivalent to `property(...).setSeed(...).setNumRuns(...).forAll()`
+ *
+ * Usage:
+ * @code
+ * forAll([](int x) { ... }, {
+ *     .seed = 123,
+ *     .numRuns = 100,
+ *     .maxDurationMs = 5000
+ * }, gen::int32());
+ * @endcode
+ *
+ * @tparam Callable property callable type in either `(ARGS...) -> bool` (success/fail by boolean return value) or
+ * `(ARGS...) -> void` (fail if exception is thrown, success eitherwise)
+ * @tparam ExplicitGens Explicit generator callable types for `ARG` in `(Random&) -> Shrinkable<ARG>`
+ * @param callable passed as any callable such as `std::function`, functor object, function pointer
+ * @param config configuration options (using designated initializers)
+ * @param gens variadic list of generators for `ARG`s (optional if `Arbitrary<ARG>` is preferred)
+ * @return true if all the cases succeed
+ * @return false if any one of the cases fails
+ */
+template <typename Callable, typename... ExplicitGens>
+bool forAll(Callable&& callable, const ForAllConfig& config, ExplicitGens&&... gens)
+{
+    auto prop = property(util::forward<Callable>(callable), util::forward<ExplicitGens>(gens)...);
+    util::applyConfig(prop, config);
+    return prop.forAll();
+}
+
 /**
  * @brief Immediately executes a randomized property test
  *
@@ -290,10 +413,27 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
  * @return true if all the cases succeed
  * @return false if any one of the cases fails
  */
-template <typename Callable, typename... ExplicitGens>
-bool forAll(Callable&& callable, ExplicitGens&&... gens)
+template <typename Callable, typename First, typename... Rest>
+    requires (!is_same_v<decay_t<First>, ForAllConfig>)
+bool forAll(Callable&& callable, First&& first, Rest&&... rest)
 {
-    return property(util::forward<Callable>(callable), util::forward<ExplicitGens>(gens)...).forAll();
+    return property(util::forward<Callable>(callable), util::forward<First>(first), util::forward<Rest>(rest)...).forAll();
+}
+
+/**
+ * @brief Immediately executes a randomized property test (no generators)
+ *
+ * equivalent to `property(...).forAll()`
+ *
+ * @tparam Callable property callable type
+ * @param callable passed as any callable such as `std::function`, functor object, function pointer
+ * @return true if all the cases succeed
+ * @return false if any one of the cases fails
+ */
+template <typename Callable>
+bool forAll(Callable&& callable)
+{
+    return property(util::forward<Callable>(callable)).forAll();
 }
 
 /**

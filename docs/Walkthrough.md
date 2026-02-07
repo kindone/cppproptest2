@@ -231,14 +231,75 @@ TEST(StringUtils, ReverseWithTimeLimit)
 }
 ```
 
+You can also use `setConfig()` to configure multiple options at once:
+
+```cpp
+TEST(StringUtils, ReverseWithSetConfig)
+{
+    auto prop = property([](const std::string& original) {
+        std::string reversed = reverseString(original);
+        std::string reversedTwice = reverseString(reversed);
+        PROP_ASSERT_EQ(original, reversedTwice);
+    });
+
+    // Batch configuration using setConfig()
+    prop.setConfig({
+        .seed = 12345,
+        .numRuns = 500,
+        .maxDurationMs = 5000
+    }).forAll();
+}
+```
+
 **Benefits of `property()`:**
 - Can configure number of runs: `.setNumRuns(500)` - stops after this many runs
 - Can set maximum duration: `.setMaxDurationMs(5000)` - stops after this many milliseconds (whichever limit is reached first)
 - Can set random seed: `.setSeed(12345)` for reproducibility
+- Can batch configure: `.setConfig({.seed = 123, .numRuns = 500})` - configure multiple options at once (C++20)
 - Can test specific examples: `.example("hello")`
 - Can test all combinations: `.matrix({"a", "ab", "abc"})`
 
 **Note:** When both `setNumRuns()` and `setMaxDurationMs()` are set, the test stops when either limit is reached - whichever comes first.
+
+### Alternative: Configure `forAll()` directly (C++20)
+
+Instead of using `property().setX().forAll()`, you can configure `forAll()` directly using designated initializers (C++20). This provides a cleaner syntax for simple configuration cases:
+
+```cpp
+TEST(StringUtils, ReverseWithForAllConfig)
+{
+    // Configure forAll directly with seed and number of runs
+    forAll([](const std::string& original) {
+        std::string reversed = reverseString(original);
+        std::string reversedTwice = reverseString(reversed);
+        PROP_ASSERT_EQ(original, reversedTwice);
+    }, {
+        .seed = 12345,
+        .numRuns = 500
+    });
+}
+```
+
+You can also combine configuration with explicit generators:
+
+```cpp
+TEST(StringUtils, ReverseWithConfigAndGenerators)
+{
+    forAll([](const std::string& original) {
+        std::string reversed = reverseString(original);
+        PROP_ASSERT_EQ(original.length(), reversed.length());
+    }, {
+        .seed = 0,
+        .numRuns = 100,
+        .maxDurationMs = 5000
+    }, gen::string(gen::character(), 0, 100));
+}
+```
+
+**When to use which:**
+- Use `forAll()` with configuration `{ ... }` for simple, one-off configurations
+- Use `property().setConfig({ ... }).forAll()` for batch configuration when you need to reuse the property object
+- Use `property().setX().forAll()` when you need fine-grained control or want to chain multiple operations (like `.example()` or `.matrix()`)
 
 See [Property API Reference](Property.md) for complete details on configuration options and methods.
 
@@ -406,11 +467,19 @@ See [Shrinking](Shrinking.md) for a detailed explanation of how shrinking works 
 When a test fails, `cppproptest` reports a seed. You can reproduce it:
 
 ```cpp
+// Using property() API
 auto prop = property([](const std::vector<int>& vec) {
     PROP_ASSERT_EQ(vec.size(), 0);
 });
 
 prop.setSeed(12345678).forAll();  // Use the seed from failure
+
+// Or using forAll() with configuration (C++20)
+forAll([](const std::vector<int>& vec) {
+    PROP_ASSERT_EQ(vec.size(), 0);
+}, {
+    .seed = 12345678
+});
 ```
 
 Or set it via environment variable:
