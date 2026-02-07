@@ -101,6 +101,48 @@ TEST(ListLikeShrinker, intsN)
     }, {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18});
 }
 
+// Test for duplicates when minSize > 0
+// This test checks if cppproptest also has the duplicate issue with minSize > 0
+TEST(ListLikeShrinker, intsN_with_minSize)
+{
+    matrix([](int N, int minSize) {
+        if(minSize > N) return; // Skip invalid cases
+        Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>>();
+        vector<ShrinkableBase>& vec = baseShr.getMutableRef();
+        for(int i = 0; i < N; i++)
+            vec.push_back(ShrinkableBase(shrinkIntegral<int>(i+1)));
+
+        Shrinkable<vector<int>> shr = shrinkListLike<vector, int>(baseShr, minSize, false, true);
+        // Check for duplicates - this will throw if duplicates are found
+        size_t uniqueCount = checkShrinkable(shr);
+        // With minSize > 0, we expect fewer than 2^N unique values
+        // (since we can't create all subsets due to minSize constraint)
+        EXPECT_GT(uniqueCount, 0);
+        EXPECT_LE(uniqueCount, pow(2, N));
+    }, {4,5,6}, {2,3});
+}
+
+// Detailed test to see the structure for a specific case with unique values: [4,1,2,3] with minSize=2
+// This tests whether the shrinking algorithm itself creates duplicates (not due to duplicates in root)
+TEST(ListLikeShrinker, specific_case_minSize2_unique_values)
+{
+    Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>>();
+    vector<ShrinkableBase>& vec = baseShr.getMutableRef();
+    vec.push_back(ShrinkableBase(shrinkIntegral<int>(4)));
+    vec.push_back(ShrinkableBase(shrinkIntegral<int>(1)));
+    vec.push_back(ShrinkableBase(shrinkIntegral<int>(2)));
+    vec.push_back(ShrinkableBase(shrinkIntegral<int>(3)));
+
+    Shrinkable<vector<int>> shr = shrinkListLike<vector, int>(baseShr, 2, false, true);
+    // This should not throw (no duplicates created by shrinking algorithm)
+    size_t uniqueCount = checkShrinkable(shr);
+    EXPECT_GT(uniqueCount, 0);
+    // Serialize to see the structure
+    string serialized = serializeShrinkable(shr);
+    // Just verify it serializes without error
+    EXPECT_FALSE(serialized.empty());
+}
+
 TEST(SetShrinker, ints)
 {
     auto baseShr = util::make_shared<set<Shrinkable<int>>,initializer_list<Shrinkable<int>>>({
