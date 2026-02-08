@@ -44,7 +44,7 @@ auto dateTupleGen = yearMonthGen.tupleWith([](const std::tuple<int, int> yearMon
 
 ```
 
-*## Generating a fixed point decimal with precision `p` and scale `s`
+## Generating a fixed point decimal with precision `p` and scale `s`
 
 * A `Decimal(p, s)` is a fixed point decimal with a precision `p` and a scale `s`.
 * It means there are `p` number of digits with `s` number of decimals, like `123.45` being a `Decimal(5,2)`.

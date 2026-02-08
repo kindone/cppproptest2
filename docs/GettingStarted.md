@@ -48,5 +48,5 @@ TEST(AudioCodec, EncoderDecoder)
 Note that `ASSERT_FOR_ALL` is a simple macro wrapping an `ASSERT_TRUE` google test macro around the `proptest::forAll` function. You can find more information in [Using Assertion](Property.md#using-assertions) section.
 
 **Next Steps:**
-- [Creating Your First Property Test: A Step-by-Step Walkthrough](Walkthrough.md) - Learn how to create property tests step-by-step
+- [Step-by-Step Walkthrough](Walkthrough.md) - Learn how to create property tests step-by-step
 - [Property API Reference](Property.md) - Complete API reference for property testing

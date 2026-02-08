@@ -253,7 +253,7 @@ With this framework, you don't need to care too much about *how* to test your re
 # Further Topics and Details:
 
 * [Getting Started with cppproptest](GettingStarted.md)
-    * [Creating Your First Property Test: A Step-by-Step Walkthrough](Walkthrough.md)
+    * [Step-by-Step Walkthrough](Walkthrough.md)
 * [Property API Reference](Property.md)
 * [Introduction to generators](Generators.md)
     * [Arbitraries, the default generators](Arbitrary.md)
