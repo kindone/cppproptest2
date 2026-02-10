@@ -48,7 +48,7 @@ TEST(Arithmetic, AdditionIsCommutative)
     - Runs the property multiple times (default: 1000 runs)
     - Reports failures if the property doesn't hold
 
-   See [Property API Reference](Property.md) for complete details on `forAll` and other property testing functions.
+   See [Property API Reference](PropertyAPI.md) for complete details on `forAll` and other property testing functions.
 
 5. **The property function**:
 
@@ -94,7 +94,7 @@ TEST(Arithmetic, AdditionIsCommutativeWithAssertions)
 - `PROP_ASSERT_GE(A, B)` - Assert greater than or equal
 - `PROP_EXPECT_*` - Non-fatal versions (continues testing on failure)
 
-See [Property API Reference - Using Assertions](Property.md#using-assertions) for the complete list of assertion macros.
+See [Property API Reference - Using Assertions](PropertyAPI.md#using-assertions) for the complete list of assertion macros.
 
 ## Step 3: Specifying Custom Generators
 
@@ -318,7 +318,7 @@ TEST(StringUtils, ReverseWithConfigAndGenerators)
 - Use `forAll()` with configuration `{ ... }` for simple, one-off configurations
 - Use `property().setConfig({ ... }).forAll()` or `property().setX().setY().forAll()` when you need to reuse the property object to chain multiple operations (like `.example()` or `.matrix()`)
 
-See [Property API Reference](Property.md) for complete details on configuration options and methods.
+See [Property API Reference](PropertyAPI.md) for complete details on configuration options and methods.
 
 ## Step 6: Testing Multiple Properties Together
 
@@ -359,7 +359,7 @@ TEST(StringUtils, ReverseEdgeCases)
 }
 ```
 
-See [Property API Reference](Property.md) for details on `.example()` and `.matrix()` methods.
+See [Property API Reference](PropertyAPI.md) for details on `.example()` and `.matrix()` methods.
 
 ## Step 7: Testing with Multiple Parameters
 
@@ -481,7 +481,7 @@ TEST(StringUtils, ReverseWithGTestIntegration)
 - `EXPECT_FOR_ALL(...)` - Shorthand for `EXPECT_TRUE(forAll(...))`
 - `ASSERT_FOR_ALL(...)` - Shorthand for `ASSERT_TRUE(forAll(...))`
 
-See [Property API Reference - Google Test Assertion Macros](Property.md#google-test-assertion-macros) for more details.
+See [Property API Reference - Google Test Assertion Macros](PropertyAPI.md#google-test-assertion-macros) for more details.
 
 ## Step 10: Handling Failures and Shrinking
 
@@ -704,7 +704,7 @@ Now that you understand the basics, explore:
 - [Combinators](Combinators.md) - Combine generators to create new ones
 - [Shrinking](Shrinking.md) - Understand how counterexamples are simplified
 - [Stateful Testing](StatefulTesting.md) - Test state machines and sequences
-- [Property API Reference](Property.md) - Complete API documentation
+- [Property API Reference](PropertyAPI.md) - Complete API documentation
 
 ## Summary
 

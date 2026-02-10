@@ -254,7 +254,7 @@ With this framework, you don't need to care too much about *how* to test your re
 
 * [Getting Started with cppproptest](GettingStarted.md)
     * [Step-by-Step Walkthrough](Walkthrough.md)
-* [Property API Reference](Property.md)
+* [Property API Reference](PropertyAPI.md)
 * [Introduction to generators](Generators.md)
     * [Arbitraries, the default generators](Arbitrary.md)
     * [`gen` namespace - built-in generators and combinators](GenNamespace.md)
