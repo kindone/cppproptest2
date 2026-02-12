@@ -1,6 +1,6 @@
 # The `gen` Namespace
 
-The `gen` namespace provides convenient collection for all built-in generators and combinators in `cppproptest`. The `gen` namespace is designed to provide a unified, user-friendly interface for accessing generators and combinators. Instead of writing verbose built-in arbitrary names like `Arbi<int>()`, you can use more intuitive names like `gen::int32()`.
+The `gen` namespace provides convenient collection for all built-in generators and combinators in `cppproptest`. The `gen` namespace is designed to provide a unified, user-friendly interface for accessing generators and combinators. Instead of writing verbose built-in arbitrary names like `Arbi<int>()`, you can use more intuitive names like `gen::int32()` or `gen::arbitrary<int>`.
 
 **Note:** All functions in the `gen` namespace are aliases to the original `proptest` namespace functions. The original names remain available for backward compatibility.
 
