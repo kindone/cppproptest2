@@ -23,23 +23,85 @@
 
 #define PROP_EXPECT(cond) PROP_EXPECT_STREAM(cond, "", "", "")
 #define PROP_EXPECT_TRUE(cond) PROP_EXPECT_STREAM(cond, "", "", "")
-#define PROP_EXPECT_FALSE(cond) PROP_EXPECT_STREAM(cond, cond, " == ", "true")
-#define PROP_EXPECT_EQ(a, b) PROP_EXPECT_STREAM((a == b), a, " != ", b)
-#define PROP_EXPECT_NE(a, b) PROP_EXPECT_STREAM((a != b), a, " == ", b)
-#define PROP_EXPECT_LT(a, b) PROP_EXPECT_STREAM((a < b), a, " >= ", b)
-#define PROP_EXPECT_GT(a, b) PROP_EXPECT_STREAM((a > b), a, " <= ", b)
-#define PROP_EXPECT_LE(a, b) PROP_EXPECT_STREAM((a <= b), a, " > ", b)
-#define PROP_EXPECT_GE(a, b) PROP_EXPECT_STREAM((a >= b), a, " < ", b)
-#define PROP_EXPECT_STREQ(a, b, n) \
-    PROP_EXPECT_STREAM(memcmp(a, b, n) == 0, ::proptest::Show<char*>(a, n), " not equals ", ::proptest::Show<char*>(b, n))
-#define PROP_EXPECT_STREQ2(a, b, n1, n2)                                                                      \
-    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) == 0, ::proptest::Show<char*>(a, n1), " not equals ", \
-                       ::proptest::Show<char*>(b, n2))
-#define PROP_EXPECT_STRNE(a, b, n) \
-    PROP_EXPECT_STREAM(memcmp(a, b, n) != 0, ::proptest::Show<char*>(a, n), " equals ", ::proptest::Show<char*>(b, n))
-#define PROP_EXPECT_STRNE2(a, b, n1, n2)                                                                  \
-    PROP_EXPECT_STREAM(memcmp(a, b, (n1 <= n2 ? n1 : n2)) != 0, ::proptest::Show<char*>(a, n1), " equals ", \
-                       ::proptest::Show<char*>(b, n2))
+#define PROP_EXPECT_FALSE(cond)                                                                             \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_cond = (cond);                                                                          \
+        return PROP_EXPECT_STREAM(__prop_cond, __prop_cond, " == ", "true");                                   \
+    })()
+#define PROP_EXPECT_EQ(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a == __prop_b), __prop_a, " != ", __prop_b);                        \
+    })()
+#define PROP_EXPECT_NE(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a != __prop_b), __prop_a, " == ", __prop_b);                        \
+    })()
+#define PROP_EXPECT_LT(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a < __prop_b), __prop_a, " >= ", __prop_b);                         \
+    })()
+#define PROP_EXPECT_GT(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a > __prop_b), __prop_a, " <= ", __prop_b);                         \
+    })()
+#define PROP_EXPECT_LE(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a <= __prop_b), __prop_a, " > ", __prop_b);                         \
+    })()
+#define PROP_EXPECT_GE(a, b)                                                                                \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        return PROP_EXPECT_STREAM((__prop_a >= __prop_b), __prop_a, " < ", __prop_b);                         \
+    })()
+#define PROP_EXPECT_STREQ(a, b, n)                                                                          \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        auto __prop_n = (n);                                                                                \
+        return PROP_EXPECT_STREAM(memcmp(__prop_a, __prop_b, __prop_n) == 0,                                 \
+                                 ::proptest::Show<char*>(__prop_a, __prop_n), " not equals ",                \
+                                 ::proptest::Show<char*>(__prop_b, __prop_n));                              \
+    })()
+#define PROP_EXPECT_STREQ2(a, b, n1, n2)                                                                    \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        auto __prop_n1 = (n1);                                                                              \
+        auto __prop_n2 = (n2);                                                                              \
+        return PROP_EXPECT_STREAM(memcmp(__prop_a, __prop_b, (__prop_n1 <= __prop_n2 ? __prop_n1 : __prop_n2)) == 0, \
+                                 ::proptest::Show<char*>(__prop_a, __prop_n1), " not equals ",                 \
+                                 ::proptest::Show<char*>(__prop_b, __prop_n2));                              \
+    })()
+#define PROP_EXPECT_STRNE(a, b, n)                                                                          \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        auto __prop_n = (n);                                                                                \
+        return PROP_EXPECT_STREAM(memcmp(__prop_a, __prop_b, __prop_n) != 0,                                \
+                                 ::proptest::Show<char*>(__prop_a, __prop_n), " equals ",                     \
+                                 ::proptest::Show<char*>(__prop_b, __prop_n));                               \
+    })()
+#define PROP_EXPECT_STRNE2(a, b, n1, n2)                                                                    \
+    ([&]() -> stringstream& {                                                                               \
+        auto __prop_a = (a);                                                                                \
+        auto __prop_b = (b);                                                                                \
+        auto __prop_n1 = (n1);                                                                              \
+        auto __prop_n2 = (n2);                                                                              \
+        return PROP_EXPECT_STREAM(memcmp(__prop_a, __prop_b, (__prop_n1 <= __prop_n2 ? __prop_n1 : __prop_n2)) != 0, \
+                                 ::proptest::Show<char*>(__prop_a, __prop_n1), " equals ",                     \
+                                 ::proptest::Show<char*>(__prop_b, __prop_n2));                               \
+    })()
 
 #define PROP_STAT(VALUE)                                                                       \
     do {                                                                                       \

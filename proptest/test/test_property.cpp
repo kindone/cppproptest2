@@ -63,6 +63,63 @@ TEST(Property, forAll)
     }, gen::interval(0, 10), gen::interval(20, 30));
 }
 
+TEST(Property, expect_invoked_once)
+{
+    struct CallCounted {
+        CallCounted() : count(0) {}
+        bool operator()() {
+            count++;
+            return true;
+        }
+        int count;
+    };
+
+    forAll([](int) {
+        CallCounted counted;
+        PROP_EXPECT(counted()) << "counted() should return true";
+        PROP_EXPECT(counted.count == 1) << "count should be 1";
+        PROP_EXPECT_EQ(counted(), true) << "counted() should return true";
+        PROP_EXPECT_EQ(counted.count, 2) << "count should be 2";
+        PROP_EXPECT_FALSE(!counted()) << "counted() should return true";
+        PROP_EXPECT_EQ(counted.count, 3) << "count should be 3";
+        return true;
+    }, gen::interval(0, 10));
+
+    forAll([](int) {
+        CallCounted counted;
+        PROP_ASSERT(counted());
+        PROP_ASSERT(counted.count == 1);
+        PROP_ASSERT(counted() == true);
+        PROP_ASSERT(counted.count == 2);
+        PROP_ASSERT_FALSE(!counted());
+        PROP_ASSERT(counted.count == 3);
+        return true;
+    }, gen::interval(0, 10));
+}
+
+TEST(Property, expect_invoked_once_on_failure)
+{
+    struct CallCounted {
+        CallCounted() : count(0) {}
+        bool operator()() {
+            count++;
+            return true;
+        }
+        int count;
+    };
+
+    forAll([](int) {
+        CallCounted counted;
+        PROP_EXPECT(!counted()) << "counted() should return true";
+        PROP_EXPECT(counted.count == 1) << "count should be 1";
+        // PROP_EXPECT_EQ(!counted(), true) << "counted() should return true";
+        // PROP_EXPECT_EQ(counted.count, 2) << "count should be 2";
+        // PROP_EXPECT_FALSE(counted()) << "counted() should return true";
+        // PROP_EXPECT_EQ(counted.count, 3) << "count should be 3";
+        return true;
+    }, gen::interval(0, 10));
+
+}
 
 TEST(Property, check_assert)
 {
@@ -311,7 +368,7 @@ TEST(Property, TestStringCheckFail2)
     forAll([](string a) {
         PROP_STAT(a.size() > 3);
         PROP_EXPECT(a.size() < 5);
-        PROP_EXPECT_LT(a.size(), 6);
+        PROP_EXPECT_LT(a.size(), 6u);
     });
 }
 
@@ -332,8 +389,8 @@ TEST(Property, TestVectorCheckFail)
             PROP_STAT(a.size() > 3);
             show(cout, a);
             cout << endl;
-            PROP_EXPECT_LT(a.size(), 5) << "synthesized failure1";
-            PROP_EXPECT_LT(a.size(), 4) << "synthesized failure2";
+            PROP_EXPECT_LT(a.size(), 5u) << "synthesized failure1";
+            PROP_EXPECT_LT(a.size(), 4u) << "synthesized failure2";
         },
         vecGen);
 }
