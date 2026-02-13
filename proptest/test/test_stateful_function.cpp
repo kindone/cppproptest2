@@ -61,9 +61,7 @@ TEST(stateful_function, basic_model)
     using Model = VectorModel2;
 
     auto pushBackGen = gen::int32().map<Action<T, Model>>([](int value) {
-        stringstream str;
-        str << "PushBack(" << value << ")";
-        return Action<T, Model>(str.str(), [value](T& obj, Model&) {
+        return Action<T, Model>(PROP_ACTION_NAME("PushBack", value), [value](T& obj, Model&) {
             auto size = obj.size();
             obj.push_back(value);
             PROP_ASSERT(obj.size() == size + 1);

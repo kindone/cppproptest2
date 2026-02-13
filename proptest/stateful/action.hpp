@@ -14,6 +14,18 @@
 namespace proptest {
 namespace stateful {
 
+template<typename ARG0, typename...ARGS>
+auto makeActionName(const char* name, ARG0&& arg0, ARGS&&...args) {
+    stringstream str;
+    str << name << "(";
+    str << arg0;
+    ((str << "," << args), ...);  // C++17 fold expression
+    str << ")";
+    return str.str();
+}
+
+#define PROP_ACTION_NAME(name, ...) proptest::stateful::makeActionName(name, ##__VA_ARGS__)
+
 struct EmptyModel
 {
 };
