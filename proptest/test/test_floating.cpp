@@ -17,7 +17,7 @@ TEST(FloatingGenerator, float_default_finite_only)
 {
     Arbi<float> floatGen;  // Default: all probabilities = 0.0
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         PROP_ASSERT(isfinite(val));
         PROP_ASSERT(!isnan(val));
         PROP_ASSERT(!isinf(val));
@@ -29,7 +29,7 @@ TEST(FloatingGenerator, double_default_finite_only)
 {
     Arbi<double> doubleGen;  // Default: all probabilities = 0.0
 
-    forAll([](double val) {
+    EXPECT_FOR_ALL([](double val) {
         PROP_ASSERT(isfinite(val));
         PROP_ASSERT(!isnan(val));
         PROP_ASSERT(!isinf(val));
@@ -41,7 +41,7 @@ TEST(FloatingGenerator, float_with_nan_probability)
 {
     Arbi<float> floatGen(0.1, 0.0, 0.0);  // 10% NaN, 90% finite
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         if (isnan(val)) {
             PROP_STAT(isnan(val));
         } else {
@@ -57,7 +57,7 @@ TEST(FloatingGenerator, float_with_posinf_probability)
 {
     Arbi<float> floatGen(0.0, 0.1, 0.0);  // 10% +inf, 90% finite
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         if (isinf(val)) {
             PROP_ASSERT(val > 0);
             PROP_STAT(val > 0);
@@ -74,7 +74,7 @@ TEST(FloatingGenerator, float_with_neginf_probability)
 {
     Arbi<float> floatGen(0.0, 0.0, 0.1);  // 10% -inf, 90% finite
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         if (isinf(val)) {
             PROP_ASSERT(val < 0);
             PROP_STAT(val < 0);
@@ -91,7 +91,7 @@ TEST(FloatingGenerator, float_with_all_probabilities)
 {
     Arbi<float> floatGen(0.05, 0.05, 0.05);  // 5% each, 85% finite
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         if (isnan(val)) {
             PROP_STAT(isnan(val));
         } else if (isinf(val)) {
@@ -112,7 +112,7 @@ TEST(FloatingGenerator, double_with_all_probabilities)
 {
     Arbi<double> doubleGen(0.05, 0.05, 0.05);  // 5% each, 85% finite
 
-    forAll([](double val) {
+    EXPECT_FOR_ALL([](double val) {
         PROP_STAT(isnan(val));
         PROP_STAT(isinf(val));
         PROP_STAT(isfinite(val));
@@ -158,7 +158,7 @@ TEST(FloatingGenerator, float_finite_values_are_finite)
 {
     Arbi<float> floatGen;  // Default: finite only
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         PROP_ASSERT(isfinite(val));
         PROP_ASSERT(!isnan(val));
         PROP_ASSERT(!isinf(val));
@@ -170,7 +170,7 @@ TEST(FloatingGenerator, double_finite_values_are_finite)
 {
     Arbi<double> doubleGen;  // Default: finite only
 
-    forAll([](double val) {
+    EXPECT_FOR_ALL([](double val) {
         PROP_ASSERT(isfinite(val));
         PROP_ASSERT(!isnan(val));
         PROP_ASSERT(!isinf(val));
@@ -183,7 +183,7 @@ TEST(FloatingGenerator, float_sum_exactly_one)
     // Sum = 1.0, no finite values
     Arbi<float> floatGen(0.5, 0.3, 0.2);
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         // When sum = 1.0, no finite values should be generated
         PROP_ASSERT(!isfinite(val));
         PROP_ASSERT(isnan(val) || isinf(val));
@@ -206,12 +206,12 @@ TEST(FloatingGenerator, float_copy_constructor)
     Arbi<float> floatGen2(floatGen1);  // Copy constructor
 
     // Test that both generators produce valid values
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         PROP_ASSERT(isfinite(val) || isnan(val) || isinf(val));
         return true;
     }, floatGen1);
 
-    forAll([](float val) {
+    EXPECT_FOR_ALL([](float val) {
         PROP_ASSERT(isfinite(val) || isnan(val) || isinf(val));
         return true;
     }, floatGen2);

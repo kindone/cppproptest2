@@ -5,7 +5,7 @@ using namespace proptest;
 
 TEST(proptest, basic)
 {
-    forAll([](int a, int b) {
+    EXPECT_FOR_ALL([](int a, int b) {
         cout << "a: " << a << ", b: " << b << endl;
     });
 }

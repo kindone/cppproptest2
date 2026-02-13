@@ -6,7 +6,7 @@ using namespace proptest;
 
 TEST(Example, DefaultGen)
 {
-    forAll([]([[maybe_unused]] int i, [[maybe_unused]] double d, [[maybe_unused]] string str, [[maybe_unused]] vector<uint64_t> vec) {
+    EXPECT_FOR_ALL([]([[maybe_unused]] int i, [[maybe_unused]] double d, [[maybe_unused]] string str, [[maybe_unused]] vector<uint64_t> vec) {
         // i, d .....
     });
 }
@@ -15,7 +15,7 @@ TEST(Example, CustomGen)
 {
     auto intGen = gen::elementOf<int>(2, 4, 6);
 
-    forAll([](int num) {
+    EXPECT_FOR_ALL([](int num) {
         cout << num << endl;
     }, intGen);
 }
@@ -39,7 +39,7 @@ TEST(Example, TemplatedGen)
         return to_string(num);/// "2", "4", "6"
     });
 
-    forAll([]([[maybe_unused]] string str, vector<string> numStrings) {
+    EXPECT_FOR_ALL([]([[maybe_unused]] string str, vector<string> numStrings) {
         //cout << str << endl;
         cout << "[ ";
         if(numStrings.size() > 0)
@@ -62,7 +62,7 @@ TEST(Example, MapGen)
 
     gen::map<int, string> mapGen;
 
-    forAll([]([[maybe_unused]] string str, [[maybe_unused]] map<int, string> nameAgeMap) {
+    EXPECT_FOR_ALL([]([[maybe_unused]] string str, [[maybe_unused]] map<int, string> nameAgeMap) {
         //cout << str << endl;
     }, stringIntGen, mapGen.setPairGen(pairGen).setMaxSize(3));
 }

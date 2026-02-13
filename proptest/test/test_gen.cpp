@@ -40,7 +40,7 @@ TEST(GenNamespace, BasicTypeGenerators)
         gen::interval<uint32_t>('0', '9')
     ));
 
-    forAll([]([[maybe_unused]] string name, [[maybe_unused]] UTF8String alphanumeric) {
+    EXPECT_FOR_ALL([]([[maybe_unused]] string name, [[maybe_unused]] UTF8String alphanumeric) {
         // Property test with strings
         for(char c : alphanumeric) {
             EXPECT_TRUE(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9');
@@ -90,7 +90,7 @@ TEST(GenNamespace, NumericRangesGenerators)
     });
 
     // Usage in forAll
-    forAll([](int64_t multiRange) {
+    EXPECT_FOR_ALL([](int64_t multiRange) {
         // Log the generated value for debugging
         if (!((multiRange >= -100 && multiRange <= -1) || (multiRange >= 1 && multiRange <= 100))) {
             cerr << "[FAIL int64_t] multiRange=" << multiRange << endl;
@@ -99,7 +99,7 @@ TEST(GenNamespace, NumericRangesGenerators)
             << "multiRange out of range: " << multiRange;
     }, multiRangeIntGen);
 
-    forAll([](uint64_t multiRange) {
+    EXPECT_FOR_ALL([](uint64_t multiRange) {
         if (!((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999))) {
             cerr << "[FAIL uint64_t] multiRange=" << multiRange << endl;
         }
@@ -283,7 +283,7 @@ TEST(GenNamespace, ComplexNestedStructures)
 TEST(GenNamespace, PropertyTestExample)
 {
     // Test that gen namespace works with forAll
-    forAll([](int x, int y) {
+    EXPECT_FOR_ALL([](int x, int y) {
         // Property: addition is commutative
         return x + y == y + x;
     }, gen::interval(-100, 100), gen::interval(-100, 100));

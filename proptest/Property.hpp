@@ -467,7 +467,7 @@ bool matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
     return property(util::forward<Callable>(callable)).matrix(util::forward<decltype(lists)>(lists)...);
 }
 
-#define EXPECT_FOR_ALL(CALLABLE, ...) EXPECT_TRUE(proptest::forAll(CALLABLE, __VA_ARGS__))
-#define ASSERT_FOR_ALL(CALLABLE, ...) ASSERT_TRUE(proptest::forAll(CALLABLE, __VA_ARGS__))
+#define EXPECT_FOR_ALL(...) EXPECT_TRUE(proptest::forAll(__VA_ARGS__))
+#define ASSERT_FOR_ALL(...) ASSERT_TRUE(proptest::forAll(__VA_ARGS__))
 
 }  // namespace proptest

@@ -41,7 +41,7 @@ TEST(Property, NonCopyable)
         return util::make_unique<NonCopyable>(n);
     });
 
-    forAll([](const NonCopyable& nc) {
+    EXPECT_FOR_ALL([](const NonCopyable& nc) {
         PROP_STAT(nc.a >= 0 && nc.a <= 10);
         return true;
     }, nonCopyableGen);
@@ -56,7 +56,7 @@ TEST(Property, matrix)
 
 TEST(Property, forAll)
 {
-    forAll([](int a, int b) {
+    EXPECT_FOR_ALL([](int a, int b) {
         PROP_ASSERT(0 <= a && a <= 10);
         PROP_ASSERT(20 <= b && b <= 30);
         return true;
@@ -74,6 +74,7 @@ TEST(Property, expect_invoked_once)
         int count;
     };
 
+    // First block: PROP_EXPECT path; left as forAll() so failure does not fail the test.
     forAll([](int) {
         CallCounted counted;
         PROP_EXPECT(counted()) << "counted() should return true";
@@ -85,6 +86,7 @@ TEST(Property, expect_invoked_once)
         return true;
     }, gen::interval(0, 10));
 
+    // Second block: PROP_ASSERT path; left as forAll() (same as first block).
     forAll([](int) {
         CallCounted counted;
         PROP_ASSERT(counted());
@@ -108,14 +110,15 @@ TEST(Property, expect_invoked_once_on_failure)
         int count;
     };
 
+    // counted should be invoked at most once
     forAll([](int) {
         CallCounted counted;
         PROP_EXPECT(!counted()) << "counted() should return true";
         PROP_EXPECT(counted.count == 1) << "count should be 1";
-        // PROP_EXPECT_EQ(!counted(), true) << "counted() should return true";
-        // PROP_EXPECT_EQ(counted.count, 2) << "count should be 2";
-        // PROP_EXPECT_FALSE(counted()) << "counted() should return true";
-        // PROP_EXPECT_EQ(counted.count, 3) << "count should be 3";
+        PROP_EXPECT_EQ(!counted(), true) << "counted() should return true";
+        PROP_EXPECT_EQ(counted.count, 2) << "count should be 2";
+        PROP_EXPECT_FALSE(counted()) << "counted() should return true";
+        PROP_EXPECT_EQ(counted.count, 3) << "count should be 3";
         return true;
     }, gen::interval(0, 10));
 
@@ -150,7 +153,7 @@ TEST(Property, propertyBasic)
     auto func = [](const vector<int>&) -> bool { return true; };
 
     property(func).forAll();
-    forAll(func);
+    EXPECT_FOR_ALL(func);
 
     auto prop = property([](string, int i, string) -> bool {
         PROP_STAT(i > 0);
@@ -182,6 +185,7 @@ TEST(Property, property_example)
 
 TYPED_TEST(SignedNumericTest, check_fail)
 {
+    // Property designed to fail when args fall outside ranges
     forAll([](TypeParam a, TypeParam b /*,string str, vector<int> vec*/) -> bool {
         PROP_ASSERT(-10 < a && a < 100 && -20 < b && b < 200);
         return true;
@@ -190,20 +194,20 @@ TYPED_TEST(SignedNumericTest, check_fail)
 
 TEST(Property, TestCheckBasic)
 {
-    forAll([](const int& a, const int& b) -> bool {
+    EXPECT_FOR_ALL([](const int& a, const int& b) -> bool {
         EXPECT_EQ(a + b, b + a);
         PROP_STAT(a + b > 0);
         return true;
     });
 
-    forAll([](int a) -> bool {
+    EXPECT_FOR_ALL([](int a) -> bool {
         PROP_STAT(a > 0);
         return true;
     });
 
     string a = "Hello";
     string b = "World";
-    forAll([](string a, string b) -> bool {
+    EXPECT_FOR_ALL([](string a, string b) -> bool {
         string c /*(allocator())*/, d /*(allocator())*/;
         c = a + b;
         d = b + a;
@@ -213,7 +217,7 @@ TEST(Property, TestCheckBasic)
         return true;
     });
 
-    forAll([=](UTF8String a, UTF8String b) -> bool {
+    EXPECT_FOR_ALL([=](UTF8String a, UTF8String b) -> bool {
         string c /*(allocator())*/, d /*(allocator())*/;
         c = a + b;
         d = b + a;
@@ -255,7 +259,7 @@ public:
 
 TEST(Property, TestCheckBit)
 {
-    forAll([](Bit bit) {
+    EXPECT_FOR_ALL([](Bit bit) {
         PROP_STAT(bit.v == 1);
         PROP_STAT(bit.v != 1 && bit.v != 0);
     });
@@ -290,7 +294,7 @@ TEST(Property, TestCheckWithGen)
     });*/
 
     // supply custom generator
-    forAll(
+    EXPECT_FOR_ALL(
         [](int a, int b) {
             PROP_STAT(a > 0);
             PROP_STAT(b > 0);
@@ -298,7 +302,7 @@ TEST(Property, TestCheckWithGen)
         GenSmallInt(), GenSmallInt());
 
     //
-    forAll(
+    EXPECT_FOR_ALL(
         [](int a, int b) {
             PROP_STAT(a > 0);
             PROP_STAT(b > 0);
@@ -307,14 +311,14 @@ TEST(Property, TestCheckWithGen)
 
     GenSmallInt genSmallInt;
 
-    forAll(
+    EXPECT_FOR_ALL(
         [](int a, int b) {
             PROP_STAT(a > 0);
             PROP_STAT(b > 0);
         },
         genSmallInt, genSmallInt);
 
-    forAll(
+    EXPECT_FOR_ALL(
         [](int a, string b) {
             PROP_STAT(a > 0);
             PROP_STAT(b.size() > 0);
@@ -324,6 +328,7 @@ TEST(Property, TestCheckWithGen)
 
 TEST(Property, TestStringCheckFail)
 {
+    // Property designed to fail when a.size() >= 5
     forAll([](string a) {
         PROP_STAT(a.size() > 3);
         PROP_ASSERT(a.size() < 5);
@@ -332,6 +337,7 @@ TEST(Property, TestStringCheckFail)
 
 TEST(Property, TestUnicodeStringCheckFail)
 {
+    // Properties designed to fail (assert size < 100)
     forAll([](UTF8String a) {
         PROP_STAT(a.size() > 3);
         PROP_ASSERT(a.size() < 100);
@@ -355,6 +361,7 @@ TEST(Property, TestUnicodeStringCheckFail)
 
 TEST(Property, TestStringCheckFail2)
 {
+    // Properties designed to fail when a.size() >= 5
     forAll([](string a) {
         PROP_STAT(a.size() > 3);
         PROP_EXPECT(a.size() < 5);
@@ -384,6 +391,7 @@ TEST(Property, TestVectorCheckFail)
     auto vecGen = gen::vector<int>();
     vecGen.setMaxSize(32);
 
+    // Property designed to fail (expects size < 4)
     forAll(
         [](vector<int> a) {
             PROP_STAT(a.size() > 3);
@@ -405,6 +413,7 @@ TEST(Property, TestExampleForAll)
 
 TEST(Property, TestTupleCheckFail)
 {
+    // Property designed to fail for some inputs
     forAll([](tuple<int, tuple<int>> tup) {
         int a = get<0>(tup);
         tuple<int> subtup = get<1>(tup);
@@ -415,6 +424,7 @@ TEST(Property, TestTupleCheckFail)
 
 TEST(Property, TestArgCheckFail)
 {
+    // Property designed to fail when args fall outside ranges
     forAll([](int a, int b) {
         PROP_ASSERT((-10 < a && a < 100) || (-20 < b && b < 200));
     });
@@ -435,14 +445,14 @@ public:
 TEST(Property, TestPropertyFunctionLambdaMethod)
 {
     property(propertyAsFunc).forAll();
-    forAll(propertyAsFunc);
+    EXPECT_FOR_ALL(propertyAsFunc);
 
     PropertyAsClass propertyAsClass;
     property(propertyAsClass).forAll();
-    forAll(propertyAsClass);
+    EXPECT_FOR_ALL(propertyAsClass);
 
     property(PropertyAsClass::propertyAsMethod).forAll();
-    forAll(PropertyAsClass::propertyAsMethod);
+    EXPECT_FOR_ALL(PropertyAsClass::propertyAsMethod);
 }
 
 namespace proptest {
@@ -651,7 +661,7 @@ TEST(Property, PropertyCapture)
 
 TEST(Property, DISABLED_TestExpectDeath)
 {
-    forAll([](vector<int> vec, uint64_t n) {
+    EXPECT_FOR_ALL([](vector<int> vec, uint64_t n) {
         auto dangerous = [&vec, n]() { vec[vec.size() - 1 + n] = 100; };
         dangerous();
         // EXPECT_DEATH(, ".*") << "vector: " << vec.size() << ", n: " << n;
@@ -673,7 +683,7 @@ TEST(Property, PropertyTimed)
 TEST(Property, forAllConfigSeed)
 {
     // Test forAll with seed configuration
-    forAll([](int) {
+    EXPECT_FOR_ALL([](int) {
         return true;
     }, {
         .seed = 42,
@@ -687,7 +697,7 @@ TEST(Property, forAllWithConfigAll)
     bool startupCalled = false;
     bool cleanupCalled = false;
 
-    forAll([](int) {
+    EXPECT_FOR_ALL([](int) {
         return true;
     }, {
         .seed = 123,
@@ -704,7 +714,7 @@ TEST(Property, forAllWithConfigAll)
 TEST(Property, forAllConfigWithGenerators)
 {
     // Test forAll with configuration and explicit generators
-    forAll([](int x) {
+    EXPECT_FOR_ALL([](int x) {
         return x >= 0;
     }, {
         .seed = 0,
@@ -715,7 +725,7 @@ TEST(Property, forAllConfigWithGenerators)
 TEST(Property, forAllPartialConfig)
 {
     // Test forAll with partial configuration (only some options set)
-    forAll([](int) {
+    EXPECT_FOR_ALL([](int) {
         return true;
     }, {
         .numRuns = 50
@@ -730,7 +740,7 @@ TEST(Property, forAllConfigSeedReproducibility)
     int secondRun = 0;
 
     // First run with seed
-    forAll([&](int x) {
+    EXPECT_FOR_ALL([&](int x) {
         firstRun = x;
         PROP_STAT(x > 0);
         return true;
@@ -740,7 +750,7 @@ TEST(Property, forAllConfigSeedReproducibility)
     });
 
     // Second run with same seed - should get same value
-    forAll([&](int x) {
+    EXPECT_FOR_ALL([&](int x) {
         secondRun = x;
         return true;
     }, {
@@ -825,7 +835,7 @@ TEST(Property, propertySetConfig_vs_individualSetters)
     int individualRun = 0;
 
     // Using setConfig
-    forAll([&](int x) {
+    EXPECT_FOR_ALL([&](int x) {
         configRun = x;
         return true;
     }, {

@@ -5,7 +5,7 @@ using namespace proptest;
 
 TEST(Simple, property)
 {
-    forAll([](int a, int b, double c) {
+    EXPECT_FOR_ALL([](int a, int b, double c) {
         PROP_STAT(a > 0);
         PROP_STAT(b > 0);
         PROP_STAT(c > 0);

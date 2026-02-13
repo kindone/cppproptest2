@@ -13,7 +13,7 @@ TEST(Compile, Property)
 
     prop.matrix({1,2,3}, {0.2f, 0.3f});
 
-    forAll([](vector<int64_t>) {
+    EXPECT_FOR_ALL([](vector<int64_t>) {
 
     });
 }
