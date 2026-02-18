@@ -7,11 +7,11 @@ namespace proptest {
 
 // template declaration
 template <typename FLOATTYPE>
-PROPTEST_API Shrinkable<FLOATTYPE>::StreamType floatShrinks(FLOATTYPE value);
+PROPTEST_API typename Shrinkable<FLOATTYPE>::StreamType floatShrinks(FLOATTYPE value);
 
 // specialization
-template <> PROPTEST_API Shrinkable<float>::StreamType floatShrinks(float value);
-template <> PROPTEST_API Shrinkable<double>::StreamType floatShrinks(double value);
+template <> PROPTEST_API typename Shrinkable<float>::StreamType floatShrinks(float value);
+template <> PROPTEST_API typename Shrinkable<double>::StreamType floatShrinks(double value);
 
 template <typename FLOATTYPE>
 PROPTEST_API Shrinkable<FLOATTYPE> shrinkFloat(FLOATTYPE value) {

@@ -300,7 +300,7 @@ struct RearRunner
         thread_ready = true;
         while (!sync_ready) {}
 
-        stateful::Context context(num);
+        stateful::Context context{num};
 
         for (auto action : actions) {
             dump.markActionStart(num);
@@ -344,7 +344,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
     ConcurrentTestDump dump(frontNames);
 
     // run front
-    stateful::Context context(FRONT_THREAD_ID);
+    stateful::Context context{FRONT_THREAD_ID};
     for (auto action : front) {
         action(obj, model, context);
         dump.appendFront();

@@ -25,7 +25,7 @@ jobs:
     name: ${{ matrix.os }} - ${{ matrix.compiler }} - C++${{ matrix.cpp_std }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    
+
     strategy:
       fail-fast: false
       matrix:
@@ -36,21 +36,21 @@ jobs:
             compiler_version: "12"
             cpp_std: "20"
             cmake_build_type: Release
-            
+
           # Linux - Clang (one version to start)
           - os: ubuntu-latest
             compiler: clang
             compiler_version: "15"
             cpp_std: "20"
             cmake_build_type: Release
-            
+
           # macOS - Clang (Apple Clang)
           - os: macos-latest
             compiler: clang
             compiler_version: "16"
             cpp_std: "20"
             cmake_build_type: Release
-            
+
           # Windows - MSVC
           - os: windows-latest
             compiler: msvc
@@ -69,6 +69,9 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
+        # Verify compiler is available
+        gcc-${{ matrix.compiler_version }} --version || exit 1
+        g++-${{ matrix.compiler_version }} --version || exit 1
         echo "CC=gcc-${{ matrix.compiler_version }}" >> $GITHUB_ENV
         echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
 
@@ -77,25 +80,61 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y clang-${{ matrix.compiler_version }}
+        # Verify compiler is available
+        clang-${{ matrix.compiler_version }} --version || exit 1
+        clang++-${{ matrix.compiler_version }} --version || exit 1
         echo "CC=clang-${{ matrix.compiler_version }}" >> $GITHUB_ENV
         echo "CXX=clang++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
 
     - name: Set up compiler (macOS)
       if: matrix.os != 'ubuntu-latest' && matrix.os != 'windows-latest'
       run: |
-        # macOS uses system Clang, ensure Xcode Command Line Tools are installed
-        xcode-select --install || true
+        # macOS uses system Clang
+        # Check if Xcode Command Line Tools are installed (non-blocking)
+        if ! xcode-select -p &>/dev/null; then
+          echo "Xcode Command Line Tools not found, but continuing..."
+        fi
         echo "CC=clang" >> $GITHUB_ENV
         echo "CXX=clang++" >> $GITHUB_ENV
 
     - name: Set up compiler (Windows MSVC)
       if: matrix.os == 'windows-latest' && matrix.compiler == 'msvc'
+      id: setup-msbuild
       uses: microsoft/setup-msbuild@v1.1
+      continue-on-error: true  # May fail with act due to missing runtime tokens
+
+    - name: Set up compiler (Windows MSVC - fallback for act)
+      if: matrix.os == 'windows-latest' && matrix.compiler == 'msvc' && steps.setup-msbuild.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "MSBuild setup failed. For act, Windows builds may not work correctly."
+        echo "Consider testing Windows builds on GitHub Actions instead."
+        # Try to find MSBuild in common locations
+        if [ -f "/c/Program Files/Microsoft Visual Studio/2022/Community/MSBuild/Current/Bin/MSBuild.exe" ]; then
+          echo "Found MSBuild, continuing..."
+        else
+          echo "MSBuild not found. Build may fail."
+        fi
 
     - name: Install CMake
+      id: install-cmake
       uses: jwlawson/actions-setup-cmake@v1.14
+      continue-on-error: true  # May fail with act due to missing runtime tokens
       with:
         cmake-version: '3.28.3'
+
+    - name: Install CMake (fallback for act)
+      if: steps.install-cmake.outcome == 'failure'
+      shell: bash
+      run: |
+        # Fallback: Use system CMake or install manually
+        if command -v cmake &> /dev/null; then
+          echo "Using system CMake: $(cmake --version)"
+        else
+          echo "CMake not found. Please install CMake manually or use a Docker image with CMake pre-installed."
+          echo "For act, consider using: act -P ubuntu-latest=catthehacker/ubuntu:act-latest"
+          exit 1
+        fi
 
     - name: Configure CMake
       shell: bash
@@ -105,6 +144,14 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
           -DCMAKE_CXX_STANDARD=${{ matrix.cpp_std }}
         )
+        # Explicitly set compiler if CC/CXX are set (Linux/macOS)
+        if [ -n "$CC" ] && [ "${{ runner.os }}" != "Windows" ]; then
+          cmake_args+=(-DCMAKE_C_COMPILER="$CC")
+        fi
+        if [ -n "$CXX" ] && [ "${{ runner.os }}" != "Windows" ]; then
+          cmake_args+=(-DCMAKE_CXX_COMPILER="$CXX")
+        fi
+        # Windows-specific generator and architecture
         if [ -n "${{ matrix.build_generator }}" ]; then
           cmake_args+=(-G "${{ matrix.build_generator }}")
         fi
@@ -112,12 +159,26 @@ jobs:
           cmake_args+=(-A ${{ matrix.build_arch }})
         fi
         cmake "${cmake_args[@]}"
+        # Verify CMake configuration succeeded
+        if [ ! -f BUILD/CMakeCache.txt ]; then
+          echo "Error: CMake configuration failed - CMakeCache.txt not found"
+          exit 1
+        fi
 
     - name: Build
       shell: bash
       run: |
+        # Use parallel builds with explicit job count for consistency
+        # Windows: Try to get CPU count, fallback to 4
+        # Linux/macOS: Use nproc/sysctl to detect CPU count
         if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --parallel
+          # Try NUMBER_OF_PROCESSORS (Windows env var), fallback to 4
+          jobs=${NUMBER_OF_PROCESSORS:-4}
+          # If still empty or not a number, default to 4
+          if ! [[ "$jobs" =~ ^[0-9]+$ ]]; then
+            jobs=4
+          fi
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --parallel $jobs
         else
           cmake --build BUILD --config ${{ matrix.cmake_build_type }} --parallel $(nproc || sysctl -n hw.ncpu || echo 4)
         fi
@@ -125,8 +186,15 @@ jobs:
     - name: Build test targets
       shell: bash
       run: |
+        # Use parallel builds with explicit job count for consistency
         if [ "${{ runner.os }}" == "Windows" ]; then
-          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --target compile_proptest test_proptest test_proptest_mini --parallel
+          # Try NUMBER_OF_PROCESSORS (Windows env var), fallback to 4
+          jobs=${NUMBER_OF_PROCESSORS:-4}
+          # If still empty or not a number, default to 4
+          if ! [[ "$jobs" =~ ^[0-9]+$ ]]; then
+            jobs=4
+          fi
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --target compile_proptest test_proptest test_proptest_mini --parallel $jobs
         else
           cmake --build BUILD --config ${{ matrix.cmake_build_type }} --target compile_proptest test_proptest test_proptest_mini --parallel $(nproc || sysctl -n hw.ncpu || echo 4)
         fi
@@ -135,9 +203,19 @@ jobs:
       shell: bash
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
+          test_exe="BUILD/${{ matrix.cmake_build_type }}/compile_proptest.exe"
+          if [ ! -f "$test_exe" ]; then
+            echo "Error: $test_exe not found"
+            exit 1
+          fi
           cd BUILD/${{ matrix.cmake_build_type }}
           ./compile_proptest.exe || exit 1
         else
+          test_exe="BUILD/compile_proptest"
+          if [ ! -f "$test_exe" ]; then
+            echo "Error: $test_exe not found"
+            exit 1
+          fi
           cd BUILD
           ./compile_proptest || exit 1
         fi
@@ -153,7 +231,13 @@ jobs:
           test_exe="BUILD/test_proptest"
           results_xml="BUILD/test_results.xml"
         fi
-        
+
+        # Verify test executable exists
+        if [ ! -f "$test_exe" ]; then
+          echo "Error: $test_exe not found"
+          exit 1
+        fi
+
         # Run with retry for flaky property-based tests
         max_attempts=3
         attempt=1
@@ -177,9 +261,19 @@ jobs:
       shell: bash
       run: |
         if [ "${{ runner.os }}" == "Windows" ]; then
+          test_exe="BUILD/${{ matrix.cmake_build_type }}/test_proptest_mini.exe"
+          if [ ! -f "$test_exe" ]; then
+            echo "Error: $test_exe not found"
+            exit 1
+          fi
           cd BUILD/${{ matrix.cmake_build_type }}
           ./test_proptest_mini.exe || exit 1
         else
+          test_exe="BUILD/test_proptest_mini"
+          if [ ! -f "$test_exe" ]; then
+            echo "Error: $test_exe not found"
+            exit 1
+          fi
           cd BUILD
           ./test_proptest_mini || exit 1
         fi
@@ -188,6 +282,7 @@ jobs:
     - name: Upload test results
       if: always()
       uses: actions/upload-artifact@v4
+      continue-on-error: true  # Don't fail if running locally with act
       with:
         name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-cpp${{ matrix.cpp_std }}
         path: |
@@ -199,6 +294,7 @@ jobs:
     - name: Upload build artifacts (on failure)
       if: failure()
       uses: actions/upload-artifact@v4
+      continue-on-error: true  # Don't fail if running locally with act
       with:
         name: build-artifacts-${{ matrix.os }}-${{ matrix.compiler }}-cpp${{ matrix.cpp_std }}
         path: |

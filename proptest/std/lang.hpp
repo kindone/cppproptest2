@@ -1,6 +1,7 @@
 #pragma once
 #include <utility>
 #include <cstddef>
+#include <cstdint>
 
 namespace proptest {
 using std::declval;

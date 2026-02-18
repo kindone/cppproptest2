@@ -52,10 +52,10 @@ double composeFloat<double>(double value, int exp)
 
 
 template <typename FLOATTYPE>
-Shrinkable<FLOATTYPE>::StreamType floatShrinksImpl(FLOATTYPE value)
+typename Shrinkable<FLOATTYPE>::StreamType floatShrinksImpl(FLOATTYPE value)
 {
-    using Stream = Shrinkable<FLOATTYPE>::StreamType;
-    using Elem = Shrinkable<FLOATTYPE>::StreamElementType;
+    using Stream = typename Shrinkable<FLOATTYPE>::StreamType;
+    using Elem = typename Shrinkable<FLOATTYPE>::StreamElementType;
     int exp = 0;
     if (value == 0.0f) {
         return Stream::empty();
@@ -112,13 +112,13 @@ Shrinkable<FLOATTYPE>::StreamType floatShrinksImpl(FLOATTYPE value)
 }
 
 template <>
-Shrinkable<float>::StreamType floatShrinks(float value)
+typename Shrinkable<float>::StreamType floatShrinks(float value)
 {
     return floatShrinksImpl<float>(value);
 }
 
 template <>
-Shrinkable<double>::StreamType floatShrinks(double value)
+typename Shrinkable<double>::StreamType floatShrinks(double value)
 {
     return floatShrinksImpl<double>(value);
 }

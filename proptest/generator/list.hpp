@@ -29,8 +29,10 @@ concept ListLikeContainer = requires(C& c, typename C::value_type v) {
 /**
  * @ingroup Generators
  * @brief Arbitrary for list-like containers with push_back support (e.g., std::list) with configurable element generator and min/max sizes
+ * 
+ * Supports containers with one template parameter (e.g., custom containers) or two parameters with default allocator (e.g., std::list, std::vector)
  */
-template <template <typename> class Container, typename T>
+template <template <typename, typename...> class Container, typename T>
     requires ListLikeContainer<Container<T>>
 class PROPTEST_API Arbi<Container<T>> final : public ArbiContainer<Container<T>> {
 public:
@@ -67,12 +69,12 @@ private:
     GenFunction<T> elemGen;
 };
 
-// Static member definitions for all list-like containers
-template <template <typename> class Container, typename T>
+// Static member definitions for all list-like containers (including std::list with variadic template parameters)
+template <template <typename, typename...> class Container, typename T>
     requires ListLikeContainer<Container<T>>
 size_t Arbi<Container<T>>::defaultMinSize = 0;
 
-template <template <typename> class Container, typename T>
+template <template <typename, typename...> class Container, typename T>
     requires ListLikeContainer<Container<T>>
 size_t Arbi<Container<T>>::defaultMaxSize = 200;
 

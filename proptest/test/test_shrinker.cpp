@@ -104,8 +104,8 @@ TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed_20)
 TYPED_TEST(SignedIntegralTest, shrinkIntegral_signed2)
 {
     // concat with positive signed number
-    using StreamType = Shrinkable<TypeParam>::StreamType;
-    using Elem = Shrinkable<TypeParam>::StreamElementType;
+    using StreamType = typename Shrinkable<TypeParam>::StreamType;
+    using Elem = typename Shrinkable<TypeParam>::StreamElementType;
     Shrinkable<TypeParam> shr = shrinkIntegral<TypeParam>(-8).concat([](const Elem& shr) {
         Shrinkable<TypeParam> inShr = shr;
         if(inShr.getRef() == 0)

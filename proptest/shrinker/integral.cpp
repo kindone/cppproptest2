@@ -14,8 +14,8 @@ Shrinkable<T> binarySearchShrinkableImpl(T value);
 template <typename T>
 Shrinkable<T> binarySearchShrinkableImpl(T value)
 {
-    using stream_t = Shrinkable<T>::StreamType;
-    using elem_t = Shrinkable<T>::StreamElementType;
+    using stream_t = typename Shrinkable<T>::StreamType;
+    using elem_t = typename Shrinkable<T>::StreamElementType;
     using genfunc_t = Function<stream_t(T, T)>;
 
     // given min, max, generate stream
@@ -56,8 +56,8 @@ Shrinkable<T> binarySearchShrinkableImpl(T value)
 template <typename T>
 Shrinkable<T> binarySearchShrinkableUImpl(T value)
 {
-    using stream_t = Shrinkable<T>::StreamType;
-    using elem_t = Shrinkable<T>::StreamElementType;
+    using stream_t = typename Shrinkable<T>::StreamType;
+    using elem_t = typename Shrinkable<T>::StreamElementType;
     using genfunc_t = Function<stream_t(T, T)>;
 
     // given min, max, generate stream

@@ -1,0 +1,16 @@
+# act configuration file
+# See: https://github.com/nektos/act#configuration
+
+# Use these Docker images for runners
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+-P macos-latest=catthehacker/ubuntu:act-latest
+-P windows-latest=catthehacker/ubuntu:act-latest
+
+# Container architecture
+--container-architecture linux/amd64
+
+# Verbose output
+-v
+
+# Reuse containers (faster, but may have stale state)
+--reuse

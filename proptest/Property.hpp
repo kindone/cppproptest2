@@ -341,7 +341,7 @@ template <typename Callable, typename... ExplicitGens>
 auto property(Callable&& callable, ExplicitGens&&... gens)
 {
     // acquire full tuple of generators
-    using FuncType = function_traits<Callable>::template function_type_with_signature<Function>;
+    using FuncType = typename function_traits<Callable>::template function_type_with_signature<Function>;
     constexpr size_t NumArgs = FuncType::Arity;
     constexpr size_t NumGens = sizeof...(ExplicitGens);
     using ArgTuple = typename FuncType::ArgTuple;
