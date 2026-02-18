@@ -1,0 +1,207 @@
+# Continuous Integration workflow for cppproptest2
+#
+# First draft - minimal coverage to verify CI setup works
+# Can be expanded later with more compiler/platform combinations
+
+name: CI
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  BUILD_TYPE: Release
+
+# Cancel in-progress runs for the same workflow/PR to save CI minutes
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} - ${{ matrix.compiler }} - C++${{ matrix.cpp_std }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Linux - GCC (one version to start)
+          - os: ubuntu-latest
+            compiler: gcc
+            compiler_version: "12"
+            cpp_std: "20"
+            cmake_build_type: Release
+            
+          # Linux - Clang (one version to start)
+          - os: ubuntu-latest
+            compiler: clang
+            compiler_version: "15"
+            cpp_std: "20"
+            cmake_build_type: Release
+            
+          # macOS - Clang (Apple Clang)
+          - os: macos-latest
+            compiler: clang
+            compiler_version: "16"
+            cpp_std: "20"
+            cmake_build_type: Release
+            
+          # Windows - MSVC
+          - os: windows-latest
+            compiler: msvc
+            compiler_version: "2022"
+            cpp_std: "20"
+            cmake_build_type: Release
+            build_generator: "Visual Studio 17 2022"
+            build_arch: "x64"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up compiler (Linux GCC)
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'gcc'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y gcc-${{ matrix.compiler_version }} g++-${{ matrix.compiler_version }}
+        echo "CC=gcc-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+        echo "CXX=g++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+
+    - name: Set up compiler (Linux Clang)
+      if: matrix.os == 'ubuntu-latest' && matrix.compiler == 'clang'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang-${{ matrix.compiler_version }}
+        echo "CC=clang-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+        echo "CXX=clang++-${{ matrix.compiler_version }}" >> $GITHUB_ENV
+
+    - name: Set up compiler (macOS)
+      if: matrix.os != 'ubuntu-latest' && matrix.os != 'windows-latest'
+      run: |
+        # macOS uses system Clang, ensure Xcode Command Line Tools are installed
+        xcode-select --install || true
+        echo "CC=clang" >> $GITHUB_ENV
+        echo "CXX=clang++" >> $GITHUB_ENV
+
+    - name: Set up compiler (Windows MSVC)
+      if: matrix.os == 'windows-latest' && matrix.compiler == 'msvc'
+      uses: microsoft/setup-msbuild@v1.1
+
+    - name: Install CMake
+      uses: jwlawson/actions-setup-cmake@v1.14
+      with:
+        cmake-version: '3.28.3'
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        cmake_args=(
+          . -BBUILD
+          -DCMAKE_BUILD_TYPE=${{ matrix.cmake_build_type }}
+          -DCMAKE_CXX_STANDARD=${{ matrix.cpp_std }}
+        )
+        if [ -n "${{ matrix.build_generator }}" ]; then
+          cmake_args+=(-G "${{ matrix.build_generator }}")
+        fi
+        if [ -n "${{ matrix.build_arch }}" ]; then
+          cmake_args+=(-A ${{ matrix.build_arch }})
+        fi
+        cmake "${cmake_args[@]}"
+
+    - name: Build
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --parallel
+        else
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --parallel $(nproc || sysctl -n hw.ncpu || echo 4)
+        fi
+
+    - name: Build test targets
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --target compile_proptest test_proptest test_proptest_mini --parallel
+        else
+          cmake --build BUILD --config ${{ matrix.cmake_build_type }} --target compile_proptest test_proptest test_proptest_mini --parallel $(nproc || sysctl -n hw.ncpu || echo 4)
+        fi
+
+    - name: Run compile tests
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          cd BUILD/${{ matrix.cmake_build_type }}
+          ./compile_proptest.exe || exit 1
+        else
+          cd BUILD
+          ./compile_proptest || exit 1
+        fi
+      continue-on-error: false
+
+    - name: Run main tests (with retry for flaky tests)
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          test_exe="BUILD/${{ matrix.cmake_build_type }}/test_proptest.exe"
+          results_xml="BUILD/${{ matrix.cmake_build_type }}/test_results.xml"
+        else
+          test_exe="BUILD/test_proptest"
+          results_xml="BUILD/test_results.xml"
+        fi
+        
+        # Run with retry for flaky property-based tests
+        max_attempts=3
+        attempt=1
+        while [ $attempt -le $max_attempts ]; do
+          echo "Running test_proptest (attempt $attempt/$max_attempts)..."
+          if "$test_exe" --gtest_output=xml:"$results_xml"; then
+            echo "Tests passed on attempt $attempt"
+            exit 0
+          fi
+          if [ $attempt -lt $max_attempts ]; then
+            echo "Tests failed, retrying..."
+            sleep 2
+          fi
+          attempt=$((attempt + 1))
+        done
+        echo "Tests failed after $max_attempts attempts"
+        exit 1
+      continue-on-error: false
+
+    - name: Run mini tests
+      shell: bash
+      run: |
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          cd BUILD/${{ matrix.cmake_build_type }}
+          ./test_proptest_mini.exe || exit 1
+        else
+          cd BUILD
+          ./test_proptest_mini || exit 1
+        fi
+      continue-on-error: false
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.compiler }}-cpp${{ matrix.cpp_std }}
+        path: |
+          BUILD/**/test_results.xml
+          BUILD/**/*.log
+        retention-days: 7
+        if-no-files-found: ignore
+
+    - name: Upload build artifacts (on failure)
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ matrix.os }}-${{ matrix.compiler }}-cpp${{ matrix.cpp_std }}
+        path: |
+          BUILD/
+        retention-days: 3
+        if-no-files-found: ignore
