@@ -9,7 +9,16 @@ SET(CMAKE_CXX_FLAGS_RELEASE "")
 SET_PROPERTY(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 SET(CMAKE_CXX_STANDARD 20)
 SET(CLANG_DEBUG_OPTIONS, "-g -O0 -fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Werror -Wnarrowing -Werror=comment -Werror=redundant-decls  -Wpessimizing-move -Werror=unused-local-typedefs -Wsign-compare -Werror=unused-parameter -Werror=dangling-else -Werror=sign-compare -Werror=tautological-compare -Werror=unused-but-set-parameter -Werror=nonnull")
+
+# Set compiler-specific flags
+if(MSVC)
+    # MSVC flags: /WX treats warnings as errors (equivalent to -Werror), /W4 is warning level 4
+    # /O2 is optimization (same as GCC's -O2)
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /W4 /O2")
+else()
+    # GCC/Clang flags
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Werror -Wnarrowing -Werror=comment -Werror=redundant-decls  -Wpessimizing-move -Werror=unused-local-typedefs -Wsign-compare -Werror=unused-parameter -Werror=dangling-else -Werror=sign-compare -Werror=tautological-compare -Werror=unused-but-set-parameter -Werror=nonnull")
+endif()
 # add_subdirectory("proptest")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
