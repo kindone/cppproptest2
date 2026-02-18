@@ -38,7 +38,9 @@ jobs:
             cmake_build_type: Release
 
           # Linux - Clang (one version to start)
-          - os: ubuntu-latest
+          # Using ubuntu-22.04 instead of ubuntu-latest to avoid libstdc++ compatibility issues
+          # with Clang + GCC 14's C++20 ranges implementation
+          - os: ubuntu-22.04
             compiler: clang
             compiler_version: "15"
             cpp_std: "20"
