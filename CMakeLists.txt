@@ -14,7 +14,11 @@ SET(CLANG_DEBUG_OPTIONS, "-g -O0 -fsanitize=address -fno-omit-frame-pointer -fno
 if(MSVC)
     # MSVC flags: /WX treats warnings as errors (equivalent to -Werror), /W4 is warning level 4
     # /O2 is optimization (same as GCC's -O2)
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /W4 /O2")
+    # /wd4251 disables C4251 warning about DLL interface for std::string/std::vector etc.
+    # /wd4273 disables C4273 warning about inconsistent dll linkage (common with exported classes)
+    # /wd2491 disables C2491 warning about dllimport static data member definitions
+    # These are common MSVC warnings when building DLLs and don't affect functionality
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /WX /W4 /O2 /wd4251 /wd4273 /wd2491")
 else()
     # GCC/Clang flags
     SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O2 -Werror -Wnarrowing -Werror=comment -Werror=redundant-decls  -Wpessimizing-move -Werror=unused-local-typedefs -Wsign-compare -Werror=unused-parameter -Werror=dangling-else -Werror=sign-compare -Werror=tautological-compare -Werror=unused-but-set-parameter -Werror=nonnull")
