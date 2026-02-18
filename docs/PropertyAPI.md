@@ -6,7 +6,93 @@
 
 `cppproptest` provides a property-based testing framework where you define properties (invariants) that should hold for all inputs in a domain, rather than testing specific examples. The framework automatically generates random inputs and verifies your properties.
 
-![Property functions and shorthands](images/property.svg)
+<!-- DO NOT DELETE BELOW IMAGE OR KROKI SCRIPT. Script generates to images/property.svg for switching between live and optimized version -->![Property functions and shorthands](images/property.svg)
+
+```kroki-d2
+
+callable : Callable {
+
+    func: |cpp
+    [](int a, int b) {
+    // test code
+    }
+    | {
+        style {
+            stroke: transparent
+            fill: transparent
+        }
+    }
+
+    style.fill : transparent
+    shape: page
+}
+
+cont: "Property" {
+
+    property: |cpp
+    proptest::property(callable)
+    |
+
+    propertyforAll: |cpp
+    .forAll()
+    |
+
+    propertymatrix: |cpp
+    .matrix(...)
+    |
+
+    example : |cpp
+    .example(...)
+    |
+}
+
+cont2 : Shorthands {
+
+    forAll: |cpp
+    proptest::forAll(callable)
+    |
+
+    matrix: |cpp
+    proptest::matrix(callable, ...)
+    |
+}
+
+cont3: GTEST Macros {
+    expectForAll: |cpp
+    EXPECT_FOR_ALL(callable)
+    |
+
+    assertForAll: |cpp
+    ASSERT_FOR_ALL(callable)
+    |
+}
+
+cont.property -> cont.propertyForAll : random inputs
+cont.property -> cont.propertyMatrix : Cartesian products
+cont.property -> cont.example : specific inputs
+
+cont.propertyForAll -- cont2.forAll : shorthand {
+  style: {
+    stroke-dash: 3
+  }
+}
+
+cont.propertyMatrix -- cont2.matrix : shorthand {
+  style: {
+    stroke-dash: 3
+  }
+}
+
+cont2.forAll -- cont3.expectForAll : Google Test EXPECT_TRUE {
+    style.stroke-dash: 3
+}
+
+cont2.forAll -- cont3.assertForAll : Google Test ASSERT_TRUE {
+    style.stroke-dash: 3
+}
+```
+
+<!-- -->
 
 ## Quick Reference
 

@@ -1,57 +1,53 @@
 # Building Custom Generator from Scratch
 
-## `GenFunction<T>` - Common representation for all generators for type `T`
+> **New to property-based testing?** Start with the [Walkthrough](Walkthrough.md) for a step-by-step guide. Before building a custom generator from scratch, consider combining existing [generators](Generators.md) with [combinators](Combinators.md)—[`.filter()`](Combinators.md#filterfilterer), [`.map<U>()`](Combinators.md#mapumapper), [`.flatMap<U>()`](Combinators.md#flatmapugenufromt), [`.pairWith<U>()`](Combinators.md#pairwithugenufromt-and-tuplewithugenufromt), or [gen::construct](Combinators.md#genconstructtargs) often suffice. Build from scratch only when you need generation logic that cannot be expressed by composing these.
 
-All generators, including the default ones, share the same base *function* type. A generator can be a callable (function, functor, or lambda) with following common signature:
+&nbsp;
 
-```cpp
-// (Random&) -> Shrinkable<T>
-```
+## When to Build from Scratch
 
-This can be represented as (or coerced to) a function type, `Function<Shrinkable<T>(Random&)>` (a lightweight type-erased callable container). In `cppproptest`, this function type is aliased as `GenFunction<T>`. We will use this term *GenFunction* throughout this page to refer the generator function type.
+Custom generators are useful when:
 
-```cpp
-template <typename T>
-using GenFunction = Function<Shrinkable<T>(Random&);
-```
+- You need values from a domain not covered by [built-in generators](Generators.md) or [Arbitraries](Arbitrary.md)
+- Combinators ([filter](Combinators.md#filterfilterer), [map](Combinators.md#mapumapper), [flatMap](Combinators.md#flatmapugenufromt), [construct](Combinators.md#genconstructtargs)) cannot express your constraints or transformations
+- You need custom shrinking behavior (see [Shrinking](Shrinking.md))
+- You want to define a default generator for a type used across many tests (see [Arbitrary](Arbitrary.md))
 
-By the way, you may have noticed a strange template type `Shrinkable` in this signature. You can refer to [`Shrinkable`](Shrinking.md) for its further detail, but it can be treated as a wrapper for type `T` for now. So a generator (`Generator<T>`) basically generates a value of type `T` from a random number generator of `Random` type. A generator can be defined as function, functor, or lambda, as following:
+&nbsp;
 
-```cpp
-// lambda style
-auto myIntGen = [](Random& rand) {
-    int smallInt = rand.getRandomInt8();
-    return make_shrinkable<int>(smallInt);
-};
+## `Generator<T>` and `Arbitrary<T>`
 
-// function style
-Shrinkable<int> myIntGen(Random& rand) {
-    int smallInt = rand.getRandomInt8();
-    return make_shrinkable<int>(smallInt);
-}
+`Generator<T>` and [`Arbitrary<T>`](Arbitrary.md) are the standard generator types in `cppproptest`. Both share the same chainable utility methods ([`.filter()`](Combinators.md#filterfilterer), [`.map<U>()`](Combinators.md#mapumapper), [`.flatMap<U>()`](Combinators.md#flatmapugenufromt), etc.). `Generator<T>` is commonly the result of [combinators](Combinators.md); `Arbitrary<T>` is the default generator for a type. They are fully chainable—you can use any generator with `forAll` and chain methods as needed.
 
-// functor style
-struct MyIntGen {
-    Shrinkable<int> operator()(Random& rand) {
-        int smallInt = rand.getRandomInt8();
-        return make_shrinkable<int>(smallInt);
-    }
-};
-```
+&nbsp;
 
-## `Generator<T>` - Decorator class for supercharging a generator
+## Building a Custom Generator
 
-The template class `Generator<T>` is an abstract functor class that also coerces to `GenFunction<T>`. A `Generator<T>` gives access to some useful methods so that you can wrap your callable with this to decorate with those methods. As all accompanied generators and combinators of `cppproptest` produce decorated `Generator<T>`s, you can use the utility methods out-of-box.
+A generator in `cppproptest` is simply a callable with signature `(Random&) -> Shrinkable<T>`. Simplest way to make a shrinkable is to use `make_shrinkable<T>(value)` to wrap your value. This makes a shrinkable with no further shrinks. See [Shrinking](Shrinking.md) for details on `Shrinkable`.
+
+You can wrap your callable with `Generator<T>` to decorate it as a standard generator with same chainable utility methods as built-in generators and [Arbitraries](Arbitrary.md):
 
 ```cpp
-// decorate a GenFunction with Generator<T>
 auto myIntGen = Generator<int>([](Random& rand) {
     int smallInt = rand.getRandomInt8();
     return make_shrinkable<int>(smallInt);
 });
 
-// .filter and other utility methods can be used once the generator is decorated with Generator<T>
+// Chain with .filter(), .map(), etc. like any other standard generators
 auto evenGen = myIntGen.filter([](const int& value) {
     return value % 2 == 0;
-}); // generates even numbers only
+});
 ```
+
+&nbsp;
+
+---
+
+## Related Topics
+
+- [Combinators](Combinators.md) - `.filter()`, `.map()`, `.flatMap()`, and other utility methods for transforming generators
+- [Generators](Generators.md) - Built-in generators for primitives and containers
+- [Arbitrary](Arbitrary.md) - Defining default generators for types used in `forAll` without explicit generator arguments
+- [Shrinking](Shrinking.md) - How `Shrinkable` and `make_shrinkable` enable automated simplification of failing inputs
+- [Property API](PropertyAPI.md) - Using custom generators with `forAll` and `property()`
+- [Walkthrough](Walkthrough.md) - Step-by-step guide for creating property tests

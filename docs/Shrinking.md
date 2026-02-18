@@ -1,40 +1,65 @@
-# Simplifying Failed Inputs
+# Simplifying Failed Inputs (Shrinking)
 
-Shrinking is powerful notion widely utilized in most property-based testing libraries. It automates some of typical debugging process and greatly reduces the effort required to analyse a test failure. `cppproptest` fully supports shrinking for all built-in generators and combinators.
+> **New to property-based testing?** Start with the [Walkthrough](Walkthrough.md) for a step-by-step guide. Shrinking happens automatically when a property fails—you don't need to configure it. This page explains how it works and when it helps.
 
-## Counterexample and Shrinking
+When a property fails, `cppproptest` finds a *counterexample*—an input that disproves the property. *Shrinking* then simplifies that counterexample to make debugging easier. All [built-in generators](Generators.md) and [combinators](Combinators.md) support shrinking out of the box.
 
-Compared to [generators](Generators.md), shrinking is a relatively optional feature of property-based testing. But it plays very important role in terms of usability and debugging. Here is an example:
+&nbsp;
 
-```cpp
-forAll([](int a, double b, bool c) -> bool {
-    PROP_ASSERT(...);
-});
-```
+## Overview
 
-When a property fails during a property-based test, a counterexample is found.
+| Concept | Description |
+|---------|-------------|
+| **Counterexample** | An input that causes the property to fail |
+| **Shrinking** | The process of finding a simpler counterexample that still fails |
+| **Shrinkable** | A wrapper that carries a value and its shrink candidates (created internally by generators) |
 
-> Falsifiable after 12 tests, where a = -13680124, b = 7524.68454e-14, c = true
+**Example:** Assume a property fails with `a = -13680124, b = 7524.68454e-14, c = true`. After shrinking, you might get `a = 0, b = 0, c = true`—if `a` and `b` have no relation to the failure condition and only `c` matters.
 
-Here, `a`, `b`, and `c`'s tuple `(-13680124, 7524.68454e-14, true)` is a counterexample that disproves a property. You can reproduce the property failure with this input combination so that you can further reason about its root cause.
+&nbsp;
 
-You would immediately want to know which combination of the arguments `a`, `b`, and `c` is responsible for the failure. In some cases, a boolean flag such as `c` in this example could have triggered the failure. If `c` is the only responsible for the failure, we can pull other arguments `a` and `b` out of the equation and keep them as simple as possible. Finding such relationship of arguments is what we would typically do to indentify the root cause of the failure.
+## How Shrinking Works
 
-*Shrinking* exactly automates this process. When a failure is encountered, `forAll` *shrinks* the failing input combination. In other words, it tries to find another input combination that still fails the property, but with simpler representation.
-If an integer is big, it tries with a smaller number. If a boolean is `true`, then tries with `false`. If a vector has many elements, it tries with removing some of the elements, and so on. If possible, it will come up with much more meaningful set of arguments that led to the failure. In this specific example, `a`, `b`, and `c` tuple can be shrunk from the complicated `(-13680124, 7524.68454e-14, true)` to much simpler `(0, 0, true)`, because `a` and `b` has no role in the failure.
+When `forAll` detects a failure, it runs a shrinking phase. It repeatedly tries simpler variants of the failing input (**while keeping the constraint given when it was generated**). If a simpler variant still fails the test, the framework keeps it and continues until there is no more that fails. The result is a minimal counterexample that still reproduces the failure.
 
-In short,
+This automates the manual debugging step of finding which arguments matter and simplifying them to isolate the root cause as much as possible.
 
-> *Shrinking* is the process of finding another failing combination of arguments with simpler representation.
+&nbsp;
 
-Although There is no universal definition of *simple* or *simpler*, we can agree on some basic ideas:
+## Shrinkability by Type
 
-* Booleans: `false` (turning a flag off) is simpler than `true` (turning on)
-* Numerics:
-    * remove sign or take a smaller absolute value/exponent (e.g. `-34` -> `34`, `16384` -> `1024`, `12e55` -> `12e20`)
-    * round some of the digits (e.g. `-29.5134` -> `-29`)
-* Strings: drop some of characters in the back (e.g. `"Hello world!"` -> `"Hello"`)
-* Containers: remove some of the elements (in the back)
-    * `[0,1,2,3,4,5]` -> `[0,1,2]`
+`cppproptest` uses type-specific heuristics for what counts as "simpler". For example, simplifying some basic types can have following approaches:
 
-*Shrinking* also shines during the early stage of writing a test. It can quickly summarize a test failure so that we can easily identify whether it was the component that had a bug or the test itself that was badly designed.
+| Type | Simpler means |
+|------|---------------|
+| **Booleans** | `false` is simpler than `true` |
+| **Integers** | Smaller absolute value; remove sign (e.g., `-34` → `34`, `16384` → `1024`) |
+| **Floats** | Smaller exponent; fewer digits (e.g., `12e55` → `12e20`, `-29.5134` → `-29`) |
+| **Strings** | Fewer characters, simpler characters. (e.g., `"Hello world!"` → `"Hello"`) |
+| **Containers** | Fewer elements, simpler elements. (e.g., `[0,1,2,3,4,5]` → `[0,0,0]`) |
+
+&nbsp;
+
+## When Shrinking Helps
+
+- **Debugging** — A minimal counterexample is easier to reason about than a large random one. It's often a single parameter that's causing the failure while the rest are irrelevant.
+- **Test design**
+- **Reproducibility** — The shrunk counterexample is reported with the failure; you can use it to reproduce the bug locally.
+
+&nbsp;
+
+## Custom Generators and Shrinking
+
+When building [custom generators](CustomGenerator.md), you wrap values with `make_shrinkable<T>(value)`. The default `make_shrinkable` provides no shrink candidates (the value is already minimal). For custom shrinking behavior, you can provide alternative shrink candidates—see the [CustomGenerator](CustomGenerator.md) and shrinker APIs for advanced use.
+
+&nbsp;
+
+---
+
+## Related Topics
+
+- [Walkthrough](Walkthrough.md) - Step-by-step guide for creating property tests
+- [Property API](PropertyAPI.md) - Using `forAll` and property configuration
+- [Generators](Generators.md) - Built-in generators (all support shrinking)
+- [Combinators](Combinators.md) - Generator combinators (all support shrinking)
+- [CustomGenerator](CustomGenerator.md) - Building custom generators with `make_shrinkable`

@@ -2,32 +2,179 @@
 
 > **New to property-based testing?** Start with the [Walkthrough](Walkthrough.md) for a step-by-step guide. This page provides a comprehensive reference for all generator combinators in `cppproptest`.
 
-Generator combinators are functions that build new generators from existing ones. Many combinators are inspired by functional programming patterns and can be chained together to create complex generation logic. Each combinator receives one or more existing generators as arguments and returns a new generator.
+Generator combinators are functions that build new generators from existing ones. Many combinators are inspired by functional programming patterns and can be chained together to create complex generation logic.
 
-**Note:** All combinators are available in the `proptest::gen` namespace. You can use them with the `gen::` prefix (e.g., `gen::just`, `gen::elementOf`) or include the backward compatibility aliases from the `proptest` namespace. The examples in this documentation use the modern `gen::` prefix.
+Generator objects provide `.filter()`, `.map()`, `.flatMap()`, `.pairWith()`, and `.tupleWith()` as member methods. They are equivalent to standalone `gen::*` higher order combinator functions (`gen::filter()`, `gen::transform()`, `gen::derive()`, `gen::dependency()`, and `gen::chain()`) under the hood.
+
+&nbsp;
+
+## Utility Methods Quick Reference
+
+Call these on any generator object (e.g., `gen::int32()`, `gen::string()`, `Arbi<MyType>()`).
+
+| Method | Purpose | Example |
+|--------|---------|---------|
+| [`.filter(predicate)`](#filterfilterer) | Keep only values satisfying a condition | `gen::int32().filter([](int n) { return n % 2 == 0; })` |
+| [`.map<U>(mapper)`](#mapumapper) | Transform each value to another type | `gen::int32().map<std::string>([](int n) { return std::to_string(n); })` |
+| [`.flatMap<U>(genUFromT)`](#flatmapugenufromt) | Derive a new generator based on each value | `gen::interval(1,10).flatMap<std::string>([](int n) { auto g = gen::string(); g.setSize(n); return g; })` |
+| [`.pairWith<U>(genUFromT)`](#pairwithugenufromt-and-tuplewithugenufromt) | Generate a pair where second element depends on first | `gen::interval(1,100).pairWith<std::vector<int>>([](int n) { auto g = gen::vector<int>(); g.setSize(n); return g; })` |
+| [`.tupleWith<U>(genUFromT)`](#pairwithugenufromt-and-tuplewithugenufromt) | Chain dependent generators into a tuple | `gen::boolean().tupleWith<int>([](bool b) { return b ? gen::interval(0,50) : gen::interval(51,100); })` |
+
+&nbsp;
+
+## Utility Methods in Standard Generators
+
+Standard generator objects (returned by `gen::*`, `Arbi<T>`, `gen::construct<T>`, etc.) provide member methods that mirror the standalone combinators. These methods allow fluent chaining and are readily discoverable via autocomplete.
+
+**Underlying type:** `Generator<T>`, representing a function `(Random&) -> Shrinkable<T>` (aliased as `GenFunction<T>`).
+
+&nbsp;
+
+### `.filter(filterer)`
+
+Applies a predicate to keep only values that satisfy the condition. Equivalent to `gen::filter<T>(*this, filterer)`.
+
+**Signature:** `Generator<T>::filter(filterer) -> Generator<T>` where `filterer` is `function<bool(const T&)>`
+
+**Example:**
+
+```cpp
+// Generate even numbers
+auto evenGen = gen::int32().filter([](const int& num) {
+    return num % 2 == 0;
+});
+
+// Generate positive integers
+auto positiveGen = gen::int32().filter([](const int& num) {
+    return num > 0;
+});
+
+// Chain with other methods
+auto evenPositiveGen = gen::int32()
+    .filter([](const int& n) { return n > 0; })
+    .filter([](const int& n) { return n % 2 == 0; });
+```
+
+**See also:** [gen::filter](#genfiltert) (standalone form), [Applying Constraints](#applying-constraints)
+
+&nbsp;
+
+### `.map<U>(mapper)`
+
+Transforms each generated value to type `U`. Equivalent to `gen::transform<T,U>(*this, mapper)`.
+
+**Signature:** `Generator<T>::map<U>(mapper) -> Generator<U>` where `mapper` is `function<U(const T&)>`
+
+**Example:**
+
+```cpp
+// Generate strings from integers
+auto numStringGen = gen::int32().map<std::string>([](const int& num) {
+    return std::to_string(num);
+});
+
+// Generate uppercase strings from lowercase
+auto upperGen = gen::string().map<std::string>([](const std::string& str) {
+    std::string upper = str;
+    std::transform(upper.begin(), upper.end(), upper.begin(), ::toupper);
+    return upper;
+});
+
+// Chain: int -> string -> string length
+auto lengthGen = gen::int32()
+    .map<std::string>([](const int& n) { return std::to_string(n); })
+    .map<size_t>([](const std::string& s) { return s.size(); });
+```
+
+**See also:** [gen::transform](#gentransformtu) (standalone form), [Transforming or Mapping](#transforming-or-mapping)
+
+&nbsp;
+
+### `.flatMap<U>(genUFromT)`
+
+Based on each generated value of type `T`, obtains a *new* generator for type `U` and uses it to produce the final value. Equivalent to `gen::derive<T,U>(*this, genUFromT)`.
+
+**Signature:** `Generator<T>::flatMap<U>(genUFromT) -> Generator<U>` where `genUFromT` is `function<Generator<U>(const T&)>`
+
+**Example:**
+
+```cpp
+// Generate a string whose max size depends on a generated integer
+auto stringGen = gen::interval(1, 50).flatMap<std::string>([](const int& maxSize) {
+    auto sizedStringGen = gen::string();
+    sizedStringGen.setMaxSize(maxSize);
+    return sizedStringGen;
+});
+
+// Generate different character sets based on a selector
+auto charGen = gen::interval(0, 2).flatMap<char>([](const int& n) {
+    if (n == 0) return gen::interval('A', 'Z');
+    if (n == 1) return gen::interval('a', 'z');
+    return gen::interval('0', '9');
+});
+```
+
+**See also:** [gen::derive](#genderivetu) (standalone form), [Deriving or Flat-mapping](#deriving-or-flat-mapping)
+
+&nbsp;
+
+### `.pairWith<U>(genUFromT)` and `.tupleWith<U>(genUFromT)`
+
+Chain the current generator with another where the second depends on the first. `.pairWith<U>` produces `std::pair<T,U>`. `.tupleWith<U>` produces `std::tuple<T,U>` and can be chained further.
+
+**Example:**
+
+```cpp
+// Size and vector of that size
+auto sizeAndVectorGen = gen::interval(1, 100).pairWith<std::vector<bool>>(
+    [](const int& size) {
+        auto g = gen::vector<bool>();
+        g.setSize(size);
+        return g;
+    }
+);
+
+// Chain multiple dependent generators
+auto complexGen = gen::boolean()
+    .tupleWith<int>([](const bool& isEven) -> Generator<int> {
+        return isEven
+            ? gen::int32().filter([](int v) { return v % 2 == 0; })
+            : gen::int32().filter([](int v) { return v % 2 != 0; });
+    })
+    .tupleWith<std::string>([](const std::tuple<bool, int>& pair) -> Generator<std::string> {
+        int size = std::max(0, std::abs(std::get<1>(pair)) % 100);
+        auto g = gen::string();
+        g.setSize(size);
+        return g;
+    });
+// Result: Generator<std::tuple<bool, int, std::string>>
+```
+
+**See also:** [gen::dependency](#gendependencytu), [gen::chain](#genchaintsu), [Values with Dependencies](#values-with-dependencies)
+
+&nbsp;
 
 ---
 
-## Combinator Quick Reference
+## Standalone Combinators Quick Reference
 
-The following table provides a quick overview of available combinators. Click on any combinator name to jump to its detailed documentation.
+The `gen::*` functions are the underlying implementations for the utility methods above. Some combinators (e.g., `gen::just`, `gen::elementOf`) have no method form and are used directly.
 
-| Combinator | Purpose | See Also |
-|------------|---------|----------|
-| [`gen::just<T>`](#genjustt) | Generate a constant value | [Constants](#constants) |
-| [`gen::lazy<T>`](#genlazyt) | Generate a value by calling a function | [Constants](#constants) |
-| [`gen::elementOf<T>`](#genelementoft) | Randomly select from a list of constant values | [Selecting from Constants](#selecting-from-constants) |
-| [`gen::interval<T>`](#genintervalt), [`gen::integers<T>`](#genintegerst), [`gen::natural<T>`](#gennaturalt), [`gen::nonNegative<T>`](#gennonnegativet) | Generate values within numeric ranges | [Integers and Intervals](#integers-and-intervals), [Generators.md](Generators.md#utility-numeric-range-generators) |
-| [`gen::pair<T1,T2>`](#genpairt1t2), [`gen::tuple<Ts...>`](#gentuplets) | Combine generators to produce pairs or tuples | [Pair and Tuples](#pair-and-tuples) |
-| [`gen::oneOf<T>`](#genoneoft), [`gen::unionOf<T>`](#genunionoft) | Randomly select from multiple generators | [Selecting from Generators](#selecting-from-generators) |
-| [`gen::transform<T,U>`](#gentransformtu) | Transform generator output to another type | [Transforming or Mapping](#transforming-or-mapping) |
-| [`gen::derive<T,U>`](#genderivetu) | Derive a new generator based on generated value | [Deriving or Flat-mapping](#deriving-or-flat-mapping) |
-| [`gen::construct<T,Args...>`](#genconstructtargs) | Generate objects by calling constructors | [Constructing an Object](#constructing-an-object) |
-| [`gen::filter<T>`](#genfiltert), [`gen::suchThat<T>`](#gensuchthatt) | Filter generated values by predicate | [Applying Constraints](#applying-constraints) |
-| [`gen::dependency<T,U>`](#gendependencytu) | Generate pairs with dependent second element | [Values with Dependencies](#values-with-dependencies) |
-| [`gen::chain<Ts...,U>`](#genchaintsu) | Generate tuples with dependent elements | [Values with Dependencies](#values-with-dependencies) |
-| [`gen::aggregate<T>`](#genaggregatet) | Generate sequences where each value depends on previous | [Aggregation or Accumulation](#aggregation-or-accumulation-of-values) |
-| [`gen::accumulate<T>`](#genaccumulatet) | Generate sequences, return only the final value | [Aggregation or Accumulation](#aggregation-or-accumulation-of-values) |
+| Combinator | Purpose | Underlying / Alias for |
+|------------|---------|-------------------|
+| [`gen::just<T>`](#genjustt) | Generate a constant value | — |
+| [`gen::lazy<T>`](#genlazyt) | Generate by calling a function | — |
+| [`gen::elementOf<T>`](#genelementoft) | Select from constant values | — |
+| [`gen::interval<T>`](#genintervalt), [`gen::natural<T>`](#gennaturalt), etc. | Numeric ranges | [Generators.md](Generators.md#utility-numeric-range-generators) |
+| [`gen::pair`](#genpairt1t2), [`gen::tuple`](#gentuplets) | Combine generators | — |
+| [`gen::oneOf<T>`](#genoneoft) | Select from multiple generators | — |
+| [`gen::construct<T,Args...>`](#genconstructtargs) | Generate via constructor | — |
+| [`gen::filter<T>`](#genfiltert) | Filter by predicate | [`.filter()`](#filterfilterer) |
+| [`gen::transform<T,U>`](#gentransformtu) | Transform to another type | [`.map<U>()`](#mapumapper) |
+| [`gen::derive<T,U>`](#genderivetu) | Derive generator from value | [`.flatMap<U>()`](#flatmapugenufromt) |
+| [`gen::dependency<T,U>`](#gendependencytu) | Pair with dependent second | [`.pairWith<U>()`](#pairwithugenufromt-and-tuplewithugenufromt) |
+| [`gen::chain<Ts...,U>`](#genchaintsu) | Tuple with dependent element | [`.tupleWith<U>()`](#pairwithugenufromt-and-tuplewithugenufromt) |
+| [`gen::aggregate<T>`](#genaggregatet), [`gen::accumulate<T>`](#genaccumulatet) | Sequential dependent generation | — |
 
 &nbsp;
 
@@ -285,6 +432,8 @@ Add a filtering condition to a generator to restrict generated values to satisfy
 
 #### `gen::filter<T>`
 
+Underlying implementation of [`.filter()`](#filterfilterer).
+
 Generates a value of type `T` using the base generator `gen`, but only yields values that satisfy the `condition_predicate` (i.e., for which the predicate returns `true`). If the predicate returns `false`, the generation is retried with a new value from `gen`.
 
 **Signature:** `gen::filter<T>(gen, condition_predicate)`
@@ -316,6 +465,8 @@ Alias of `gen::filter<T>`.
 Transform an existing generator to create a new generator by providing a transformer function. This is equivalent to *mapping* in functional programming.
 
 #### `gen::transform<T,U>`
+
+Underlying implementation of [`.map<U>()`](#mapumapper).
 
 Generates type `U` based on a generator for type `T`, using a transformer function that converts a value of type `const T&` to type `U`.
 
@@ -350,6 +501,8 @@ auto upperGen = gen::transform<std::string, std::string>(
 Another combinator that resembles `gen::transform` is `gen::derive`. This is equivalent to *flat-mapping* or *binding* in functional programming. The key difference from `gen::transform<T, U>` is that the function provided to `gen::derive` returns a *new generator* (`Generator<U>`) based on the intermediate value of type `T`, rather than just transforming the value into a `U`. This allows for more complex, context-dependent generation logic.
 
 #### `gen::derive<T,U>`
+
+Underlying implementation of [`.flatMap<U>()`](#flatmapugenufromt).
 
 Derives a new generator for type `U`. It first generates a value of type `T` using `genT`. Then, it passes this value to `genUGen`, which is a function that returns a `Generator<U>`. This returned generator is then used to produce the final value of type `U`.
 
@@ -389,6 +542,8 @@ Generate values where one value depends on another. Two combinators facilitate t
 
 #### `gen::dependency<T,U>`
 
+Underlying implementation of [`.pairWith<U>()`](#pairwithugenufromt-and-tuplewithugenufromt).
+
 Generates a `std::pair<T,U>`. It first uses `genT` to generate a value of type `T`. This value is then passed to `genUgen`, which is a function that returns a `Generator<U>`. This returned generator produces the second element of the pair. This effectively creates a generator for a pair where the second item depends on the first.
 
 **Signature:** `gen::dependency<T,U>(genT, genUgen)`
@@ -422,7 +577,7 @@ auto nullableIntegerGen = gen::dependency<bool, int>(
 
 #### `gen::chain<Ts...,U>`
 
-Similar to `gen::dependency`, but operates on tuples. It takes a generator `genTuple` for `std::tuple<Ts...>` and a function `genUFromTuple`. This function receives the generated tuple (`const std::tuple<Ts...>&`) and returns a `Generator<U>`. The final result is a generator for `std::tuple<Ts..., U>`. `gen::chain` can be repeatedly applied to build tuples with multiple dependent elements.
+Underlying implementation of [`.tupleWith<U>()`](#pairwithugenufromt-and-tuplewithugenufromt). Similar to `gen::dependency`, but operates on tuples. It takes a generator `genTuple` for `std::tuple<Ts...>` and a function `genUFromTuple`. This function receives the generated tuple (`const std::tuple<Ts...>&`) and returns a `Generator<U>`. The final result is a generator for `std::tuple<Ts..., U>`. `gen::chain` can be repeatedly applied to build tuples with multiple dependent elements.
 
 **Signature:** `gen::chain<Ts..., U>(genTuple, genUFromTuple)`
 
@@ -543,113 +698,6 @@ Generator<vector<int>> gen = gen::aggregate<int>(
 **See also:** [StatefulTesting.md](StatefulTesting.md) for testing stateful systems with sequences of actions
 
 &nbsp;
-
-## Utility Methods in Standard Generators
-
-Standard generator objects (like those returned by `gen::*`, `Arbi<T>`, `gen::construct<T>`, and the combinators themselves) provide convenient member functions that mirror the standalone combinator functions. These methods allow for fluent chaining of operations directly on the generator object. The underlying type is typically `Generator<T>`, representing a function `(Random&) -> Shrinkable<T>` (aliased as `GenFunction<T>`).
-
-These methods have equivalent standalone counterparts and can be continuously chained:
-
-| Method | Result Type | Equivalent Standalone Combinator |
-|--------|-------------|----------------------------------|
-| `Generator<T>::filter(filterer)` | `Generator<T>` | [`gen::filter<T>`](#genfiltert) |
-| `Generator<T>::map<U>(mapper)` | `Generator<U>` | [`gen::transform<T,U>`](#gentransformtu) |
-| `Generator<T>::flatMap<U>(genUFromT)` | `Generator<U>` | [`gen::derive<T,U>`](#genderivetu) |
-| `Generator<T>::pairWith<U>(genUFromT)` | `Generator<std::pair<T,U>>` | [`gen::dependency<T,U>`](#gendependencytu) |
-| `Generator<T>::tupleWith<U>(genUFromT)` | `Generator<std::tuple<T,U>>` | [`gen::chain<T,U>`](#genchaintsu) |
-| `Generator<std::tuple<Ts...>>::tupleWith<U>(genUFromTuple)` | `Generator<std::tuple<Ts...,U>>` | [`gen::chain<std::tuple<Ts...>,U>`](#genchaintsu) |
-
-### `.map<U>(mapper)`
-
-Equivalent to calling `gen::transform<T,U>(*this, mapper)`. Transforms the output of the current generator using the provided `mapper` function.
-
-**Example:**
-
-```cpp
-// generator for strings representing arbitrary integers
-auto numStringGen = gen::int32().map<std::string>([](const int& num) {
-    return std::to_string(num);
-});
-// which is equivalent to:
-auto numStringGenEquivalent = gen::transform<int, std::string>(
-    gen::int32(),
-    [](const int& num) {
-        return std::to_string(num);
-    }
-);
-```
-
-**See also:** [Transforming or Mapping](#transforming-or-mapping)
-
-### `.filter(filterer)`
-
-Equivalent to calling `gen::filter<T>(*this, filterer)`. Applies a predicate to filter the values produced by the current generator.
-
-**Example:**
-
-```cpp
-// two equivalent ways to generate random even numbers
-auto evenGen = gen::int32().filter([](const int& num) {
-    return num % 2 == 0;
-});
-
-auto evenGenEquivalent = gen::filter<int>(gen::int32(), [](const int& num) {
-    return num % 2 == 0;
-});
-```
-
-**See also:** [Applying Constraints](#applying-constraints)
-
-### `.flatMap<U>(genUFromT)`
-
-Equivalent to calling `gen::derive<T, U>(*this, genUFromT)`. Based on the generated value of the current generator (type `T`), it uses the `genUFromT` function to obtain a *new* generator (`Generator<U>`), which is then used to produce the final value. This allows the characteristics of the resulting generator `U` to depend on the intermediate value `T`.
-
-**Example:**
-
-```cpp
-// Generate a string whose maximum size depends on a generated integer
-auto stringGen = gen::interval(1, 50).flatMap<std::string>([](const int& maxSize) {
-    auto sizedStringGen = gen::string();
-    sizedStringGen.setMaxSize(maxSize); // Configure the string generator
-    return sizedStringGen; // Return the configured generator
-});
-```
-
-**See also:** [Deriving or Flat-mapping](#deriving-or-flat-mapping)
-
-### `.pairWith<U>(genUFromT)` and `.tupleWith<U>(genUFromT)`
-
-Chain the current generator with another one where the second depends on the first. `.pairWith<U>` is equivalent to `gen::dependency<T, U>(*this, genUFromT)`, and `.tupleWith<U>` is equivalent to `gen::chain<T, U>(*this, genUFromT)`. If the current generator produces a `std::tuple<Ts...>`, `.tupleWith<U>` is equivalent to `gen::chain<Ts..., U>(*this, genUFromTuple)`.
-
-**Example:**
-
-```cpp
-// Chain multiple dependent generators using tupleWith
-auto complexGen = gen::boolean().tupleWith<int>([](const bool& isEven) -> Generator<int> {
-    if (isEven)
-        // If bool is true, generate an even integer
-        return gen::int32().filter([](const int& value) {
-            return value % 2 == 0;
-        });
-    else
-        // If bool is false, generate an odd integer
-        return gen::int32().filter([](const int& value) {
-            return value % 2 != 0;
-        });
-}).tupleWith<std::string>([](const std::tuple<bool, int>& pair) -> Generator<std::string> {
-    // Generate a string whose size depends on the generated integer (second element)
-    int size = std::get<1>(pair);
-    // Ensure size is non-negative for the string generator
-    size = std::max(0, std::abs(size) % 100); // Example: Limit size reasonably
-    auto stringGen = gen::string();
-    stringGen.setSize(size);
-    return stringGen;
-}); // Results in Generator<tuple<bool, int, string>>
-```
-
-**Note:** `tupleWith` automatically chains generators, increasing the tuple size by one element at each step (`Generator<bool>` -> `Generator<tuple<bool, int>>` -> `Generator<tuple<bool, int, string>>` in the example above).
-
-**See also:** [Values with Dependencies](#values-with-dependencies)
 
 ---
 
