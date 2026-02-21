@@ -34,7 +34,7 @@ cont: "Property" {
     |
 
     propertyforAll: |cpp
-    .forAll()
+    .forAll(...)
     |
 
     propertymatrix: |cpp
@@ -49,7 +49,7 @@ cont: "Property" {
 cont2 : Shorthands {
 
     forAll: |cpp
-    proptest::forAll(callable)
+    proptest::forAll(callable, ...)
     |
 
     matrix: |cpp
@@ -59,11 +59,19 @@ cont2 : Shorthands {
 
 cont3: GTEST Macros {
     expectForAll: |cpp
-    EXPECT_FOR_ALL(callable)
+    EXPECT_FOR_ALL(callable, ...)
     |
 
     assertForAll: |cpp
-    ASSERT_FOR_ALL(callable)
+    ASSERT_FOR_ALL(callable, ...)
+    |
+
+    expectMatrix: |cpp
+    EXPECT_MATRIX(callable, ...)
+    |
+
+    assertMatrix: |cpp
+    ASSERT_MATRIX(callable, ...)
     |
 }
 
@@ -90,6 +98,14 @@ cont2.forAll -- cont3.expectForAll : Google Test EXPECT_TRUE {
 cont2.forAll -- cont3.assertForAll : Google Test ASSERT_TRUE {
     style.stroke-dash: 3
 }
+
+cont2.matrix -- cont3.expectMatrix : Google Test EXPECT_TRUE {
+    style.stroke-dash: 3
+}
+
+cont2.matrix -- cont3.assertMatrix : Google Test ASSERT_TRUE {
+    style.stroke-dash: 3
+}
 ```
 
 <!-- -->
@@ -101,7 +117,7 @@ cont2.forAll -- cont3.assertForAll : Google Test ASSERT_TRUE {
 | Function | Description | Returns |
 |----------|-------------|---------|
 | [`proptest::property(callable, ...generators)`](#proptestpropertycallable-generators) | Create a `Property` object from a callable | `Property` |
-| [`proptest::forAll(callable, ...)`](#proptestforallcallable-) | Create and run a property immediately | `bool` |
+| [`proptest::forAll(callable, ...)`](#proptestforallcallable) | Create and run a property immediately | `bool` |
 | [`proptest::matrix(callable, ...lists)`](#proptestmatrixcallable-lists) | Create and run a matrix test immediately | `bool` |
 
 ### Property Class Methods
@@ -163,8 +179,10 @@ All configuration methods return a reference to `Property`, allowing method chai
 
 | Macro | Description |
 |-------|-------------|
-| [`EXPECT_FOR_ALL(...)`](#expect_for_all) | Run `forAll` with `EXPECT_TRUE` (non-fatal) |
-| [`ASSERT_FOR_ALL(...)`](#assert_for_all) | Run `forAll` with `ASSERT_TRUE` (fatal) |
+| [`EXPECT_FOR_ALL(...)`](#expect_for_all) | Run `forAll()` with `EXPECT_TRUE` (non-fatal) |
+| [`ASSERT_FOR_ALL(...)`](#assert_for_all) | Run `forAll()` with `ASSERT_TRUE` (fatal) |
+| [`EXPECT_MATRIX(...)`](#expect_matrix) | Run `matrix()` with `EXPECT_TRUE` (non-fatal) |
+| [`ASSERT_MATRIX(...)`](#assert_matrix) | Run `matrix()` with `ASSERT_TRUE` (fatal) |
 
 &nbsp;
 
@@ -476,7 +494,7 @@ forAll([](int a, int b) {
 });
 ```
 
-**See also:** [Controlling Test Execution](#controlling-test-execution)
+**See also:** [Test Control Macros](#test-control-macros_1)
 
 &nbsp;
 
@@ -595,6 +613,34 @@ TEST(Arithmetic, Commutativity)
     ASSERT_FOR_ALL([](int a, int b) {
         PROP_ASSERT_EQ(a + b, b + a);
     });
+}
+```
+
+### `EXPECT_MATRIX(...)`
+
+Shorthand for `EXPECT_TRUE(proptest::matrix(...))`. Takes a callable and `initializer_list` arguments (same as the `matrix` free function). Runs the property over the Cartesian product of the given lists. Non-fatal - continues testing on failure.
+
+**Example:**
+```cpp
+TEST(Arithmetic, MatrixExample)
+{
+    EXPECT_MATRIX([](int a, int b) -> bool {
+        return a + b == b + a;
+    }, {1, 2, 3}, {4, 5, 6});
+}
+```
+
+### `ASSERT_MATRIX(...)`
+
+Shorthand for `ASSERT_TRUE(proptest::matrix(...))`. Takes a callable and `initializer_list` arguments (same as the `matrix` free function). Runs the property over the Cartesian product of the given lists. Fatal - stops test execution on failure.
+
+**Example:**
+```cpp
+TEST(Arithmetic, MatrixExample)
+{
+    ASSERT_MATRIX([](int a, int b) -> bool {
+        return a + b == b + a;
+    }, {1, 2, 3}, {4, 5, 6});
 }
 ```
 

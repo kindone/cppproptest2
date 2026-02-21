@@ -54,6 +54,20 @@ TEST(Property, matrix)
     }, {1,2,3}, {2,3,4});
 }
 
+TEST(Property, EXPECT_MATRIX)
+{
+    EXPECT_MATRIX([](int a, int b) -> bool {
+        return a + b == b + a;
+    }, {1, 2, 3}, {4, 5, 6});
+}
+
+TEST(Property, ASSERT_MATRIX)
+{
+    ASSERT_MATRIX([](int a, int b) -> bool {
+        return a + b == b + a;
+    }, {10, 20}, {30, 40});
+}
+
 TEST(Property, forAll)
 {
     EXPECT_FOR_ALL([](int a, int b) {

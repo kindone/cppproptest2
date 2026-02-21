@@ -45,7 +45,7 @@ TEST(AudioCodec, EncoderDecoder)
 }
 ```
 
-Note that `ASSERT_FOR_ALL` is a simple macro wrapping an `ASSERT_TRUE` google test macro around the `proptest::forAll` function. You can find more information in [Using Assertion](PropertyAPI.md#using-assertions) section.
+Note that `ASSERT_FOR_ALL` is a simple macro wrapping an `ASSERT_TRUE` google test macro around the `proptest::forAll` function. Similarly, `EXPECT_MATRIX` and `ASSERT_MATRIX` wrap `proptest::matrix()` for Cartesian product tests. You can find more information in [Property API Reference - Google Test Integration Macros](PropertyAPI.md#google-test-integration-macros).
 
 **Next Steps:**
 - [Step-by-Step Walkthrough](Walkthrough.md) - Learn how to create property tests step-by-step

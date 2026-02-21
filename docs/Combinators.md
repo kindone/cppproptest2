@@ -168,7 +168,7 @@ The `gen::*` functions are the underlying implementations for the utility method
 | [`gen::interval<T>`](#genintervalt), [`gen::natural<T>`](#gennaturalt), etc. | Numeric ranges | [Generators.md](Generators.md#utility-numeric-range-generators) |
 | [`gen::pair`](#genpairt1t2), [`gen::tuple`](#gentuplets) | Combine generators | — |
 | [`gen::oneOf<T>`](#genoneoft) | Select from multiple generators | — |
-| [`gen::construct<T,Args...>`](#genconstructtargs) | Generate via constructor | — |
+| [`gen::construct<T,Args...>`](#genconstructt-args) | Generate via constructor | — |
 | [`gen::filter<T>`](#genfiltert) | Filter by predicate | [`.filter()`](#filterfilterer) |
 | [`gen::transform<T,U>`](#gentransformtu) | Transform to another type | [`.map<U>()`](#mapumapper) |
 | [`gen::derive<T,U>`](#genderivetu) | Derive generator from value | [`.flatMap<U>()`](#flatmapugenufromt) |
@@ -314,7 +314,7 @@ auto nonNegGen = gen::nonNegative<int>(100); // generates integers in {0, ..., 1
 
 Combine generators of different types to produce `std::pair` or `std::tuple` values. These are convenient wrappers that support type inference.
 
-**See also:** [Generators.md](Generators.md#tuples--pairs) for more details on tuple and pair generators.
+**See also:** [Generators.md](Generators.md#tuple-and-pair-generators) for more details on tuple and pair generators.
 
 #### `gen::pair<T1,T2>`
 

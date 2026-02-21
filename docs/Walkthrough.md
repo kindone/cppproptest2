@@ -472,16 +472,23 @@ TEST(StringUtils, ReverseWithGTestIntegration)
     ASSERT_FOR_ALL([](const std::string& s) {
         PROP_ASSERT_EQ(s.length(), reverseString(s).length());
     });
+
+    // For Cartesian product tests, use EXPECT_MATRIX or ASSERT_MATRIX
+    EXPECT_MATRIX([](const std::string& a, const std::string& b) {
+        PROP_ASSERT_EQ(a.length() + b.length(), (a + b).length());
+    }, {"", "a", "ab"}, {"", "x", "xy"});
 }
 ```
 
 **Difference:**
 
-- `forAll()` returns `bool` - you need to wrap it: `EXPECT_TRUE(forAll(...))`
+- `forAll()` and `matrix()` return `bool` - you need to wrap them: `EXPECT_TRUE(forAll(...))` or `EXPECT_TRUE(matrix(...))`
 - `EXPECT_FOR_ALL(...)` - Shorthand for `EXPECT_TRUE(forAll(...))`
 - `ASSERT_FOR_ALL(...)` - Shorthand for `ASSERT_TRUE(forAll(...))`
+- `EXPECT_MATRIX(callable, ...lists)` - Shorthand for `EXPECT_TRUE(matrix(callable, ...lists))` (Cartesian product)
+- `ASSERT_MATRIX(callable, ...lists)` - Shorthand for `ASSERT_TRUE(matrix(callable, ...lists))` (Cartesian product)
 
-See [Property API Reference - Google Test Assertion Macros](PropertyAPI.md#google-test-assertion-macros) for more details.
+See [Property API Reference - Google Test Integration Macros](PropertyAPI.md#google-test-integration-macros) for more details.
 
 ## Step 10: Handling Failures and Shrinking
 

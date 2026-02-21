@@ -470,4 +470,20 @@ bool matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
 #define EXPECT_FOR_ALL(...) EXPECT_TRUE(proptest::forAll(__VA_ARGS__))
 #define ASSERT_FOR_ALL(...) ASSERT_TRUE(proptest::forAll(__VA_ARGS__))
 
+/**
+ * @brief Run matrix(callable, lists...) with EXPECT_TRUE (non-fatal).
+ * Takes a callable and initializer_list arguments (same as proptest::matrix free function).
+ * @param callable Property callable (lambda, function, etc.)
+ * @param lists... initializer_list arguments for Cartesian product (same order as in callable parameters)
+ */
+#define EXPECT_MATRIX(...) EXPECT_TRUE(proptest::matrix(__VA_ARGS__))
+
+/**
+ * @brief Run matrix(callable, lists...) with ASSERT_TRUE (fatal).
+ * Takes a callable and initializer_list arguments (same as proptest::matrix free function).
+ * @param callable Property callable (lambda, function, etc.)
+ * @param lists... initializer_list arguments for Cartesian product (same order as in callable parameters)
+ */
+#define ASSERT_MATRIX(...) ASSERT_TRUE(proptest::matrix(__VA_ARGS__))
+
 }  // namespace proptest
