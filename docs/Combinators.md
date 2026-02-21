@@ -19,6 +19,7 @@ Call these on any generator object (e.g., `gen::int32()`, `gen::string()`, `Arbi
 | [`.flatMap<U>(genUFromT)`](#flatmapugenufromt) | Derive a new generator based on each value | `gen::interval(1,10).flatMap<std::string>([](int n) { auto g = gen::string(); g.setSize(n); return g; })` |
 | [`.pairWith<U>(genUFromT)`](#pairwithugenufromt-and-tuplewithugenufromt) | Generate a pair where second element depends on first | `gen::interval(1,100).pairWith<std::vector<int>>([](int n) { auto g = gen::vector<int>(); g.setSize(n); return g; })` |
 | [`.tupleWith<U>(genUFromT)`](#pairwithugenufromt-and-tuplewithugenufromt) | Chain dependent generators into a tuple | `gen::boolean().tupleWith<int>([](bool b) { return b ? gen::interval(0,50) : gen::interval(51,100); })` |
+| [`.noShrink()`](#noshrink) | Same values, but with empty shrink stream (for seeds, UUIDs, timestamps) | `gen::uint64().noShrink()` |
 
 &nbsp;
 
@@ -154,6 +155,26 @@ auto complexGen = gen::boolean()
 
 &nbsp;
 
+### `.noShrink()`
+
+Returns a generator that produces the same values but with an empty shrink stream. Use when shrinking (simplification of a counterexample) is meaningless (e.g., seeds, UUIDs, timestamps).
+
+**Signature:** `Generator<T>::noShrink() -> Generator<T>`
+
+**Example:**
+
+```cpp
+// Seed that should not be shrunk during failure minimization
+auto seedGen = gen::uint64().noShrink();
+
+// Equivalent free function form
+auto seedGen = gen::noShrink(gen::uint64());
+```
+
+**See also:** [gen::noShrink](#gennoshrink) (standalone form)
+
+&nbsp;
+
 ---
 
 ## Standalone Combinators Quick Reference
@@ -170,6 +191,7 @@ The `gen::*` functions are the underlying implementations for the utility method
 | [`gen::oneOf<T>`](#genoneoft) | Select from multiple generators | — |
 | [`gen::construct<T,Args...>`](#genconstructt-args) | Generate via constructor | — |
 | [`gen::filter<T>`](#genfiltert) | Filter by predicate | [`.filter()`](#filterfilterer) |
+| [`gen::noShrink`](#gennoshrink) | Same values, but with empty shrink stream | [`.noShrink()`](#noshrink) |
 | [`gen::transform<T,U>`](#gentransformtu) | Transform to another type | [`.map<U>()`](#mapumapper) |
 | [`gen::derive<T,U>`](#genderivetu) | Derive generator from value | [`.flatMap<U>()`](#flatmapugenufromt) |
 | [`gen::dependency<T,U>`](#gendependencytu) | Pair with dependent second | [`.pairWith<U>()`](#pairwithugenufromt-and-tuplewithugenufromt) |
@@ -457,6 +479,20 @@ auto positiveGen = gen::filter<int>(gen::int32(), [](const int& num) {
 #### `gen::suchThat<T>`
 
 Alias of `gen::filter<T>`.
+
+#### `gen::noShrink`
+
+Wraps a generator to produce the same values but with an empty shrink stream. Use when shrinking is meaningless (e.g., seeds, UUIDs, timestamps). Equivalent to [`.noShrink()`](#noshrink).
+
+**Signature:** `gen::noShrink(gen) -> Generator<T>`
+
+**Example:**
+
+```cpp
+// Seed that should not be shrunk during failure minimization
+auto seedGen = gen::noShrink(gen::uint64());
+// Equivalent to: gen::uint64().noShrink()
+```
 
 **See also:** [CustomGenerator.md](CustomGenerator.md) for creating generators with built-in constraints
 

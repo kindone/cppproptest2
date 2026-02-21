@@ -114,6 +114,14 @@ public:
     Generator<T> filter(Criteria&& criteria);
 
     /**
+     * @brief Returns a generator that produces the same values but with an empty shrink stream.
+     * Use when shrinking is meaningless (e.g. seeds, UUIDs, timestamps).
+     *
+     * @return Generator<T> New Generator for type `T` with no shrink candidates
+     */
+    Generator<T> noShrink();
+
+    /**
      * @brief Higher-order function that lets you produce a pair of dependent generators, by taking a generated result
      * from this Generator
      *

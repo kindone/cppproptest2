@@ -45,6 +45,15 @@ Generator<T> GeneratorBase<T>::filter(Criteria&& criteria)
 }
 
 template <typename T>
+Generator<T> GeneratorBase<T>::noShrink()
+{
+    auto func = asGenFunction1();
+    return Generator<T>(Function1<ShrinkableBase>([func](Random& rand) -> ShrinkableBase {
+        return func.callDirect(rand).clear();
+    }));
+}
+
+template <typename T>
 template <typename U>
 Generator<pair<T, U>> GeneratorBase<T>::pairWith(Function<GenFunction<U>(T&)> genFactory)
 {

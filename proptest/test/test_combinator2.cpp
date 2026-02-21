@@ -120,6 +120,36 @@ TEST(PropTest, TestTranform2)
         cout << gen(rand).getRef() << endl;
 }
 
+TEST(PropTest, noShrink_empty_shrink_stream)
+{
+    // noShrink produces same values but with empty shrink stream (dimension not shrunk)
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+    auto noShrinkGen = gen::uint64().noShrink();
+    auto noShrinkFree = gen::noShrink(gen::uint64());
+
+    for (int i = 0; i < 20; i++) {
+        auto noShrinkShrinkable = noShrinkGen(rand);
+        auto noShrinkFreeShrinkable = noShrinkFree(rand);
+
+        EXPECT_TRUE(noShrinkShrinkable.getShrinks().isEmpty()) << "noShrink() method should produce empty shrinks (i=" << i << ")";
+        EXPECT_TRUE(noShrinkFreeShrinkable.getShrinks().isEmpty()) << "gen::noShrink() should produce empty shrinks (i=" << i << ")";
+    }
+}
+
+TEST(PropTest, noShrink_preserves_filter)
+{
+    // combinator + noShrink still generates only values satisfying the combinator (e.g. even numbers)
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+    auto evenGen = gen::int32().filter([](const int& x) { return x % 2 == 0; }).noShrink();
+
+    for (int i = 0; i < 100; i++) {
+        int val = evenGen(rand).getRef();
+        EXPECT_EQ(val % 2, 0) << "filter+noShrink should still produce even numbers only (got " << val << " at i=" << i << ")";
+    }
+}
+
 TEST(PropTest, TestDependency)
 {
     auto intGen = gen::interval(0, 2);

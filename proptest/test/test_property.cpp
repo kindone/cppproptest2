@@ -117,7 +117,7 @@ TEST(Property, chainable_preserves_config)
     int forAllRuns = 0;
     auto p = property([&forAllRuns](int) -> bool { forAllRuns++; return true; });
     p.setSeed(0).setNumRuns(3).forAll(gen::just(1)).forAll(gen::just(2));
-    EXPECT_EQ(forAllRuns, 6);  // 3 from forAll (1) + 1 from forAll (2)
+    EXPECT_EQ(forAllRuns, 6);  // 3 from forAll (1) + 3 from forAll (2)
 }
 
 TEST(Property, forAll)
