@@ -6,7 +6,8 @@
 
 `cppproptest` provides a property-based testing framework where you define properties (invariants) that should hold for all inputs in a domain, rather than testing specific examples. The framework automatically generates random inputs and verifies your properties.
 
-<!-- DO NOT DELETE BELOW IMAGE OR KROKI SCRIPT. Script generates to images/property.svg for switching between live and optimized version -->![Property functions and shorthands](images/property.svg)
+<!-- DO NOT DELETE BELOW IMAGE OR KROKI SCRIPT. Script generates to images/property.svg for switching between live and optimized version -->
+<!--![Property functions and shorthands](images/property.svg)-->
 
 ```kroki-d2
 
@@ -117,16 +118,18 @@ cont2.matrix -- cont3.assertMatrix : Google Test ASSERT_TRUE {
 | Function | Description | Returns |
 |----------|-------------|---------|
 | [`proptest::property(callable, ...generators)`](#proptestpropertycallable-generators) | Create a `Property` object from a callable | `Property` |
-| [`proptest::forAll(callable, ...)`](#proptestforallcallable) | Create and run a property immediately | `bool` |
-| [`proptest::matrix(callable, ...lists)`](#proptestmatrixcallable-lists) | Create and run a matrix test immediately | `bool` |
+| [`proptest::forAll(callable, ...)`](#proptestforallcallable) | Create and run a property immediately | `Property` |
+| [`proptest::matrix(callable, ...lists)`](#proptestmatrixcallable-lists) | Create and run a matrix test immediately | `Property` |
 
 ### Property Class Methods
 
 | Method | Description | Returns |
 |--------|-------------|---------|
-| [`.forAll(...generators)`](#propertyforallgenerators) | Run property with random inputs | `bool` |
-| [`.example(...args)`](#propertyexampleargs) | Run property with specific inputs | `bool` |
-| [`.matrix(...lists)`](#propertymatrixlists) | Run property with Cartesian product of inputs | `bool` |
+| [`.forAll(...generators)`](#propertyforallgenerators) | Run property with random inputs | `Property` |
+| [`.example(...args)`](#propertyexampleargs) | Run property with specific inputs | `Property` |
+| [`.matrix(...lists)`](#propertymatrixlists) | Run property with Cartesian product of inputs | `Property` |
+
+See [Chaining](#chaining) for immutable chaining, failure propagation, short-circuiting, and config preservation.
 
 ### Configuration Methods
 
@@ -215,6 +218,33 @@ auto prop2 = property([](int a, int b) -> bool {
 
 **See also:** [Generators](Generators.md), [Arbitrary](Arbitrary.md), [Custom Generator](CustomGenerator.md)
 
+### Chaining
+
+`proptest::property()`, `proptest::forAll()`, `proptest::matrix()`, return `Property` objects. The run methods (`.forAll()`, `.example()`, `.matrix()`) also return `Property`, enabling fluent chaining. Chaining lets you to test various subdomains for a property in one go:
+
+```cpp
+// Chain run methods
+EXPECT_TRUE(property([](int a, int b) { return a + b == b + a; })
+    .forAll(gen::interval(0, 10))
+    .matrix({1, 2}, {3, 4})
+    .example(5, 6));
+
+// Chain free functions
+EXPECT_TRUE(forAll([](int x) { return x >= 0; }, gen::interval(0, 100)).example(42));
+
+// Config flows through the chain
+prop.setSeed(0).setNumRuns(10).forAll().example(42);
+```
+
+**Behavior:**
+
+| Aspect | Description |
+|--------|-------------|
+| **Immutable** | Each step returns a copy; the original is unchanged. `p1.example(5); p1.example(6);` — each call uses the same `p1`. |
+| **Failure propagates** | Once a step fails, later steps cannot overturn it. |
+| **Short-circuiting** | When a step fails, subsequent steps are skipped (no execution). |
+| **Configuration preserved** | `setSeed`, `setNumRuns`, etc. flow through the chain. |
+
 ### `proptest::forAll(callable, ...)`
 
 Shorthand for `property(callable).forAll()`. Creates and immediately runs a property test.
@@ -224,7 +254,7 @@ Shorthand for `property(callable).forAll()`. Creates and immediately runs a prop
 - `callable`: A callable that defines the property
 - `...`: Optional configuration (C++20 designated initializers) and/or generators
 
-**Returns:** `bool` - `true` if all test runs passed, `false` otherwise
+**Returns:** `Property` - for chaining (e.g. `forAll(...).example(42)`). Also provides `operator bool()` for test result.
 
 **Example:**
 ```cpp
@@ -245,6 +275,9 @@ forAll([](int a, int b) -> bool {
 forAll([](int a, int b) -> bool {
     return a + b == b + a;
 }, gen::interval(0, 100), gen::interval(0, 100));
+
+// Chainable: forAll().example(...)
+EXPECT_TRUE(forAll([](int x) -> bool { return x >= 0; }, gen::interval(0, 100)).example(42));
 ```
 
 ### `proptest::matrix(callable, ...lists)`
@@ -256,7 +289,7 @@ Shorthand for `property(callable).matrix(...)`. Creates and immediately runs a m
 - `callable`: A callable that defines the property
 - `...lists`: `initializer_list` for each parameter, representing all values to test
 
-**Returns:** `bool`
+**Returns:** `Property` - for chaining (e.g. `matrix(...).example(42)`).
 
 **Example:**
 ```cpp
@@ -281,7 +314,7 @@ Runs the property with randomly generated inputs.
 
 - `...generators`: Optional generators to override or supplement those specified at property creation
 
-**Returns:** `bool` - `true` if all test runs passed, `false` otherwise
+**Returns:** `Property` copy with accumulated test result (immutable; original unchanged).
 
 **Example:**
 ```cpp
@@ -291,6 +324,9 @@ auto prop = property([](int a, int b) -> bool {
 
 prop.forAll();  // Use default generators
 prop.forAll(gen::interval(0, 100), gen::interval(0, 100));  // Override generators
+
+// Chainable: forAll().matrix().example() — returns new Property
+EXPECT_TRUE(prop.forAll().matrix({1, 2}, {3, 4}).example(5, 6));
 ```
 
 **See also:** [Testing a Property](#testing-a-property), [Configuring test runs](#configuring-test-runs)
@@ -303,7 +339,7 @@ Runs the property once with specific input values.
 
 - `...args`: Arguments matching the property function's parameters
 
-**Returns:** `bool` - `true` if the property holds for the given inputs, `false` otherwise
+**Returns:** `Property` copy with accumulated test result (immutable; original unchanged).
 
 **Example:**
 ```cpp
@@ -312,7 +348,8 @@ auto prop = property([](int a, int b) -> bool {
 });
 
 prop.example(5, 10);
-prop.example(INT_MIN, INT_MAX);
+prop.example(INT_MIN, INT_MAX);  // Independent of previous call
+EXPECT_TRUE(prop.forAll().example(42));  // Chaining and bool coercion
 ```
 
 ### `Property::matrix(...lists)`
@@ -323,7 +360,7 @@ Runs the property for all combinations of input values (Cartesian product).
 
 - `...lists`: `initializer_list` for each parameter
 
-**Returns:** `bool` - `true` if all combinations passed, `false` otherwise
+**Returns:** `Property` copy with accumulated test result (immutable; original unchanged).
 
 **Example:**
 ```cpp
@@ -332,8 +369,12 @@ auto prop = property([](int a, int b) -> bool {
 });
 
 // Tests all 9 combinations: (1,4), (1,5), (1,6), (2,4), (2,5), (2,6), (3,4), (3,5), (3,6)
-prop.matrix({1, 2, 3}, {4, 5, 6});
+EXPECT_TRUE(prop.matrix({1, 2, 3}, {4, 5, 6}));
 ```
+
+### `Property::operator bool()`
+
+Returns the accumulated test result. Enables `EXPECT_TRUE(prop.forAll())` and `if (forAll(...))` via implicit conversion. Used on the *returned* Property from `forAll`/`example`/`matrix`. **Failure propagates**: once any step fails, later steps cannot overturn it and are skipped (no execution). **Configuration preserved**: `setSeed`, `setNumRuns`, etc. flow through the chain (each step returns a copy that includes the config).
 
 &nbsp;
 

@@ -207,6 +207,9 @@ protected:
 
     vector<AnyGenerator> genVec;
 
+    /// Last test run result (true = success, false = failure). Used for operator bool() and chainable API.
+    bool lastRunOk = true;
+
     friend struct PropertyContext;
 };
 

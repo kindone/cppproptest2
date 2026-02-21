@@ -97,7 +97,7 @@ forAll([](int age, std::string name) {
 }, gen::arbitrary<int>(), gen:arbitrary<std::string>());
 ```
 
-**See also:** [Arbitrary](Arbitrary.md) for details on default generators, [Property API Reference](Property.md) for `forAll()` usage, and [Walkthrough](Walkthrough.md) for step-by-step examples.
+**See also:** [Arbitrary](Arbitrary.md) for details on default generators, [Property API Reference](PropertyAPI.md) for `forAll()` usage, and [Walkthrough](Walkthrough.md) for step-by-step examples.
 
 ---
 
@@ -883,7 +883,7 @@ forAll([](float f) {
 }, gen::float64(0.05, 0.05, 0.05));
 ```
 
-**See also:** [Property API Reference](Property.md) for `PROP_STAT` usage, [Basic Type Generators](#basic-type-generators) for other numeric generators, [Arbitrary](Arbitrary.md) for floating-point generator configuration.
+**See also:** [Property API Reference](PropertyAPI.md) for `PROP_STAT` usage, [Basic Type Generators](#basic-type-generators) for other numeric generators, [Arbitrary](Arbitrary.md) for floating-point generator configuration.
 
 ---
 
@@ -1061,7 +1061,7 @@ While you can build a custom generator from scratch, it's usually not recommende
 - [Generator Examples](GeneratorExamples.md) - Real-world generator usage
 - [Gen Namespace](GenNamespace.md) - Organization of the `gen` namespace
 - [Walkthrough](Walkthrough.md) - Step-by-step guide to using generators
-- [Property API Reference](Property.md) - Using generators with `forAll()` and `property()`
+- [Property API Reference](PropertyAPI.md) - Using generators with `forAll()` and `property()`
 - [Shrinking](Shrinking.md) - How generated values are simplified when tests fail
 
 [^encstring]: Encoding-aware string types `UTF8String`, `UTF16BEString`, `UTF16LEString`, and `CESU8String` are implemented as classes derived from `std::string`. This lets you use standard string APIs such as `.c_str()` / `.data()` to access the underlying bytes and `.size()` to get the buffer length in bytes, while `.charsize()` reports the logical character/code-unit count. For example:

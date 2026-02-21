@@ -68,6 +68,58 @@ TEST(Property, ASSERT_MATRIX)
     }, {10, 20}, {30, 40});
 }
 
+TEST(Property, chainable_success)
+{
+    auto prop = property([](int a, int b) -> bool { return a + b == b + a; });
+    EXPECT_TRUE(prop.forAll(gen::interval(0, 10), gen::interval(0, 10)).matrix({1, 2}, {3, 4}).example(5, 6));
+    EXPECT_TRUE(property([](int x) -> bool { return x >= 0; }).forAll(gen::just(1)).example(42));
+    EXPECT_TRUE(forAll([](int x) -> bool { return x >= 0; }, gen::interval(0, 100)).example(42));
+    EXPECT_TRUE(matrix([](int a, int b) -> bool { return a + b == b + a; }, {1, 2}, {3, 4}).example(5, 6));
+    EXPECT_TRUE(forAll([](int x) -> bool { return x >= 0; }, gen::just(1)));
+}
+
+TEST(Property, chainable_failure)
+{
+    EXPECT_FALSE(property([](int a, int b) -> bool { return a != 99 || b != 99; }).example(99, 99));
+    EXPECT_FALSE(property([](int x) -> bool { return x < 0; }).forAll(gen::just(-1)).example(42));
+    EXPECT_FALSE(property([](int a, int b) -> bool { return a == b; }).matrix({1, 2}, {1, 2}));
+}
+
+TEST(Property, chainable_immutable_independent_calls)
+{
+    // p1.example(5) and p1.example(6) are independent; first call does not affect second
+    auto p1 = property([](int x) -> bool { return x > 0; });
+    EXPECT_FALSE(p1.example(-6));
+    EXPECT_TRUE(p1.example(6));   // p1 unchanged by previous call
+    EXPECT_FALSE(p1.example(0));  // p1 still unchanged
+}
+
+TEST(Property, chainable_failure_propagates)
+{
+    // Once a step fails, failure propagates; later success does not overwrite it
+    auto p = property([](int x) -> bool { return x > 0; });
+    // forAll fails (gen::just(0) gives 0), then example(42) would succeed — failure must propagate
+    EXPECT_FALSE(p.forAll(gen::just(0)).example(42));
+}
+
+TEST(Property, chainable_short_circuit)
+{
+    // When a step fails, subsequent steps are skipped (no execution)
+    int exampleCalls = 0;
+    auto p = property([&exampleCalls](int x) -> bool { if (x == 42) exampleCalls++; return x > 0; });
+    p.forAll(gen::just(0)).example(42);  // forAll fails, example(42) should not run
+    EXPECT_EQ(exampleCalls, 0);
+}
+
+TEST(Property, chainable_preserves_config)
+{
+    // Configuration (seed, numRuns, etc.) is preserved through chaining
+    int forAllRuns = 0;
+    auto p = property([&forAllRuns](int) -> bool { forAllRuns++; return true; });
+    p.setSeed(0).setNumRuns(3).forAll(gen::just(1)).forAll(gen::just(2));
+    EXPECT_EQ(forAllRuns, 6);  // 3 from forAll (1) + 1 from forAll (2)
+}
+
 TEST(Property, forAll)
 {
     EXPECT_FOR_ALL([](int a, int b) {

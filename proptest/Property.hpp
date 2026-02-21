@@ -200,11 +200,10 @@ public:
      * @endcode
      * @tparam ExplicitGens Explicitly given generator types
      * @param gens Variadic list of optional explicit generators (in same order as in definition of property arguments)
-     * @return true if all the cases succeed
-     * @return false if any one of the cases fails
+     * @return Property copy with lastRunOk set (immutable; original unchanged)
      */
     template <typename... ExplicitGens>
-    bool forAll(ExplicitGens&&... gens)
+    Property forAll(ExplicitGens&&... gens)
     {
         // combine explicit generators and implicit generators into a tuple by overriding implicit generators with explicit generators
         constexpr size_t NumExplicitGens = sizeof...(gens);
@@ -217,26 +216,31 @@ public:
             static_assert(is_same_v<typename invoke_result_t<ExplicitGen, Random&>::type, T>, "Supplied generator type does not match property argument type");
         });
 
+        if (!lastRunOk) return *this;  // short-circuit: failure already set
         vector<AnyGenerator> curGenVec{generator(gens)...};
         curGenVec.reserve(genVec.size());
         for(size_t i = NumExplicitGens; i < genVec.size(); i++) {
             curGenVec.push_back(genVec[i]);
         }
-        return runForAll(curGenVec);
+        Property result = *this;
+        result.lastRunOk = runForAll(curGenVec);
+        return result;
     }
 
     /**
      * @brief Executes single example-based test for given property.
      *
      * @param args Variadic list of explicit arguments (in same order as in definition of property arguments)
-     * @return true if the case succeeds
-     * @return false if the cases fails
+     * @return Property copy with lastRunOk set (immutable; original unchanged)
      */
-    bool example(const ARGS&... args)
+    Property example(const ARGS&... args)
     {
+        if (!lastRunOk) return *this;  // short-circuit: failure already set
         PropertyContext context;
         vector<Any> values{args...};
-        return exampleImpl(values);
+        Property result = *this;
+        result.lastRunOk = exampleImpl(values);
+        return result;
     }
 
 public:
@@ -256,14 +260,25 @@ public:
         prop.matrix({1,2,3}, {0.2f, 0.3f});
     * @endcode
     * @param lists Lists of valid arguments (types must be in same order as in parameters of the callable)
+    * @return Property copy with lastRunOk set (immutable; original unchanged)
     */
-    bool matrix(initializer_list<ARGS>&&... lists)
+    Property matrix(initializer_list<ARGS>&&... lists)
     {
+        if (!lastRunOk) return *this;  // short-circuit: failure already set
         Function<bool(ARGS...)> test = [this](ARGS... args) {
-            return example(args...);
+            return static_cast<bool>(example(args...));
         };
-        return util::cartesianProduct(test, util::forward<initializer_list<ARGS>>(lists)...);
+        Property result = *this;
+        result.lastRunOk = util::cartesianProduct(test, util::forward<initializer_list<ARGS>>(lists)...);
+        return result;
     }
+
+    /**
+     * @brief Returns the result of the last test run (forAll, example, or matrix)
+     * @return true if the last run succeeded, false if it failed
+     * @details Enables bool coercion for EXPECT_TRUE(prop.forAll()) and chaining.
+     */
+    operator bool() const { return lastRunOk; }
 
 private:
 
@@ -389,11 +404,10 @@ auto property(Callable&& callable, ExplicitGens&&... gens)
  * @param callable passed as any callable such as `std::function`, functor object, function pointer
  * @param config configuration options (using designated initializers)
  * @param gens variadic list of generators for `ARG`s (optional if `Arbitrary<ARG>` is preferred)
- * @return true if all the cases succeed
- * @return false if any one of the cases fails
+ * @return Property for chaining (use operator bool() for result)
  */
 template <typename Callable, typename... ExplicitGens>
-bool forAll(Callable&& callable, const ForAllConfig& config, ExplicitGens&&... gens)
+auto forAll(Callable&& callable, const ForAllConfig& config, ExplicitGens&&... gens)
 {
     auto prop = property(util::forward<Callable>(callable), util::forward<ExplicitGens>(gens)...);
     util::applyConfig(prop, config);
@@ -410,12 +424,11 @@ bool forAll(Callable&& callable, const ForAllConfig& config, ExplicitGens&&... g
  * @tparam ExplicitGens Explicit generator callable types for `ARG` in `(Random&) -> Shrinkable<ARG>`
  * @param callable passed as any callable such as `std::function`, functor object, function pointer
  * @param gens variadic list of generators for `ARG`s (optional if `Arbitrary<ARG>` is preferred)
- * @return true if all the cases succeed
- * @return false if any one of the cases fails
+ * @return Property for chaining (use operator bool() for result)
  */
 template <typename Callable, typename First, typename... Rest>
     requires (!is_same_v<decay_t<First>, ForAllConfig>)
-bool forAll(Callable&& callable, First&& first, Rest&&... rest)
+auto forAll(Callable&& callable, First&& first, Rest&&... rest)
 {
     return property(util::forward<Callable>(callable), util::forward<First>(first), util::forward<Rest>(rest)...).forAll();
 }
@@ -427,11 +440,10 @@ bool forAll(Callable&& callable, First&& first, Rest&&... rest)
  *
  * @tparam Callable property callable type
  * @param callable passed as any callable such as `std::function`, functor object, function pointer
- * @return true if all the cases succeed
- * @return false if any one of the cases fails
+ * @return Property for chaining (use operator bool() for result)
  */
 template <typename Callable>
-bool forAll(Callable&& callable)
+auto forAll(Callable&& callable)
 {
     return property(util::forward<Callable>(callable)).forAll();
 }
@@ -458,11 +470,10 @@ lists
 * @tparam ARGS variadic types for callable and the initializer_lists
 * @param callable passed as any callable such as `std::function`, functor object, function pointer
 * @param lists Lists of valid arguments (types must be in same order as in parameters of the callable)
-* @return true if all the cases succeed
-* @return false if any one of the cases fails
+* @return Property for chaining (use operator bool() for result)
 */
 template <typename Callable, typename... ARGS>
-bool matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
+auto matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
 {
     return property(util::forward<Callable>(callable)).matrix(util::forward<decltype(lists)>(lists)...);
 }
