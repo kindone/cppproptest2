@@ -57,24 +57,24 @@ TEST(Property, matrix)
 TEST(Property, EXPECT_MATRIX)
 {
     EXPECT_MATRIX([](int a, int b) -> bool {
-        return a + b == b + a;
+        return a >= 0 && b >= 0;
     }, {1, 2, 3}, {4, 5, 6});
 }
 
 TEST(Property, ASSERT_MATRIX)
 {
     ASSERT_MATRIX([](int a, int b) -> bool {
-        return a + b == b + a;
+        return a >= 0 && b >= 0;
     }, {10, 20}, {30, 40});
 }
 
 TEST(Property, chainable_success)
 {
-    auto prop = property([](int a, int b) -> bool { return a + b == b + a; });
+    auto prop = property([](int a, int b) -> bool { return a >= 0 && b >= 0; });
     EXPECT_TRUE(prop.forAll(gen::interval(0, 10), gen::interval(0, 10)).matrix({1, 2}, {3, 4}).example(5, 6));
     EXPECT_TRUE(property([](int x) -> bool { return x >= 0; }).forAll(gen::just(1)).example(42));
     EXPECT_TRUE(forAll([](int x) -> bool { return x >= 0; }, gen::interval(0, 100)).example(42));
-    EXPECT_TRUE(matrix([](int a, int b) -> bool { return a + b == b + a; }, {1, 2}, {3, 4}).example(5, 6));
+    EXPECT_TRUE(matrix([](int a, int b) -> bool { return a >= 0 && b >= 0; }, {1, 2}, {3, 4}).example(5, 6));
     EXPECT_TRUE(forAll([](int x) -> bool { return x >= 0; }, gen::just(1)));
 }
 
