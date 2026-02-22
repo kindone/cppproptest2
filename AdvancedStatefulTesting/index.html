@@ -12,7 +12,7 @@
         <meta name="author" content="kindone">
       
       
-        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/AdvancedStatefulTesting/">
+        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest2/AdvancedStatefulTesting/">
       
       
         <link rel="prev" href="../ConcurrencyTesting/">
@@ -165,13 +165,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
       </div>
@@ -211,13 +211,13 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
     </div>
@@ -746,30 +746,51 @@
 
 
 <h1 id="advanced-stateful-concurrency-testing">Advanced Stateful &amp; Concurrency Testing<a class="headerlink" href="#advanced-stateful-concurrency-testing" title="Permanent link">&para;</a></h1>
-<p>Stateful testing opens new possibilities for testing.
-* Finding memory leaks
-    * With help of a suitable allocation tracker, we can place postcondition check that allocation numbers should come back to 0, after various actions executed and then destructed the object.
-* Testing with various responses from external dependencies
-    * Complex behavior of mocks can be generated with random sequence of the function specification constructs like ON_CALL of Google Test.
-* Malfunctions (I/O failures, Network errors, Out-of-memory errors)
-    * With help of a probabilistic malfunction generation functionality we can test for malfunction tolerance of a component, whether it leads to inconsistent states or even crashes
-    * A typical malfunction generation functionality may be bound to a resource allocator (OOM) or I/O PIs (network, disk, etc.) that highly depends on external factors
-    * A malfunction object may take a floating point argument that decides the probability of malfunctions can happen within the scope
-        * Inside an allocator or I/O API the number set in the malfunction object is read and throws exception if the outcome of the dice is true.
-* Thread-safety (concurrency testing)
-    * After various actions are executed in parallel, consistency of the object is validated as postcondition
-* Testing for Transactional requirements in databases
-    * Transactional visibility as invariant property
-        * Multiple transactions can be maintained and when the same resource (e.g. table) is accessed concurrently, uncommitted changes made should be only visible to current transaction and not in the others.
-    * Atomicity of a transaction
-        * If a sequence of changes is executed, they should be either fully committed or fully rolled back</p>
+<div class="admonition stub">
+<p class="admonition-title">This page is work in progress</p>
+</div>
+<p>Stateful testing opens new possibilities for testing.</p>
+<ul>
+<li>Finding memory leaks<ul>
+<li>With help of a suitable allocation tracker, we can place postcondition check that allocation numbers should come back to 0, after various actions executed and then destructed the object.</li>
+</ul>
+</li>
+<li>Testing with various responses from external dependencies<ul>
+<li>Complex behavior of mocks can be generated with random sequence of the function specification constructs like ON_CALL of Google Test.</li>
+</ul>
+</li>
+<li>Malfunctions (I/O failures, Network errors, Out-of-memory errors)<ul>
+<li>With help of a probabilistic malfunction generation functionality we can test for malfunction tolerance of a component, whether it leads to inconsistent states or even crashes</li>
+<li>A typical malfunction generation functionality may be bound to a resource allocator (OOM) or I/O PIs (network, disk, etc.) that highly depends on external factors</li>
+<li>A malfunction object may take a floating point argument that decides the probability of malfunctions can happen within the scope<ul>
+<li>Inside an allocator or I/O API the number set in the malfunction object is read and throws exception if the outcome of the dice is true.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Thread-safety (concurrency testing)<ul>
+<li>After various actions are executed in parallel, consistency of the object is validated as postcondition</li>
+</ul>
+</li>
+<li>Testing for Transactional requirements in databases<ul>
+<li>Transactional visibility as invariant property<ul>
+<li>Multiple transactions can be maintained and when the same resource (e.g. table) is accessed concurrently, uncommitted changes made should be only visible to current transaction and not in the others.</li>
+</ul>
+</li>
+<li>Atomicity of a transaction<ul>
+<li>If a sequence of changes is executed, they should be either fully committed or fully rolled back</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 10, 2026</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
       
     
   </small>

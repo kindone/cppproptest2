@@ -12,7 +12,7 @@
         <meta name="author" content="kindone">
       
       
-        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/StatefulTesting/">
+        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest2/StatefulTesting/">
       
       
         <link rel="prev" href="../Printing/">
@@ -165,13 +165,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
       </div>
@@ -211,13 +211,13 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
     </div>
@@ -661,6 +661,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#action-callbacks-setonactionstart-setonactionend" class="md-nav__link">
+    Action callbacks: setOnActionStart / setOnActionEnd
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#configuring-stateful-test-runs" class="md-nav__link">
     Configuring stateful test runs
   </a>
@@ -890,6 +897,13 @@
           <li class="md-nav__item">
   <a href="#debugging-stateful-test-failures" class="md-nav__link">
     Debugging stateful test failures
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#action-callbacks-setonactionstart-setonactionend" class="md-nav__link">
+    Action callbacks: setOnActionStart / setOnActionEnd
   </a>
   
 </li>
@@ -1149,6 +1163,33 @@
 <div class="highlight"><pre><span></span><code>Falsifiable,<span class="w"> </span>after<span class="w"> </span><span class="m">1</span><span class="w"> </span>tests:<span class="w"> </span>vec.size<span class="o">()</span><span class="w"> </span>&lt;<span class="w"> </span><span class="m">5</span><span class="w"> </span><span class="o">(</span>test/test_state_func.cpp:111<span class="o">)</span>
 <span class="w">  </span>with<span class="w"> </span>args:<span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="m">1882384569</span>,<span class="w"> </span>-1157159508,<span class="w"> </span>...,<span class="w"> </span><span class="m">128</span>,<span class="w"> </span><span class="m">32768</span>,<span class="w"> </span><span class="m">840506558</span><span class="w"> </span><span class="o">]</span>,<span class="w"> </span><span class="o">[</span><span class="w"> </span>PushBack<span class="o">(</span><span class="m">1894834799</span><span class="o">)</span>,<span class="w"> </span>PopBack,<span class="w"> </span>Clear,<span class="w"> </span>...,<span class="w"> </span>PushBack<span class="o">(</span><span class="m">814265512</span><span class="o">)</span><span class="w"> </span><span class="o">]</span><span class="w"> </span><span class="o">}</span>
 </code></pre></div>
+<h3 id="action-callbacks-setonactionstart-setonactionend">Action callbacks: <code>setOnActionStart</code> / <code>setOnActionEnd</code><a class="headerlink" href="#action-callbacks-setonactionstart-setonactionend" title="Permanent link">&para;</a></h3>
+<p>For properties like "no intermediate state violates the invariant" (<code>∀ ∀ ¬∃</code>), you need to assert after <strong>every action</strong>, not just at the end. Instead of repeating assertions in every action, use <code>setOnActionEnd</code> to centralize invariant checks:</p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">actionGen</span><span class="p">);</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">setOnActionEnd</span><span class="p">([](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">,</span><span class="w"> </span><span class="n">EmptyModel</span><span class="o">&amp;</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">           </span><span class="c1">// Invariant: size is non-negative</span>
+<span class="p">});</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
+</code></pre></div>
+<table>
+<thead>
+<tr>
+<th>Callback</th>
+<th>When it runs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>setOnActionStart(obj, model)</code></td>
+<td>Before each action (including before the first)</td>
+</tr>
+<tr>
+<td><code>setOnActionEnd(obj, model)</code></td>
+<td>After each action</td>
+</tr>
+</tbody>
+</table>
+<p>Use <code>setOnActionEnd</code> for invariant checks; use <code>setOnActionStart</code> for pre-condition checks or debugging. Both receive <code>(ObjectType&amp;, ModelType&amp;)</code> (use <code>EmptyModel&amp;</code> when using <code>SimpleAction</code>).</p>
 <h3 id="configuring-stateful-test-runs">Configuring stateful test runs<a class="headerlink" href="#configuring-stateful-test-runs" title="Permanent link">&para;</a></h3>
 <p>You can alter some of test characteristics of stateful test runs.</p>
 <ul>
@@ -1179,7 +1220,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">October 14, 2025</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
       
     
   </small>

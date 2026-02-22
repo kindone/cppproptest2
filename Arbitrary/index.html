@@ -12,7 +12,7 @@
         <meta name="author" content="kindone">
       
       
-        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/Arbitrary/">
+        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest2/Arbitrary/">
       
       
       
@@ -161,13 +161,13 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
       </div>
@@ -207,13 +207,13 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
   </div>
   <div class="md-source__repository">
-    kindone/cppproptest
+    kindone/cppproptest2
   </div>
 </a>
     </div>
@@ -852,7 +852,7 @@ Arbitraries are specially treated in <code>cppproptest</code>. An arbitrary serv
 <li>Boolean type:<code>bool</code></li>
 <li>Character type: <code>char</code></li>
 <li>Integral types: <code>int8_t</code>, <code>uint8_t</code>, <code>int16_t</code>, <code>uint16_t</code>, <code>int32_t</code>, <code>uint32_t</code>, <code>int64_t</code>, <code>uint64_t</code></li>
-<li>Floating point types: <code>float</code>, <code>double</code></li>
+<li>Floating point types: <code>float</code>, <code>double</code> — Named parameters: <code>Arbi&lt;float&gt;({.nanProb = 0.1})</code>. See <a href="../Generators/#floating-point-generators">Floating Point Generators</a>.</li>
 </ul>
 <table>
 <thead>
@@ -930,16 +930,27 @@ Arbitraries are specially treated in <code>cppproptest</code>. An arbitrary serv
 <span class="c1">// otherwise, Arbi&lt;int&gt; is used</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">vecInt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
 
+<span class="c1">// Named parameters (util::ContainerGenConfig&lt;T&gt;)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vecGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">({.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vecGen2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">({.</span><span class="n">elemGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">});</span>
+
+<span class="c1">// String arbitraries: ContainerGenConfig&lt;char&gt; for std::string, ContainerGenConfig&lt;uint32_t&gt; for UTF-8/16/CESU-8</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">strGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">({.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">utf8Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">UTF8String</span><span class="o">&gt;</span><span class="p">({.</span><span class="n">elemGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">),</span><span class="w"> </span><span class="p">.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">10</span><span class="p">});</span>
+
 <span class="c1">// string aarbitraries also take optional element generator</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">uppercaseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
 <span class="k">auto</span><span class="w"> </span><span class="n">alphabetGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">unionOf</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="sc">&#39;z&#39;</span><span class="p">)));</span>
 </code></pre></div></p>
 </li>
 <li>
-<p><code>Arbi&lt;std::Map&gt;</code> provides setter methods for assigning a key generator and a value generator.</p>
+<p><code>Arbi&lt;std::map&lt;K,V&gt;&gt;</code> provides a pair generator and size constraints. Use <code>setPairGen</code> or the config constructor.</p>
 <div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">mapGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
-<span class="n">mapGen</span><span class="p">.</span><span class="n">setKeyGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">));</span><span class="w"> </span><span class="c1">// interval: key ranges from 0 to 100</span>
-<span class="n">mapGen</span><span class="p">.</span><span class="n">setElemGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span><span class="w"> </span><span class="c1">// interval: value ranges from -100 to 100</span>
+<span class="n">mapGen</span><span class="p">.</span><span class="n">setPairGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)));</span>
+
+<span class="c1">// Named parameters (util::MapGenConfig&lt;K,V&gt;)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mapGen2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">({.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mapGen3</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">({.</span><span class="n">keyGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">.</span><span class="n">valueGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">.</span><span class="n">minSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="p">.</span><span class="n">maxSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="p">});</span>
 </code></pre></div>
 </li>
 <li>
@@ -998,7 +1009,7 @@ Arbitraries are specially treated in <code>cppproptest</code>. An arbitrary serv
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">October 14, 2025</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
       
     
   </small>
