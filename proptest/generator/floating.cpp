@@ -63,6 +63,11 @@ Arbi<float>::Arbi(double nanProb, double posInfProb, double negInfProb)
     }
 }
 
+Arbi<float>::Arbi(const util::FloatGenConfig& config)
+    : Arbi(config.nanProb.value_or(0.0), config.posInfProb.value_or(0.0), config.negInfProb.value_or(0.0))
+{
+}
+
 Shrinkable<float> Arbi<float>::operator()(Random& rand) const
 {
     // If all probabilities are 0, generate finite values only
@@ -119,6 +124,11 @@ Arbi<double>::Arbi(double nanProb, double posInfProb, double negInfProb)
         throw runtime_error(__FILE__, __LINE__,
             "Sum of probabilities (nanProb + posInfProb + negInfProb) must be <= 1.0, got " + to_string(totalProb));
     }
+}
+
+Arbi<double>::Arbi(const util::FloatGenConfig& config)
+    : Arbi(config.nanProb.value_or(0.0), config.posInfProb.value_or(0.0), config.negInfProb.value_or(0.0))
+{
 }
 
 Shrinkable<double> Arbi<double>::operator()(Random& rand) const

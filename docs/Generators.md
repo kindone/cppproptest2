@@ -823,6 +823,11 @@ gen::float64(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 
 // Equivalent to:
 Arbi<float>(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
 Arbi<double>(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0)
+
+// Named parameters (C++20 designated initializers) — all fields optional:
+Arbi<float>({.nanProb = 0.1, .posInfProb = 0.05, .negInfProb = 0.02})
+Arbi<double>({.nanProb = 0.1})
+gen::float32({.nanProb = 0.1, .posInfProb = 0.05})
 ```
 
 **Parameters:**
@@ -873,6 +878,10 @@ auto onlySpecial = gen::float32(0.5, 0.3, 0.2); // 50% NaN, 30% +inf, 20% -inf
 
 // Same API for double
 auto doubleWithNaN = gen::float64(0.1, 0.0, 0.0);
+
+// Named parameters (C++20) — clearer when specifying only some options
+auto floatWithNaN = Arbi<float>({.nanProb = 0.1});
+auto floatWithAll = Arbi<float>({.nanProb = 0.05, .posInfProb = 0.05, .negInfProb = 0.05});
 
 // Usage in forAll
 forAll([](float f) {

@@ -294,7 +294,7 @@ prop.go();
 | `setOnActionStart(obj, model)` | Before each action (including before the first) |
 | `setOnActionEnd(obj, model)` | After each action |
 
-Use `setOnActionEnd` for invariant checks; use `setOnActionStart` for pre-action checks or debugging. Both receive `(ObjectType&, ModelType&)` (use `EmptyModel&` when using `SimpleAction`).
+Use `setOnActionEnd` for invariant checks; use `setOnActionStart` for pre-condition checks or debugging. Both receive `(ObjectType&, ModelType&)` (use `EmptyModel&` when using `SimpleAction`).
 
 ### Configuring stateful test runs
 

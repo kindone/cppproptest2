@@ -1,4 +1,5 @@
 #include "proptest/generator/floating.hpp"
+#include "proptest/gen.hpp"
 #include "proptest/Property.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Shrinkable.hpp"
@@ -152,6 +153,70 @@ TEST(FloatingGenerator, double_validation)
     EXPECT_THROW({
         Arbi<double> doubleGen(0.6, 0.5, 0.0);  // Invalid: sum > 1.0
     }, runtime_error);
+}
+
+TEST(FloatingGenerator, FloatGenConfig_full_config)
+{
+    Arbi<float> floatGen({.nanProb = 0.1, .posInfProb = 0.05, .negInfProb = 0.02});
+
+    EXPECT_FOR_ALL([](float val) {
+        PROP_ASSERT(isfinite(val) || isnan(val) || isinf(val));
+        return true;
+    }, floatGen);
+
+    // Verify params are applied: nanProb 0.1, posInfProb 0.05, negInfProb 0.02
+    EXPECT_TRUE(forAll([](float val) {
+        PROP_STAT_ASSERT_IN_RANGE(isnan(val), 0.05, 0.15);
+        PROP_STAT_ASSERT_IN_RANGE(isinf(val) && val > 0, 0.02, 0.08);
+        PROP_STAT_ASSERT_IN_RANGE(isinf(val) && val < 0, 0.005, 0.04);
+        return true;
+    }, floatGen));
+}
+
+TEST(FloatingGenerator, FloatGenConfig_partial_config)
+{
+    Arbi<float> floatGen({.nanProb = 0.1});  // Only nanProb; others default to 0.0
+
+    // Verify nanProb applied; posInfProb/negInfProb default to 0
+    EXPECT_TRUE(forAll([](float val) {
+        PROP_STAT_ASSERT_IN_RANGE(isnan(val), 0.05, 0.15);
+        PROP_STAT_ASSERT_LE(isinf(val), 0.02);
+        return true;
+    }, floatGen));
+}
+
+TEST(FloatingGenerator, FloatGenConfig_empty_config)
+{
+    Arbi<float> floatGen({});  // All defaults: finite only
+
+    // Verify all probs default to 0: no NaN, no inf
+    EXPECT_TRUE(forAll([](float val) {
+        PROP_STAT_ASSERT_LE(isnan(val), 0.0);
+        PROP_STAT_ASSERT_LE(isinf(val), 0.0);
+        return true;
+    }, floatGen));
+}
+
+TEST(FloatingGenerator, FloatGenConfig_validation)
+{
+    EXPECT_THROW({
+        Arbi<float> floatGen({.nanProb = 1.5});
+    }, runtime_error);
+
+    EXPECT_THROW({
+        Arbi<float> floatGen({.nanProb = 0.6, .posInfProb = 0.5});
+    }, runtime_error);
+}
+
+TEST(FloatingGenerator, gen_float32_with_config)
+{
+    util::FloatGenConfig config{.nanProb = 0.1, .posInfProb = 0.05};
+    gen::float32 floatGen(config);
+
+    EXPECT_FOR_ALL([](float val) {
+        PROP_ASSERT(isfinite(val) || isnan(val) || isinf(val));
+        return true;
+    }, floatGen);
 }
 
 TEST(FloatingGenerator, float_finite_values_are_finite)

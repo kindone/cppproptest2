@@ -61,7 +61,7 @@ Here's quick reference for built-in arbitraries:
 * Boolean type:`bool`
 * Character type: `char`
 * Integral types: `int8_t`, `uint8_t`, `int16_t`, `uint16_t`, `int32_t`, `uint32_t`, `int64_t`, `uint64_t`
-* Floating point types: `float`, `double`
+* Floating point types: `float`, `double` — Named parameters: `Arbi<float>({.nanProb = 0.1})`. See [Floating Point Generators](Generators.md#floating-point-generators).
 
 | Arbitrary                                   | Alias                                | Examples                            |
 | ------------------------------------------- | ------------------------------------ | ----------------------------------- |

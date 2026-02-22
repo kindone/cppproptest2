@@ -2,6 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/Arbitrary.hpp"
+#include "proptest/std/optional.hpp"
 
 /**
  * @file floating.hpp
@@ -12,6 +13,21 @@
  */
 
 namespace proptest {
+
+namespace util {
+
+/**
+ * @brief Configuration for floating-point generators (Arbi<float>, Arbi<double>).
+ * All fields are optional; unspecified fields default to 0.0.
+ * Use with designated initializers: Arbi<float>({.nanProb = 0.1, .posInfProb = 0.05})
+ */
+struct FloatGenConfig {
+    optional<double> nanProb;
+    optional<double> posInfProb;
+    optional<double> negInfProb;
+};
+
+}  // namespace util
 
 /**
  * @ingroup Generators
@@ -34,6 +50,12 @@ public:
      * The remaining probability (1.0 - sum) is used for finite values.
      */
     Arbi(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0);
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::FloatGenConfig with optional .nanProb, .posInfProb, .negInfProb
+     */
+    Arbi(const util::FloatGenConfig& config);
 
     Shrinkable<float> operator()(Random& rand) const override;
 
@@ -68,6 +90,12 @@ public:
      * The remaining probability (1.0 - sum) is used for finite values.
      */
     Arbi(double nanProb = 0.0, double posInfProb = 0.0, double negInfProb = 0.0);
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::FloatGenConfig with optional .nanProb, .posInfProb, .negInfProb
+     */
+    Arbi(const util::FloatGenConfig& config);
 
     Shrinkable<double> operator()(Random& rand) const override;
 
