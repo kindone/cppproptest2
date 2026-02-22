@@ -96,29 +96,29 @@ stringstream PropertyContext::flushFailures(int indent)
 
 void PropertyContext::addStatAssertGe(string&& key, double minBound, const char* filename, int lineno)
 {
-    string dedupKey = "GE:" + key + ":" + std::to_string(minBound);
+    string dedupKey = "GE:" + key + ":" + to_string(minBound);
     if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
         return;
     statAssertKeys.insert(dedupKey);
-    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::GE, minBound, filename, lineno));
+    statAssertions.push_back(StatAssertion(util::move(key), StatAssertType::GE, minBound, filename, lineno));
 }
 
 void PropertyContext::addStatAssertLe(string&& key, double maxBound, const char* filename, int lineno)
 {
-    string dedupKey = "LE:" + key + ":" + std::to_string(maxBound);
+    string dedupKey = "LE:" + key + ":" + to_string(maxBound);
     if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
         return;
     statAssertKeys.insert(dedupKey);
-    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::LE, maxBound, filename, lineno));
+    statAssertions.push_back(StatAssertion(util::move(key), StatAssertType::LE, maxBound, filename, lineno));
 }
 
 void PropertyContext::addStatAssertInRange(string&& key, double minBound, double maxBound, const char* filename, int lineno)
 {
-    string dedupKey = "IN_RANGE:" + key + ":" + std::to_string(minBound) + ":" + std::to_string(maxBound);
+    string dedupKey = "IN_RANGE:" + key + ":" + to_string(minBound) + ":" + to_string(maxBound);
     if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
         return;
     statAssertKeys.insert(dedupKey);
-    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::IN_RANGE, minBound, filename, lineno, maxBound));
+    statAssertions.push_back(StatAssertion(util::move(key), StatAssertType::IN_RANGE, minBound, filename, lineno, maxBound));
 }
 
 bool PropertyContext::checkStatAssertions(size_t totalRuns)

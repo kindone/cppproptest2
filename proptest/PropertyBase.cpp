@@ -40,19 +40,19 @@ void PropertyBase::tag(const char* file, int lineno, string key, string value)
 void PropertyBase::addStatAssertGe(string&& key, double bound, const char* filename, int lineno)
 {
     if (context)
-        context->addStatAssertGe(std::move(key), bound, filename, lineno);
+        context->addStatAssertGe(util::move(key), bound, filename, lineno);
 }
 
 void PropertyBase::addStatAssertLe(string&& key, double bound, const char* filename, int lineno)
 {
     if (context)
-        context->addStatAssertLe(std::move(key), bound, filename, lineno);
+        context->addStatAssertLe(util::move(key), bound, filename, lineno);
 }
 
 void PropertyBase::addStatAssertInRange(string&& key, double minBound, double maxBound, const char* filename, int lineno)
 {
     if (context)
-        context->addStatAssertInRange(std::move(key), minBound, maxBound, filename, lineno);
+        context->addStatAssertInRange(util::move(key), minBound, maxBound, filename, lineno);
 }
 
 void PropertyBase::succeed(const char* file, int lineno, const char* condition, const stringstream& str)
