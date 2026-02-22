@@ -13,6 +13,10 @@ Arbi<UTF16BEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_min
 
 Arbi<UTF16BEString>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(_elemGen) {}
 
+Arbi<UTF16BEString>::Arbi(const util::ContainerGenConfig<uint32_t>& config)
+    : ArbiContainer(config.minSize.value_or(defaultMinSize), config.maxSize.value_or(defaultMaxSize)),
+      elemGen(config.elemGen.value_or(gen::unicode())) {}
+
 /*
  * legal UTF-16 byte sequence
  *
@@ -71,6 +75,10 @@ size_t Arbi<UTF16LEString>::defaultMaxSize = 200;
 Arbi<UTF16LEString>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(gen::unicode()) {}
 
 Arbi<UTF16LEString>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer(_minSize, _maxSize), elemGen(_elemGen) {}
+
+Arbi<UTF16LEString>::Arbi(const util::ContainerGenConfig<uint32_t>& config)
+    : ArbiContainer(config.minSize.value_or(defaultMinSize), config.maxSize.value_or(defaultMaxSize)),
+      elemGen(config.elemGen.value_or(gen::unicode())) {}
 
 
 /*

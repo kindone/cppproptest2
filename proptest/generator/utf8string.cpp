@@ -12,6 +12,12 @@ size_t Arbi<UTF8String>::defaultMaxSize = 200;
 Arbi<UTF8String>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<UTF8String>(_minSize, _maxSize), elemGen(gen::unicode()) {}
 
 Arbi<UTF8String>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer<UTF8String>(_minSize, _maxSize), elemGen(_elemGen) {}
+
+Arbi<UTF8String>::Arbi(const util::ContainerGenConfig<uint32_t>& config)
+    : ArbiContainer<UTF8String>(
+          config.minSize.value_or(defaultMinSize),
+          config.maxSize.value_or(defaultMaxSize)),
+      elemGen(config.elemGen.value_or(gen::unicode())) {}
 /*
  * legal utf-8 byte sequence
  * http://www.unicode.org/versions/Unicode6.0.0/ch03.pdf

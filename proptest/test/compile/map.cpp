@@ -11,6 +11,12 @@ TEST(Compile, map)
     gen(rand);
     gen.map([](const map<string, string>&) { return 0; });
     gen.map<int>([](const map<string, string>&) { return 0; });
+
+    // Config-based constructor
+    auto gen2 = gen::map<int,int>({.minSize = 5, .maxSize = 20});
+    auto gen3 = gen::map<int,int>({.keyGen = gen::int32(), .valueGen = gen::int32(), .minSize = 1, .maxSize = 10});
+    gen2(rand);
+    gen3(rand);
 }
 
 TEST(Compile, map_keygen)

@@ -99,17 +99,28 @@ Here's quick reference for built-in arbitraries:
         // otherwise, Arbi<int> is used
         auto vecInt = Arbi<std::vector<int>>();
 
+        // Named parameters (util::ContainerGenConfig<T>)
+        auto vecGen = Arbi<std::vector<int>>({.minSize = 5, .maxSize = 20});
+        auto vecGen2 = Arbi<std::vector<int>>({.elemGen = gen::interval<int>(1, 100), .minSize = 5, .maxSize = 20});
+
+        // String arbitraries: ContainerGenConfig<char> for std::string, ContainerGenConfig<uint32_t> for UTF-8/16/CESU-8
+        auto strGen = Arbi<std::string>({.minSize = 5, .maxSize = 20});
+        auto utf8Gen = Arbi<UTF8String>({.elemGen = gen::interval<uint32_t>('0', '9'), .minSize = 1, .maxSize = 10});
+
         // string aarbitraries also take optional element generator
         auto uppercaseGen = Arbi<std::string>(gen::interval('A', 'Z'));
         auto alphabetGen = Arbi<std::string>(gen::unionOf(gen::interval('A', 'Z'), gen::interval('a','z')));
         ```
 
-    * `Arbi<std::Map>` provides setter methods for assigning a key generator and a value generator.
+    * `Arbi<std::map<K,V>>` provides a pair generator and size constraints. Use `setPairGen` or the config constructor.
 
         ```cpp
         auto mapGen = Arbi<std::map<int,int>>();
-        mapGen.setKeyGen(gen::interval<int>(0,100)); // interval: key ranges from 0 to 100
-        mapGen.setElemGen(gen::interval<int>(-100, 100)); // interval: value ranges from -100 to 100
+        mapGen.setPairGen(gen::pair(gen::interval<int>(0,100), gen::interval<int>(-100, 100)));
+
+        // Named parameters (util::MapGenConfig<K,V>)
+        auto mapGen2 = Arbi<std::map<int,int>>({.minSize = 5, .maxSize = 20});
+        auto mapGen3 = Arbi<std::map<int,int>>({.keyGen = gen::int32(), .valueGen = gen::int32(), .minSize = 5, .maxSize = 20});
         ```
 
        * Containers provide methods for configuring the desired sizes

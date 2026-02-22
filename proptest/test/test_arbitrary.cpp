@@ -101,6 +101,18 @@ TEST(Arbitrary, list_int)
             EXPECT_TRUE(0<= val && val <= 9);
         }
     }
+
+    // Config-based constructor
+    auto arbi4 = Arbi<list<int>>({.elemGen = gen::interval<int>(0, 5), .minSize = 1, .maxSize = 4});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi4(rand);
+        const auto& l = shr.getRef();
+        EXPECT_GE(l.size(), 1u);
+        EXPECT_LE(l.size(), 4u);
+        for(auto val : l) {
+            EXPECT_TRUE(0 <= val && val <= 5);
+        }
+    }
 }
 
 TEST(Arbitrary, vector_int)
@@ -129,6 +141,25 @@ TEST(Arbitrary, vector_int)
             EXPECT_TRUE(0<= val && val <= 9);
         }
     }
+
+    // Config-based constructor (named parameters)
+    auto arbi4 = Arbi<vector<int>>({.minSize = 5, .maxSize = 10});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi4(rand);
+        const auto& v = shr.getRef();
+        EXPECT_GE(v.size(), 5u);
+        EXPECT_LE(v.size(), 10u);
+    }
+    auto arbi5 = Arbi<vector<int>>({.elemGen = gen::interval<int>(1, 100), .minSize = 2, .maxSize = 5});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi5(rand);
+        const auto& v = shr.getRef();
+        EXPECT_GE(v.size(), 2u);
+        EXPECT_LE(v.size(), 5u);
+        for(auto val : v) {
+            EXPECT_TRUE(1 <= val && val <= 100);
+        }
+    }
 }
 
 TEST(Arbitrary, set_int)
@@ -141,6 +172,14 @@ TEST(Arbitrary, set_int)
         cout << endl;
         EXPECT_LE(shr.getRef().size(), (Arbi<set<int   >>::defaultMaxSize));
     }
+
+    // Config-based constructor
+    auto arbi2 = Arbi<set<int>>({.minSize = 3, .maxSize = 8});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi2(rand);
+        EXPECT_GE(shr.getRef().size(), 3u);
+        EXPECT_LE(shr.getRef().size(), 8u);
+    }
 }
 
 TEST(Arbitrary, map_int_int)
@@ -152,6 +191,25 @@ TEST(Arbitrary, map_int_int)
         show(cout, shr.getRef());
         cout << endl;
         EXPECT_LE(shr.getRef().size(), (Arbi<map<int,int>>::defaultMaxSize));
+    }
+
+    // Config-based constructor
+    auto arbi2 = Arbi<map<int,int>>({.minSize = 2, .maxSize = 6});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi2(rand);
+        EXPECT_GE(shr.getRef().size(), 2u);
+        EXPECT_LE(shr.getRef().size(), 6u);
+    }
+    auto arbi3 = Arbi<map<int,int>>({.keyGen = gen::interval<int>(0, 9), .valueGen = gen::interval<int>(1, 100), .minSize = 1, .maxSize = 4});
+    for(int i = 0; i < 5; i++) {
+        auto shr = arbi3(rand);
+        const auto& m = shr.getRef();
+        EXPECT_GE(m.size(), 1u);
+        EXPECT_LE(m.size(), 4u);
+        for(const auto& [k, v] : m) {
+            EXPECT_TRUE(0 <= k && k <= 9);
+            EXPECT_TRUE(1 <= v && v <= 100);
+        }
     }
 }
 
@@ -209,6 +267,23 @@ TEST(Arbitrary, string_customchars)
             EXPECT_TRUE(c >= '0' && c<= '9');
         }
     }
+
+    // Config-based constructor
+    auto arbi2 = Arbi<string>({.minSize = 5, .maxSize = 15});
+    for(int i = 0; i < 10; i++) {
+        auto str = arbi2(rand).getRef();
+        EXPECT_GE(str.size(), 5u);
+        EXPECT_LE(str.size(), 15u);
+    }
+    auto arbi3 = Arbi<string>({.elemGen = gen::interval<char>('A', 'Z'), .minSize = 2, .maxSize = 8});
+    for(int i = 0; i < 10; i++) {
+        auto str = arbi3(rand).getRef();
+        EXPECT_GE(str.size(), 2u);
+        EXPECT_LE(str.size(), 8u);
+        for(auto c : str) {
+            EXPECT_TRUE(c >= 'A' && c <= 'Z');
+        }
+    }
 }
 
 template <typename T, typename...ARGS>
@@ -252,6 +327,16 @@ TYPED_TEST(StringLikeTest, Arbitrary_customchars)
             if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
                 EXPECT_TRUE(c >= '0' && c<= '9');
             }
+        }
+    }
+
+    // Config-based constructor for UTF-8/CESU-8 strings
+    if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
+        auto arbi2 = Arbi<TypeParam>({.minSize = 1, .maxSize = 5});
+        for(int i = 0; i < 5; i++) {
+            auto str = arbi2(rand).getRef();
+            EXPECT_GE(str.charsize(), 1u);
+            EXPECT_LE(str.charsize(), 5u);
         }
     }
 }

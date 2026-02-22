@@ -387,6 +387,10 @@ auto asciiStringGen = gen::string();
 auto uppercaseGen = gen::string(gen::interval<char>('A', 'Z'));
 auto digitGen = gen::string(gen::interval<char>('0', '9'));
 
+// Named parameters (C++20 designated initializers)
+auto strGen = gen::string({.minSize = 5, .maxSize = 20});
+auto strGen2 = gen::string({.elemGen = gen::interval<char>('A', 'Z'), .minSize = 3, .maxSize = 10});
+
 // Usage in forAll
 forAll([](std::string name) {
     // Property test with strings
@@ -418,6 +422,9 @@ auto alphanumericGen = gen::utf8string(gen::unionOf<uint32_t>(
     gen::interval<uint32_t>('a', 'z'),
     gen::interval<uint32_t>('0', '9')
 ));
+
+// Named parameters (C++20 designated initializers)
+auto utf8Gen = gen::utf8string({.minSize = 1, .maxSize = 50});
 
 // Usage in forAll
 forAll([](UTF8String text) {
@@ -542,6 +549,10 @@ boundedVectorGen.setMaxSize(10); // Generates vectors of size 1-10
 auto vectorGen1 = gen::vector<int>(5, 5); // Fixed size 5
 auto vectorGen2 = gen::vector<int>(gen::interval(1,10), 5, 5); // element generator + size range
 
+// Named parameters (C++20 designated initializers)
+auto vectorGen3 = gen::vector<int>({.minSize = 5, .maxSize = 20});
+auto vectorGen4 = gen::vector<int>({.elemGen = gen::interval<int>(1, 100), .minSize = 5, .maxSize = 20});
+
 // Usage in forAll
 forAll([](std::vector<int> numbers) {
     // Property test with vectors
@@ -571,6 +582,9 @@ auto stringListGen = gen::list<std::string>();
 // List with custom element generator
 auto uppercaseStringListGen = gen::list<std::string>(gen::string(gen::interval<char>('A', 'Z')));
 
+// Named parameters (C++20 designated initializers)
+auto listGen = gen::list<int>({.elemGen = gen::interval<int>(0, 9), .minSize = 1, .maxSize = 10});
+
 // Usage in forAll
 forAll([](std::list<std::string> items) {
     // Property test with lists
@@ -596,6 +610,9 @@ Generates random sets with elements of type `T`.
 ```cpp
 // Basic set generator
 auto intSetGen = gen::set<int>();
+
+// Named parameters (C++20 designated initializers)
+auto setGen = gen::set<int>({.minSize = 3, .maxSize = 15});
 
 // Usage in forAll
 forAll([](std::set<int> uniqueNumbers) {
@@ -625,9 +642,11 @@ Generates random maps with keys of type `K` and values of type `V`.
 auto stringIntMapGen = gen::map<std::string, int>();
 
 // Map with custom key and value generators
-auto customMapGen = gen::map<std::string, int>();
-customMapGen.setKeyGen(gen::string(gen::interval<char>('a', 'z')));
-customMapGen.setElemGen(gen::interval<int>(0, 100));
+auto customMapGen = gen::map<std::string, int>({.keyGen = gen::string(gen::interval<char>('a', 'z')), .valueGen = gen::interval<int>(0, 100)});
+
+// Named parameters (C++20 designated initializers)
+auto mapGen = gen::map<int,int>({.minSize = 5, .maxSize = 20});
+auto mapGen2 = gen::map<int,int>({.keyGen = gen::int32(), .valueGen = gen::int32(), .minSize = 5, .maxSize = 20});
 
 // Usage in forAll
 forAll([](std::map<std::string, int> data) {

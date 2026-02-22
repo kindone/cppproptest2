@@ -1,5 +1,6 @@
 #pragma once
 #include "proptest/Arbitrary.hpp"
+#include "proptest/generator/container_config.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/shrinker/map.hpp"
 #include "proptest/generator/pair.hpp"
@@ -15,7 +16,7 @@
 namespace proptest {
 /**
  * @ingroup Generators
- * @brief Arbitrary for map<Key, Value> with configurable Key and Value generators and min/max sizes
+ * @brief Arbitrary for map<Key, Value> with configurable pair generator and min/max sizes
  */
 template <typename Key, typename Value>
 class Arbi<map<Key, Value>> final : public ArbiContainer<map<Key, Value>> {
@@ -31,6 +32,18 @@ public:
     Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<Map>(_minSize, _maxSize), pairGen(Arbi<Pair>()) {}
 
     Arbi(GenFunction<Pair> _pairGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<Map>(_minSize, _maxSize), pairGen(_pairGen) {}
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::MapGenConfig<Key,Value> with optional .keyGen, .valueGen, .minSize, .maxSize
+     */
+    Arbi(const util::MapGenConfig<Key, Value>& config)
+        : ArbiContainer<Map>(
+              config.minSize.value_or(defaultMinSize),
+              config.maxSize.value_or(defaultMaxSize)),
+          pairGen(gen::pair(
+              config.keyGen.value_or(Arbi<Key>()),
+              config.valueGen.value_or(Arbi<Value>()))) {}
 
     Shrinkable<Map> operator()(Random& rand) const override
     {

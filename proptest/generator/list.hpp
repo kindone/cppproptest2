@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/Arbitrary.hpp"
+#include "proptest/generator/container_config.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/list.hpp"
@@ -29,7 +30,7 @@ concept ListLikeContainer = requires(C& c, typename C::value_type v) {
 /**
  * @ingroup Generators
  * @brief Arbitrary for list-like containers with push_back support (e.g., std::list) with configurable element generator and min/max sizes
- * 
+ *
  * Supports containers with one template parameter (e.g., custom containers) or two parameters with default allocator (e.g., std::list, std::vector)
  */
 template <template <typename, typename...> class Container, typename T>
@@ -47,6 +48,16 @@ public:
 
     Arbi(GenFunction<T> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize)
         : ArbiContainer<ContainerType>(_minSize, _maxSize), elemGen(_elemGen) {}
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::ContainerGenConfig<T> with optional .elemGen, .minSize, .maxSize
+     */
+    Arbi(const util::ContainerGenConfig<T>& config)
+        : ArbiContainer<ContainerType>(
+              config.minSize.value_or(defaultMinSize),
+              config.maxSize.value_or(defaultMaxSize)),
+          elemGen(config.elemGen.value_or(Arbi<T>())) {}
 
     Arbi setElemGen(GenFunction<T> _elemGen)
     {

@@ -13,6 +13,12 @@ Arbi<string>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<string>(_mi
 
 Arbi<string>::Arbi(Generator<char> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer<string>(_minSize, _maxSize), elemGen(_elemGen) {}
 
+Arbi<string>::Arbi(const util::ContainerGenConfig<char>& config)
+    : ArbiContainer<string>(
+          config.minSize.value_or(defaultMinSize),
+          config.maxSize.value_or(defaultMaxSize)),
+      elemGen(config.elemGen.has_value() ? Generator<char>(config.elemGen.value()) : gen::interval<char>(0x1, 0x7f)) {}
+
 Shrinkable<string> Arbi<string>::operator()(Random& rand) const
 {
     size_t size = rand.getRandomSize(minSize, maxSize + 1);

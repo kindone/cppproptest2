@@ -13,6 +13,12 @@ Arbi<CESU8String>::Arbi(size_t _minSize, size_t _maxSize) : ArbiContainer<CESU8S
 
 Arbi<CESU8String>::Arbi(GenFunction<uint32_t> _elemGen, size_t _minSize, size_t _maxSize) : ArbiContainer<CESU8String>(_minSize, _maxSize), elemGen(_elemGen) {}
 
+Arbi<CESU8String>::Arbi(const util::ContainerGenConfig<uint32_t>& config)
+    : ArbiContainer<CESU8String>(
+          config.minSize.value_or(defaultMinSize),
+          config.maxSize.value_or(defaultMaxSize)),
+      elemGen(config.elemGen.value_or(gen::unicode())) {}
+
 
 /*
  * legal CESU-8 byte sequence

@@ -210,8 +210,7 @@ TEST(FloatingGenerator, FloatGenConfig_validation)
 
 TEST(FloatingGenerator, gen_float32_with_config)
 {
-    util::FloatGenConfig config{.nanProb = 0.1, .posInfProb = 0.05};
-    gen::float32 floatGen(config);
+    gen::float32 floatGen({.nanProb = 0.1, .posInfProb = 0.05});
 
     EXPECT_FOR_ALL([](float val) {
         PROP_ASSERT(isfinite(val) || isnan(val) || isinf(val));

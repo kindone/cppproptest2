@@ -1,6 +1,7 @@
 #pragma once
 #include "proptest/api.hpp"
 #include "proptest/Arbitrary.hpp"
+#include "proptest/generator/container_config.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/std/string.hpp"
 
@@ -25,6 +26,12 @@ public:
 
     Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
     Arbi(Generator<char> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize);
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::ContainerGenConfig<char> with optional .elemGen (charGen), .minSize, .maxSize
+     */
+    Arbi(const util::ContainerGenConfig<char>& config);
 
     Shrinkable<string> operator()(Random& rand) const override;
 

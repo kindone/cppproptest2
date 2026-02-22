@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/Arbitrary.hpp"
+#include "proptest/generator/container_config.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/vector.hpp"
@@ -29,6 +30,16 @@ public:
     Arbi(size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<vector<T>>(_minSize, _maxSize), elemGen(Arbi<T>()) {}
 
     Arbi(GenFunction<T> _elemGen, size_t _minSize = defaultMinSize, size_t _maxSize = defaultMaxSize) : ArbiContainer<vector<T>>(_minSize, _maxSize), elemGen(_elemGen) {}
+
+    /**
+     * @brief Constructor with named parameters (C++20 designated initializers)
+     * @param config util::ContainerGenConfig<T> with optional .elemGen, .minSize, .maxSize
+     */
+    Arbi(const util::ContainerGenConfig<T>& config)
+        : ArbiContainer<vector<T>>(
+              config.minSize.value_or(defaultMinSize),
+              config.maxSize.value_or(defaultMaxSize)),
+          elemGen(config.elemGen.value_or(Arbi<T>())) {}
 
     Arbi setElemGen(GenFunction<T> _elemGen)
     {
