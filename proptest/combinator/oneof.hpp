@@ -3,8 +3,10 @@
 #include "proptest/GenType.hpp"
 #include "proptest/Generator.hpp"
 #include "proptest/std/exception.hpp"
+#include "proptest/std/concepts.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/combinator/combinatorimpl.hpp"
+#include "proptest/Shrinkable.hpp"
 
 /**
  * @file oneof.hpp
@@ -62,6 +64,15 @@ Weighted<T> GenToWeighted(const Weighted<T>& weighted)
     return weighted;
 }
 
+// Raw value: treat as gen::just<T>(value) - inline to avoid circular include with just.hpp
+template <typename T, typename Impl>
+    requires (!GenLike<Impl, T>) && (!is_same_v<decay_t<Impl>, Weighted<T>>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+Weighted<T> GenToWeighted(Impl&& value)
+{
+    auto any = util::make_any<T>(util::forward<Impl>(value));
+    return Weighted<T>(Function1<ShrinkableBase>([any](Random&) -> ShrinkableBase { return Shrinkable<T>(any); }), 0.0);
+}
+
 }  // namespace util
 
 
@@ -85,17 +96,24 @@ auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_res
     return weightedGen<T>(util::forward<GEN>(gen), weight);
 }
 
+// Concept: generator, Weighted<T>, or raw value convertible to T
+template <typename T, typename Impl>
+concept OneOfArg = GenLike<Impl, T> || is_same_v<decay_t<Impl>, util::Weighted<T>> ||
+    ((convertible_to<Impl, T> || same_as<decay_t<Impl>, T>) && !GenLike<Impl, T> && !is_same_v<decay_t<Impl>, util::Weighted<T>>);
+
 /**
  * @ingroup Combinators
  * @brief Generator combinator for generating a type by choosing one of given generators with some probability
  * @details You can combine generators into a single generator that can generate one of them with some probability. This
  * can be considered as taking a union of generators. It can generate a type T from multiple generators for type T, by
- * choosing one of the generators randomly, with even probability, or weighted probability. a GEN can be a generator or
- * a weightedGen(generator, weight) decorator with the weight between 0 and 1 (exclusive). Unweighted generators take rest of
- * unweighted probability evenly.
+ * choosing one of the generators randomly, with even probability, or weighted probability. Each argument can be:
+ * - a generator (GenLike)
+ * - weightedGen(generator, weight) with weight between 0 and 1 (exclusive)
+ * - a raw value of type T (treated as gen::just(value))
+ * Unweighted generators/values take rest of unweighted probability evenly.
  */
 template <typename T, typename... GENS>
-    requires ((GenLike<GENS, T> || is_same_v<decay_t<GENS>, util::Weighted<T>>) && ...)
+    requires (OneOfArg<T, GENS> && ...)
 Generator<T> oneOf(GENS&&... gens)
 {
     using WeightedVec = vector<util::WeightedBase>;

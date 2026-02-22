@@ -150,6 +150,28 @@ TEST(PropTest, noShrink_preserves_filter)
     }
 }
 
+TEST(PropTest, oneOf_raw_values)
+{
+    // oneOf accepts raw values (implicit gen::just)
+    int64_t seed = getCurrentTime();
+    Random rand(seed);
+
+    // Raw values only
+    auto rawOnlyGen = gen::oneOf<int>(1339, 42);
+    for (int i = 0; i < 100; i++) {
+        int val = rawOnlyGen(rand).getRef();
+        EXPECT_TRUE(val == 1339 || val == 42) << "oneOf(1339, 42) should produce only 1339 or 42 (got " << val << ")";
+    }
+
+    // Mixed: raw values + generator
+    auto mixedGen = gen::oneOf<int>(1339, gen::interval(0, 10), 42);
+    for (int i = 0; i < 100; i++) {
+        int val = mixedGen(rand).getRef();
+        EXPECT_TRUE(val == 1339 || val == 42 || (val >= 0 && val <= 10))
+            << "oneOf(1339, interval(0,10), 42) should produce 1339, 42, or [0,10] (got " << val << ")";
+    }
+}
+
 TEST(PropTest, TestDependency)
 {
     auto intGen = gen::interval(0, 2);

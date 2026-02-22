@@ -376,9 +376,12 @@ Combine multiple generators of the same type into a single generator that random
 
 #### `gen::oneOf<T>`
 
-Generates a value of type `T` by randomly choosing one of the provided generators. All generators (`gen1` to `genN`) must generate the same type `T`.
+Generates a value of type `T` by randomly choosing one of the provided generators or values. Each argument can be:
+- a generator (GenLike)
+- `weightedGen(generator, weight)`
+- a raw value of type `T` (treated as `gen::just(value)`)
 
-**Signature:** `gen::oneOf<T>(gen1, ..., genN)`
+**Signature:** `gen::oneOf<T>(gen1, ..., genN)` or `gen::oneOf<T>(val1, val2, ...)` or mixed
 
 **Example:**
 
@@ -389,6 +392,12 @@ auto rangeGen = gen::oneOf<int>(
     gen::interval(100, 1000),
     gen::interval(10000, 100000)
 );
+
+// Raw values (implicit gen::just) can be used
+auto fixedGen = gen::oneOf<int>(1339, 42); // equivalent to gen::oneOf<int>(gen::just(1339), gen::just(42))
+
+// Mixed: raw values and generators
+auto mixedGen = gen::oneOf<int>(1339, gen::interval(0, 10), 42);
 ```
 
 **Weighted Selection:**

@@ -51,7 +51,6 @@ The following table provides a comprehensive overview of all generators availabl
 | | [`gen::derive<T,U>(gen, genGen)`](#combinator-functions) | Value derivation (flat-map) |
 | | [`gen::filter<T>(gen, predicate)`](#combinator-functions) | Value filtering |
 | | [`gen::suchThat<T>(gen, predicate)`](#combinator-functions) | Alias for filter |
-| | [`gen::noShrink(gen)`](#combinator-functions) | Same values, empty shrink stream |
 | | [`gen::dependency<T,U>(genT, genUGen)`](#combinator-functions) | Dependency between values |
 | | [`gen::chain<T>(genT, genGen)`](#combinator-functions) | Chain of generators |
 | | [`gen::aggregate<T>(genT, aggregator)`](#combinator-functions) | Aggregation of values |
@@ -62,6 +61,7 @@ The following table provides a comprehensive overview of all generators availabl
 | | [`gen::weightedVal<T>(value, weight)`](#combinator-functions) | Weighted value decorator |
 | **Utilities** | | |
 | | [`gen::arbitrary<T>(...)`](#access-to-an-arbitrary) | Access to arbitrary |
+| | [`gen::noShrink(gen)`](#combinator-functions) | Same values, but with empty shrink stream |
 
 **Note:** For detailed documentation on combinators, see the [Combinators](Combinators.md) page. For building custom generators, see [Custom Generator](CustomGenerator.md).
 

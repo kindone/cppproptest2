@@ -23,32 +23,29 @@ TEST(stateful_function, basic)
         });
     });
 
-    // actionGen<T> is shorthand for just<SimpleAction<T>>
-    auto popBackGen = gen::just(SimpleAction<T>([](T& obj) {
+    auto popBackAction = SimpleAction<T>([](T& obj) {
         auto size = obj.size();
         if (obj.empty())
             return;
         obj.pop_back();
         PROP_ASSERT(obj.size() == size - 1);
-    }));
+    });
 
-    auto popBackGen2 = gen::just(SimpleAction<T>([](T& obj) {
+    auto popBackAction2 = SimpleAction<T>([](T& obj) {
         auto size = obj.size();
         if (obj.empty())
             return;
         obj.pop_back();
         PROP_ASSERT(obj.size() == size - 1);
-    }));
+    });
 
-    // actionGen<T> is shorthand for just<SimpleAction<T>>
-    auto clearGen = gen::just(SimpleAction<T>([](T& obj) {
-        // cout << "Clear" << endl;
+    auto clearAction = SimpleAction<T>([](T& obj) {
         obj.clear();
         PROP_ASSERT(obj.size() == 0);
-    }));
+    });
 
     auto actionGen =
-        gen::oneOf<SimpleAction<T>>(pushBackGen, popBackGen, popBackGen2, gen::weightedGen(clearGen, 0.1));
+        gen::oneOf<SimpleAction<T>>(pushBackGen, popBackAction, popBackAction2, gen::weightedGen<SimpleAction<T>>(gen::just(clearAction), 0.1));
     auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
     prop.setOnStartup([]() { cout << "startup" << endl; });
     prop.setOnCleanup([]() { cout << "cleanup" << endl; });
@@ -68,28 +65,29 @@ TEST(stateful_function, basic_model)
         });
     });
 
-    auto popBackGen = gen::just(Action<T, Model>("PopBack", [](T& obj, Model&) {
+    // Raw actions directly in oneOf (treated as gen::just(action))
+    auto popBackAction = Action<T, Model>("PopBack", [](T& obj, Model&) {
         auto size = obj.size();
         if (obj.empty())
             return;
         obj.pop_back();
         PROP_ASSERT(obj.size() == size - 1);
-    }));
+    });
 
-    auto popBackGen2 = gen::just(Action<T, Model>("PopBack2", [](T& obj, Model&) {
+    auto popBackAction2 = Action<T, Model>("PopBack2", [](T& obj, Model&) {
         auto size = obj.size();
         if (obj.empty())
             return;
         obj.pop_back();
         PROP_ASSERT(obj.size() == size - 1);
-    }));
+    });
 
-    auto clearGen = gen::just(Action<T, Model>("Clear", [](T& obj, Model&) {
+    auto clearAction = Action<T, Model>("Clear", [](T& obj, Model&) {
         obj.clear();
         PROP_ASSERT(obj.size() == 0);
-    }));
+    });
 
-    auto actionGen = gen::oneOf<Action<T, Model>>(pushBackGen, popBackGen, popBackGen2, clearGen);
+    auto actionGen = gen::oneOf<Action<T, Model>>(pushBackGen, popBackAction, popBackAction2, clearAction);
     auto prop = statefulProperty<T, Model>(
         Arbi<T>(), [](T& obj) -> Model { return VectorModel2(obj.size()); }, actionGen);
     prop.setOnStartup([]() { cout << "startup" << endl; });
