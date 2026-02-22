@@ -93,17 +93,34 @@ public:
         return *this;
     }
 
+    StatefulProperty& setOnActionStart(Function<void(ObjectType&, ModelType&)> _onActionStart)
+    {
+        onActionStart = _onActionStart;
+        return *this;
+    }
+
+    StatefulProperty& setOnActionEnd(Function<void(ObjectType&, ModelType&)> _onActionEnd)
+    {
+        onActionEnd = _onActionEnd;
+        return *this;
+    }
+
     bool go()
     {
         // TODO add interface to adjust list min max sizes
         auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen);
         vector<AnyGenerator> genVec({initialGen, actionListGen});
 
-        auto func = [modelFactory = this->modelFactory, postCheck = this->postCheck](ObjectType obj,
-                                                                         list<Action<ObjectType, ModelType>> actions) {
+        auto func = [modelFactory = this->modelFactory, postCheck = this->postCheck,
+                     onActionStart = this->onActionStart, onActionEnd = this->onActionEnd](
+                        ObjectType obj, list<Action<ObjectType, ModelType>> actions) {
             auto model = modelFactory(obj);
             for (auto action : actions) {
+                if (onActionStart)
+                    onActionStart(obj, model);
                 action(obj, model);
+                if (onActionEnd)
+                    onActionEnd(obj, model);
             }
             if (postCheck)
                 postCheck(obj, model);
@@ -133,6 +150,8 @@ private:
     ActionGen<ObjectType, ModelType> actionGen;
 
     Function<void(ObjectType&, ModelType&)> postCheck;
+    Function<void(ObjectType&, ModelType&)> onActionStart;
+    Function<void(ObjectType&, ModelType&)> onActionEnd;
     Function<void()> onStartup;
     Function<void()> onCleanup;
 };

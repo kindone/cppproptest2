@@ -277,6 +277,25 @@ Falsifiable, after 1 tests: vec.size() < 5 (test/test_state_func.cpp:111)
 ```
 
 
+### Action callbacks: `setOnActionStart` / `setOnActionEnd`
+
+For properties like "no intermediate state violates the invariant" (`∀ ∀ ¬∃`), you need to assert after **every action**, not just at the end. Instead of repeating assertions in every action, use `setOnActionEnd` to centralize invariant checks:
+
+```cpp
+auto prop = statefulProperty<MyVector>(Arbi<MyVector>(), actionGen);
+prop.setOnActionEnd([](MyVector& vec, EmptyModel&) {
+    PROP_ASSERT(vec.size() >= 0);           // Invariant: size is non-negative
+});
+prop.go();
+```
+
+| Callback | When it runs |
+|----------|--------------|
+| `setOnActionStart(obj, model)` | Before each action (including before the first) |
+| `setOnActionEnd(obj, model)` | After each action |
+
+Use `setOnActionEnd` for invariant checks; use `setOnActionStart` for pre-action checks or debugging. Both receive `(ObjectType&, ModelType&)` (use `EmptyModel&` when using `SimpleAction`).
+
 ### Configuring stateful test runs
 
 You can alter some of test characteristics of stateful test runs.

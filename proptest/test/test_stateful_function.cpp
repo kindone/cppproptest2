@@ -101,3 +101,46 @@ TEST(stateful_function, basic_model)
     auto endTime = steady_clock::now();
     EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), 2000);
 }
+
+TEST(stateful_function, onActionStart_onActionEnd_callbacks)
+{
+    using T = vector<int>;
+    int startCount = 0, endCount = 0;
+
+    auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
+        return SimpleAction<T>([value](T& obj) { obj.push_back(value); });
+    });
+    auto popBackAction = SimpleAction<T>([](T& obj) {
+        if (!obj.empty())
+            obj.pop_back();
+    });
+    auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, popBackAction);
+
+    auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
+    prop.setOnActionStart([&startCount](T&, EmptyModel&) { ++startCount; });
+    prop.setOnActionEnd([&endCount](T&, EmptyModel&) { ++endCount; });
+    prop.setSeed(0).setNumRuns(10).go();
+
+    EXPECT_GT(startCount, 0);
+    EXPECT_EQ(startCount, endCount);
+}
+
+TEST(stateful_function, onActionEnd_invariant_check)
+{
+    using T = vector<int>;
+
+    auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
+        return SimpleAction<T>([value](T& obj) { obj.push_back(value); });
+    });
+    auto popBackAction = SimpleAction<T>([](T& obj) {
+        if (!obj.empty())
+            obj.pop_back();
+    });
+    auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, popBackAction);
+
+    auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
+    prop.setOnActionEnd([](T& vec, EmptyModel&) {
+        PROP_ASSERT(vec.size() >= 0);  // Invariant: size is non-negative
+    });
+    prop.setSeed(0).setNumRuns(100).go();
+}
