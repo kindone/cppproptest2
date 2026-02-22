@@ -57,6 +57,12 @@ void PropertyContext::fail(const char* filename, int lineno, const char* conditi
     lastStreamExists = true;
 }
 
+void PropertyContext::fail(const char* filename, int lineno, string condition, const stringstream& str)
+{
+    failures.push_back(Failure(filename, lineno, util::move(condition), str));
+    lastStreamExists = true;
+}
+
 stringstream& PropertyContext::getLastStream()
 {
     static stringstream defaultStr;
@@ -86,6 +92,80 @@ stringstream PropertyContext::flushFailures(int indent)
     }
     failures.clear();
     return allFailures;
+}
+
+void PropertyContext::addStatAssertGe(string&& key, double minBound, const char* filename, int lineno)
+{
+    string dedupKey = "GE:" + key + ":" + std::to_string(minBound);
+    if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
+        return;
+    statAssertKeys.insert(dedupKey);
+    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::GE, minBound, filename, lineno));
+}
+
+void PropertyContext::addStatAssertLe(string&& key, double maxBound, const char* filename, int lineno)
+{
+    string dedupKey = "LE:" + key + ":" + std::to_string(maxBound);
+    if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
+        return;
+    statAssertKeys.insert(dedupKey);
+    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::LE, maxBound, filename, lineno));
+}
+
+void PropertyContext::addStatAssertInRange(string&& key, double minBound, double maxBound, const char* filename, int lineno)
+{
+    string dedupKey = "IN_RANGE:" + key + ":" + std::to_string(minBound) + ":" + std::to_string(maxBound);
+    if (statAssertKeys.find(dedupKey) != statAssertKeys.end())
+        return;
+    statAssertKeys.insert(dedupKey);
+    statAssertions.push_back(StatAssertion(std::move(key), StatAssertType::IN_RANGE, minBound, filename, lineno, maxBound));
+}
+
+bool PropertyContext::checkStatAssertions(size_t totalRuns)
+{
+    if (totalRuns == 0)
+        return true;
+    static const string kTrueValue("true");  // PROP_STAT records bool as "true"/"false"; we assert on "true" ratio
+    bool allPassed = true;
+    for (const auto& a : statAssertions) {
+        size_t count = 0;
+        auto keyItr = tags.find(a.key);
+        if (keyItr != tags.end()) {
+            auto valueItr = keyItr->second.find(kTrueValue);
+            if (valueItr != keyItr->second.end())
+                count = valueItr->second.count;
+        }
+        double ratio = static_cast<double>(count) / totalRuns;
+        bool pass = false;
+        stringstream ss;
+        switch (a.type) {
+            case StatAssertType::GE:
+                pass = ratio >= a.bound1;
+                if (!pass)
+                    ss << "PROP_STAT_ASSERT_GE(" << a.key << ", " << a.bound1 << ") failed: ratio " << ratio
+                       << " < " << a.bound1 << " (" << count << "/" << totalRuns << ")";
+                break;
+            case StatAssertType::LE:
+                pass = ratio <= a.bound1;
+                if (!pass)
+                    ss << "PROP_STAT_ASSERT_LE(" << a.key << ", " << a.bound1 << ") failed: ratio " << ratio
+                       << " > " << a.bound1 << " (" << count << "/" << totalRuns << ")";
+                break;
+            case StatAssertType::IN_RANGE:
+                pass = ratio >= a.bound1 && ratio <= a.bound2;
+                if (!pass)
+                    ss << "PROP_STAT_ASSERT_IN_RANGE(" << a.key << ", " << a.bound1 << ", " << a.bound2
+                       << ") failed: ratio " << ratio << " not in [" << a.bound1 << ", " << a.bound2 << "] ("
+                       << count << "/" << totalRuns << ")";
+                break;
+        }
+        if (!pass) {
+            allPassed = false;
+            stringstream empty;
+            fail(a.filename, a.lineno, ss.str(), empty);
+        }
+    }
+    return allPassed;
 }
 
 void PropertyContext::printSummary()

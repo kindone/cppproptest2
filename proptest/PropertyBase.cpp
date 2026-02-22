@@ -37,6 +37,24 @@ void PropertyBase::tag(const char* file, int lineno, string key, string value)
     context->tag(file, lineno, key, value);
 }
 
+void PropertyBase::addStatAssertGe(string&& key, double bound, const char* filename, int lineno)
+{
+    if (context)
+        context->addStatAssertGe(std::move(key), bound, filename, lineno);
+}
+
+void PropertyBase::addStatAssertLe(string&& key, double bound, const char* filename, int lineno)
+{
+    if (context)
+        context->addStatAssertLe(std::move(key), bound, filename, lineno);
+}
+
+void PropertyBase::addStatAssertInRange(string&& key, double minBound, double maxBound, const char* filename, int lineno)
+{
+    if (context)
+        context->addStatAssertInRange(std::move(key), minBound, maxBound, filename, lineno);
+}
+
 void PropertyBase::succeed(const char* file, int lineno, const char* condition, const stringstream& str)
 {
     if (!context)
@@ -107,6 +125,12 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
                 if(duration_cast<util::milliseconds>(currentTime - startedTime).count() > maxDurationMs)
                 {
                     cout << "Timed out after " << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed " << i << " tests" << endl;
+                    if (!ctx.checkStatAssertions(i)) {
+                        stringstream failures = ctx.flushFailures();
+                        cerr << "Stat assertion failed: " << failures.str() << endl;
+                        ctx.printSummary();
+                        return false;
+                    }
                     ctx.printSummary();
                     return true;
                 }
@@ -164,6 +188,12 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
     }
 
     cout << "OK, passed " << numRuns << " tests" << endl;
+    if (!ctx.checkStatAssertions(i)) {
+        stringstream failures = ctx.flushFailures();
+        cerr << "Stat assertion failed: " << failures.str() << endl;
+        ctx.printSummary();
+        return false;
+    }
     ctx.printSummary();
     return true;
 }

@@ -170,6 +170,9 @@ All configuration methods return a reference to `Property`, allowing method chai
 | [`PROP_STAT(expr)`](#prop_statexpression) | Collect statistics about expression values |
 | [`PROP_TAG(key, value)`](#prop_tagkey-value) | Categorize test cases with custom labels |
 | [`PROP_CLASSIFY(cond, key, value)`](#prop_classifycondition-key-value) | Conditionally tag test cases |
+| [`PROP_STAT_ASSERT_GE(expr, bound)`](#prop_stat_assert_macros) | Assert ratio of `expr` true ≥ bound (0–1) |
+| [`PROP_STAT_ASSERT_LE(expr, bound)`](#prop_stat_assert_macros) | Assert ratio of `expr` true ≤ bound (0–1) |
+| [`PROP_STAT_ASSERT_IN_RANGE(expr, min, max)`](#prop_stat_assert_macros) | Assert ratio of `expr` true in [min, max] |
 
 #### Test Control Macros
 
@@ -584,6 +587,33 @@ forAll([](int x, int y) {
     PROP_CLASSIFY(x > y, "relationship", "greater");
     PROP_CLASSIFY(x < y, "relationship", "less");
 });
+```
+
+### Stat assertion macros
+
+Assert that the ratio of runs where an expression is true falls within bounds. Bounds are ratios in [0, 1]. Assertions are evaluated after the main loop.
+
+| Macro | Condition |
+|-------|-----------|
+| `PROP_STAT_ASSERT_GE(expr, bound)` | ratio ≥ bound |
+| `PROP_STAT_ASSERT_LE(expr, bound)` | ratio ≤ bound |
+| `PROP_STAT_ASSERT_IN_RANGE(expr, min, max)` | min ≤ ratio ≤ max |
+
+**Failure output:** When a stat assertion fails, the message includes the source location `(file:line)` for easy debugging, e.g.:
+
+```
+Stat assertion failed: PROP_STAT_ASSERT_GE(a > 0, 0.5) failed: ratio 0 < 0.5 (0/1000) (/path/to/test.cpp:42)
+```
+
+**Example:**
+```cpp
+forAll([](int a) {
+    PROP_STAT_ASSERT_GE(a > 0, 0.5); // a > 0 case must be greater or equal to 50%
+}, gen::interval(1, 100));
+
+forAll([](int a) {
+    PROP_STAT_ASSERT_IN_RANGE(a > 0, 0.5, 1.0);  // Ratio must be in [0.5, 1.0]
+}, gen::interval(1, 100));
 ```
 
 &nbsp;

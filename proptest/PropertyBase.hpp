@@ -130,6 +130,28 @@
         }                                                      \
     } while (false)
 
+#define PROP_STAT_ASSERT_GE(EXPR, BOUND)                                                       \
+    do {                                                                                       \
+        PROP_STAT(EXPR);                                                                       \
+        stringstream __prop_stat_assert_key; __prop_stat_assert_key << (#EXPR);                 \
+        ::proptest::PropertyBase::addStatAssertGe(__prop_stat_assert_key.str(), static_cast<double>(BOUND), __FILE__, __LINE__); \
+    } while (false)
+
+#define PROP_STAT_ASSERT_LE(EXPR, BOUND)                                                       \
+    do {                                                                                       \
+        PROP_STAT(EXPR);                                                                       \
+        stringstream __prop_stat_assert_key; __prop_stat_assert_key << (#EXPR);                 \
+        ::proptest::PropertyBase::addStatAssertLe(__prop_stat_assert_key.str(), static_cast<double>(BOUND), __FILE__, __LINE__); \
+    } while (false)
+
+#define PROP_STAT_ASSERT_IN_RANGE(EXPR, MIN_BOUND, MAX_BOUND)                                  \
+    do {                                                                                       \
+        PROP_STAT(EXPR);                                                                       \
+        stringstream __prop_stat_assert_key; __prop_stat_assert_key << (#EXPR);                 \
+        ::proptest::PropertyBase::addStatAssertInRange(__prop_stat_assert_key.str(),            \
+            static_cast<double>(MIN_BOUND), static_cast<double>(MAX_BOUND), __FILE__, __LINE__); \
+    } while (false)
+
 namespace proptest {
 
 class Random;
@@ -145,6 +167,9 @@ public:
 
     static void setDefaultNumRuns(uint32_t);
     static void tag(const char* filename, int lineno, string key, string value);
+    static void addStatAssertGe(string&& key, double bound, const char* filename, int lineno);
+    static void addStatAssertLe(string&& key, double bound, const char* filename, int lineno);
+    static void addStatAssertInRange(string&& key, double minBound, double maxBound, const char* filename, int lineno);
     static void succeed(const char* filename, int lineno, const char* condition, const stringstream& str);
     static void fail(const char* filename, int lineno, const char* condition, const stringstream& str);
     static stringstream& getLastStream();

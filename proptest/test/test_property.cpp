@@ -392,6 +392,59 @@ TEST(Property, TestCheckWithGen)
         genSmallInt);
 }
 
+TEST(Property, StatAssertGe)
+{
+    // gen::interval(1, 100) produces only positive ints, so a > 0 is always true (ratio 1.0)
+    forAll([](int a) {
+        PROP_STAT_ASSERT_GE(a > 0, 0.5);
+        return true;
+    }, gen::interval(1, 100));
+}
+
+TEST(Property, StatAssertInRange)
+{
+    forAll([](int a) {
+        PROP_STAT_ASSERT_IN_RANGE(a > 0, 0.5, 1.0);
+        return true;
+    }, gen::interval(1, 100));
+}
+
+TEST(Property, StatAssertLe)
+{
+    // gen::interval(-100, -1) produces only negative ints, so a > 0 is always false (ratio 0)
+    forAll([](int a) {
+        PROP_STAT_ASSERT_LE(a > 0, 0.5);
+        return true;
+    }, gen::interval(-100, -1));
+}
+
+TEST(Property, StatAssertGeFails)
+{
+    // gen::interval(-100, -1): a > 0 is always false (ratio 0). GE 0.5 requires ratio >= 0.5.
+    EXPECT_FALSE(forAll([](int a) {
+        PROP_STAT_ASSERT_GE(a > 0, 0.5);
+        return true;
+    }, gen::interval(-100, -1)));
+}
+
+TEST(Property, StatAssertLeFails)
+{
+    // gen::interval(1, 100): a > 0 is always true (ratio 1.0). LE 0.5 requires ratio <= 0.5.
+    EXPECT_FALSE(forAll([](int a) {
+        PROP_STAT_ASSERT_LE(a > 0, 0.5);
+        return true;
+    }, gen::interval(1, 100)));
+}
+
+TEST(Property, StatAssertInRangeFails)
+{
+    // gen::interval(1, 100): ratio 1.0. IN_RANGE(0.5, 0.8) requires ratio in [0.5, 0.8].
+    EXPECT_FALSE(forAll([](int a) {
+        PROP_STAT_ASSERT_IN_RANGE(a > 0, 0.5, 0.8);
+        return true;
+    }, gen::interval(1, 100)));
+}
+
 TEST(Property, TestStringCheckFail)
 {
     // Property designed to fail when a.size() >= 5
