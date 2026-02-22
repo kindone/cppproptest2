@@ -1,10 +1,10 @@
 site_name: 'cppproptest'
 site_description: 'C++ Property Testing'
 site_author: 'kindone'
-site_url: 'https://github.com/pages/kindone/cppproptest'
+site_url: 'https://github.com/pages/kindone/cppproptest2'
 
-repo_name: 'kindone/cppproptest'
-repo_url: 'https://github.com/kindone/cppproptest'
+repo_name: 'kindone/cppproptest2'
+repo_url: 'https://github.com/kindone/cppproptest2'
 edit_uri: 'edit/master/docs'
 
 theme:
