@@ -18,7 +18,7 @@
         <link rel="prev" href="../Generators/">
       
       
-        <link rel="next" href="../Shrinking/">
+        <link rel="next" href="../GeneratorExamples/">
       
       
       <link rel="icon" href="../assets/favicon.ico">
@@ -47,8 +47,8 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CInconsolata:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Inter";--md-code-font:"Inconsolata"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
       
     
     
@@ -320,11 +320,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Property/" class="md-nav__link">
+      <a href="../Walkthrough/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Writing Property-based Tests
+    Step-by-Step Walkthrough
   </span>
   
 
@@ -340,11 +340,77 @@
   
   
     <li class="md-nav__item">
+      <a href="../PropertyAPI/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Property API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Generating Inputs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            Generating Inputs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Generators/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Generating Inputs
+    Generators
   </span>
   
 
@@ -406,6 +472,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#utility-methods-quick-reference" class="md-nav__link">
+    Utility Methods Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-methods-in-standard-generators" class="md-nav__link">
+    Utility Methods in Standard Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Utility Methods in Standard Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filterfilterer" class="md-nav__link">
+    .filter(filterer)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapumapper" class="md-nav__link">
+    .map&lt;U&gt;(mapper)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flatmapugenufromt" class="md-nav__link">
+    .flatMap&lt;U&gt;(genUFromT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pairwithugenufromt-and-tuplewithugenufromt" class="md-nav__link">
+    .pairWith&lt;U&gt;(genUFromT) and .tupleWith&lt;U&gt;(genUFromT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#noshrink" class="md-nav__link">
+    .noShrink()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standalone-combinators-quick-reference" class="md-nav__link">
+    Standalone Combinators Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#basic-generator-combinators" class="md-nav__link">
     Basic Generator Combinators
   </a>
@@ -418,19 +546,86 @@
     Constants
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Constants">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#selecting-from-constants" class="md-nav__link">
-    Selecting from constants
+  <a href="#genjustt" class="md-nav__link">
+    gen::just&lt;T&gt;
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#integers-and-intervals" class="md-nav__link">
-    Integers and intervals
+  <a href="#genlazyt" class="md-nav__link">
+    gen::lazy&lt;T&gt;
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-from-constants" class="md-nav__link">
+    Selecting from Constants
+  </a>
+  
+    <nav class="md-nav" aria-label="Selecting from Constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genelementoft" class="md-nav__link">
+    gen::elementOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integers-and-intervals" class="md-nav__link">
+    Integers and Intervals
+  </a>
+  
+    <nav class="md-nav" aria-label="Integers and Intervals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintervalt" class="md-nav__link">
+    gen::interval&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegerst" class="md-nav__link">
+    gen::integers&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturalt" class="md-nav__link">
+    gen::natural&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennonnegativet" class="md-nav__link">
+    gen::nonNegative&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -438,6 +633,26 @@
   <a href="#pair-and-tuples" class="md-nav__link">
     Pair and Tuples
   </a>
+  
+    <nav class="md-nav" aria-label="Pair and Tuples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genpairt1t2" class="md-nav__link">
+    gen::pair&lt;T1,T2&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplets" class="md-nav__link">
+    gen::tuple&lt;Ts...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -456,43 +671,149 @@
         
           <li class="md-nav__item">
   <a href="#selecting-from-generators" class="md-nav__link">
-    Selecting from generators
+    Selecting from Generators
   </a>
+  
+    <nav class="md-nav" aria-label="Selecting from Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genoneoft" class="md-nav__link">
+    gen::oneOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunionoft" class="md-nav__link">
+    gen::unionOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#constructing-an-object" class="md-nav__link">
-    Constructing an object
+    Constructing an Object
   </a>
+  
+    <nav class="md-nav" aria-label="Constructing an Object">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genconstructt-args" class="md-nav__link">
+    gen::construct&lt;T, Args...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#applying-constraints" class="md-nav__link">
-    Applying constraints
+    Applying Constraints
   </a>
+  
+    <nav class="md-nav" aria-label="Applying Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genfiltert" class="md-nav__link">
+    gen::filter&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensuchthatt" class="md-nav__link">
+    gen::suchThat&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennoshrink" class="md-nav__link">
+    gen::noShrink
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#transforming-or-mapping" class="md-nav__link">
-    Transforming or mapping
+    Transforming or Mapping
   </a>
+  
+    <nav class="md-nav" aria-label="Transforming or Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gentransformtu" class="md-nav__link">
+    gen::transform&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#deriving-or-flat-mapping" class="md-nav__link">
-    Deriving or flat-mapping
+    Deriving or Flat-mapping
   </a>
+  
+    <nav class="md-nav" aria-label="Deriving or Flat-mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genderivetu" class="md-nav__link">
+    gen::derive&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#values-with-dependencies" class="md-nav__link">
-    Values with dependencies
+    Values with Dependencies
   </a>
+  
+    <nav class="md-nav" aria-label="Values with Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gendependencytu" class="md-nav__link">
+    gen::dependency&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genchaintsu" class="md-nav__link">
+    gen::chain&lt;Ts...,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -500,6 +821,26 @@
   <a href="#aggregation-or-accumulation-of-values" class="md-nav__link">
     Aggregation or Accumulation of Values
   </a>
+  
+    <nav class="md-nav" aria-label="Aggregation or Accumulation of Values">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genaccumulatet" class="md-nav__link">
+    gen::accumulate&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genaggregatet" class="md-nav__link">
+    gen::aggregate&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -509,8 +850,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#utility-methods-in-standard-generators" class="md-nav__link">
-    Utility Methods in Standard Generators
+  <a href="#related-topics" class="md-nav__link">
+    Related Topics
   </a>
   
 </li>
@@ -530,11 +871,39 @@
   
   
     <li class="md-nav__item">
+      <a href="../GeneratorExamples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Real World Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Shrinking/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Simplifying Failed Inputs
+    Shrinking - Simplifying Failed Inputs
   </span>
   
 
@@ -554,7 +923,7 @@
         
   
   <span class="md-ellipsis">
-    Printing Facilities
+    Displaying Custom Types
   </span>
   
 
@@ -563,6 +932,52 @@
   
 
               
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Stateful & Concurrency Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Stateful & Concurrency Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -604,6 +1019,104 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AdvancedStatefulTesting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Advanced Scenarios
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tips & Best Practices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_9">
+            <span class="md-nav__icon md-icon"></span>
+            Tips & Best Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TestStrategies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Strategies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -638,6 +1151,68 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#utility-methods-quick-reference" class="md-nav__link">
+    Utility Methods Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-methods-in-standard-generators" class="md-nav__link">
+    Utility Methods in Standard Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Utility Methods in Standard Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#filterfilterer" class="md-nav__link">
+    .filter(filterer)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#mapumapper" class="md-nav__link">
+    .map&lt;U&gt;(mapper)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flatmapugenufromt" class="md-nav__link">
+    .flatMap&lt;U&gt;(genUFromT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pairwithugenufromt-and-tuplewithugenufromt" class="md-nav__link">
+    .pairWith&lt;U&gt;(genUFromT) and .tupleWith&lt;U&gt;(genUFromT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#noshrink" class="md-nav__link">
+    .noShrink()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standalone-combinators-quick-reference" class="md-nav__link">
+    Standalone Combinators Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#basic-generator-combinators" class="md-nav__link">
     Basic Generator Combinators
   </a>
@@ -650,19 +1225,86 @@
     Constants
   </a>
   
-</li>
+    <nav class="md-nav" aria-label="Constants">
+      <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#selecting-from-constants" class="md-nav__link">
-    Selecting from constants
+  <a href="#genjustt" class="md-nav__link">
+    gen::just&lt;T&gt;
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#integers-and-intervals" class="md-nav__link">
-    Integers and intervals
+  <a href="#genlazyt" class="md-nav__link">
+    gen::lazy&lt;T&gt;
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#selecting-from-constants" class="md-nav__link">
+    Selecting from Constants
+  </a>
+  
+    <nav class="md-nav" aria-label="Selecting from Constants">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genelementoft" class="md-nav__link">
+    gen::elementOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integers-and-intervals" class="md-nav__link">
+    Integers and Intervals
+  </a>
+  
+    <nav class="md-nav" aria-label="Integers and Intervals">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintervalt" class="md-nav__link">
+    gen::interval&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegerst" class="md-nav__link">
+    gen::integers&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturalt" class="md-nav__link">
+    gen::natural&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennonnegativet" class="md-nav__link">
+    gen::nonNegative&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -670,6 +1312,26 @@
   <a href="#pair-and-tuples" class="md-nav__link">
     Pair and Tuples
   </a>
+  
+    <nav class="md-nav" aria-label="Pair and Tuples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genpairt1t2" class="md-nav__link">
+    gen::pair&lt;T1,T2&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplets" class="md-nav__link">
+    gen::tuple&lt;Ts...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -688,43 +1350,149 @@
         
           <li class="md-nav__item">
   <a href="#selecting-from-generators" class="md-nav__link">
-    Selecting from generators
+    Selecting from Generators
   </a>
+  
+    <nav class="md-nav" aria-label="Selecting from Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genoneoft" class="md-nav__link">
+    gen::oneOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genunionoft" class="md-nav__link">
+    gen::unionOf&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#constructing-an-object" class="md-nav__link">
-    Constructing an object
+    Constructing an Object
   </a>
+  
+    <nav class="md-nav" aria-label="Constructing an Object">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genconstructt-args" class="md-nav__link">
+    gen::construct&lt;T, Args...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#applying-constraints" class="md-nav__link">
-    Applying constraints
+    Applying Constraints
   </a>
+  
+    <nav class="md-nav" aria-label="Applying Constraints">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genfiltert" class="md-nav__link">
+    gen::filter&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensuchthatt" class="md-nav__link">
+    gen::suchThat&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennoshrink" class="md-nav__link">
+    gen::noShrink
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#transforming-or-mapping" class="md-nav__link">
-    Transforming or mapping
+    Transforming or Mapping
   </a>
+  
+    <nav class="md-nav" aria-label="Transforming or Mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gentransformtu" class="md-nav__link">
+    gen::transform&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#deriving-or-flat-mapping" class="md-nav__link">
-    Deriving or flat-mapping
+    Deriving or Flat-mapping
   </a>
+  
+    <nav class="md-nav" aria-label="Deriving or Flat-mapping">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genderivetu" class="md-nav__link">
+    gen::derive&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#values-with-dependencies" class="md-nav__link">
-    Values with dependencies
+    Values with Dependencies
   </a>
+  
+    <nav class="md-nav" aria-label="Values with Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#gendependencytu" class="md-nav__link">
+    gen::dependency&lt;T,U&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genchaintsu" class="md-nav__link">
+    gen::chain&lt;Ts...,U&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -732,6 +1500,26 @@
   <a href="#aggregation-or-accumulation-of-values" class="md-nav__link">
     Aggregation or Accumulation of Values
   </a>
+  
+    <nav class="md-nav" aria-label="Aggregation or Accumulation of Values">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genaccumulatet" class="md-nav__link">
+    gen::accumulate&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genaggregatet" class="md-nav__link">
+    gen::aggregate&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -741,8 +1529,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#utility-methods-in-standard-generators" class="md-nav__link">
-    Utility Methods in Standard Generators
+  <a href="#related-topics" class="md-nav__link">
+    Related Topics
   </a>
   
 </li>
@@ -766,444 +1554,652 @@
 
 
 <h1 id="generator-combinators">Generator Combinators<a class="headerlink" href="#generator-combinators" title="Permanent link">&para;</a></h1>
-<p>Generator combinators are provided for building a new generator based on existing ones. Many of them come from ideas and best practices of functional programming. They can be chained as they receive existing generator(s) as argument and returns new generator.</p>
-<p>While you can go through this document from top to the bottom, you might be want to find a suitable combinator for your use case using this table:</p>
+<blockquote>
+<p><strong>New to property-based testing?</strong> Start with the <a href="../Walkthrough/">Walkthrough</a> for a step-by-step guide. This page provides a comprehensive reference for all generator combinators in <code>cppproptest</code>.</p>
+</blockquote>
+<p>Generator combinators are functions that build new generators from existing ones. Many combinators are inspired by functional programming patterns and can be chained together to create complex generation logic.</p>
+<p>Generator objects provide <code>.filter()</code>, <code>.map()</code>, <code>.flatMap()</code>, <code>.pairWith()</code>, and <code>.tupleWith()</code> as member methods. They are equivalent to standalone <code>gen::*</code> higher order combinator functions (<code>gen::filter()</code>, <code>gen::transform()</code>, <code>gen::derive()</code>, <code>gen::dependency()</code>, and <code>gen::chain()</code>) under the hood.</p>
+<p>&nbsp;</p>
+<h2 id="utility-methods-quick-reference">Utility Methods Quick Reference<a class="headerlink" href="#utility-methods-quick-reference" title="Permanent link">&para;</a></h2>
+<p>Call these on any generator object (e.g., <code>gen::int32()</code>, <code>gen::string()</code>, <code>Arbi&lt;MyType&gt;()</code>).</p>
 <table>
 <thead>
 <tr>
+<th>Method</th>
 <th>Purpose</th>
-<th>Related Generator/Combinator</th>
-<th>Examples</th>
+<th>Example</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Generate just a constant</td>
-<td><a href="#constants"><code>just&lt;T&gt;</code></a></td>
-<td><code>0</code> or <code>"1337"</code></td>
+<td><a href="#filterfilterer"><code>.filter(predicate)</code></a></td>
+<td>Keep only values satisfying a condition</td>
+<td><code>gen::int32().filter([](int n) { return n % 2 == 0; })</code></td>
 </tr>
 <tr>
-<td>Generate a value within constants</td>
-<td><a href="#selecting-from-values"><code>elementOf&lt;T&gt;</code></a></td>
-<td>a prime number under 100</td>
+<td><a href="#mapumapper"><code>.map&lt;U&gt;(mapper)</code></a></td>
+<td>Transform each value to another type</td>
+<td><code>gen::int32().map&lt;std::string&gt;([](int n) { return std::to_string(n); })</code></td>
 </tr>
 <tr>
-<td>Generate a list of unique values</td>
-<td><a href="../Generators/#built-in-arbitraries"><code>Arbi&lt;set&lt;T&gt;&gt;</code></a></td>
-<td><code>{3,5,1}</code> but not <code>{3,5,5}</code></td>
+<td><a href="#flatmapugenufromt"><code>.flatMap&lt;U&gt;(genUFromT)</code></a></td>
+<td>Derive a new generator based on each value</td>
+<td><code>gen::interval(1,10).flatMap&lt;std::string&gt;([](int n) { auto g = gen::string(); g.setSize(n); return g; })</code></td>
 </tr>
 <tr>
-<td>Generate a value within numeric range of values</td>
-<td><a href="#integers-and-intervals"><code>interval&lt;T&gt;</code>, <code>integers&lt;T&gt;</code></a></td>
-<td>a number within <code>1</code>~<code>9999</code></td>
+<td><a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.pairWith&lt;U&gt;(genUFromT)</code></a></td>
+<td>Generate a pair where second element depends on first</td>
+<td><code>gen::interval(1,100).pairWith&lt;std::vector&lt;int&gt;&gt;([](int n) { auto g = gen::vector&lt;int&gt;(); g.setSize(n); return g; })</code></td>
 </tr>
 <tr>
-<td>Generate a pair or a tuple of different types</td>
-<td><a href="#pair-and-tuples"><code>pairOf&lt;T1,T2&gt;</code>, <code>tupleOf&lt;Ts...&gt;</code></a></td>
-<td>a <code>pair&lt;int, string&gt;</code></td>
+<td><a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.tupleWith&lt;U&gt;(genUFromT)</code></a></td>
+<td>Chain dependent generators into a tuple</td>
+<td><code>gen::boolean().tupleWith&lt;int&gt;([](bool b) { return b ? gen::interval(0,50) : gen::interval(51,100); })</code></td>
 </tr>
 <tr>
-<td>Union multiple generators</td>
-<td><a href="#selecting-from-generators"><code>unionOf&lt;T&gt;</code> (<code>oneOf&lt;T&gt;</code>)</a></td>
-<td><code>20~39</code> or <code>60~79</code> combined</td>
+<td><a href="#noshrink"><code>.noShrink()</code></a></td>
+<td>Same values, but with empty shrink stream (for seeds, UUIDs, timestamps)</td>
+<td><code>gen::uint64().noShrink()</code></td>
+</tr>
+</tbody>
+</table>
+<p>&nbsp;</p>
+<h2 id="utility-methods-in-standard-generators">Utility Methods in Standard Generators<a class="headerlink" href="#utility-methods-in-standard-generators" title="Permanent link">&para;</a></h2>
+<p>Standard generator objects (returned by <code>gen::*</code>, <code>Arbi&lt;T&gt;</code>, <code>gen::construct&lt;T&gt;</code>, etc.) provide member methods that mirror the standalone combinators. These methods allow fluent chaining and are readily discoverable via autocomplete.</p>
+<p><strong>Underlying type:</strong> <code>Generator&lt;T&gt;</code>, representing a function <code>(Random&amp;) -&gt; Shrinkable&lt;T&gt;</code> (aliased as <code>GenFunction&lt;T&gt;</code>).</p>
+<p>&nbsp;</p>
+<h3 id="filterfilterer"><code>.filter(filterer)</code><a class="headerlink" href="#filterfilterer" title="Permanent link">&para;</a></h3>
+<p>Applies a predicate to keep only values that satisfy the condition. Equivalent to <code>gen::filter&lt;T&gt;(*this, filterer)</code>.</p>
+<p><strong>Signature:</strong> <code>Generator&lt;T&gt;::filter(filterer) -&gt; Generator&lt;T&gt;</code> where <code>filterer</code> is <code>function&lt;bool(const T&amp;)&gt;</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate even numbers</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// Generate positive integers</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">positiveGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// Chain with other methods</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">evenPositiveGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="n">filter</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">filter</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#genfiltert">gen::filter</a> (standalone form), <a href="#applying-constraints">Applying Constraints</a></p>
+<p>&nbsp;</p>
+<h3 id="mapumapper"><code>.map&lt;U&gt;(mapper)</code><a class="headerlink" href="#mapumapper" title="Permanent link">&para;</a></h3>
+<p>Transforms each generated value to type <code>U</code>. Equivalent to <code>gen::transform&lt;T,U&gt;(*this, mapper)</code>.</p>
+<p><strong>Signature:</strong> <code>Generator&lt;T&gt;::map&lt;U&gt;(mapper) -&gt; Generator&lt;U&gt;</code> where <code>mapper</code> is <code>function&lt;U(const T&amp;)&gt;</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate strings from integers</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">numStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">().</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="c1">// Generate uppercase strings from lowercase</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">upperGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">().</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">str</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">transform</span><span class="p">(</span><span class="n">upper</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">upper</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">upper</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="o">::</span><span class="n">toupper</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">upper</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// Chain: int -&gt; string -&gt; string length</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">lengthGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#gentransformtu">gen::transform</a> (standalone form), <a href="#transforming-or-mapping">Transforming or Mapping</a></p>
+<p>&nbsp;</p>
+<h3 id="flatmapugenufromt"><code>.flatMap&lt;U&gt;(genUFromT)</code><a class="headerlink" href="#flatmapugenufromt" title="Permanent link">&para;</a></h3>
+<p>Based on each generated value of type <code>T</code>, obtains a <em>new</em> generator for type <code>U</code> and uses it to produce the final value. Equivalent to <code>gen::derive&lt;T,U&gt;(*this, genUFromT)</code>.</p>
+<p><strong>Signature:</strong> <code>Generator&lt;T&gt;::flatMap&lt;U&gt;(genUFromT) -&gt; Generator&lt;U&gt;</code> where <code>genUFromT</code> is <code>function&lt;Generator&lt;U&gt;(const T&amp;)&gt;</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate a string whose max size depends on a generated integer</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">).</span><span class="n">flatMap</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">maxSize</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">sizedStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">();</span>
+<span class="w">    </span><span class="n">sizedStringGen</span><span class="p">.</span><span class="n">setMaxSize</span><span class="p">(</span><span class="n">maxSize</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sizedStringGen</span><span class="p">;</span>
+<span class="p">});</span>
+
+<span class="c1">// Generate different character sets based on a selector</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">charGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">).</span><span class="n">flatMap</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">n</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">);</span>
+<span class="p">});</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#genderivetu">gen::derive</a> (standalone form), <a href="#deriving-or-flat-mapping">Deriving or Flat-mapping</a></p>
+<p>&nbsp;</p>
+<h3 id="pairwithugenufromt-and-tuplewithugenufromt"><code>.pairWith&lt;U&gt;(genUFromT)</code> and <code>.tupleWith&lt;U&gt;(genUFromT)</code><a class="headerlink" href="#pairwithugenufromt-and-tuplewithugenufromt" title="Permanent link">&para;</a></h3>
+<p>Chain the current generator with another where the second depends on the first. <code>.pairWith&lt;U&gt;</code> produces <code>std::pair&lt;T,U&gt;</code>. <code>.tupleWith&lt;U&gt;</code> produces <code>std::tuple&lt;T,U&gt;</code> and can be chained further.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Size and vector of that size</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sizeAndVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">).</span><span class="n">pairWith</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="n">g</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">g</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Chain multiple dependent generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">complexGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">()</span>
+<span class="w">    </span><span class="p">.</span><span class="n">tupleWith</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="o">&amp;</span><span class="w"> </span><span class="n">isEven</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Generator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">isEven</span>
+<span class="w">            </span><span class="o">?</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">})</span>
+<span class="w">            </span><span class="o">:</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">tupleWith</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">pair</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Generator</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">abs</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">pair</span><span class="p">))</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">g</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">();</span>
+<span class="w">        </span><span class="n">g</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">g</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="c1">// Result: Generator&lt;std::tuple&lt;bool, int, std::string&gt;&gt;</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#gendependencytu">gen::dependency</a>, <a href="#genchaintsu">gen::chain</a>, <a href="#values-with-dependencies">Values with Dependencies</a></p>
+<p>&nbsp;</p>
+<h3 id="noshrink"><code>.noShrink()</code><a class="headerlink" href="#noshrink" title="Permanent link">&para;</a></h3>
+<p>Returns a generator that produces the same values but with an empty shrink stream. Use when shrinking (simplification of a counterexample) is meaningless (e.g., seeds, UUIDs, timestamps).</p>
+<p><strong>Signature:</strong> <code>Generator&lt;T&gt;::noShrink() -&gt; Generator&lt;T&gt;</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Seed that should not be shrunk during failure minimization</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">seedGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint64</span><span class="p">().</span><span class="n">noShrink</span><span class="p">();</span>
+
+<span class="c1">// Equivalent free function form</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">seedGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">noShrink</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">uint64</span><span class="p">());</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#gennoshrink">gen::noShrink</a> (standalone form)</p>
+<p>&nbsp;</p>
+<hr />
+<h2 id="standalone-combinators-quick-reference">Standalone Combinators Quick Reference<a class="headerlink" href="#standalone-combinators-quick-reference" title="Permanent link">&para;</a></h2>
+<p>The <code>gen::*</code> functions are the underlying implementations for the utility methods above. Some combinators (e.g., <code>gen::just</code>, <code>gen::elementOf</code>) have no method form and are used directly.</p>
+<table>
+<thead>
+<tr>
+<th>Combinator</th>
+<th>Purpose</th>
+<th>Underlying / Alias for</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genjustt"><code>gen::just&lt;T&gt;</code></a></td>
+<td>Generate a constant value</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Transform into another type or a value</td>
-<td><a href="#transforming-or-mapping"><code>transform&lt;T,U&gt;</code></a></td>
-<td><code>"0"</code> or <code>"1.4"</code> (a number as string).</td>
+<td><a href="#genlazyt"><code>gen::lazy&lt;T&gt;</code></a></td>
+<td>Generate by calling a function</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Generate a struct or a class object</td>
-<td><a href="#constructing-an-object"><code>construct&lt;T,ARGS...&gt;</code></a></td>
-<td>a <code>Rectangle</code> object with width and height</td>
+<td><a href="#genelementoft"><code>gen::elementOf&lt;T&gt;</code></a></td>
+<td>Select from constant values</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Apply constraints in generated values</td>
-<td><a href="#applying-constraints"><code>filter</code> (<code>suchThat</code>)</a></td>
-<td>an even natural number (<code>n % 2 == 0</code>)</td>
+<td><a href="#genintervalt"><code>gen::interval&lt;T&gt;</code></a>, <a href="#gennaturalt"><code>gen::natural&lt;T&gt;</code></a>, etc.</td>
+<td>Numeric ranges</td>
+<td><a href="../Generators/#utility-numeric-range-generators">Generators.md</a></td>
 </tr>
 <tr>
-<td>Generate values with dependencies or relationships</td>
-<td><a href="#values-with-dependencies"><code>dependency</code>, <code>chain</code></a>, <a href="#utility-methods-in-standard-generators"><code>pairWith</code>, <code>tupleWith</code></a></td>
-<td>a rectangle where <code>width == height * 2</code></td>
+<td><a href="#genpairt1t2"><code>gen::pair</code></a>, <a href="#gentuplets"><code>gen::tuple</code></a></td>
+<td>Combine generators</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Generate a value based on previously generated value</td>
-<td><a href="#aggregation-or-accumulation-of-values"><code>aggregate</code>, <code>accumulate</code></a></td>
-<td>a sequence of numbers where each one is between 0.5x and 1.5x of its previous</td>
+<td><a href="#genoneoft"><code>gen::oneOf&lt;T&gt;</code></a></td>
+<td>Select from multiple generators</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="#genconstructt-args"><code>gen::construct&lt;T,Args...&gt;</code></a></td>
+<td>Generate via constructor</td>
+<td>—</td>
+</tr>
+<tr>
+<td><a href="#genfiltert"><code>gen::filter&lt;T&gt;</code></a></td>
+<td>Filter by predicate</td>
+<td><a href="#filterfilterer"><code>.filter()</code></a></td>
+</tr>
+<tr>
+<td><a href="#gennoshrink"><code>gen::noShrink</code></a></td>
+<td>Same values, but with empty shrink stream</td>
+<td><a href="#noshrink"><code>.noShrink()</code></a></td>
+</tr>
+<tr>
+<td><a href="#gentransformtu"><code>gen::transform&lt;T,U&gt;</code></a></td>
+<td>Transform to another type</td>
+<td><a href="#mapumapper"><code>.map&lt;U&gt;()</code></a></td>
+</tr>
+<tr>
+<td><a href="#genderivetu"><code>gen::derive&lt;T,U&gt;</code></a></td>
+<td>Derive generator from value</td>
+<td><a href="#flatmapugenufromt"><code>.flatMap&lt;U&gt;()</code></a></td>
+</tr>
+<tr>
+<td><a href="#gendependencytu"><code>gen::dependency&lt;T,U&gt;</code></a></td>
+<td>Pair with dependent second</td>
+<td><a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.pairWith&lt;U&gt;()</code></a></td>
+</tr>
+<tr>
+<td><a href="#genchaintsu"><code>gen::chain&lt;Ts...,U&gt;</code></a></td>
+<td>Tuple with dependent element</td>
+<td><a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.tupleWith&lt;U&gt;()</code></a></td>
+</tr>
+<tr>
+<td><a href="#genaggregatet"><code>gen::aggregate&lt;T&gt;</code></a>, <a href="#genaccumulatet"><code>gen::accumulate&lt;T&gt;</code></a></td>
+<td>Sequential dependent generation</td>
+<td>—</td>
 </tr>
 </tbody>
 </table>
 <p>&nbsp;</p>
 <h2 id="basic-generator-combinators">Basic Generator Combinators<a class="headerlink" href="#basic-generator-combinators" title="Permanent link">&para;</a></h2>
 <h3 id="constants">Constants<a class="headerlink" href="#constants" title="Permanent link">&para;</a></h3>
+<h4 id="genjustt"><code>gen::just&lt;T&gt;</code><a class="headerlink" href="#genjustt" title="Permanent link">&para;</a></h4>
+<p>Generates a constant value. Useful when you need a fixed value in your property tests.</p>
+<p><strong>Signatures:</strong></p>
 <ul>
-<li><code>just&lt;T&gt;(T*)</code>, <code>just&lt;T&gt;(T)</code>, <code>just&lt;T&gt;(shared_ptr&lt;T&gt;)</code>: always generates a specific value. A shared pointer can be used for non-copyable types.</li>
-<li><code>lazy&lt;T&gt;(function&lt;T()&gt;)</code>: generates a value by calling a function
-    <div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">zeroGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">just</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// template argument is optional if type is deducible</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">oneGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lazy</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
-</code></pre></div></li>
+<li><code>gen::just&lt;T&gt;(T*)</code> - Takes a pointer to a value</li>
+<li><code>gen::just&lt;T&gt;(T)</code> - Takes a value by copy</li>
+<li><code>gen::just&lt;T&gt;(shared_ptr&lt;T&gt;)</code> - Takes a shared pointer (useful for non-copyable types)</li>
 </ul>
-<h3 id="selecting-from-constants">Selecting from constants<a class="headerlink" href="#selecting-from-constants" title="Permanent link">&para;</a></h3>
-<p>You may want to random choose from specific list of values.</p>
-<ul>
-<li>
-<p><code>elementOf&lt;T&gt;(val1, ..., valN)</code>: generates a type <code>T</code> from multiple values for type <code>T</code>, by choosing one of the values randomly
-    <div class="highlight"><pre><span></span><code><span class="c1">// generates a prime number under 50</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">primeGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span><span class="p">,</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span><span class="w"> </span><span class="mi">41</span><span class="p">,</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span><span class="w"> </span><span class="mi">47</span><span class="p">);</span>
-</code></pre></div></p>
-<ul>
-<li><code>elementOf</code> can receive optional probabilitistic weights (<code>0 &lt; weight &lt; 1</code>, sum of weights must not exceed 1.0) for generators. If weight is unspecified for a generator, it is calculated automatically so that remaining probability among unspecified generators is evenly distributed.
-<code>weightedVal(&lt;value&gt;, &lt;weight&gt;)</code> is used to annotate the desired weight.</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1">// generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]</span>
-<span class="c1">//   weight for 10 automatically becomes 1.0 - 0.8 - 0.15 == 0.05</span>
-<span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">weightedVal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">),</span><span class="w"> </span><span class="n">weightedVal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.15</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">zeroGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">just</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span><span class="w"> </span><span class="c1">// template argument is optional if type is deducible</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">just</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">);</span>
 </code></pre></div>
-</li>
-</ul>
-<h3 id="integers-and-intervals">Integers and intervals<a class="headerlink" href="#integers-and-intervals" title="Permanent link">&para;</a></h3>
-<p>Some utility generators for integers are provided</p>
-<ul>
-<li><code>interval&lt;INT_TYPE&gt;(min, max)</code>: generates an integer type(e.g. <code>uint16_t</code>) in the closed interval <code>[min, max]</code>.</li>
-<li><code>integers&lt;INT_TYPE(from, count)</code>: generates an integer type starting from <code>from</code>
-    <div class="highlight"><pre><span></span><code><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">);</span>
-<span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="p">);</span><span class="w"> </span><span class="c1">// template type argument can be ommitted if the input type(`int`) is the same as the output type.</span>
-<span class="n">interval</span><span class="p">(</span><span class="mf">1L</span><span class="p">,</span><span class="w"> </span><span class="mf">48L</span><span class="p">);</span><span class="w"> </span><span class="c1">// template type argument can be ommitted if the input type(`int`) is the same as the output type.</span>
-<span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {0, ..., 10}</span>
-<span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates a char of uppercase alphabet</span>
-<span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {0, ..., 9}</span>
-<span class="n">integers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {1, ..., 10}</span>
-</code></pre></div></li>
-<li><code>natural&lt;INT_TYPE&gt;(max)</code>: generates a positive integer up to <code>max</code>(inclusive)</li>
-<li><code>nonNegative&lt;INT_TYPE&gt;(max)</code>: : generates zero or a positive integer up to <code>max</code>(inclusive)</li>
-</ul>
+<p><strong>See also:</strong> <a href="../Generators/#combinator-functions">Generators.md</a></p>
+<h4 id="genlazyt"><code>gen::lazy&lt;T&gt;</code><a class="headerlink" href="#genlazyt" title="Permanent link">&para;</a></h4>
+<p>Generates a value by calling a function each time. Useful when you need to generate a fresh value on each call (e.g., for mutable objects or time-dependent values).</p>
+<p><strong>Signature:</strong> <code>gen::lazy&lt;T&gt;(function&lt;T()&gt;)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">oneGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">lazy</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">timestampGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">lazy</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">([]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">getCurrentTimestamp</span><span class="p">();</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="../Generators/#combinator-functions">Generators.md</a></p>
+<h3 id="selecting-from-constants">Selecting from Constants<a class="headerlink" href="#selecting-from-constants" title="Permanent link">&para;</a></h3>
+<h4 id="genelementoft"><code>gen::elementOf&lt;T&gt;</code><a class="headerlink" href="#genelementoft" title="Permanent link">&para;</a></h4>
+<p>Randomly selects one value from a provided list of constant values. Useful for choosing from a fixed set of options.</p>
+<p><strong>Signature:</strong> <code>gen::elementOf&lt;T&gt;(val1, ..., valN)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generates a prime number under 50</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">primeGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span><span class="p">,</span><span class="w"> </span><span class="mi">37</span><span class="p">,</span><span class="w"> </span><span class="mi">41</span><span class="p">,</span><span class="w"> </span><span class="mi">43</span><span class="p">,</span><span class="w"> </span><span class="mi">47</span><span class="p">);</span>
+
+<span class="c1">// generates a HTTP method</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">httpMethodGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;GET&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;POST&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;PUT&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;DELETE&quot;</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>Weighted Selection:</strong></p>
+<p><code>gen::elementOf</code> supports probabilistic weights (<code>0 &lt; weight &lt;= 1</code>). The sum of weights should ideally be 1.0 but must not exceed 1.0. If a weight is unspecified for a value, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the values without specified weights.</p>
+<p>Use <code>gen::weightedVal(&lt;value&gt;, &lt;weight&gt;)</code> to annotate the desired weight.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generates 2, 5, or 10 with specified probabilities</span>
+<span class="c1">// weight for 10 automatically becomes 1.0 - 0.8 - 0.15 == 0.05</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">weightedVal</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">weightedVal</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.15</span><span class="p">),</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="../Generators/#combinator-functions">Generators.md</a></p>
+<h3 id="integers-and-intervals">Integers and Intervals<a class="headerlink" href="#integers-and-intervals" title="Permanent link">&para;</a></h3>
+<p>Utility generators for generating integers within specific ranges. These combinators are convenient wrappers around the base integer generators.</p>
+<p><strong>See also:</strong> <a href="../Generators/#utility-numeric-range-generators">Generators.md</a> for more details on numeric range generators.</p>
+<h4 id="genintervalt"><code>gen::interval&lt;T&gt;</code><a class="headerlink" href="#genintervalt" title="Permanent link">&para;</a></h4>
+<p>Generates an integer type in the closed interval <code>[min, max]</code> (both endpoints inclusive).</p>
+<p><strong>Signature:</strong> <code>gen::interval&lt;INT_TYPE&gt;(min, max)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">);</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">48</span><span class="p">);</span><span class="w"> </span><span class="c1">// template type argument can be omitted if input type matches output type</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {0, ..., 10}</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates a char of uppercase alphabet</span>
+</code></pre></div>
+<h4 id="genintegerst"><code>gen::integers&lt;T&gt;</code><a class="headerlink" href="#genintegerst" title="Permanent link">&para;</a></h4>
+<p>Generates an integer type starting from <code>from</code> with a count of values.</p>
+<p><strong>Signature:</strong> <code>gen::integers&lt;INT_TYPE&gt;(from, count)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">gen</span><span class="o">::</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {0, ..., 9}</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">integers</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates an integer in {1, ..., 10}</span>
+</code></pre></div>
+<h4 id="gennaturalt"><code>gen::natural&lt;T&gt;</code><a class="headerlink" href="#gennaturalt" title="Permanent link">&para;</a></h4>
+<p>Generates a positive integer (greater than 0) up to <code>max</code> (inclusive).</p>
+<p><strong>Signature:</strong> <code>gen::natural&lt;INT_TYPE&gt;(max)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">positiveGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">natural</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates integers in {1, ..., 100}</span>
+</code></pre></div>
+<h4 id="gennonnegativet"><code>gen::nonNegative&lt;T&gt;</code><a class="headerlink" href="#gennonnegativet" title="Permanent link">&para;</a></h4>
+<p>Generates zero or a positive integer (&gt;= 0) up to <code>max</code> (inclusive).</p>
+<p><strong>Signature:</strong> <code>gen::nonNegative&lt;INT_TYPE&gt;(max)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">nonNegGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">nonNegative</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">);</span><span class="w"> </span><span class="c1">// generates integers in {0, ..., 100}</span>
+</code></pre></div>
+<p><strong>Note:</strong> <code>gen::interval</code>, <code>gen::inRange</code>, and <code>gen::integers</code> are essentially the same with subtle differences for user preference. See <a href="../Generators/#utility-numeric-range-generators">Generators.md</a> for details.</p>
 <h3 id="pair-and-tuples">Pair and Tuples<a class="headerlink" href="#pair-and-tuples" title="Permanent link">&para;</a></h3>
-<p>Generators for different types can be bound to a pair or a tuple.</p>
-<ul>
-<li>
-<p><code>pairOf&lt;T1, T2&gt;(gen1, gen2)</code> : generates a <code>std::pair&lt;T1,T2&gt;</code> based on result of generators <code>gen1</code> and <code>gen2</code></p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">pairGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pairOf</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+<p>Combine generators of different types to produce <code>std::pair</code> or <code>std::tuple</code> values. These are convenient wrappers that support type inference.</p>
+<p><strong>See also:</strong> <a href="../Generators/#tuple-and-pair-generators">Generators.md</a> for more details on tuple and pair generators.</p>
+<h4 id="genpairt1t2"><code>gen::pair&lt;T1,T2&gt;</code><a class="headerlink" href="#genpairt1t2" title="Permanent link">&para;</a></h4>
+<p>Generates a <code>std::pair&lt;T1,T2&gt;</code> based on the results of two generators.</p>
+<p><strong>Signature:</strong> <code>gen::pair(gen1, gen2)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">pairGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">());</span>
+<span class="c1">// Equivalent to: gen::pair&lt;int32_t, std::string&gt;(gen::int32(), gen::string())</span>
 </code></pre></div>
-</li>
-<li>
-<p><code>tupleOf&lt;T1, ..., TN&gt;(gen1, ..., genN)</code>: generates a <code>std::tuple&lt;T1,...,TN&gt;</code> based on result of generators <code>gen1</code> through <code>genN</code></p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">tupleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tupleOf</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">());</span>
+<h4 id="gentuplets"><code>gen::tuple&lt;Ts...&gt;</code><a class="headerlink" href="#gentuplets" title="Permanent link">&para;</a></h4>
+<p>Generates a <code>std::tuple&lt;T1,...,TN&gt;</code> based on the results of multiple generators.</p>
+<p><strong>Signature:</strong> <code>gen::tuple(gen1, ..., genN)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">tupleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">());</span>
+<span class="c1">// Generates std::tuple&lt;int32_t, std::string, double&gt;</span>
 </code></pre></div>
-</li>
-</ul>
+<p>&nbsp;</p>
 <p>&nbsp;</p>
 <h2 id="advanced-generator-combinators">Advanced Generator Combinators<a class="headerlink" href="#advanced-generator-combinators" title="Permanent link">&para;</a></h2>
-<h3 id="selecting-from-generators">Selecting from generators<a class="headerlink" href="#selecting-from-generators" title="Permanent link">&para;</a></h3>
-<p>You can combine generators to a single generator that can generate each of them with some probability. This can be considered as taking a <em>union</em> of generators.</p>
-<ul>
-<li>
-<p><code>oneOf&lt;T&gt;(gen1, ..., genN)</code>: generates a type <code>T</code> from multiple generators for type <code>T</code>, by choosing one of the generators randomly</p>
+<h3 id="selecting-from-generators">Selecting from Generators<a class="headerlink" href="#selecting-from-generators" title="Permanent link">&para;</a></h3>
+<p>Combine multiple generators of the same type into a single generator that randomly selects one of the underlying generators to produce a value. This can be considered as taking a <em>union</em> of generators.</p>
+<h4 id="genoneoft"><code>gen::oneOf&lt;T&gt;</code><a class="headerlink" href="#genoneoft" title="Permanent link">&para;</a></h4>
+<p>Generates a value of type <code>T</code> by randomly choosing one of the provided generators or values. Each argument can be:
+- a generator (GenLike)
+- <code>weightedGen(generator, weight)</code>
+- a raw value of type <code>T</code> (treated as <code>gen::just(value)</code>)</p>
+<p><strong>Signature:</strong> <code>gen::oneOf&lt;T&gt;(gen1, ..., genN)</code> or <code>gen::oneOf&lt;T&gt;(val1, val2, ...)</code> or mixed</p>
+<p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1">// generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">),</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="mi">100000</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">rangeGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="mi">100000</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">// Raw values (implicit gen::just) can be used</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">fixedGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1339</span><span class="p">,</span><span class="w"> </span><span class="mi">42</span><span class="p">);</span><span class="w"> </span><span class="c1">// equivalent to gen::oneOf&lt;int&gt;(gen::just(1339), gen::just(42))</span>
+
+<span class="c1">// Mixed: raw values and generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mixedGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1339</span><span class="p">,</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mi">42</span><span class="p">);</span>
 </code></pre></div>
-<ul>
-<li><code>oneOf</code> can receive optional probabilistic weights (<code>0 &lt; weight &lt; 1</code>, sum of weights must not exceed 1.0) for generators. If weight is unspecified for a generator, it is calculated automatically so that remaining probability among unspecified generators is evenly distributed.
-<code>weightedGen(&lt;generator&gt;, &lt;weight&gt;)</code> is used to annotate the desired weight.</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="c1">// generates a numeric within ranges [0,10], [100, 1000], [10000, 100000]</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">weightedGen</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mf">0.8</span><span class="p">),</span><span class="w"> </span><span class="n">weightedGen</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">),</span><span class="w"> </span><span class="mf">0.15</span><span class="p">),</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="mi">100000</span><span class="p">)</span><span class="cm">/* weight automatically becomes 1.0 - (0.8 + 0.15) == 0.05 */</span><span class="p">);</span>
+<p><strong>Weighted Selection:</strong></p>
+<p><code>gen::oneOf</code> supports probabilistic weights (<code>0 &lt; weight &lt;= 1</code>). The sum of weights should ideally be 1.0 but must not exceed 1.0. If a weight is unspecified for a generator, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the generators without specified weights.</p>
+<p>Use <code>weightedGen(&lt;generator&gt;, &lt;weight&gt;)</code> to annotate the desired weight.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generates a numeric within ranges with specified probabilities</span>
+<span class="c1">// weight for third generator automatically becomes 1.0 - (0.8 + 0.15) == 0.05</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">weightedRangeGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">weightedGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mf">0.8</span><span class="p">),</span>
+<span class="w">    </span><span class="n">weightedGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">),</span><span class="w"> </span><span class="mf">0.15</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">10000</span><span class="p">,</span><span class="w"> </span><span class="mi">100000</span><span class="p">)</span>
+<span class="p">);</span>
 </code></pre></div>
-</li>
-<li>
-<p><code>unionOf&lt;T&gt;</code> is an alias of <code>oneOf&lt;T&gt;</code></p>
-</li>
-</ul>
-<h3 id="constructing-an-object">Constructing an object<a class="headerlink" href="#constructing-an-object" title="Permanent link">&para;</a></h3>
-<p>You can generate an object of a class or a struct type <code>T</code>, by calling a matching constructor of <code>T</code>.</p>
-<ul>
-<li>
-<p><code>construct&lt;T, ARG1, ..., ARGN&gt;([gen1, ..., genM])</code>: generates an object of type <code>T</code> by calling its constructor that matches the signature <code>(ARG1, ..., ARGN)</code>. Custom generators <code>gen1</code>,..., <code>genM</code> can be supplied for generating arguments. If <code>M &lt; N</code>, then rest of the arguments are generated with <code>Arbi</code>s.</p>
+<h4 id="genunionoft"><code>gen::unionOf&lt;T&gt;</code><a class="headerlink" href="#genunionoft" title="Permanent link">&para;</a></h4>
+<p>Alias of <code>gen::oneOf&lt;T&gt;</code>.</p>
+<p><strong>See also:</strong> <a href="../Generators/#combinator-functions">Generators.md</a></p>
+<h3 id="constructing-an-object">Constructing an Object<a class="headerlink" href="#constructing-an-object" title="Permanent link">&para;</a></h3>
+<p>Generate objects of a class or struct type <code>T</code> by calling a matching constructor.</p>
+<h4 id="genconstructt-args"><code>gen::construct&lt;T, Args...&gt;</code><a class="headerlink" href="#genconstructt-args" title="Permanent link">&para;</a></h4>
+<p>Generates an object of type <code>T</code> by calling its constructor that matches the signature <code>(ARG1, ..., ARGN)</code>. Custom generators can be supplied for generating arguments. If fewer generators are provided than constructor arguments, the remaining arguments are generated using their default <code>Arbi</code> generators.</p>
+<p><strong>Signature:</strong> <code>gen::construct&lt;T, ARG1, ..., ARGN&gt;([gen1, ..., genM])</code></p>
+<p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Coordinate</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="n">Coordinate</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// ...</span>
+<span class="w">        </span><span class="c1">// ...</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="p">};</span>
-<span class="c1">// ...</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">coordinateGen1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Coordinate</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">-20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">));</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">coordinateGen2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Coordinate</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">));</span><span class="w"> </span><span class="c1">// y is generated with Arbi&lt;int&gt;</span>
+
+<span class="c1">// Generate Coordinate with custom generators for both arguments</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">coordinateGen1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Coordinate</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-20</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">// Generate Coordinate with custom generator for x only; y uses default Arbi&lt;int&gt;</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">coordinateGen2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Coordinate</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<span class="p">);</span>
 </code></pre></div>
-</li>
-</ul>
-<h3 id="applying-constraints">Applying constraints<a class="headerlink" href="#applying-constraints" title="Permanent link">&para;</a></h3>
-<p>You can add a filtering condition to a generator to restrict the generated values to have certain constraint.</p>
-<ul>
-<li>
-<p><code>filter&lt;T&gt;(gen, condition_predicate)</code>:  generates a type <code>T</code> that satisfies condition predicate (<code>condition_predicate</code> returns <code>true</code>)</p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary.md</a> for information on default generators</p>
+<h3 id="applying-constraints">Applying Constraints<a class="headerlink" href="#applying-constraints" title="Permanent link">&para;</a></h3>
+<p>Add a filtering condition to a generator to restrict generated values to satisfy a certain constraint.</p>
+<h4 id="genfiltert"><code>gen::filter&lt;T&gt;</code><a class="headerlink" href="#genfiltert" title="Permanent link">&para;</a></h4>
+<p>Underlying implementation of <a href="#filterfilterer"><code>.filter()</code></a>.</p>
+<p>Generates a value of type <code>T</code> using the base generator <code>gen</code>, but only yields values that satisfy the <code>condition_predicate</code> (i.e., for which the predicate returns <code>true</code>). If the predicate returns <code>false</code>, the generation is retried with a new value from <code>gen</code>.</p>
+<p><strong>Signature:</strong> <code>gen::filter&lt;T&gt;(gen, condition_predicate)</code></p>
+<p><strong>Example:</strong></p>
 <div class="highlight"><pre><span></span><code><span class="c1">// generates even numbers</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">});</span>
-</code></pre></div>
-</li>
-<li>
-<p><code>suchThat&lt;T&gt;</code>: an alias of <code>filter</code></p>
-</li>
-</ul>
-<h3 id="transforming-or-mapping">Transforming or mapping<a class="headerlink" href="#transforming-or-mapping" title="Permanent link">&para;</a></h3>
-<p>You can transform an existing generator to create new generator by providing a transformer function. This is equivalent to <em>mapping</em> in functional programming context.</p>
-<ul>
-<li>
-<p><code>transform&lt;T,U&gt;(gen, transformer)</code>: generates type <code>U</code> based on generator for type <code>T</code>, using <code>transformer</code> that transforms a value of type <code>const T</code> to type <code>U</code></p>
-<div class="highlight"><pre><span></span><code><span class="c1">// generates string from integers (e.g. &quot;0&quot;, &quot;1&quot;, ... , &quot;-16384&quot;)</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">numStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">transform</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
+
+<span class="c1">// generates positive integers</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">positiveGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
 <span class="p">});</span>
 </code></pre></div>
-</li>
-</ul>
-<h3 id="deriving-or-flat-mapping">Deriving or flat-mapping<a class="headerlink" href="#deriving-or-flat-mapping" title="Permanent link">&para;</a></h3>
-<p>Another combinator that resembles <code>transform</code> is <code>derive</code>. This is equivalent to <em>flat-mapping</em> or <em>binding</em> in functional programming. Difference to <code>transform&lt;T,U&gt;</code> is that you can have greater control on the resultant generator.</p>
-<ul>
-<li>
-<p><code>derive&lt;T, U&gt;(genT, genUGen)</code>: derives a new generator for type <code>U</code>, based on result of <code>genT</code>, which is a generator for type <code>T</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// generates a string something like &quot;KOPZZFASF&quot;, &quot;ghnpqpojv&quot;, or &quot;49681002378&quot;, ... that consists of only uppercase/lowercase alphabets/numeric characters.</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">derive</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">integers</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
-<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">));</span>
-<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="c1">// num == 2</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">));</span>
-<span class="p">});</span>
+<p><strong>Note:</strong> Using <code>gen::filter</code> with tight constraints can be inefficient, as many values may be discarded. Consider using <a href="#values-with-dependencies">dependency combinators</a> or <a href="../CustomGenerator/">custom generators</a> for better performance.</p>
+<h4 id="gensuchthatt"><code>gen::suchThat&lt;T&gt;</code><a class="headerlink" href="#gensuchthatt" title="Permanent link">&para;</a></h4>
+<p>Alias of <code>gen::filter&lt;T&gt;</code>.</p>
+<h4 id="gennoshrink"><code>gen::noShrink</code><a class="headerlink" href="#gennoshrink" title="Permanent link">&para;</a></h4>
+<p>Wraps a generator to produce the same values but with an empty shrink stream. Use when shrinking is meaningless (e.g., seeds, UUIDs, timestamps). Equivalent to <a href="#noshrink"><code>.noShrink()</code></a>.</p>
+<p><strong>Signature:</strong> <code>gen::noShrink(gen) -&gt; Generator&lt;T&gt;</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Seed that should not be shrunk during failure minimization</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">seedGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">noShrink</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">uint64</span><span class="p">());</span>
+<span class="c1">// Equivalent to: gen::uint64().noShrink()</span>
 </code></pre></div>
-</li>
-</ul>
-<p>Following table compares <code>transform</code> and <code>derive</code>:</p>
+<p><strong>See also:</strong> <a href="../CustomGenerator/">CustomGenerator.md</a> for creating generators with built-in constraints</p>
+<h3 id="transforming-or-mapping">Transforming or Mapping<a class="headerlink" href="#transforming-or-mapping" title="Permanent link">&para;</a></h3>
+<p>Transform an existing generator to create a new generator by providing a transformer function. This is equivalent to <em>mapping</em> in functional programming.</p>
+<h4 id="gentransformtu"><code>gen::transform&lt;T,U&gt;</code><a class="headerlink" href="#gentransformtu" title="Permanent link">&para;</a></h4>
+<p>Underlying implementation of <a href="#mapumapper"><code>.map&lt;U&gt;()</code></a>.</p>
+<p>Generates type <code>U</code> based on a generator for type <code>T</code>, using a transformer function that converts a value of type <code>const T&amp;</code> to type <code>U</code>.</p>
+<p><strong>Signature:</strong> <code>gen::transform&lt;T,U&gt;(gen, transformer)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generates strings from integers (e.g. &quot;0&quot;, &quot;1&quot;, ... , &quot;-16384&quot;)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">numStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">transform</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// generates uppercase strings from lowercase strings</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">upperGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">transform</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">str</span><span class="p">;</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">transform</span><span class="p">(</span><span class="n">upper</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">upper</span><span class="p">.</span><span class="n">end</span><span class="p">(),</span><span class="w"> </span><span class="n">upper</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="o">::</span><span class="n">toupper</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">upper</span><span class="p">;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#deriving-or-flat-mapping">Deriving or Flat-mapping</a> for context-dependent generation, <a href="#utility-methods-in-standard-generators">Utility Methods</a> for fluent chaining with <code>.map&lt;U&gt;()</code></p>
+<h3 id="deriving-or-flat-mapping">Deriving or Flat-mapping<a class="headerlink" href="#deriving-or-flat-mapping" title="Permanent link">&para;</a></h3>
+<p>Another combinator that resembles <code>gen::transform</code> is <code>gen::derive</code>. This is equivalent to <em>flat-mapping</em> or <em>binding</em> in functional programming. The key difference from <code>gen::transform&lt;T, U&gt;</code> is that the function provided to <code>gen::derive</code> returns a <em>new generator</em> (<code>Generator&lt;U&gt;</code>) based on the intermediate value of type <code>T</code>, rather than just transforming the value into a <code>U</code>. This allows for more complex, context-dependent generation logic.</p>
+<h4 id="genderivetu"><code>gen::derive&lt;T,U&gt;</code><a class="headerlink" href="#genderivetu" title="Permanent link">&para;</a></h4>
+<p>Underlying implementation of <a href="#flatmapugenufromt"><code>.flatMap&lt;U&gt;()</code></a>.</p>
+<p>Derives a new generator for type <code>U</code>. It first generates a value of type <code>T</code> using <code>genT</code>. Then, it passes this value to <code>genUGen</code>, which is a function that returns a <code>Generator&lt;U&gt;</code>. This returned generator is then used to produce the final value of type <code>U</code>.</p>
+<p><strong>Signature:</strong> <code>gen::derive&lt;T, U&gt;(genT, genUGen)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generates a string consisting of only uppercase/lowercase alphabets/numeric characters</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">derive</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">));</span>
+<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="c1">// num == 2</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">));</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>Comparison with <code>gen::transform</code>:</strong></p>
 <table>
 <thead>
 <tr>
 <th>Combinator</th>
-<th>transformer signature</th>
-<th>Result type</th>
+<th>Transformer Signature</th>
+<th>Result Type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>transform&lt;T,U&gt;</code></td>
+<td><code>gen::transform&lt;T,U&gt;</code></td>
 <td><code>function&lt;U(T)&gt;</code></td>
 <td><code>Generator&lt;U&gt;</code></td>
 </tr>
 <tr>
-<td><code>derive&lt;T,U&gt;</code></td>
+<td><code>gen::derive&lt;T,U&gt;</code></td>
 <td><code>function&lt;Generator&lt;U&gt;(T)&gt;</code></td>
 <td><code>Generator&lt;U&gt;</code></td>
 </tr>
 </tbody>
 </table>
-<h3 id="values-with-dependencies">Values with dependencies<a class="headerlink" href="#values-with-dependencies" title="Permanent link">&para;</a></h3>
-<p>You may want to include dependency in the generated values. There are two variants that do this. One generates a pair and the other one generates a tuple.</p>
-<ul>
-<li>
-<p><code>dependency&lt;T,U&gt;(genT, genUgen)</code>: generates a <code>std::pair&lt;T,U&gt;</code> with a generator <code>genT</code> for type <code>T</code> and <code>genUgen</code>. <code>genUgen</code> receives a type <code>T</code> and returns a generator for type <code>U</code>. This can effectively create a generator for a pair where second item depends on the first one.</p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">sizeAndVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">vectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
-<span class="w">    </span><span class="n">vectorGen</span><span class="p">.</span><span class="n">maxLen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num</span><span class="p">;</span>
-<span class="w">    </span><span class="c1">// generates a vector with maximum size of num</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">vectorGen</span><span class="p">;</span>
-<span class="p">});</span>
+<p><strong>See also:</strong> <a href="#transforming-or-mapping">Transforming or Mapping</a>, <a href="#utility-methods-in-standard-generators">Utility Methods</a> for fluent chaining with <code>.flatMap&lt;U&gt;()</code></p>
+<h3 id="values-with-dependencies">Values with Dependencies<a class="headerlink" href="#values-with-dependencies" title="Permanent link">&para;</a></h3>
+<p>Generate values where one value depends on another. Two combinators facilitate this: one generates a <code>std::pair</code>, and the other generates a <code>std::tuple</code>.</p>
+<h4 id="gendependencytu"><code>gen::dependency&lt;T,U&gt;</code><a class="headerlink" href="#gendependencytu" title="Permanent link">&para;</a></h4>
+<p>Underlying implementation of <a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.pairWith&lt;U&gt;()</code></a>.</p>
+<p>Generates a <code>std::pair&lt;T,U&gt;</code>. It first uses <code>genT</code> to generate a value of type <code>T</code>. This value is then passed to <code>genUgen</code>, which is a function that returns a <code>Generator&lt;U&gt;</code>. This returned generator produces the second element of the pair. This effectively creates a generator for a pair where the second item depends on the first.</p>
+<p><strong>Signature:</strong> <code>gen::dependency&lt;T,U&gt;(genT, genUgen)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Example 1: Generate a size and a vector of that size</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sizeAndVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">vectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="w">        </span><span class="n">vectorGen</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">vectorGen</span><span class="p">;</span><span class="w"> </span><span class="c1">// generates a vector with exactly &#39;size&#39; elements</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
 
-<span class="k">auto</span><span class="w"> </span><span class="n">nullableIntegers</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="kt">bool</span><span class="o">&amp;</span><span class="w"> </span><span class="n">isNull</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">isNull</span><span class="p">)</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">just</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
-<span class="w">    </span><span class="k">else</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">fromTo</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="c1">// Example 2: Generate a bool and an int depending on the bool</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">nullableIntegerGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">bool</span><span class="o">&amp;</span><span class="w"> </span><span class="n">isNull</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Generator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isNull</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">just</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#utility-methods-in-standard-generators">Utility Methods</a> for fluent chaining with <code>.pairWith&lt;U&gt;()</code></p>
+<h4 id="genchaintsu"><code>gen::chain&lt;Ts...,U&gt;</code><a class="headerlink" href="#genchaintsu" title="Permanent link">&para;</a></h4>
+<p>Underlying implementation of <a href="#pairwithugenufromt-and-tuplewithugenufromt"><code>.tupleWith&lt;U&gt;()</code></a>. Similar to <code>gen::dependency</code>, but operates on tuples. It takes a generator <code>genTuple</code> for <code>std::tuple&lt;Ts...&gt;</code> and a function <code>genUFromTuple</code>. This function receives the generated tuple (<code>const std::tuple&lt;Ts...&gt;&amp;</code>) and returns a <code>Generator&lt;U&gt;</code>. The final result is a generator for <code>std::tuple&lt;Ts..., U&gt;</code>. <code>gen::chain</code> can be repeatedly applied to build tuples with multiple dependent elements.</p>
+<p><strong>Signature:</strong> <code>gen::chain&lt;Ts..., U&gt;(genTuple, genUFromTuple)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">yearMonthGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="w"> </span><span class="mi">2100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">));</span>
+<span class="c1">// number of days in a month depends on the month and whether the year is a leap year</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">yearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">chain</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">yearMonthGen</span><span class="p">,</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">yearMonth</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Generator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">yearMonth</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">yearMonth</span><span class="p">);</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">monthHas31Days</span><span class="p">(</span><span class="n">month</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">monthHas30Days</span><span class="p">(</span><span class="n">month</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// February (month == 2)</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">isLeapYear</span><span class="p">(</span><span class="n">year</span><span class="p">))</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">);</span>
+<span class="w">            </span><span class="k">else</span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="p">);</span><span class="w"> </span><span class="c1">// yearMonthDayGen generates std::tuple&lt;int, int, int&gt; representing (year, month, day)</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="#utility-methods-in-standard-generators">Utility Methods</a> for fluent chaining with <code>.tupleWith&lt;U&gt;()</code></p>
+<p><strong>Alternative Approach with <code>gen::filter</code>:</strong></p>
+<p>You can often achieve similar goals using the <code>gen::filter</code> combinator:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generate any year, month, day combination first</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">anyYearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1900</span><span class="p">,</span><span class="w"> </span><span class="mi">2100</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span><span class="p">)</span>
+<span class="p">);</span>
+<span class="c1">// then apply filter to keep only valid dates</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">validYearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">anyYearMonthDayGen</span><span class="p">.</span><span class="n">filter</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">ymd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">isValidDate</span><span class="p">(</span><span class="n">year</span><span class="p">,</span><span class="w"> </span><span class="n">month</span><span class="p">,</span><span class="w"> </span><span class="n">day</span><span class="p">);</span><span class="w"> </span><span class="c1">// Assuming isValidDate helper function</span>
 <span class="p">});</span>
 </code></pre></div>
-</li>
-<li>
-<p><code>chain&lt;Ts..., U&gt;(genT, genUgen)</code>: similar to <code>dependency</code>, but takes a tuple generator for <code>std::tuple&lt;Ts...&gt;</code> and generates a <code>std::tuple&lt;Ts..., U&gt;</code> instead of a <code>std::pair</code>. <code>chain</code> can be repeatedly applied to itself, and results in a tuple one element larger than the previous one. You can chain multiple dependencies with this form.</p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">yearMonthGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tupleOf</span><span class="p">(</span><span class="n">fromTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">9999</span><span class="p">),</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">));</span>
-<span class="c1">// number of days of month depends on month (28~31 days) and year (whether it&#39;s a leap year)</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">yearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">chain</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">yearMonthGen</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">yearMonth</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">yearMonth</span><span class="p">);</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">yearMonth</span><span class="p">);</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">monthHas31Days</span><span class="p">(</span><span class="n">month</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">31</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">monthHas30Days</span><span class="p">(</span><span class="n">month</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">30</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">    </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// february has 28 or 29 days</span>
-<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">isLeapYear</span><span class="p">(</span><span class="n">year</span><span class="p">))</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">29</span><span class="p">);</span>
-<span class="w">    </span><span class="k">else</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">28</span><span class="p">);</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">});</span><span class="w"> </span><span class="c1">// yearMonthDayGen generates std::tuple&lt;int, int, int&gt; of (year, month, day)</span>
-</code></pre></div>
-</li>
-</ul>
-<p>Actually you can achieve the similar goal using <code>filter</code> combinator:</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// generate any year,month,day combination</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">yearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tupleOf</span><span class="p">(</span><span class="n">fromTo</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">9999</span><span class="p">),</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">12</span><span class="p">),</span><span class="w"> </span><span class="n">fromTo</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">31</span><span class="p">));</span>
-<span class="w">    </span><span class="c1">// apply filter</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">validYearMonthDayGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">yearMonthDayGen</span><span class="p">.</span><span class="n">filter</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">ymd</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">month</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
-<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">2</span><span class="o">&gt;</span><span class="p">(</span><span class="n">ymd</span><span class="p">);</span>
-<span class="w">        </span><span class="k">if</span><span class="p">(</span><span class="n">monthHas31Days</span><span class="p">(</span><span class="n">month</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">31</span><span class="p">)</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="p">(</span><span class="n">monthHas30Days</span><span class="p">(</span><span class="n">month</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">30</span><span class="p">)</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="w">        </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// february has 28 or 29 days</span>
-<span class="w">            </span><span class="k">if</span><span class="p">(</span><span class="n">isLeapYear</span><span class="p">(</span><span class="n">year</span><span class="p">)</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">29</span><span class="p">)</span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
-<span class="w">            </span><span class="k">else</span>
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">day</span><span class="w"> </span><span class="o">&lt;=</span><span class="w"> </span><span class="mi">28</span><span class="p">;</span>
-<span class="w">        </span><span class="p">}</span>
-<span class="w">    </span><span class="p">});</span>
-</code></pre></div>
-<p>However, using <code>filter</code> for generating values with complex dependency may result in many generated values that do not meet the constraint to be discarded and retried. Therefore it's usually not recommended for that purpose if the ratio of discarded values is high.</p>
+<p>However, using <code>gen::filter</code> for generating values with complex dependencies can be inefficient. If the constraints are tight, many generated values might be discarded before a valid one is found, leading to performance issues. In such cases, <code>gen::dependency</code> or <code>gen::chain</code> are often preferable as they construct valid values directly.</p>
 <h3 id="aggregation-or-accumulation-of-values">Aggregation or Accumulation of Values<a class="headerlink" href="#aggregation-or-accumulation-of-values" title="Permanent link">&para;</a></h3>
-<p>You may want to generate values that are related to previously generated values. Such example is generating a sequence of chess moves where knowing previous moves are crucial for generating new valid move.
-This can be achieved with <code>aggregate</code> or <code>accumulate</code>.
-Both of the combinators take base generator in the form of <code>Generator&lt;T&gt;</code> as the first argument and a factory that takes a value of type <code>T</code> and returns <code>Generator&lt;T&gt;</code>, as the second argument.</p>
-<p>While <code>accumulate</code> generates a single value, <code>aggregate</code> generates a vector of values at each generation.</p>
+<p>Generate sequences of values where each value depends on the previously generated one(s). A common example is generating a sequence of chess moves, where knowing the previous move is crucial for generating the next valid move.</p>
+<p>Both combinators take:
+1. A base generator (<code>genT</code>) for the initial value.
+2. A function (<code>genTFromT</code>) that receives the <em>previously generated value</em> of type <code>T</code> and returns a <code>Generator&lt;T&gt;</code> for the <em>next</em> value in the sequence.
+3. Minimum (<code>minSize</code>) and maximum (<code>maxSize</code>) lengths for the generated sequence.</p>
 <table>
 <thead>
 <tr>
 <th>Combinator</th>
-<th>Result type</th>
-<th>Remark</th>
+<th>Result Type</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><code>accumulate&lt;GenT, GenT2GenT&gt;(genT, gen2GenT, minSize, maxSize)</code></td>
+<td><code>gen::accumulate&lt;T&gt;(genT, genTFromT, minSize, maxSize)</code></td>
 <td><code>Generator&lt;T&gt;</code></td>
-<td></td>
+<td>Generates sequence, returns the <strong>last</strong> element</td>
 </tr>
 <tr>
-<td><code>aggregate&lt;GenT, GenT2GenT&gt;(genT, gen2GenT, minSize, maxSize)</code></td>
+<td><code>gen::aggregate&lt;T&gt;(genT, genTFromT, minSize, maxSize)</code></td>
 <td><code>Generator&lt;vector&lt;T&gt;&gt;</code></td>
-<td></td>
+<td>Generates sequence, returns the <strong>entire sequence</strong> vector</td>
 </tr>
 </tbody>
 </table>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// generate initial value</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">baseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span>
-<span class="w">    </span><span class="c1">// generate a value based on previous value</span>
-<span class="w">    </span><span class="n">Generator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">accumulate</span><span class="p">(</span>
-<span class="w">        </span><span class="n">baseGen</span><span class="p">,</span>
-<span class="w">        </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="n">num</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">num</span><span class="o">*</span><span class="mi">2</span><span class="p">);</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="mi">2</span><span class="w"> </span><span class="cm">/* min size */</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="cm">/* max size */</span><span class="p">);</span>
+<h4 id="genaccumulatet"><code>gen::accumulate&lt;T&gt;</code><a class="headerlink" href="#genaccumulatet" title="Permanent link">&para;</a></h4>
+<p>Generates a sequence of values based on the previous one, but ultimately yields only the <em>final</em> value generated in that sequence.</p>
+<p><strong>Signature:</strong> <code>gen::accumulate&lt;T&gt;(genT, genTFromT, minSize, maxSize)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generate initial value</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">baseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span>
+<span class="c1">// generate a value based on previous value, return only the last one</span>
+<span class="n">Generator</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">accumulate</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">baseGen</span><span class="p">,</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Generate next number between 0.5x and 1.5x of the previous</span>
+<span class="w">        </span><span class="c1">// Ensure lower bound is not negative if num is small</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">lower</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span><span class="w"> </span><span class="n">upper</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="mi">2</span><span class="w"> </span><span class="cm">/* min sequence length */</span><span class="p">,</span>
+<span class="w">    </span><span class="mi">10</span><span class="w"> </span><span class="cm">/* max sequence length */</span>
+<span class="p">);</span>
 </code></pre></div>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="c1">// generate initial value</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">baseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span>
-<span class="w">    </span><span class="c1">// generate list of values</span>
-<span class="w">    </span><span class="n">Generator</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">aggregate</span><span class="p">(</span>
-<span class="w">        </span><span class="n">baseGen</span><span class="p">,</span>
-<span class="w">        </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="n">num</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="n">num</span><span class="o">*</span><span class="mi">2</span><span class="p">);</span>
-<span class="w">        </span><span class="p">},</span>
-<span class="w">        </span><span class="mi">2</span><span class="w"> </span><span class="cm">/* min size */</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="w"> </span><span class="cm">/* max size */</span><span class="p">);</span>
+<h4 id="genaggregatet"><code>gen::aggregate&lt;T&gt;</code><a class="headerlink" href="#genaggregatet" title="Permanent link">&para;</a></h4>
+<p>Generates a sequence of values where each depends on the previous, and yields the <em>entire sequence</em> as a <code>std::vector&lt;T&gt;</code>.</p>
+<p><strong>Signature:</strong> <code>gen::aggregate&lt;T&gt;(genT, genTFromT, minSize, maxSize)</code></p>
+<p><strong>Example:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="c1">// generate initial value</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">baseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">1000</span><span class="p">);</span><span class="w"> </span><span class="c1">// Ensure initial value is not too small for division</span>
+<span class="c1">// generate list of values where each depends on the previous</span>
+<span class="n">Generator</span><span class="o">&lt;</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="w"> </span><span class="n">gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">aggregate</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">baseGen</span><span class="p">,</span>
+<span class="w">    </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Generate next number between 0.5x and 1.5x of the previous</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">lower</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">);</span>
+<span class="w">        </span><span class="kt">int</span><span class="w"> </span><span class="n">upper</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="n">lower</span><span class="p">,</span><span class="w"> </span><span class="n">upper</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="mi">2</span><span class="w"> </span><span class="cm">/* min sequence length */</span><span class="p">,</span>
+<span class="w">    </span><span class="mi">10</span><span class="w"> </span><span class="cm">/* max sequence length */</span>
+<span class="p">);</span>
 </code></pre></div>
-<h2 id="utility-methods-in-standard-generators">Utility Methods in Standard Generators<a class="headerlink" href="#utility-methods-in-standard-generators" title="Permanent link">&para;</a></h2>
-<p>Standard generators and combinators (including <code>Arbi&lt;T&gt;</code> and <code>Construct&lt;...&gt;</code>) returns a <code>Generator&lt;T&gt;</code>, which is of the form <code>(Random&amp;) -&gt; Shrinkable&lt;T&gt;</code> (aliased as <code>GenFunction&lt;T&gt;</code>), but has additional combinator methods decorated for ease of use. They in fact have equivalent standalone counterparts. Following table shows this relationship:</p>
-<table>
-<thead>
-<tr>
-<th>Decorated method</th>
-<th>Result type</th>
-<th>Equivalent Standalone combinator</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Generator&lt;T&gt;::filter</code></td>
-<td><code>Generator&lt;T&gt;</code></td>
-<td><code>filter&lt;T&gt;</code></td>
-</tr>
-<tr>
-<td><code>Generator&lt;T&gt;::map&lt;U&gt;</code></td>
-<td><code>Generator&lt;U&gt;</code></td>
-<td><code>transform&lt;T,U&gt;</code></td>
-</tr>
-<tr>
-<td><code>Generator&lt;T&gt;::flatMap&lt;U&gt;</code></td>
-<td><code>Generator&lt;U&gt;</code></td>
-<td><code>derive&lt;T,U&gt;</code></td>
-</tr>
-<tr>
-<td><code>Generator&lt;T&gt;::pairWith&lt;U&gt;</code></td>
-<td><code>Generator&lt;std::pair&lt;T,U&gt;&gt;</code></td>
-<td><code>dependency&lt;T,U&gt;</code></td>
-</tr>
-<tr>
-<td><code>Generator&lt;T&gt;::tupleWith&lt;U&gt;</code></td>
-<td><code>Generator&lt;std::tuple&lt;T,U&gt;&gt;</code></td>
-<td><code>chain&lt;T,U&gt;</code></td>
-</tr>
-<tr>
-<td><code>Generator&lt;std::tuple&lt;Ts...&gt;&gt;::tupleWith&lt;U&gt;</code></td>
-<td><code>Generator&lt;std::tuple&lt;Ts...,U&gt;&gt;</code></td>
-<td><code>chain&lt;std::tuple&lt;Ts...&gt;,U&gt;</code></td>
-</tr>
-</tbody>
-</table>
-<p>These functions and methods can be continuously chained.</p>
+<p><strong>See also:</strong> <a href="../StatefulTesting/">StatefulTesting.md</a> for testing stateful systems with sequences of actions</p>
+<p>&nbsp;</p>
+<hr />
+<h2 id="related-topics">Related Topics<a class="headerlink" href="#related-topics" title="Permanent link">&para;</a></h2>
 <ul>
-<li>
-<p><code>.map&lt;U&gt;(mapper)</code>: effectively calls <code>transform&lt;T,U&gt;(gen, transformer)</code> combinator on itself with type <code>T</code> and generator <code>gen</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// generator for strings of arbitrary number</span>
-<span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="o">&amp;</span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
-<span class="p">});</span>
-<span class="c1">// this is equivalent to:</span>
-<span class="n">transform</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="o">&amp;</span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
-<span class="p">});</span>
-</code></pre></div>
-</li>
-<li>
-<p><code>.filter(filterer)</code>: apply <code>filter</code> combinator on itself.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// two equivalent ways to generate random even numbers</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">});</span>
-
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),[](</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">});</span>
-</code></pre></div>
-</li>
-<li>
-<p><code>.flatMap&lt;U&gt;(genUGen)</code>: based on generated result of the generator object itself, induces a new generator for type <code>U</code>. It's equivalent combinator is <code>derive&lt;T,U&gt;</code>. Difference to <code>.map&lt;U&gt;</code> (or <code>transform&lt;T,U&gt;</code>) is that you can have greater control on the resultant generator.</p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">flatMap</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">genString</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="w">    </span><span class="n">genString</span><span class="p">.</span><span class="n">setMaxSize</span><span class="p">(</span><span class="n">num</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">genString</span><span class="p">;</span>
-<span class="p">});</span>
-</code></pre></div>
-</li>
-<li>
-<p><code>.pairWith&lt;U&gt;(genUGen)</code> or <code>tupleWith&lt;U&gt;(genUGen)</code>: chains itself to create a generator of pair or tuple. Equivalent to <code>dependency</code> or <code>chain</code>, respectively.
-    <div class="highlight"><pre><span></span><code><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">bool</span><span class="o">&gt;</span><span class="p">().</span><span class="n">tupleWith</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">([](</span><span class="kt">bool</span><span class="o">&amp;</span><span class="w"> </span><span class="n">isEven</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">if</span><span class="p">(</span><span class="n">isEven</span><span class="p">)</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="w">    </span><span class="p">});</span>
-<span class="w">    </span><span class="k">else</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span>
-<span class="w">    </span><span class="p">});</span>
-<span class="p">}).</span><span class="n">tupleWith</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">tuple</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">tuple</span><span class="p">);</span>
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="w">    </span><span class="n">stringGen</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">stringGen</span><span class="p">;</span>
-<span class="p">});</span>
-</code></pre></div></p>
-<p>Notice <code>tupleWith</code> can automatically chain a tuple generator of <code>n</code> parameters into a tuple generator of <code>n+1</code> parameters (<code>bool</code> generator -&gt; <code>tuple&lt;bool, int&gt;</code> generator -&gt; <code>tuple&lt;bool, int, string&gt;</code> generator in above example)</p>
-</li>
+<li><a href="../Generators/">Generators.md</a> - Comprehensive reference for all built-in generators</li>
+<li><a href="../Arbitrary/">Arbitrary.md</a> - Default generators for common types</li>
+<li><a href="../CustomGenerator/">CustomGenerator.md</a> - Creating custom generators with built-in constraints</li>
+<li><a href="../Walkthrough/">Walkthrough.md</a> - Step-by-step guide for creating property tests</li>
+<li><a href="../PropertyAPI/">PropertyAPI.md</a> - API reference for property-based tests</li>
+<li><a href="../StatefulTesting/">StatefulTesting.md</a> - Testing stateful systems with sequences of actions</li>
 </ul>
 
   <hr>
@@ -1211,7 +2207,7 @@ Both of the combinators take base generator in the form of <code>Generator&lt;T&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 22, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
       
     
   </small>

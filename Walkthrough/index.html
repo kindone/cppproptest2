@@ -1,0 +1,1930 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="C++ Property Testing">
+      
+      
+        <meta name="author" content="kindone">
+      
+      
+        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/Walkthrough/">
+      
+      
+        <link rel="prev" href="../GettingStarted/">
+      
+      
+        <link rel="next" href="../PropertyAPI/">
+      
+      
+      <link rel="icon" href="../assets/favicon.ico">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+    
+    
+      
+        <title>Step-by-Step Walkthrough - cppproptest</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      
+        
+        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#creating-your-first-property-test-a-step-by-step-walkthrough" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="cppproptest" class="md-header__button md-logo" aria-label="cppproptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            cppproptest
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Step-by-Step Walkthrough
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/cppproptest
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="cppproptest" class="md-nav__button md-logo" aria-label="cppproptest" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    cppproptest
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kindone/cppproptest" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kindone/cppproptest
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href=".." class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    cppproptest
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            cppproptest
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GettingStarted/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Getting Started
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Step-by-Step Walkthrough
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Step-by-Step Walkthrough
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-your-first-property-test" class="md-nav__link">
+    Step 1: Your First Property Test
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Your First Property Test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    Complete Example
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-it-down" class="md-nav__link">
+    Breaking It Down
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-the-test" class="md-nav__link">
+    Running the Test
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-using-assertions-instead-of-return-values" class="md-nav__link">
+    Step 2: Using Assertions Instead of Return Values
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-specifying-custom-generators" class="md-nav__link">
+    Step 3: Specifying Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-testing-a-real-function" class="md-nav__link">
+    Step 4: Testing a Real Function
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-45-understanding-parameter-types" class="md-nav__link">
+    Step 4.5: Understanding Parameter Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-using-the-property-api-for-more-control" class="md-nav__link">
+    Step 5: Using the property() API for More Control
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Using the property() API for More Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-configure-forall-directly-c20" class="md-nav__link">
+    Alternative: Configure forAll() directly (C++20)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-testing-multiple-properties-together" class="md-nav__link">
+    Step 6: Testing Multiple Properties Together
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-testing-with-multiple-parameters" class="md-nav__link">
+    Step 7: Testing with Multiple Parameters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-using-statistics-to-understand-test-coverage" class="md-nav__link">
+    Step 8: Using Statistics to Understand Test Coverage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-integrating-with-google-test-macros" class="md-nav__link">
+    Step 9: Integrating with Google Test Macros
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-handling-failures-and-shrinking" class="md-nav__link">
+    Step 10: Handling Failures and Shrinking
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-testing-complex-data-structures" class="md-nav__link">
+    Step 11: Testing Complex Data Structures
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-creating-custom-generators" class="md-nav__link">
+    Step 12: Creating Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-patterns-and-best-practices" class="md-nav__link">
+    Common Patterns and Best Practices
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Patterns and Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-round-trip-properties" class="md-nav__link">
+    Pattern 1: Round-trip Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-invariant-properties" class="md-nav__link">
+    Pattern 2: Invariant Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-3-idempotency" class="md-nav__link">
+    Pattern 3: Idempotency
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-4-commutativity-and-associativity" class="md-nav__link">
+    Pattern 4: Commutativity and Associativity
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problem-compile-error-about-missing-generator" class="md-nav__link">
+    Problem: Compile error about missing generator
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-test-runs-too-slowly" class="md-nav__link">
+    Problem: Test runs too slowly
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-need-to-test-specific-values" class="md-nav__link">
+    Problem: Need to test specific values
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-property-fails-but-counterexample-is-too-complex" class="md-nav__link">
+    Problem: Property fails but counterexample is too complex
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    Next Steps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PropertyAPI/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Property API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Generating Inputs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            Generating Inputs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Generators/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Combinators/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Generator Combinators
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../GeneratorExamples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Real World Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Shrinking/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Shrinking - Simplifying Failed Inputs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../Printing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Displaying Custom Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Stateful & Concurrency Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Stateful & Concurrency Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../StatefulTesting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Stateful Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../ConcurrencyTesting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Concurrency Testing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AdvancedStatefulTesting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Advanced Scenarios
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tips & Best Practices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_9">
+            <span class="md-nav__icon md-icon"></span>
+            Tips & Best Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TestStrategies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Strategies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    Prerequisites
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-1-your-first-property-test" class="md-nav__link">
+    Step 1: Your First Property Test
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 1: Your First Property Test">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#complete-example" class="md-nav__link">
+    Complete Example
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#breaking-it-down" class="md-nav__link">
+    Breaking It Down
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#running-the-test" class="md-nav__link">
+    Running the Test
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-2-using-assertions-instead-of-return-values" class="md-nav__link">
+    Step 2: Using Assertions Instead of Return Values
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-3-specifying-custom-generators" class="md-nav__link">
+    Step 3: Specifying Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-4-testing-a-real-function" class="md-nav__link">
+    Step 4: Testing a Real Function
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-45-understanding-parameter-types" class="md-nav__link">
+    Step 4.5: Understanding Parameter Types
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-5-using-the-property-api-for-more-control" class="md-nav__link">
+    Step 5: Using the property() API for More Control
+  </a>
+  
+    <nav class="md-nav" aria-label="Step 5: Using the property() API for More Control">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#alternative-configure-forall-directly-c20" class="md-nav__link">
+    Alternative: Configure forAll() directly (C++20)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-6-testing-multiple-properties-together" class="md-nav__link">
+    Step 6: Testing Multiple Properties Together
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-7-testing-with-multiple-parameters" class="md-nav__link">
+    Step 7: Testing with Multiple Parameters
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-8-using-statistics-to-understand-test-coverage" class="md-nav__link">
+    Step 8: Using Statistics to Understand Test Coverage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-9-integrating-with-google-test-macros" class="md-nav__link">
+    Step 9: Integrating with Google Test Macros
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-10-handling-failures-and-shrinking" class="md-nav__link">
+    Step 10: Handling Failures and Shrinking
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-11-testing-complex-data-structures" class="md-nav__link">
+    Step 11: Testing Complex Data Structures
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-12-creating-custom-generators" class="md-nav__link">
+    Step 12: Creating Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-patterns-and-best-practices" class="md-nav__link">
+    Common Patterns and Best Practices
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Patterns and Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-round-trip-properties" class="md-nav__link">
+    Pattern 1: Round-trip Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-invariant-properties" class="md-nav__link">
+    Pattern 2: Invariant Properties
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-3-idempotency" class="md-nav__link">
+    Pattern 3: Idempotency
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-4-commutativity-and-associativity" class="md-nav__link">
+    Pattern 4: Commutativity and Associativity
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    Troubleshooting
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#problem-compile-error-about-missing-generator" class="md-nav__link">
+    Problem: Compile error about missing generator
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-test-runs-too-slowly" class="md-nav__link">
+    Problem: Test runs too slowly
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-need-to-test-specific-values" class="md-nav__link">
+    Problem: Need to test specific values
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#problem-property-fails-but-counterexample-is-too-complex" class="md-nav__link">
+    Problem: Property fails but counterexample is too complex
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    Next Steps
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#summary" class="md-nav__link">
+    Summary
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="creating-your-first-property-test-a-step-by-step-walkthrough">Creating Your First Property Test: A Step-by-Step Walkthrough<a class="headerlink" href="#creating-your-first-property-test-a-step-by-step-walkthrough" title="Permanent link">&para;</a></h1>
+<p>This guide walks you through creating property-based tests with <code>cppproptest</code> from scratch. We'll start with a simple example and gradually build up to more complex scenarios.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>Before starting, make sure you have:</p>
+<ul>
+<li><code>cppproptest</code> integrated into your project (see <a href="../GettingStarted/">Getting Started</a>)</li>
+<li>A test framework (Google Test is used in these examples)</li>
+<li>Basic understanding of C++ lambdas</li>
+</ul>
+<h2 id="step-1-your-first-property-test">Step 1: Your First Property Test<a class="headerlink" href="#step-1-your-first-property-test" title="Permanent link">&para;</a></h2>
+<p>Let's start with the simplest possible property test - testing that addition is commutative.</p>
+<h3 id="complete-example">Complete Example<a class="headerlink" href="#complete-example" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;proptest/proptest.hpp&quot;</span>
+<span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;&lt;gtest/gtest.h&gt;&quot;</span>
+
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="p">;</span>
+
+<span class="n">TEST</span><span class="p">(</span><span class="n">Arithmetic</span><span class="p">,</span><span class="w"> </span><span class="n">AdditionIsCommutative</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">;</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="breaking-it-down">Breaking It Down<a class="headerlink" href="#breaking-it-down" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Includes</strong>:</p>
+<ul>
+<li><code>proptest/proptest.hpp</code> - Main header with all property testing functionality</li>
+<li><code>&lt;gtest/gtest.h&gt;</code> - Google Test integration</li>
+</ul>
+</li>
+<li>
+<p><strong>Using namespace</strong>: <code>using namespace proptest;</code> gives you access to <code>forAll</code>, <code>property</code>, <code>gen</code>, etc.</p>
+</li>
+<li>
+<p><strong>Test structure</strong>: This is a standard Google Test <code>TEST</code> macro. The property test runs inside it.</p>
+</li>
+<li>
+<p><strong>The <code>forAll</code> function</strong>: This is the simplest way to run a property test. It:</p>
+<ul>
+<li>Takes a callable (here, a lambda) that defines your property</li>
+<li>Automatically generates random inputs for each parameter</li>
+<li>Runs the property multiple times (default: 1000 runs)</li>
+<li>Reports failures if the property doesn't hold</li>
+</ul>
+</li>
+</ol>
+<p>See <a href="../PropertyAPI/">Property API Reference</a> for complete details on <code>forAll</code> and other property testing functions.</p>
+<ol>
+<li>
+<p><strong>The property function</strong>:</p>
+<ul>
+<li>Parameters <code>int a, int b</code> - these will be randomly generated</li>
+<li>Return type <code>bool</code> - <code>true</code> means the property holds, <code>false</code> means it fails</li>
+<li>Body: <code>return a + b == b + a;</code> - the property we're testing</li>
+</ul>
+</li>
+</ol>
+<h3 id="running-the-test">Running the Test<a class="headerlink" href="#running-the-test" title="Permanent link">&para;</a></h3>
+<p>When you run this test, <code>cppproptest</code> will:</p>
+<ul>
+<li>Generate 1000 random pairs of integers</li>
+<li>Call your lambda with each pair</li>
+<li>Verify that <code>a + b == b + a</code> for all pairs</li>
+<li>If any pair fails, it will report the failure and attempt to 'shrink' it to a simpler counterexample (see <a href="../Shrinking/">Shrinking</a> for details)</li>
+</ul>
+<h2 id="step-2-using-assertions-instead-of-return-values">Step 2: Using Assertions Instead of Return Values<a class="headerlink" href="#step-2-using-assertions-instead-of-return-values" title="Permanent link">&para;</a></h2>
+<p>Instead of returning <code>bool</code>, you can use assertions. This is often more readable and provides better error messages on failures:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Arithmetic</span><span class="p">,</span><span class="w"> </span><span class="n">AdditionIsCommutativeWithAssertions</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Key differences:</strong></p>
+<ul>
+<li>No return type needed (implicitly <code>void</code>)</li>
+<li><code>PROP_ASSERT_EQ</code> provides detailed failure messages</li>
+<li>Test case stops immediately on first failure (fatal assertion)</li>
+</ul>
+<p><strong>Available assertion macros:</strong></p>
+<ul>
+<li><code>PROP_ASSERT_EQ(A, B)</code> - Assert equality</li>
+<li><code>PROP_ASSERT_NE(A, B)</code> - Assert not equal</li>
+<li><code>PROP_ASSERT_LT(A, B)</code> - Assert less than</li>
+<li><code>PROP_ASSERT_LE(A, B)</code> - Assert less than or equal</li>
+<li><code>PROP_ASSERT_GT(A, B)</code> - Assert greater than</li>
+<li><code>PROP_ASSERT_GE(A, B)</code> - Assert greater than or equal</li>
+<li><code>PROP_EXPECT_*</code> - Non-fatal versions (continues testing on failure)</li>
+</ul>
+<p>See <a href="../PropertyAPI/#using-assertions">Property API Reference - Using Assertions</a> for the complete list of assertion macros.</p>
+<h2 id="step-3-specifying-custom-generators">Step 3: Specifying Custom Generators<a class="headerlink" href="#step-3-specifying-custom-generators" title="Permanent link">&para;</a></h2>
+<p>By default, <code>forAll</code> uses built-in generators (arbitraries) for each parameter type. You can specify custom generators to control the input domain. See <a href="../Generators/">Generators</a> for a complete list of available generators and <a href="../Arbitrary/">Arbitrary</a> for details on default generators.</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Arithmetic</span><span class="p">,</span><span class="w"> </span><span class="n">AdditionWithCustomRange</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>What changed:</strong></p>
+<ul>
+<li>Added two generator arguments: <code>gen::interval(0, 100)</code></li>
+<li><code>a</code> and <code>b</code> will now only be generated in the range [0, 100]</li>
+<li>This is useful for testing specific ranges or avoiding problematic values</li>
+</ul>
+<p><strong>Some common generator functions:</strong></p>
+<ul>
+<li><code>gen::interval(min, max)</code> - Generate integers in a range</li>
+<li><code>gen::elementOf(values...)</code> - Generate one of the specified values</li>
+<li><code>gen::just(value)</code> - Always generate the same value</li>
+<li><code>gen::string()</code> - Generate random strings</li>
+<li><code>gen::vector&lt;T&gt;()</code> - Generate random vectors</li>
+</ul>
+<p><strong>Learn more:</strong></p>
+<ul>
+<li><a href="../Generators/">Generators</a> - Complete guide to all built-in generators</li>
+<li><a href="../Combinators/">Combinators</a> - Combine generators to create new ones (e.g., <code>map</code>, <code>filter</code>, <code>flatMap</code>)</li>
+<li><a href="../GenNamespace/">Gen Namespace</a> - Overview of the <code>gen</code> namespace</li>
+<li><a href="../GeneratorExamples/">Generator Examples</a> - Real-world examples of generator usage</li>
+</ul>
+<h2 id="step-4-testing-a-real-function">Step 4: Testing a Real Function<a class="headerlink" href="#step-4-testing-a-real-function" title="Permanent link">&para;</a></h2>
+<p>Let's test an actual function from your codebase. Suppose you have a function that reverses a string:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Your code (e.g., in a header file)</span>
+<span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="nf">reverseString</span><span class="p">(</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">);</span>
+
+<span class="c1">// Your test</span>
+<span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseTwiceIsIdentity</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversedTwice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="n">reversedTwice</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Property being tested:</strong> Reversing a string twice should yield the original string.</p>
+<p><strong>What's happening:</strong></p>
+<ul>
+<li><code>original</code> is a randomly generated string (see <a href="../Generators/#string-generators">Generators - String Generators</a> for string generation options)</li>
+<li>We reverse it once, then reverse the result</li>
+<li>We verify the final result equals the original</li>
+</ul>
+<h2 id="step-45-understanding-parameter-types">Step 4.5: Understanding Parameter Types<a class="headerlink" href="#step-45-understanding-parameter-types" title="Permanent link">&para;</a></h2>
+<p>In the examples so far, we've used different parameter styles - value types like <code>int a</code> and const references like <code>const std::string&amp; original</code>. Both work identically with <code>cppproptest</code> while the latter is often preferred to avoid copy-construction.</p>
+<p><strong>Value types vs const references:</strong></p>
+<ul>
+<li><strong>Value types</strong>: <code>int</code>, <code>std::string</code>, <code>std::vector&lt;int&gt;</code> - Parameters are passed by value</li>
+<li><strong>Const references</strong>: <code>const int&amp;</code>, <code>const std::string&amp;</code>, <code>const std::vector&lt;int&gt;&amp;</code> - Parameters are passed by const reference</li>
+</ul>
+<p><strong>How generators are selected:</strong>
+The library automatically selects the appropriate generator based on the underlying type, regardless of whether you use value or const reference:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// These are equivalent - both use Arbi&lt;int&gt;</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="kt">int</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+
+<span class="c1">// These are equivalent - both use Arbi&lt;std::string&gt;</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+</code></pre></div>
+<p><strong>When to use which:</strong></p>
+<ul>
+<li><strong>Use value types</strong> for simple, cheap-to-copy types: <code>int</code>, <code>bool</code>, <code>char</code>, <code>double</code>, etc.</li>
+<li><strong>Use const references</strong> for larger or expensive-to-copy types: <code>std::string</code>, <code>std::vector&lt;T&gt;</code>, <code>std::map&lt;K,V&gt;</code>, custom structs, etc.</li>
+</ul>
+<p><strong>Example showing both styles:</strong></p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">ParameterTypes</span><span class="p">,</span><span class="w"> </span><span class="n">ValueAndReference</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Value type for simple int</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_GE</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Const reference for string (avoids copying)</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">str</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">str</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">str</span><span class="p">.</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Mixed: const reference for vector, value for int</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">index</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">())</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">PROP_ASSERT_GE</span><span class="p">(</span><span class="n">vec</span><span class="p">[</span><span class="n">index</span><span class="p">],</span><span class="w"> </span><span class="n">INT_MIN</span><span class="p">);</span>
+<span class="w">        </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>The generator selection happens automatically - you don't need to specify different generators for value vs const reference types.</p>
+<h2 id="step-5-using-the-property-api-for-more-control">Step 5: Using the <code>property()</code> API for More Control<a class="headerlink" href="#step-5-using-the-property-api-for-more-control" title="Permanent link">&para;</a></h2>
+<p>The <code>property()</code> function gives you more control and flexibility:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithPropertyAPI</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversedTwice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="n">reversedTwice</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Configure and run</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">setNumRuns</span><span class="p">(</span><span class="mi">500</span><span class="p">).</span><span class="n">forAll</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>You can also set a maximum duration to limit how long the test runs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithTimeLimit</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversedTwice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="n">reversedTwice</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Run for at most 5 seconds, or until 1000 runs complete (whichever comes first)</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">setMaxDurationMs</span><span class="p">(</span><span class="mi">5000</span><span class="p">).</span><span class="n">setNumRuns</span><span class="p">(</span><span class="mi">1000</span><span class="p">).</span><span class="n">forAll</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>You can also use <code>setConfig()</code> to configure multiple options at once:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithSetConfig</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversedTwice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="n">reversedTwice</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Batch configuration using setConfig()</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">setConfig</span><span class="p">({</span>
+<span class="w">        </span><span class="p">.</span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">        </span><span class="p">.</span><span class="n">numRuns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span><span class="p">,</span>
+<span class="w">        </span><span class="p">.</span><span class="n">maxDurationMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">    </span><span class="p">}).</span><span class="n">forAll</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Capability of <code>property()</code>:</strong></p>
+<p>with a <code>Property</code> object obtained from <code>property()</code> higher order function, you can perform various test combinations with custom configurations, using the same property function.</p>
+<ul>
+<li>Can test with random examples: <code>.forAll()</code><ul>
+<li>Can set number of runs: <code>.setNumRuns(500)</code> - stops after this many runs</li>
+<li>Can set maximum duration: <code>.setMaxDurationMs(5000)</code> - stops after this many milliseconds (whichever limit is reached first)</li>
+<li>Can set random seed: <code>.setSeed(12345)</code> for reproducibility</li>
+<li>Can batch configure: <code>.setConfig({.seed = 123, .numRuns = 500})</code> - configure multiple options at once (C++20)</li>
+</ul>
+</li>
+<li>Can test specific examples: <code>.example("hello")</code></li>
+<li>Can test all possible combinations: <code>.matrix({"a", "ab", "abc"})</code></li>
+</ul>
+<p><strong>Note:</strong> When both <code>setNumRuns()</code> and <code>setMaxDurationMs()</code> are set, the test stops when either limit is reached - whichever comes first.</p>
+<h3 id="alternative-configure-forall-directly-c20">Alternative: Configure <code>forAll()</code> directly (C++20)<a class="headerlink" href="#alternative-configure-forall-directly-c20" title="Permanent link">&para;</a></h3>
+<p>Instead of using <code>property().setX().forAll()</code>, you can configure <code>forAll()</code> directly using designated initializers (C++20). This provides a cleaner syntax for simple configuration cases:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithForAllConfig</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Configure forAll directly with seed and number of runs</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversedTwice</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reversed</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="n">reversedTwice</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="p">.</span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12345</span><span class="p">,</span>
+<span class="w">        </span><span class="p">.</span><span class="n">numRuns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">500</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>You can also combine configuration with explicit generators:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithConfigAndGenerators</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">original</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">reversed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">original</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">original</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">reversed</span><span class="p">.</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="p">.</span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="p">.</span><span class="n">numRuns</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">100</span><span class="p">,</span>
+<span class="w">        </span><span class="p">.</span><span class="n">maxDurationMs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">5000</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">character</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>When to use which:</strong></p>
+<ul>
+<li>Use <code>forAll()</code> with configuration <code>{ ... }</code> for simple, one-off configurations</li>
+<li>Use <code>property().setConfig({ ... }).forAll()</code> or <code>property().setX().setY().forAll()</code> when you need to reuse the property object to chain multiple operations (like <code>.example()</code> or <code>.matrix()</code>)</li>
+</ul>
+<p>See <a href="../PropertyAPI/">Property API Reference</a> for complete details on configuration options and methods.</p>
+<h2 id="step-6-testing-multiple-properties-together">Step 6: Testing Multiple Properties Together<a class="headerlink" href="#step-6-testing-multiple-properties-together" title="Permanent link">&para;</a></h2>
+<p>You can test multiple related properties in one test:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseProperties</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property 1: Reversing twice is identity</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reverseString</span><span class="p">(</span><span class="n">s</span><span class="p">)));</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Property 2: Reversed string has same length</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">s</span><span class="p">).</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Property 3: Reversing empty string yields empty string</span>
+<span class="w">    </span><span class="c1">// For specific examples, use property().example() instead</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>Or better, use the <code>property().example()</code> for specific cases:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseEdgeCases</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">s</span><span class="p">).</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Test specific examples</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="s">&quot;&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="s">&quot;a&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="s">&quot;ab&quot;</span><span class="p">);</span>
+<span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="s">&quot;hello world&quot;</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>See <a href="../PropertyAPI/">Property API Reference</a> for details on <code>.example()</code> and <code>.matrix()</code> methods.</p>
+<h2 id="step-7-testing-with-multiple-parameters">Step 7: Testing with Multiple Parameters<a class="headerlink" href="#step-7-testing-with-multiple-parameters" title="Permanent link">&para;</a></h2>
+<p>Properties can have multiple parameters with different types:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Container</span><span class="p">,</span><span class="w"> </span><span class="n">VectorOperations</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Property: Adding then removing should preserve size (if value wasn&#39;t present)</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">vecCopy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="p">;</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">originalSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vecCopy</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+
+<span class="w">        </span><span class="n">vecCopy</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vecCopy</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="n">originalSize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+
+<span class="w">        </span><span class="c1">// Remove the value we just added</span>
+<span class="w">        </span><span class="n">vecCopy</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vecCopy</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="n">originalSize</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Note:</strong> Each parameter type needs a generator. Built-in types like <code>int</code>, <code>std::string</code>, <code>std::vector&lt;T&gt;</code> have default generators, so you don't need to specify them unless you want custom ranges. Notice we use <code>const std::vector&lt;int&gt;&amp;</code> (const reference) for the vector and <code>int</code> (value) for the integer - both value types and const reference types work identically (see <a href="#step-45-understanding-parameter-types">Step 4.5</a> for details).</p>
+<h2 id="step-8-using-statistics-to-understand-test-coverage">Step 8: Using Statistics to Understand Test Coverage<a class="headerlink" href="#step-8-using-statistics-to-understand-test-coverage" title="Permanent link">&para;</a></h2>
+<p>You can collect statistics about the generated inputs:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Statistics</span><span class="p">,</span><span class="w"> </span><span class="n">CollectingStats</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Track how often value &gt; 0</span>
+<span class="w">        </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Track how often value &lt; 0</span>
+<span class="w">        </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Track how often value == 0</span>
+
+<span class="w">        </span><span class="c1">// Your actual property test</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_GE</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Square is always non-negative</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong><code>PROP_STAT(condition)</code>:</strong></p>
+<ul>
+<li>Tracks how often the condition is true or false</li>
+<li>Doesn't fail the test if false</li>
+<li>Useful for understanding input distribution</li>
+<li>Statistics are printed at the end of the test run</li>
+<li>The key is automatically derived from the condition expression by the precompiler</li>
+</ul>
+<p><strong><code>PROP_TAG(KEY, VALUE)</code>:</strong></p>
+<ul>
+<li>Similar to <code>PROP_STAT</code>, but allows you to specify a custom key name</li>
+<li>Tracks how often the VALUE is true or false with your custom KEY</li>
+<li>Useful when you want more descriptive or grouped statistics</li>
+<li>Doesn't fail the test if VALUE is false</li>
+<li>Statistics are printed at the end of the test run</li>
+</ul>
+<p><strong><code>PROP_CLASSIFY(condition, KEY, VALUE)</code>:</strong></p>
+<ul>
+<li>Conditionally tags test cases only when the condition is true</li>
+<li>Only applies the tag when the condition evaluates to true (unlike <code>PROP_TAG</code> which tracks both true and false)</li>
+<li>Useful for categorizing test cases into groups based on conditions</li>
+<li>Doesn't fail the test if condition is false</li>
+<li>Statistics are printed at the end of the test run</li>
+</ul>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Statistics</span><span class="p">,</span><span class="w"> </span><span class="n">UsingTags</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Key: &quot;value &gt; 0&quot;</span>
+<span class="w">        </span><span class="n">PROP_TAG</span><span class="p">(</span><span class="s">&quot;positive&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span><span class="w">  </span><span class="c1">// Key: &quot;positive&quot; (custom)</span>
+<span class="w">        </span><span class="n">PROP_TAG</span><span class="p">(</span><span class="s">&quot;in range&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&gt;=</span><span class="w"> </span><span class="mi">0</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span><span class="w">  </span><span class="c1">// Key: &quot;in range&quot; (custom)</span>
+
+<span class="w">        </span><span class="n">PROP_ASSERT_GE</span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+
+<span class="n">TEST</span><span class="p">(</span><span class="n">Statistics</span><span class="p">,</span><span class="w"> </span><span class="n">UsingClassify</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Only tag when conditions are true</span>
+<span class="w">        </span><span class="n">PROP_CLASSIFY</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;relationship&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;equal&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_CLASSIFY</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;relationship&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;greater&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_CLASSIFY</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;relationship&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;less&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_CLASSIFY</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;parity&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;even&quot;</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_CLASSIFY</span><span class="p">(</span><span class="n">y</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;parity&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;even&quot;</span><span class="p">);</span>
+
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>See <a href="../TestStrategies/">Test Strategies</a> for more advanced testing techniques and statistics usage.</p>
+<h2 id="step-9-integrating-with-google-test-macros">Step 9: Integrating with Google Test Macros<a class="headerlink" href="#step-9-integrating-with-google-test-macros" title="Permanent link">&para;</a></h2>
+<p>To make property test failures properly reported as failures in your Google Test, use the provided macros:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">StringUtils</span><span class="p">,</span><span class="w"> </span><span class="n">ReverseWithGTestIntegration</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// This will properly fail the Google Test if property fails</span>
+<span class="w">    </span><span class="n">EXPECT_FOR_ALL</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">s</span><span class="p">,</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">reverseString</span><span class="p">(</span><span class="n">s</span><span class="p">)));</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Or use ASSERT_FOR_ALL for fatal failures</span>
+<span class="w">    </span><span class="n">ASSERT_FOR_ALL</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="n">reverseString</span><span class="p">(</span><span class="n">s</span><span class="p">).</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// For Cartesian product tests, use EXPECT_MATRIX or ASSERT_MATRIX</span>
+<span class="w">    </span><span class="n">EXPECT_MATRIX</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">a</span><span class="p">.</span><span class="n">length</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">.</span><span class="n">length</span><span class="p">(),</span><span class="w"> </span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">).</span><span class="n">length</span><span class="p">());</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;a&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;ab&quot;</span><span class="p">},</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;xy&quot;</span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Difference:</strong></p>
+<ul>
+<li><code>forAll()</code> and <code>matrix()</code> return <code>bool</code> - you need to wrap them: <code>EXPECT_TRUE(forAll(...))</code> or <code>EXPECT_TRUE(matrix(...))</code></li>
+<li><code>EXPECT_FOR_ALL(...)</code> - Shorthand for <code>EXPECT_TRUE(forAll(...))</code></li>
+<li><code>ASSERT_FOR_ALL(...)</code> - Shorthand for <code>ASSERT_TRUE(forAll(...))</code></li>
+<li><code>EXPECT_MATRIX(callable, ...lists)</code> - Shorthand for <code>EXPECT_TRUE(matrix(callable, ...lists))</code> (Cartesian product)</li>
+<li><code>ASSERT_MATRIX(callable, ...lists)</code> - Shorthand for <code>ASSERT_TRUE(matrix(callable, ...lists))</code> (Cartesian product)</li>
+</ul>
+<p>See <a href="../PropertyAPI/#google-test-integration-macros">Property API Reference - Google Test Integration Macros</a> for more details.</p>
+<h2 id="step-10-handling-failures-and-shrinking">Step 10: Handling Failures and Shrinking<a class="headerlink" href="#step-10-handling-failures-and-shrinking" title="Permanent link">&para;</a></h2>
+<p>When a property fails, <code>cppproptest</code> automatically tries to shrink the counterexample to a simpler one:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Example</span><span class="p">,</span><span class="w"> </span><span class="n">FailingProperty</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// This will fail for non-empty vectors</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>What happens on failure:</strong></p>
+<ol>
+<li>Test finds a counterexample (e.g., <code>vec = [42, 17, 99]</code>)</li>
+<li>Shrinking process tries to simplify it</li>
+<li>May find a simpler counterexample (e.g., <code>vec = [0]</code> or <code>vec = [1]</code>)</li>
+<li>Reports the minimal counterexample</li>
+</ol>
+<p>See <a href="../Shrinking/">Shrinking</a> for a detailed explanation of how shrinking works and how to customize it.</p>
+<p><strong>Reproducing failures:</strong>
+When a test fails, <code>cppproptest</code> reports a seed. You can reproduce it:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Using property() API</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="n">prop</span><span class="p">.</span><span class="n">setSeed</span><span class="p">(</span><span class="mi">12345678</span><span class="p">).</span><span class="n">forAll</span><span class="p">();</span><span class="w">  </span><span class="c1">// Use the seed from failure</span>
+
+<span class="c1">// Or using forAll() with configuration (C++20)</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="p">.</span><span class="n">seed</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">12345678</span>
+<span class="p">});</span>
+</code></pre></div>
+<p>Or set it via environment variable:
+<div class="highlight"><pre><span></span><code><span class="nv">PROPTEST_SEED</span><span class="o">=</span><span class="m">12345678</span><span class="w"> </span>./your_test
+</code></pre></div></p>
+<h2 id="step-11-testing-complex-data-structures">Step 11: Testing Complex Data Structures<a class="headerlink" href="#step-11-testing-complex-data-structures" title="Permanent link">&para;</a></h2>
+<p>You can test properties involving complex data structures:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">DataStructures</span><span class="p">,</span><span class="w"> </span><span class="n">MapProperties</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">m</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">mCopy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">m</span><span class="p">;</span>
+<span class="w">        </span><span class="n">mCopy</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">value</span><span class="p">;</span>
+
+<span class="w">        </span><span class="c1">// Property: After insertion, map should contain the key</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_NE</span><span class="p">(</span><span class="n">mCopy</span><span class="p">.</span><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">),</span><span class="w"> </span><span class="n">mCopy</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">mCopy</span><span class="p">[</span><span class="n">key</span><span class="p">],</span><span class="w"> </span><span class="n">value</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<p><strong>Some built-in generators for containers:</strong></p>
+<ul>
+<li><code>gen::vector&lt;T&gt;()</code> - Vectors</li>
+<li><code>gen::map&lt;K, V&gt;()</code> - Maps</li>
+<li><code>gen::set&lt;T&gt;()</code> - Sets</li>
+<li><code>gen::pair&lt;A, B&gt;()</code> - Pairs</li>
+<li><code>gen::tuple&lt;...&gt;()</code> - Tuples</li>
+</ul>
+<p>See <a href="../Generators/#container-generators">Generators - Container Generators</a> for complete details and configuration options.</p>
+<h2 id="step-12-creating-custom-generators">Step 12: Creating Custom Generators<a class="headerlink" href="#step-12-creating-custom-generators" title="Permanent link">&para;</a></h2>
+<p>For custom types, you may want to create custom generators for multiple uses:</p>
+<div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Point</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="p">};</span>
+
+<span class="c1">// Define a generator for Point using combinators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pointGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">))</span>
+<span class="w">    </span><span class="p">.</span><span class="n">map</span><span class="o">&lt;</span><span class="n">Point</span><span class="o">&gt;</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Point</span><span class="p">{</span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">0</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">get</span><span class="o">&lt;</span><span class="mi">1</span><span class="o">&gt;</span><span class="p">(</span><span class="n">t</span><span class="p">)};</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="n">TEST</span><span class="p">(</span><span class="n">Geometry</span><span class="p">,</span><span class="w"> </span><span class="n">PointProperties</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">Point</span><span class="o">&amp;</span><span class="w"> </span><span class="n">p</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="c1">// Property: Distance from origin is non-negative</span>
+<span class="w">        </span><span class="kt">double</span><span class="w"> </span><span class="n">dist</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">sqrt</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">y</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_GE</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+<span class="w">    </span><span class="p">},</span><span class="w"> </span><span class="n">pointGen</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>See <a href="../CustomGenerator/">Custom Generator</a> for detailed instructions on creating custom generators, and <a href="../Combinators/">Combinators</a> for using generator combinators like <code>map</code>, <code>filter</code>, and <code>flatMap</code>.</p>
+<p>See <a href="../Arbitrary/">Arbitraries</a> for more on arbitraries(default generators) and how to make a new arbitrary out of a custom generator.</p>
+<h2 id="common-patterns-and-best-practices">Common Patterns and Best Practices<a class="headerlink" href="#common-patterns-and-best-practices" title="Permanent link">&para;</a></h2>
+<p>For more testing strategies and patterns, see <a href="../TestStrategies/">Test Strategies</a>.</p>
+<h3 id="pattern-1-round-trip-properties">Pattern 1: Round-trip Properties<a class="headerlink" href="#pattern-1-round-trip-properties" title="Permanent link">&para;</a></h3>
+<p>Test that encoding/decoding, serialization/deserialization, etc. preserve data:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Codec</span><span class="p">,</span><span class="w"> </span><span class="n">EncodeDecodeRoundTrip</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="k">const</span><span class="w"> </span><span class="n">MyData</span><span class="o">&amp;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">encoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">encode</span><span class="p">(</span><span class="n">data</span><span class="p">);</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">decoded</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">decode</span><span class="p">(</span><span class="n">encoded</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">data</span><span class="p">,</span><span class="w"> </span><span class="n">decoded</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="pattern-2-invariant-properties">Pattern 2: Invariant Properties<a class="headerlink" href="#pattern-2-invariant-properties" title="Permanent link">&para;</a></h3>
+<p>Test that operations preserve invariants:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Container</span><span class="p">,</span><span class="w"> </span><span class="n">SizeInvariant</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="kt">size_t</span><span class="w"> </span><span class="n">originalSize</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="w">        </span><span class="n">vec</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="n">value</span><span class="p">);</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">(),</span><span class="w"> </span><span class="n">originalSize</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="pattern-3-idempotency">Pattern 3: Idempotency<a class="headerlink" href="#pattern-3-idempotency" title="Permanent link">&para;</a></h3>
+<p>Test that applying an operation twice is the same as once:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Operations</span><span class="p">,</span><span class="w"> </span><span class="n">Idempotent</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="n">MyObject</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">auto</span><span class="w"> </span><span class="n">original</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">obj</span><span class="p">;</span>
+<span class="w">        </span><span class="n">normalize</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span>
+<span class="w">        </span><span class="n">normalize</span><span class="p">(</span><span class="n">obj</span><span class="p">);</span><span class="w">  </span><span class="c1">// Apply twice</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">original</span><span class="p">);</span><span class="w">  </span><span class="c1">// Should be same as after first normalize</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h3 id="pattern-4-commutativity-and-associativity">Pattern 4: Commutativity and Associativity<a class="headerlink" href="#pattern-4-commutativity-and-associativity" title="Permanent link">&para;</a></h3>
+<p>Test mathematical properties:</p>
+<div class="highlight"><pre><span></span><code><span class="n">TEST</span><span class="p">(</span><span class="n">Math</span><span class="p">,</span><span class="w"> </span><span class="n">AdditionProperties</span><span class="p">)</span>
+<span class="p">{</span>
+<span class="w">    </span><span class="c1">// Commutativity</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">(</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">a</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// Associativity</span>
+<span class="w">    </span><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">a</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">b</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT_EQ</span><span class="p">((</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">,</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="p">(</span><span class="n">b</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">c</span><span class="p">));</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="p">}</span>
+</code></pre></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="problem-compile-error-about-missing-generator">Problem: Compile error about missing generator<a class="headerlink" href="#problem-compile-error-about-missing-generator" title="Permanent link">&para;</a></h3>
+<p><strong>Solution:</strong> Specify a generator explicitly or create a custom one:
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="n">MyCustomType</span><span class="w"> </span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="n">myCustomTypeGenerator</span><span class="p">);</span>
+</code></pre></div>
+See <a href="../CustomGenerator/">Custom Generator</a> for creating generators for custom types.</p>
+<h3 id="problem-test-runs-too-slowly">Problem: Test runs too slowly<a class="headerlink" href="#problem-test-runs-too-slowly" title="Permanent link">&para;</a></h3>
+<p><strong>Solution:</strong> Reduce number of runs, set a maximum duration, or limit input size:
+<div class="highlight"><pre><span></span><code><span class="n">property</span><span class="p">([](...)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">setNumRuns</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span><span class="w">  </span><span class="c1">// Reduce from default 1000</span>
+<span class="w">    </span><span class="p">.</span><span class="n">forAll</span><span class="p">();</span>
+
+<span class="c1">// Or limit by time instead of number of runs</span>
+<span class="n">property</span><span class="p">([](...)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">setMaxDurationMs</span><span class="p">(</span><span class="mi">5000</span><span class="p">)</span><span class="w">  </span><span class="c1">// Stop after 5 seconds</span>
+<span class="w">    </span><span class="p">.</span><span class="n">forAll</span><span class="p">();</span>
+
+<span class="c1">// Or use both - stops when either limit is reached</span>
+<span class="n">property</span><span class="p">([](...)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">})</span>
+<span class="w">    </span><span class="p">.</span><span class="n">setNumRuns</span><span class="p">(</span><span class="mi">1000</span><span class="p">)</span>
+<span class="w">    </span><span class="p">.</span><span class="n">setMaxDurationMs</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span><span class="w">  </span><span class="c1">// Stop after 10 seconds or 1000 runs, whichever comes first</span>
+<span class="w">    </span><span class="p">.</span><span class="n">forAll</span><span class="p">();</span>
+</code></pre></div></p>
+<h3 id="problem-need-to-test-specific-values">Problem: Need to test specific values<a class="headerlink" href="#problem-need-to-test-specific-values" title="Permanent link">&para;</a></h3>
+<p><strong>Solution:</strong> Use <code>.example()</code> or <code>.matrix()</code>:
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">});</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">example</span><span class="p">(</span><span class="n">INT_MAX</span><span class="p">);</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">matrix</span><span class="p">({</span><span class="mi">-1</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">1</span><span class="p">});</span>
+</code></pre></div></p>
+<h3 id="problem-property-fails-but-counterexample-is-too-complex">Problem: Property fails but counterexample is too complex<a class="headerlink" href="#problem-property-fails-but-counterexample-is-too-complex" title="Permanent link">&para;</a></h3>
+<p><strong>Solution:</strong> Shrinking should help automatically, but you can also constrain generators:
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">));</span><span class="w">  </span><span class="c1">// Smaller range</span>
+</code></pre></div>
+See <a href="../Shrinking/">Shrinking</a> for details on how shrinking works and how to customize it.</p>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Now that you understand the basics, explore:</p>
+<ul>
+<li><a href="../Generators/">Generators</a> - Learn about all available generators</li>
+<li><a href="../Combinators/">Combinators</a> - Combine generators to create new ones</li>
+<li><a href="../Shrinking/">Shrinking</a> - Understand how counterexamples are simplified</li>
+<li><a href="../StatefulTesting/">Stateful Testing</a> - Test state machines and sequences</li>
+<li><a href="../PropertyAPI/">Property API Reference</a> - Complete API documentation</li>
+</ul>
+<h2 id="summary">Summary<a class="headerlink" href="#summary" title="Permanent link">&para;</a></h2>
+<p>Creating a property test involves:</p>
+<ol>
+<li><strong>Define the property</strong> - Write a function/lambda that expresses what should always be true</li>
+<li><strong>Choose generators</strong> - Specify how to generate inputs (or use defaults)</li>
+<li><strong>Run the test</strong> - Use <code>forAll()</code> or <code>property().forAll()</code></li>
+<li><strong>Handle failures</strong> - Use reported seeds to reproduce and fix issues</li>
+</ol>
+<p>The key insight: Instead of testing specific examples, you're testing universal properties that should hold for all (or most) inputs in a domain.</p>
+
+  <hr>
+<div class="md-source-file">
+  <small>
+    
+      Last update:
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 21, 2026</span>
+      
+    
+  </small>
+</div>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      
+    
+  </body>
+</html>

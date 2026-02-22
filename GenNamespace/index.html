@@ -12,13 +12,9 @@
         <meta name="author" content="kindone">
       
       
-        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/Printing/">
+        <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/GenNamespace/">
       
       
-        <link rel="prev" href="../Shrinking/">
-      
-      
-        <link rel="next" href="../StatefulTesting/">
       
       
       <link rel="icon" href="../assets/favicon.ico">
@@ -26,7 +22,7 @@
     
     
       
-        <title>Displaying Custom Types - cppproptest</title>
+        <title>The gen Namespace - cppproptest</title>
       
     
     
@@ -77,7 +73,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#printing-facilities-for-displaying-custom-types" class="md-skip">
+        <a href="#the-gen-namespace" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +109,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Displaying Custom Types
+              The gen Namespace
             
           </span>
         </div>
@@ -228,8 +224,6 @@
       
   
   
-    
-  
   
     
     
@@ -258,12 +252,14 @@
     
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1" >
         
           
           
@@ -285,7 +281,7 @@
             
           </div>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             cppproptest
@@ -492,29 +488,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Displaying Custom Types
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../Printing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -523,47 +499,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#defining-a-printer-for-a-type" class="md-nav__link">
-    Defining a printer for a type
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#defining-a-printer-for-a-templated-type" class="md-nav__link">
-    Defining a printer for a templated type
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#utilizing-other-printers" class="md-nav__link">
-    Utilizing other printers
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -787,23 +722,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#defining-a-printer-for-a-type" class="md-nav__link">
-    Defining a printer for a type
+  <a href="#generators" class="md-nav__link">
+    Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#combinators" class="md-nav__link">
+    Combinators
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#defining-a-printer-for-a-templated-type" class="md-nav__link">
-    Defining a printer for a templated type
+        
+          <li class="md-nav__item">
+  <a href="#dependencies-and-complex-generators" class="md-nav__link">
+    Dependencies and Complex Generators
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#utilizing-other-printers" class="md-nav__link">
-    Utilizing other printers
+        
+          <li class="md-nav__item">
+  <a href="#property-tests" class="md-nav__link">
+    Property Tests
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -825,81 +773,67 @@
   
 
 
-<h1 id="printing-facilities-for-displaying-custom-types">Printing Facilities for Displaying Custom Types<a class="headerlink" href="#printing-facilities-for-displaying-custom-types" title="Permanent link">&para;</a></h1>
-<p>It's sometimes recommended to have a printer defined for a type. It would ensure values of a type to be correctly printed. <code>cppproptest</code> fully defines printers for built-in types.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// a std::tuple&lt;std::tuple&lt;int, std::tuple&lt;int&gt;&gt;&gt; type is printed:</span>
-<span class="n">shrinking</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">simpler</span><span class="w"> </span><span class="n">failing</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="mi">-1002144</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="p">}</span>
-</code></pre></div>
-<p>For a new type you'd like to use with <code>cppproptest</code>, you can define a printer for that type. As you can see in above example, complex recursive structures such as tuple of tuples can be printed if you have correctly defined it. If there is no printer is defined for a type yet, '???' would be printed instead, as there is no correct way known to <code>cppproptest</code> how to printing that type .</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Car type that does not yet have a printing method, so it&#39;s printed as &#39;???&#39;:</span>
-<span class="n">shrinking</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">simpler</span><span class="w"> </span><span class="n">failing</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="o">???</span>
-</code></pre></div>
-<h3 id="defining-a-printer-for-a-type">Defining a printer for a type<a class="headerlink" href="#defining-a-printer-for-a-type" title="Permanent link">&para;</a></h3>
-<p>Defining a printer for type <code>T</code> can be achieved by defining the struct specialization <code>proptest::util::ShowDefault&lt;T&gt;</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="w"> </span><span class="p">{</span>
-<span class="k">namespace</span><span class="w"> </span><span class="nn">util</span><span class="w"> </span><span class="p">{</span>
+<h1 id="the-gen-namespace">The <code>gen</code> Namespace<a class="headerlink" href="#the-gen-namespace" title="Permanent link">&para;</a></h1>
+<p>The <code>gen</code> namespace provides convenient collection for all built-in generators and combinators in <code>cppproptest</code>. The <code>gen</code> namespace is designed to provide a unified, user-friendly interface for accessing generators and combinators. Instead of writing verbose built-in arbitrary names like <code>Arbi&lt;int&gt;()</code>, you can use more intuitive names like <code>gen::int32()</code> or <code>gen::arbitrary&lt;int&gt;</code>.</p>
+<p><strong>Note:</strong> All functions in the <code>gen</code> namespace are aliases to the original <code>proptest</code> namespace functions. The original names remain available for backward compatibility.</p>
+<h2 id="generators">Generators<a class="headerlink" href="#generators" title="Permanent link">&para;</a></h2>
+<p>To use the <code>gen</code> namespace, simply include the main header and use the <code>gen::</code> prefix:</p>
+<div class="highlight"><pre><span></span><code><span class="cp">#include</span><span class="w"> </span><span class="cpf">&quot;proptest/proptest.hpp&quot;</span>
 
-<span class="c1">// printer for Car class</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ShowDefault</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span>
-<span class="p">{</span>
-<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">os</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">Car</span><span class="o">&amp;</span><span class="w"> </span><span class="n">car</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">os</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;Car(&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">car</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;, &quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">car</span><span class="p">.</span><span class="n">year</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;)&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">os</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">};</span>
+<span class="k">using</span><span class="w"> </span><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="p">;</span>
 
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace util</span>
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace proptest</span>
+<span class="c1">// Use gen namespace for cleaner syntax</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
 </code></pre></div>
-<p>This will be called whenever <code>T</code> is being printed by <code>cppproptest</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// Car type now has a printer defined</span>
-<span class="n">shrinking</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">simpler</span><span class="w"> </span><span class="n">failing</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">Car</span><span class="p">(</span><span class="n">Ferari</span><span class="p">,</span><span class="w"> </span><span class="mi">2020</span><span class="p">)</span>
-</code></pre></div>
-<h3 id="defining-a-printer-for-a-templated-type">Defining a printer for a templated type<a class="headerlink" href="#defining-a-printer-for-a-templated-type" title="Permanent link">&para;</a></h3>
-<p>You can also define a printer for a templated type as following:</p>
-<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="w"> </span><span class="p">{</span>
-<span class="k">namespace</span><span class="w"> </span><span class="nn">util</span><span class="w"> </span><span class="p">{</span>
+<h3 id="combinators">Combinators<a class="headerlink" href="#combinators" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Constants and choices</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">constantGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">just</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">choiceGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">,</span><span class="w"> </span><span class="mi">17</span><span class="p">,</span><span class="w"> </span><span class="mi">19</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">unionGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">110</span><span class="p">)</span>
+<span class="p">);</span>
 
-<span class="c1">// printer for CarLike&lt;T&gt;</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ShowDefault</span><span class="o">&lt;</span><span class="n">CarLike</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
-<span class="p">{</span>
-<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">os</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CarLike</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="n">os</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;CarLike()&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">os</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">};</span>
+<span class="c1">// Object construction</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Point</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">Point</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">y</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span><span class="w"> </span><span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pointGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-10</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">)</span>
+<span class="p">);</span>
 
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace util</span>
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace proptest</span>
+<span class="c1">// Filtering and transformation</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">positiveGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">suchThat</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">});</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringFromIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">transform</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">to_string</span><span class="p">(</span><span class="n">n</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
 </code></pre></div>
-<p>This will print a <code>CarLike</code> as:</p>
-<div class="highlight"><pre><span></span><code><span class="n">shrinking</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">simpler</span><span class="w"> </span><span class="n">failing</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">CarLike</span><span class="p">()</span>
-</code></pre></div>
-<h3 id="utilizing-other-printers">Utilizing other printers<a class="headerlink" href="#utilizing-other-printers" title="Permanent link">&para;</a></h3>
-<p>If your printer fneeds to print another type <code>T</code>, you can use an already defined (either built-in or custom one) printer for <code>T</code> by calling <code>proptest::util::Show&lt;T&gt;(T&amp;)</code>, as following:</p>
-<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="w"> </span><span class="p">{</span>
-<span class="k">namespace</span><span class="w"> </span><span class="nn">util</span><span class="w"> </span><span class="p">{</span>
+<h3 id="dependencies-and-complex-generators">Dependencies and Complex Generators<a class="headerlink" href="#dependencies-and-complex-generators" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Size-dependent vector</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sizeAndVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">),</span>
+<span class="w">    </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
 
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;</span><span class="k">typename</span><span class="w"> </span><span class="nc">T</span><span class="o">&gt;</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">ShowDefault</span><span class="o">&lt;</span><span class="n">CarLike</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&gt;</span>
-<span class="p">{</span>
-<span class="w">    </span><span class="k">static</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="nf">show</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">ostream</span><span class="o">&amp;</span><span class="w"> </span><span class="n">os</span><span class="p">,</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="n">CarLike</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;&amp;</span><span class="w"> </span><span class="n">carLike</span><span class="p">)</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">        </span><span class="c1">// utilize printer for type T (&#39;CarLike(???)&#39; will be printed if there is no printer defined for T)</span>
-<span class="w">        </span><span class="n">os</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;CarLike(&quot;</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="n">Show</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span><span class="n">carLike</span><span class="p">.</span><span class="n">t</span><span class="p">)</span><span class="w"> </span><span class="o">&lt;&lt;</span><span class="w"> </span><span class="s">&quot;)&quot;</span><span class="p">;</span>
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">os</span><span class="p">;</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="p">};</span>
-
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace util</span>
-<span class="p">}</span><span class="w"> </span><span class="c1">// namespace proptest</span>
+<span class="c1">// Complex nested structure</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">complexGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span><span class="p">();</span>
 </code></pre></div>
-<p>Now it will correctly prints a <code>CarLike&lt;Car&gt;</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="n">shrinking</span><span class="w"> </span><span class="n">found</span><span class="w"> </span><span class="n">simpler</span><span class="w"> </span><span class="n">failing</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="mi">0</span><span class="o">:</span><span class="w"> </span><span class="n">CarLike</span><span class="p">(</span><span class="n">Car</span><span class="p">(</span><span class="n">Ferari</span><span class="p">,</span><span class="w"> </span><span class="mi">2020</span><span class="p">))</span>
+<h3 id="property-tests">Property Tests<a class="headerlink" href="#property-tests" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Simple property test</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">y</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">x</span><span class="p">;</span><span class="w">  </span><span class="c1">// Commutativity of addition</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+
+<span class="c1">// Property test with custom generators</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">empty</span><span class="p">())</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="nb">true</span><span class="p">;</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">sorted</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">vec</span><span class="p">;</span>
+<span class="w">    </span><span class="n">std</span><span class="o">::</span><span class="n">sort</span><span class="p">(</span><span class="n">sorted</span><span class="p">.</span><span class="n">begin</span><span class="p">(),</span><span class="w"> </span><span class="n">sorted</span><span class="p">.</span><span class="n">end</span><span class="p">());</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">sorted</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">();</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">().</span><span class="n">setSize</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">));</span>
 </code></pre></div>
 
   <hr>
@@ -907,7 +841,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 10, 2026</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 12, 2026</span>
       
     
   </small>

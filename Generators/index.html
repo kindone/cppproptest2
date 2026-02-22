@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://github.com/pages/kindone/cppproptest/Generators/">
       
       
-        <link rel="prev" href="../Property/">
+        <link rel="prev" href="../PropertyAPI/">
       
       
         <link rel="next" href="../Combinators/">
@@ -26,7 +26,7 @@
     
     
       
-        <title>Generating Inputs - cppproptest</title>
+        <title>Generators - cppproptest</title>
       
     
     
@@ -47,8 +47,8 @@
         
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CInconsolata:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Inter";--md-code-font:"Inconsolata"}</style>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,300i,400,400i,700,700i%7CSpline+Sans+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Inter";--md-code-font:"Spline Sans Mono"}</style>
       
     
     
@@ -77,7 +77,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#generating-inputs" class="md-skip">
+        <a href="#generators" class="md-skip">
           Skip to content
         </a>
       
@@ -113,7 +113,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Generating Inputs
+              Generators
             
           </span>
         </div>
@@ -320,11 +320,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../Property/" class="md-nav__link">
+      <a href="../Walkthrough/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Writing Property-based Tests
+    Step-by-Step Walkthrough
   </span>
   
 
@@ -333,6 +333,72 @@
   
 
               
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../PropertyAPI/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Property API Reference
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Generating Inputs
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_5">
+            <span class="md-nav__icon md-icon"></span>
+            Generating Inputs
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -353,7 +419,7 @@
           
   
   <span class="md-ellipsis">
-    Generating Inputs
+    Generators
   </span>
   
 
@@ -364,7 +430,7 @@
         
   
   <span class="md-ellipsis">
-    Generating Inputs
+    Generators
   </span>
   
 
@@ -386,6 +452,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#generator-quick-reference" class="md-nav__link">
+    Generator Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generators-in-property-based-testing" class="md-nav__link">
     Generators in Property-Based Testing
   </a>
@@ -393,37 +466,310 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#arbitraries-the-default-generators" class="md-nav__link">
-    Arbitraries - The Default Generators
+  <a href="#built-in-arbitraries-and-their-generator-aliases" class="md-nav__link">
+    Built-in Arbitraries and Their Generator Aliases
   </a>
   
-    <nav class="md-nav" aria-label="Arbitraries - The Default Generators">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-type-generators" class="md-nav__link">
+    Basic Type Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Type Generators">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-makes-defaults-so-special" class="md-nav__link">
-    What makes defaults so special
+  <a href="#genboolean" class="md-nav__link">
+    gen::boolean
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#built-in-arbitraries" class="md-nav__link">
-    Built-in Arbitraries
+  <a href="#gencharacter" class="md-nav__link">
+    gen::character
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#defining-an-arbitrary" class="md-nav__link">
-    Defining an Arbitrary
+  <a href="#integer-generators" class="md-nav__link">
+    Integer Generators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-numeric-range-generators" class="md-nav__link">
+    Utility Numeric Range Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Utility Numeric Range Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintervaltmin-max" class="md-nav__link">
+    gen::interval&lt;T&gt;(min, max)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#utility-methods-of-arbitrary" class="md-nav__link">
-    Utility methods of Arbitrary
+  <a href="#geninrangetfrom-to" class="md-nav__link">
+    gen::inRange&lt;T&gt;(from, to)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegerststart-count" class="md-nav__link">
+    gen::integers&lt;T&gt;(start, count)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturaltmax" class="md-nav__link">
+    gen::natural&lt;T&gt;(max)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennonnegativetmax" class="md-nav__link">
+    gen::nonNegative&lt;T&gt;(max)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#string-generators" class="md-nav__link">
+    String Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="String Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genstring" class="md-nav__link">
+    gen::string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genutf8string" class="md-nav__link">
+    gen::utf8string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utf-16-string-generators" class="md-nav__link">
+    UTF-16 String Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gencesu8string" class="md-nav__link">
+    gen::cesu8string
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-generators" class="md-nav__link">
+    Container Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genvectort" class="md-nav__link">
+    gen::vector&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genlistt" class="md-nav__link">
+    gen::list&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensett" class="md-nav__link">
+    gen::set&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genmapkv" class="md-nav__link">
+    gen::map&lt;K,V&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genoptionalt" class="md-nav__link">
+    gen::optional&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genshared_ptrt" class="md-nav__link">
+    gen::shared_ptr&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tuple-and-pair-generators" class="md-nav__link">
+    Tuple and Pair Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Tuple and Pair Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genpairt1t2" class="md-nav__link">
+    gen::pair&lt;T1,T2&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplets" class="md-nav__link">
+    gen::tuple&lt;Ts...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interval-generators" class="md-nav__link">
+    Interval Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#floating-point-generators" class="md-nav__link">
+    Floating Point Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Floating Point Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface" class="md-nav__link">
+    Interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-behavior" class="md-nav__link">
+    Default Behavior
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#special-value-probabilities" class="md-nav__link">
+    Special Value Probabilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-to-an-arbitrary" class="md-nav__link">
+    Access to an Arbitrary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combinator-functions" class="md-nav__link">
+    Combinator Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Combinator Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#utility-functions-for-oneofunionof-and-elementof" class="md-nav__link">
+    Utility Functions for oneOf(unionOf) and elementOf
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-generators" class="md-nav__link">
+    Basic Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-generators_1" class="md-nav__link">
+    Container Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-generators-with-custom-elements" class="md-nav__link">
+    String Generators with Custom Elements
   </a>
   
 </li>
@@ -436,6 +782,13 @@
         <li class="md-nav__item">
   <a href="#building-custom-generators" class="md-nav__link">
     Building Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-topics" class="md-nav__link">
+    Related Topics
   </a>
   
 </li>
@@ -475,11 +828,39 @@
   
   
     <li class="md-nav__item">
+      <a href="../GeneratorExamples/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Real World Examples
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../Shrinking/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Simplifying Failed Inputs
+    Shrinking - Simplifying Failed Inputs
   </span>
   
 
@@ -499,7 +880,7 @@
         
   
   <span class="md-ellipsis">
-    Printing Facilities
+    Displaying Custom Types
   </span>
   
 
@@ -508,6 +889,52 @@
   
 
               
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Stateful & Concurrency Testing
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_8">
+            <span class="md-nav__icon md-icon"></span>
+            Stateful & Concurrency Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -549,6 +976,104 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../AdvancedStatefulTesting/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Advanced Scenarios
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    
+    
+      
+        
+      
+    
+    
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Tips & Best Practices
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_9">
+            <span class="md-nav__icon md-icon"></span>
+            Tips & Best Practices
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../TestStrategies/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Strategies
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -583,6 +1108,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#generator-quick-reference" class="md-nav__link">
+    Generator Quick Reference
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#generators-in-property-based-testing" class="md-nav__link">
     Generators in Property-Based Testing
   </a>
@@ -590,37 +1122,310 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#arbitraries-the-default-generators" class="md-nav__link">
-    Arbitraries - The Default Generators
+  <a href="#built-in-arbitraries-and-their-generator-aliases" class="md-nav__link">
+    Built-in Arbitraries and Their Generator Aliases
   </a>
   
-    <nav class="md-nav" aria-label="Arbitraries - The Default Generators">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-type-generators" class="md-nav__link">
+    Basic Type Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Type Generators">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#what-makes-defaults-so-special" class="md-nav__link">
-    What makes defaults so special
+  <a href="#genboolean" class="md-nav__link">
+    gen::boolean
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#built-in-arbitraries" class="md-nav__link">
-    Built-in Arbitraries
+  <a href="#gencharacter" class="md-nav__link">
+    gen::character
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#defining-an-arbitrary" class="md-nav__link">
-    Defining an Arbitrary
+  <a href="#integer-generators" class="md-nav__link">
+    Integer Generators
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#utility-numeric-range-generators" class="md-nav__link">
+    Utility Numeric Range Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Utility Numeric Range Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genintervaltmin-max" class="md-nav__link">
+    gen::interval&lt;T&gt;(min, max)
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#utility-methods-of-arbitrary" class="md-nav__link">
-    Utility methods of Arbitrary
+  <a href="#geninrangetfrom-to" class="md-nav__link">
+    gen::inRange&lt;T&gt;(from, to)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genintegerststart-count" class="md-nav__link">
+    gen::integers&lt;T&gt;(start, count)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennaturaltmax" class="md-nav__link">
+    gen::natural&lt;T&gt;(max)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gennonnegativetmax" class="md-nav__link">
+    gen::nonNegative&lt;T&gt;(max)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#string-generators" class="md-nav__link">
+    String Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="String Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genstring" class="md-nav__link">
+    gen::string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genutf8string" class="md-nav__link">
+    gen::utf8string
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#utf-16-string-generators" class="md-nav__link">
+    UTF-16 String Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gencesu8string" class="md-nav__link">
+    gen::cesu8string
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#container-generators" class="md-nav__link">
+    Container Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Container Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genvectort" class="md-nav__link">
+    gen::vector&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genlistt" class="md-nav__link">
+    gen::list&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gensett" class="md-nav__link">
+    gen::set&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genmapkv" class="md-nav__link">
+    gen::map&lt;K,V&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genoptionalt" class="md-nav__link">
+    gen::optional&lt;T&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genshared_ptrt" class="md-nav__link">
+    gen::shared_ptr&lt;T&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tuple-and-pair-generators" class="md-nav__link">
+    Tuple and Pair Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Tuple and Pair Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#genpairt1t2" class="md-nav__link">
+    gen::pair&lt;T1,T2&gt;
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gentuplets" class="md-nav__link">
+    gen::tuple&lt;Ts...&gt;
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#interval-generators" class="md-nav__link">
+    Interval Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#floating-point-generators" class="md-nav__link">
+    Floating Point Generators
+  </a>
+  
+    <nav class="md-nav" aria-label="Floating Point Generators">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#interface" class="md-nav__link">
+    Interface
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#default-behavior" class="md-nav__link">
+    Default Behavior
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#special-value-probabilities" class="md-nav__link">
+    Special Value Probabilities
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#access-to-an-arbitrary" class="md-nav__link">
+    Access to an Arbitrary
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#combinator-functions" class="md-nav__link">
+    Combinator Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Combinator Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#utility-functions-for-oneofunionof-and-elementof" class="md-nav__link">
+    Utility Functions for oneOf(unionOf) and elementOf
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples" class="md-nav__link">
+    Examples
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-generators" class="md-nav__link">
+    Basic Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#container-generators_1" class="md-nav__link">
+    Container Generators
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#string-generators-with-custom-elements" class="md-nav__link">
+    String Generators with Custom Elements
   </a>
   
 </li>
@@ -633,6 +1438,13 @@
         <li class="md-nav__item">
   <a href="#building-custom-generators" class="md-nav__link">
     Building Custom Generators
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-topics" class="md-nav__link">
+    Related Topics
   </a>
   
 </li>
@@ -655,220 +1467,1278 @@
   
 
 
-<h1 id="generating-inputs">Generating Inputs<a class="headerlink" href="#generating-inputs" title="Permanent link">&para;</a></h1>
-<h2 id="generators-in-property-based-testing">Generators in Property-Based Testing<a class="headerlink" href="#generators-in-property-based-testing" title="Permanent link">&para;</a></h2>
-<p>Property-based testing promotes the concept of <strong>input domain</strong> of a property. In property-based testing, <strong>generators</strong> are the means for representing input domains. A <em>generator</em> is basically a function that generates random values. It defines the constraints of the generated random values in its body. Even a simple <code>forAll()</code> call depends on generators under the hood. Let's see following example:</p>
-<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">});</span>
-</code></pre></div>
-<p>This <code>forAll()</code> call takes a function with parameters of types <code>int</code> and <code>std::string</code>. This function is the <em>property function</em>. If no additional specification is given on how to generate the values for <code>age</code> and <code>name</code> as in this example, the parameter types are identified to invoke the default generators for those types. In this case, it calls the default generators for <code>int</code> and <code>std::string</code> types. Those default generators are called the <em>arbitraries</em>. You can access the arbitraries of a type <code>T</code> with <code>Arbitrary&lt;T&gt;</code> or <code>Arbi&lt;T&gt;</code>. This code is actually equivalent to:</p>
-<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">},</span><span class="w"> </span><span class="n">Arbitrary</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">Arbitrary</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
-</code></pre></div>
-<p>Notice the extra arguments <code>Arbitrary&lt;int&gt;()</code> and <code>Arbitrary&lt;std::string&gt;()</code> in the <code>forAll()</code> call. As you can see, <code>forAll()</code> actually requires some information on how to generate the values for the parameter types. Some of the often used types have default generators defined in <code>cppproptest</code>.</p>
-<p>&nbsp;</p>
-<h2 id="arbitraries-the-default-generators">Arbitraries - The Default Generators<a class="headerlink" href="#arbitraries-the-default-generators" title="Permanent link">&para;</a></h2>
-<h3 id="what-makes-defaults-so-special">What makes defaults so special<a class="headerlink" href="#what-makes-defaults-so-special" title="Permanent link">&para;</a></h3>
-<p>An <code>Arbitrary&lt;T&gt;</code> or its alias <code>Arbi&lt;T&gt;</code> is a <strong>generator</strong> type (that also coerces to <code>GenFunction&lt;T&gt;</code>).
-Arbitraries are specially treated in <code>cppproptest</code>. An arbitrary serves as globally defined default <em>generator</em> for the type. If a default generator for a type is available, <code>cppproptest</code> can use the default generator to generate a value of that type, if no generator has been specified.</p>
-<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="n">T1</span><span class="w"> </span><span class="n">t1</span><span class="p">,</span><span class="w"> </span><span class="n">T2</span><span class="w"> </span><span class="n">t2</span><span class="p">,</span><span class="w"> </span><span class="p">...,</span><span class="w"> </span><span class="n">TN</span><span class="w"> </span><span class="n">tn</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="c1">// property function body</span>
-<span class="p">},</span><span class="w"> </span><span class="cm">/* custom generators for T1, ..., TN */</span><span class="p">);</span>
-</code></pre></div>
-<p>For each of the parameter types of a property function, <code>forAll()</code> requires either a custom generator is provided as an argument, or a conforming <code>Arbitrary&lt;T&gt;</code> class has been defined in <code>proptest</code> namespace. A custom generator can be supplied in the <code>forAll()</code> function arguments next to the property function, as in the same order of parameters of the property function. If it hasn't been supplied, <code>forAll()</code> looks up the default generator - the <em>arbitrary</em> - and uses it instead. If there were no <code>proptest::Arbitrary&lt;T&gt;</code> defined, the compilation would fail.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// if there is no default generator available, you must provide a generator for the type SomeNewType.</span>
-<span class="n">forAll</span><span class="p">([](</span><span class="n">SomeNewType</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">},</span><span class="w"> </span><span class="n">someNewTypeGen</span><span class="p">);</span>
-
-
-<span class="c1">// explicit generators should be supplied in same order as parameter types of property function</span>
-<span class="n">forAll</span><span class="p">([](</span><span class="n">SomeNewType</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">SomeOtherType</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">},</span><span class="w"> </span><span class="n">someNewTypeGen</span><span class="p">,</span><span class="w"> </span><span class="n">SomeOtherTypeGen</span><span class="p">);</span>
-
-
-<span class="c1">// if there is a default generator (Arbitrary&lt;SomeType&gt;) available, you can use that generator by omitting the argument</span>
-<span class="n">forAll</span><span class="p">([](</span><span class="n">SomeType</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">});</span>
-
-<span class="c1">// Partially specifying generators is also allowed. Other types will be generated with arbitraries</span>
-<span class="n">forAll</span><span class="p">([](</span><span class="n">SomeNewType</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">SomeOtherType</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="p">},</span><span class="w"> </span><span class="n">someNewTypeGen</span><span class="p">);</span><span class="w"> </span><span class="c1">// y will be generated with Arbitary&lt;SomeOtherType&gt;</span>
-</code></pre></div>
-<h3 id="built-in-arbitraries">Built-in Arbitraries<a class="headerlink" href="#built-in-arbitraries" title="Permanent link">&para;</a></h3>
-<p><code>cppproptest</code> provides a set of built-in generators for generation of types that are often used in practice. These built-in generators are in the form of Arbitraries. You can access an arbitrary for <code>T</code> with <code>proptest::Arbitrary&lt;T&gt;</code>. Some of them are defined as template classes with type parameters for universality. For example, <code>Arbitrary&lt;vector&lt;T&gt;&gt;</code> defines a generator for a vector of any given type <code>T</code>, assuming you have an arbitrary for <code>T</code> already defined, or you have provided a custom generator for <code>T</code> as an argument for the vector arbitrary's constructor. Arbitraries of Commonly used standard containers are defined with type parameters so that you can generate such containers for the elemental types you desire.</p>
-<p>Here's quick reference for built-in arbitraries:</p>
+<h1 id="generators">Generators<a class="headerlink" href="#generators" title="Permanent link">&para;</a></h1>
+<blockquote>
+<p><strong>New to property-based testing?</strong> Start with the <a href="../Walkthrough/">Walkthrough</a> for a step-by-step guide. This page provides a comprehensive reference for all built-in generators in <code>cppproptest</code>.</p>
+</blockquote>
+<p>Generators are the foundation of property-based testing in <code>cppproptest</code>. They define the <strong>input domain</strong> of a property by specifying how random values should be generated. A generator is essentially a function that produces random values according to defined constraints.</p>
+<hr />
+<h2 id="generator-quick-reference">Generator Quick Reference<a class="headerlink" href="#generator-quick-reference" title="Permanent link">&para;</a></h2>
+<p>The following table provides a comprehensive overview of all generators available in <code>cppproptest</code>, organized by category. Click on any generator name to jump to its detailed documentation.</p>
 <table>
 <thead>
 <tr>
-<th>Purpose</th>
+<th>Category</th>
 <th>Generator</th>
-<th>Examples</th>
+<th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Generate a boolean</td>
-<td><code>Arbi&lt;bool&gt;()</code></td>
-<td><code>true</code> or <code>false</code></td>
+<td><strong>Primitives</strong></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td>Generate a character</td>
-<td><code>Arbi&lt;char&gt;()</code></td>
-<td><code>'c'</code> or <code>'%'</code></td>
+<td></td>
+<td><a href="#genboolean"><code>gen::boolean</code></a></td>
+<td>Boolean values</td>
 </tr>
 <tr>
-<td>Generate an integer</td>
-<td><code>Arbi&lt;int&gt;()</code>, <code>Arbi&lt;uint64_t&gt;()</code>, ...</td>
-<td><code>12</code> or <code>-1133</code></td>
+<td></td>
+<td><a href="#gencharacter"><code>gen::character</code></a></td>
+<td>Character values</td>
 </tr>
 <tr>
-<td>Generate a floating point number</td>
-<td><code>Arbi&lt;float&gt;()</code>, <code>Arbi&lt;double&gt;()</code></td>
-<td><code>3.4</code> or <code>-1.4e3</code></td>
+<td></td>
+<td><a href="#integer-generators"><code>gen::int8</code>, <code>gen::uint8</code>, <code>gen::int16</code>, <code>gen::uint16</code>, <code>gen::int32</code>, <code>gen::uint32</code>, <code>gen::int64</code>, <code>gen::uint64</code></a></td>
+<td>Integer types (8, 16, 32, 64-bit)</td>
 </tr>
 <tr>
-<td>Generate a string</td>
-<td><code>Arbi&lt;std::string&gt;()</code>, <code>Arbi&lt;UTF8String&gt;()</code></td>
-<td><code>"world"</code> or <code>"あ叶葉말"</code></td>
+<td></td>
+<td><a href="#floating-point-generators"><code>gen::float32</code></a>, <a href="#floating-point-generators"><code>gen::float64</code></a></td>
+<td>Floating point numbers</td>
 </tr>
 <tr>
-<td>Generate a pair</td>
-<td><code>Arbi&lt;std::pair&lt;T1,T2&gt;&gt;()</code></td>
-<td><code>{1, "xv"}</code> or <code>{true, 3.4}</code></td>
+<td><strong>Strings</strong></td>
+<td></td>
+<td></td>
 </tr>
 <tr>
-<td>Generate a tuple</td>
-<td><code>Arbi&lt;std::tuple&lt;Ts...&gt;&gt;()</code></td>
-<td><code>{1, "xv", true}</code> or <code>{true, 3.4}</code></td>
+<td></td>
+<td><a href="#genstring"><code>gen::string</code></a></td>
+<td>ASCII strings</td>
 </tr>
 <tr>
-<td>Generate a list</td>
-<td><code>Arbi&lt;std::list&lt;T&gt;&gt;()</code></td>
-<td><code>{10, -4, 0}</code> or <code>{"k", "&amp;"}</code></td>
+<td></td>
+<td><a href="#genutf8string"><code>gen::utf8string</code></a></td>
+<td>UTF-8 strings</td>
 </tr>
 <tr>
-<td>Generate a vector</td>
-<td><code>Arbi&lt;std::vector&lt;T&gt;&gt;()</code></td>
-<td><code>{10, -4, 0}</code> or <code>{"k", "&amp;"}</code></td>
+<td></td>
+<td><a href="#utf-16-string-generators"><code>gen::utf16bestring</code>, <code>gen::utf16lestring</code></a></td>
+<td>UTF-16 strings (big-endian, little-endian)</td>
 </tr>
 <tr>
-<td>Generate a set</td>
-<td><code>Arbi&lt;std::set&lt;T&gt;&gt;()</code></td>
-<td>set <code>{1, 3, 4}</code> but not <code>{1, 1, 3}</code></td>
+<td></td>
+<td><a href="#gencesu8string"><code>gen::cesu8string</code></a></td>
+<td>CESU-8 strings</td>
 </tr>
 <tr>
-<td>Generate a map</td>
-<td><code>Arbi&lt;std::map&lt;K,V&gt;&gt;()</code></td>
-<td>map of <code>"Bob" -&gt; 25, "Alice" -&gt; 30</code></td>
+<td><strong>Containers</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genvectort"><code>gen::vector&lt;T&gt;</code></a></td>
+<td>Vectors</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genlistt"><code>gen::list&lt;T&gt;</code></a></td>
+<td>Lists</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#gensett"><code>gen::set&lt;T&gt;</code></a></td>
+<td>Sets</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genmapkv"><code>gen::map&lt;K,V&gt;</code></a></td>
+<td>Maps</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genoptionalt"><code>gen::optional&lt;T&gt;</code></a></td>
+<td>Optional values</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#gensharedptrt"><code>gen::shared_ptr&lt;T&gt;</code></a></td>
+<td>Shared pointers</td>
+</tr>
+<tr>
+<td><strong>Tuples &amp; Pairs</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genpairt1t2"><code>gen::pair&lt;T1,T2&gt;</code></a></td>
+<td>Pairs</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#gentuplets"><code>gen::tuple&lt;Ts...&gt;</code></a></td>
+<td>Tuples</td>
+</tr>
+<tr>
+<td><strong>Numeric Ranges</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#gennaturaltmax"><code>gen::natural&lt;T&gt;(max)</code></a></td>
+<td>Positive integers ≤ max</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#gennonnegativetmax"><code>gen::nonNegative&lt;T&gt;(max)</code></a></td>
+<td>Non-negative integers ≤ max</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genintervaltmin-max"><code>gen::interval&lt;T&gt;(min, max)</code></a></td>
+<td>Integers in [min, max]</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#geninrangetfrom-to"><code>gen::inRange&lt;T&gt;(from, to)</code></a></td>
+<td>Integers in [from, to)</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genintegerststart-count"><code>gen::integers&lt;T&gt;(start, count)</code></a></td>
+<td>Integers in [start, start+count)</td>
+</tr>
+<tr>
+<td><strong>Intervals</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#interval-generators"><code>gen::intervals({...})</code></a></td>
+<td>Multiple intervals (signed)</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#interval-generators"><code>gen::uintervals({...})</code></a></td>
+<td>Multiple intervals (unsigned)</td>
+</tr>
+<tr>
+<td><strong>Combinators</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::just&lt;T&gt;(value)</code></a></td>
+<td>Constant value</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::elementOf&lt;T&gt;(vals...)</code></a></td>
+<td>Random selection from values</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::oneOf&lt;T&gt;(gens...)</code></a></td>
+<td>Union of generators</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::unionOf&lt;T&gt;(gens...)</code></a></td>
+<td>Alias for <code>gen::oneOf</code></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::construct&lt;Class,Args...&gt;(gens...)</code></a></td>
+<td>Object construction</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::transform&lt;T,U&gt;(gen, func)</code></a></td>
+<td>Value transformation</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::derive&lt;T,U&gt;(gen, genGen)</code></a></td>
+<td>Value derivation (flat-map)</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::filter&lt;T&gt;(gen, predicate)</code></a></td>
+<td>Value filtering</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::suchThat&lt;T&gt;(gen, predicate)</code></a></td>
+<td>Alias for filter</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::dependency&lt;T,U&gt;(genT, genUGen)</code></a></td>
+<td>Dependency between values</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::chain&lt;T&gt;(genT, genGen)</code></a></td>
+<td>Chain of generators</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::aggregate&lt;T&gt;(genT, aggregator)</code></a></td>
+<td>Aggregation of values</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::accumulate&lt;T&gt;(genT, accumulator, min, max)</code></a></td>
+<td>Accumulation of values</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::lazy&lt;T&gt;(func)</code></a></td>
+<td>Lazy evaluation</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::reference&lt;T&gt;(ref)</code></a></td>
+<td>Reference wrapper</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::weighted&lt;T&gt;(gen, weight)</code></a></td>
+<td>Weighted generator decorator</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::weightedVal&lt;T&gt;(value, weight)</code></a></td>
+<td>Weighted value decorator</td>
+</tr>
+<tr>
+<td><strong>Utilities</strong></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#access-to-an-arbitrary"><code>gen::arbitrary&lt;T&gt;(...)</code></a></td>
+<td>Access to arbitrary</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#combinator-functions"><code>gen::noShrink(gen)</code></a></td>
+<td>Same values, but with empty shrink stream</td>
 </tr>
 </tbody>
 </table>
-<ul>
-<li>Boolean type:<code>bool</code></li>
-<li>Character type: <code>char</code></li>
-<li>Integral types: <code>int8_t</code>, <code>uint8_t</code>, <code>int16_t</code>, <code>uint16_t</code>, <code>int32_t</code>, <code>uint32_t</code>, <code>int64_t</code>, <code>uint64_t</code></li>
-<li>Floating point types: <code>float</code>, <code>double</code></li>
-<li>String types:<ul>
-<li><code>std::string</code> (defaults to generate ASCII character strings in [0x01, 0x7F] range)</li>
-<li><code>UTF8String</code> (a class which extends <code>std::string</code> and can be used to generate valid <a href="https://en.wikipedia.org/wiki/UTF-8">UTF-8</a> strings by using <code>Arbi&lt;UTF8String&gt;</code>)</li>
-<li><code>CESU8String</code> (similar to UTF-8, but can be used to generate valid <a href="https://en.wikipedia.org/wiki/CESU-8">CESU-8</a> strings)</li>
-<li><code>UTF16BEString</code> and <code>UTF16LEString</code> for <a href="https://en.wikipedia.org/wiki/UTF-16">UTF-16</a> big and little endian strings. CESU-8 and Unicode types produce full unicode code point range of [0x1, 0x10FFFF], excluding forbidden surrogate code points ([0xD800, 0xDFFF])</li>
-</ul>
-</li>
-<li>Shared pointers: <code>std::shared_ptr&lt;T&gt;</code> where an <code>Arbi&lt;T&gt;</code> or a custom generator for <code>T</code> is available. It's also useful for generating polymorphic types.
-    <div class="highlight"><pre><span></span><code><span class="k">struct</span><span class="w"> </span><span class="nc">Action</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">get</span><span class="p">()</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
-<span class="p">};</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">Insert</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Action</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">get</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-<span class="p">};</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">Delete</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">Action</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">virtual</span><span class="w"> </span><span class="kt">void</span><span class="w"> </span><span class="nf">get</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="mi">2</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
-<span class="p">};</span>
-<span class="n">Generator</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="n">Action</span><span class="o">&gt;&gt;</span><span class="p">(...);</span><span class="w"> </span><span class="c1">// can hold both Insert and Delete</span>
-</code></pre></div></li>
-<li>
-<p>Standard containers: <code>std::string</code>, <code>std::vector</code>, <code>std::list</code>, <code>std::set</code>, <code>std::pair</code>, <code>std::tuple</code>, <code>std::map</code></p>
-<ul>
-<li>
-<p>Arbitraries for containers can optionally take a custom generator for their elemental types. If no custom generator for elemental type <code>T</code> is provided, <code>Arbitrary&lt;T&gt;</code> will be used instead.
-    <div class="highlight"><pre><span></span><code><span class="c1">// You can supply a specific generator for integers</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">vecInt0to100</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">));</span>
-<span class="c1">// otherwise, Arbi&lt;int&gt; is used</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">vecInt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
-
-<span class="c1">// string aarbitraries also take optional element generator</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">uppercaseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">alphabetGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">unionOf</span><span class="p">(</span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">),</span><span class="w"> </span><span class="n">interval</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="sc">&#39;z&#39;</span><span class="p">)));</span>
-</code></pre></div></p>
-</li>
-<li>
-<p><code>Arbi&lt;std::Map&gt;</code> provides setter methods for assigning a key generator and a value generator.</p>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">mapGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
-<span class="n">mapGen</span><span class="p">.</span><span class="n">setKeyGen</span><span class="p">(</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">100</span><span class="p">));</span><span class="w"> </span><span class="c1">// interval: key ranges from 0 to 100</span>
-<span class="n">mapGen</span><span class="p">.</span><span class="n">setElemGen</span><span class="p">(</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span><span class="w"> </span><span class="c1">// interval: value ranges from -100 to 100</span>
-</code></pre></div>
-</li>
-<li>
-<p>Containers provide methods for configuring the desired sizes</p>
-<ul>
-<li><code>setMinSize(size)</code>, <code>setMaxSize(size)</code> for restricting the container to specific range of sizes</li>
-<li><code>setSize(size)</code> for restricting the container to a specific size</li>
-</ul>
-<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">vecInt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
-<span class="n">vecInt</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w">    </span><span class="c1">// 1) generated vector will always have size 10</span>
-<span class="n">vecInt</span><span class="p">.</span><span class="n">setMinSize</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span><span class="w">  </span><span class="c1">// 2) generated vector will have size &gt;= 1</span>
-<span class="n">vecInt</span><span class="p">.</span><span class="n">setMaxSize</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">//    generated vector will have size &lt;= 10</span>
-<span class="n">vecInt</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// 3) generated vector will have size &gt;= 1 and size &lt;= 10</span>
-</code></pre></div>
-</li>
-</ul>
-</li>
-</ul>
-<p>As long as a generator for type <code>T</code> is available (either by <code>Arbitary&lt;T&gt;</code> defined or a custom generator provided), you can generate a container of that type, however complex the type <code>T</code> is, even including a container type. This means you can readily generate a random <code>vector&lt;vector&lt;int&gt;&gt;</code>, as <code>Arbitrary&lt;vector&lt;T&gt;&gt;</code> and <code>Arbitrary&lt;int&gt;</code> is readily available.</p>
-<div class="highlight"><pre><span></span><code><span class="w">    </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&gt;</span><span class="p">();</span><span class="w"> </span><span class="c1">// generates a vector of vector of ints.</span>
-<span class="w">    </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;&gt;&gt;</span><span class="p">();</span>
-</code></pre></div>
-<p>This design makes arbitraries of <code>cppproptest</code> composable, meaning that they can be easily reusable as building blocks for a new generator.</p>
-<h3 id="defining-an-arbitrary">Defining an Arbitrary<a class="headerlink" href="#defining-an-arbitrary" title="Permanent link">&para;</a></h3>
-<p>With template specialization, new <code>proptest::Arbi&lt;T&gt;</code> (or its alias <code>proptest::Arbitrary&lt;T&gt;</code>) for type <code>T</code> can be defined, if it hasn't been already defined yet. By defining an <em>Arbitrary</em>, you are effectively adding a default generator for a type.</p>
-<p>Following shows an example of defining an <em>Arbitrary</em>. Note that it should be defined under <code>proptest</code> namespace in order to be recognized and accessible by the library.</p>
-<div class="highlight"><pre><span></span><code><span class="k">namespace</span><span class="w"> </span><span class="nn">proptest</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="c1">// you should define your Arbi&lt;T&gt; inside this namespace</span>
-
-<span class="c1">// define a template specialization of Arbi for Car type</span>
-<span class="c1">// by extending ArbiBase, you are decorating your arbitrary with standard methods (map, flatMap, filter, etc.)</span>
-<span class="k">template</span><span class="w"> </span><span class="o">&lt;&gt;</span>
-<span class="k">struct</span><span class="w"> </span><span class="nc">Arbi</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">ArbiBase</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="n">Shrinkable</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="w"> </span><span class="k">operator</span><span class="p">()(</span><span class="n">Random</span><span class="o">&amp;</span><span class="w"> </span><span class="n">rand</span><span class="p">)</span><span class="w"> </span><span class="k">const</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="kt">bool</span><span class="w"> </span><span class="n">isAutomatic</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">rand</span><span class="p">.</span><span class="n">getRandomBool</span><span class="p">();</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">make_shrinkable</span><span class="o">&lt;</span><span class="n">Car</span><span class="o">&gt;</span><span class="p">(</span><span class="n">isAutomatic</span><span class="p">);</span><span class="w"> </span><span class="c1">// make_shrinkable creates a Car object by calling Car&#39;s constructor with 1 boolean parameter</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">};</span>
-
-<span class="p">}</span>
-</code></pre></div>
-<p>Although you can define an arbitrary as shown in this example, it's only required to do so if you desire to have a default generator for the type.</p>
-<h3 id="utility-methods-of-arbitrary">Utility methods of Arbitrary<a class="headerlink" href="#utility-methods-of-arbitrary" title="Permanent link">&para;</a></h3>
-<p><code>Arbitrary&lt;T&gt;</code> provides useful helpers for creating new generators from existing ones<sup id="fnref:generatorT"><a class="footnote-ref" href="#fn:generatorT">1</a></sup>. <code>filter</code> is such a helper. It restrictively generates values that satisfy a criteria function. Following shows an even number generator from the integer <code>Arbitrary</code>.</p>
-<div class="highlight"><pre><span></span><code><span class="c1">// generates any integers</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">anyIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
-<span class="c1">// generates even integers</span>
-<span class="k">auto</span><span class="w"> </span><span class="n">evenGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">anyIntGen</span><span class="p">.</span><span class="n">filter</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">num</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">num</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span>
+<p><strong>Note:</strong> For detailed documentation on combinators, see the <a href="../Combinators/">Combinators</a> page. For building custom generators, see <a href="../CustomGenerator/">Custom Generator</a>.</p>
+<hr />
+<h2 id="generators-in-property-based-testing">Generators in Property-Based Testing<a class="headerlink" href="#generators-in-property-based-testing" title="Permanent link">&para;</a></h2>
+<p>Property-based testing promotes the concept of <strong>input domain</strong> of a property. In property-based testing, <strong>generators</strong> are the means for representing input domains. Even a simple <code>forAll()</code> call depends on generators under the hood. Consider the following example:</p>
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test code</span>
 <span class="p">});</span>
 </code></pre></div>
-<p>You can find the full list of such helpers in <a href="../Combinators/#utility-methods-in-standard-generators">Utility methods in standard generators</a>.</p>
-<p>&nbsp;</p>
+<p>This <code>forAll()</code> call takes a function with parameters of types <code>int</code> and <code>std::string</code>. This function is the <em>property function</em>. If no additional specification is given on how to generate the values for <code>age</code> and <code>name</code> as in this example, the parameter types are identified to invoke the default generators for those types. In this case, it calls the default generators for <code>int</code> and <code>std::string</code> types.</p>
+<p>Those default generators are called the <em>arbitraries</em>. You can access the arbitraries of a type <code>T</code> with <code>Arbitrary&lt;T&gt;</code> or <code>Arbi&lt;T&gt;</code>.
+Previous code is actually equivalent to:</p>
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test code</span>
+<span class="p">},</span><span class="w"> </span><span class="n">Arbitrary</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">Arbitrary</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div>
+<p>Notice the extra arguments <code>gen::arbitrary&lt;int&gt;()</code> and <code>gen::arbitrary&lt;std::string&gt;()</code> in the <code>forAll()</code> call. As you can see, <code>forAll()</code> actually requires some information on how to generate the values for the parameter types. Some of the commonly used data types have default generators defined in <code>cppproptest</code>.</p>
+<p><code>gen</code> namespace also provide alias template <code>gen::arbitrary&lt;T&gt;</code>. So you can also write the same code as:</p>
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test code</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">arbitrary</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">:</span><span class="n">arbitrary</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for details on default generators, <a href="../PropertyAPI/">Property API Reference</a> for <code>forAll()</code> usage, and <a href="../Walkthrough/">Walkthrough</a> for step-by-step examples.</p>
+<hr />
+<h2 id="built-in-arbitraries-and-their-generator-aliases">Built-in Arbitraries and Their Generator Aliases<a class="headerlink" href="#built-in-arbitraries-and-their-generator-aliases" title="Permanent link">&para;</a></h2>
+<p>Specifically for <code>Arbitrary&lt;int&gt;()</code> in the above example, we have an alias - <code>gen::int32()</code>. <code>cppproptest</code> provides such built-in arbitraries for common data types and useful aliases to those arbitraries in the <code>gen</code> namespace. Thus, you can also write the above example as following:</p>
+<div class="highlight"><pre><span></span><code><span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">age</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test code</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">());</span>
+</code></pre></div>
+<p>Here is the complete list of the built-in arbitraries and their aliases. You can also refer to the <a href="../Arbitrary/">Arbitrary</a> page for more about arbitraries, including their configurable options and how they make up as default generators for a data type.</p>
+<p><strong>See also:</strong> <a href="../GenNamespace/">Gen Namespace</a> for details on the <code>gen</code> namespace organization.</p>
+<hr />
+<h2 id="basic-type-generators">Basic Type Generators<a class="headerlink" href="#basic-type-generators" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Arbitrary</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genboolean"><code>gen::boolean</code></a></td>
+<td><code>Arbi&lt;bool&gt;</code></td>
+<td>Boolean values</td>
+</tr>
+<tr>
+<td><a href="#gencharacter"><code>gen::character</code></a></td>
+<td><code>Arbi&lt;char&gt;</code></td>
+<td>Character values</td>
+</tr>
+<tr>
+<td><a href="#integer-generators"><code>gen::int8</code>, <code>gen::uint8</code>, <code>gen::int16</code>, <code>gen::uint16</code>, <code>gen::int32</code>, <code>gen::uint32</code>, <code>gen::int64</code>, <code>gen::uint64</code></a></td>
+<td><code>Arbi&lt;int8_t&gt;</code>, <code>Arbi&lt;uint8_t&gt;</code>, <code>Arbi&lt;int16_t&gt;</code>, <code>Arbi&lt;uint16_t&gt;</code>, <code>Arbi&lt;int32_t&gt;</code>, <code>Arbi&lt;uint32_t&gt;</code>, <code>Arbi&lt;int64_t&gt;</code>, <code>Arbi&lt;uint64_t&gt;</code></td>
+<td>Integer types (8, 16, 32, 64-bit)</td>
+</tr>
+<tr>
+<td><a href="#floating-point-generators"><code>gen::float32</code></a>, <a href="#floating-point-generators"><code>gen::float64</code></a></td>
+<td><code>Arbi&lt;float&gt;</code>, <code>Arbi&lt;double&gt;</code></td>
+<td>Floating point numbers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genboolean"><code>gen::boolean</code><a class="headerlink" href="#genboolean" title="Permanent link">&para;</a></h3>
+<p>Generates random boolean values (<code>true</code> or <code>false</code>) with configurable probability.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>trueProb</code> (double, default: 0.5): Probability of generating <code>true</code> (0.0 to 1.0)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;bool&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate random booleans (50% true, 50% false)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">boolGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">();</span>
+
+<span class="c1">// Generate mostly true values (80% true, 20% false)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">boolGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">(</span><span class="mf">0.8</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">bool</span><span class="w"> </span><span class="n">b</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with booleans</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="gencharacter"><code>gen::character</code><a class="headerlink" href="#gencharacter" title="Permanent link">&para;</a></h3>
+<p>Generates random character values.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li>None</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;char&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate random characters</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">charGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">character</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">char</span><span class="w"> </span><span class="n">c</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with characters</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">character</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options, <a href="#string-generators">String Generators</a> for string generation.</p>
+<hr />
+<h3 id="integer-generators">Integer Generators<a class="headerlink" href="#integer-generators" title="Permanent link">&para;</a></h3>
+<p>Generate signed and unsigned integers of various bit widths: <code>gen::int8</code>, <code>gen::uint8</code>, <code>gen::int16</code>, <code>gen::uint16</code>, <code>gen::int32</code>, <code>gen::uint32</code>, <code>gen::int64</code>, <code>gen::uint64</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li>None</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;int8_t&gt;</code>, <code>Generator&lt;uint8_t&gt;</code>, <code>Generator&lt;int16_t&gt;</code>, <code>Generator&lt;uint16_t&gt;</code>, <code>Generator&lt;int32_t&gt;</code>, <code>Generator&lt;uint32_t&gt;</code>, <code>Generator&lt;int64_t&gt;</code>, or <code>Generator&lt;uint64_t&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate integers of various sizes</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">int8Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int8</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uint8Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint8</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">int16Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int16</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uint16Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint16</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">int32Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uint32Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">int64Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int64</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uint64Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint64</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int32_t</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="kt">uint32_t</span><span class="w"> </span><span class="n">u</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint32</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h2 id="utility-numeric-range-generators">Utility Numeric Range Generators<a class="headerlink" href="#utility-numeric-range-generators" title="Permanent link">&para;</a></h2>
+<p>There are also utility integer generators based on numeric range for everyday use. These are function calls, not type aliases. The first three (<code>gen::interval</code>, <code>gen::inRange</code>, <code>gen::integers</code>) are essentially the same concept with different parameter styles and inclusive/exclusive semantics, so you can choose based on preference and clarity.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genintervaltmin-max"><code>gen::interval&lt;T&gt;(min, max)</code></a></td>
+<td>Integers in [min, max] (inclusive)</td>
+</tr>
+<tr>
+<td><a href="#geninrangetfrom-to"><code>gen::inRange&lt;T&gt;(from, to)</code></a></td>
+<td>Integers in [from, to) (exclusive)</td>
+</tr>
+<tr>
+<td><a href="#genintegerststart-count"><code>gen::integers&lt;T&gt;(start, count)</code></a></td>
+<td>Integers in [start, start+count)</td>
+</tr>
+<tr>
+<td><a href="#gennaturaltmax"><code>gen::natural&lt;T&gt;(max)</code></a></td>
+<td>Positive integers ≤ max</td>
+</tr>
+<tr>
+<td><a href="#gennonnegativetmax"><code>gen::nonNegative&lt;T&gt;(max)</code></a></td>
+<td>Non-negative integers ≤ max</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genintervaltmin-max"><code>gen::interval&lt;T&gt;(min, max)</code><a class="headerlink" href="#genintervaltmin-max" title="Permanent link">&para;</a></h3>
+<p>Generates integers in the range [min, max] (inclusive of both bounds).</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>min</code> (T): Minimum integer value (inclusive)</li>
+<li><code>max</code> (T): Maximum integer value (inclusive)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;T&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate integers from 1 to 100</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">smallIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">// Different integer types</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">smallInt8Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int8_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-128</span><span class="p">,</span><span class="w"> </span><span class="mi">127</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">int64Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int64_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-1000000</span><span class="p">,</span><span class="w"> </span><span class="mi">1000000</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">small</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with range-constrained integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators, <a href="#geninrangetfrom-to">gen::inRange<T>(from, to)</a> for exclusive ranges, <a href="#interval-generators">Interval Generators</a> for multiple intervals.</p>
+<hr />
+<h3 id="geninrangetfrom-to"><code>gen::inRange&lt;T&gt;(from, to)</code><a class="headerlink" href="#geninrangetfrom-to" title="Permanent link">&para;</a></h3>
+<p>Generates integers in the range [from, to) (exclusive of <code>to</code>).</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>from</code> (T): Minimum integer value (inclusive)</li>
+<li><code>to</code> (T): Maximum integer value (exclusive)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;T&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate integers from 0 to 99 (exclusive of 100)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">rangeIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">inRange</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">index</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with range-constrained integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">inRange</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators, <a href="#genintervaltmin-max">gen::interval<T>(min, max)</a> for inclusive ranges.</p>
+<hr />
+<h3 id="genintegerststart-count"><code>gen::integers&lt;T&gt;(start, count)</code><a class="headerlink" href="#genintegerststart-count" title="Permanent link">&para;</a></h3>
+<p>Generates integers in the range [start, start+count). The second parameter is the <strong>count</strong> of values to generate, not the maximum value.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>start</code> (T): Starting value (inclusive)</li>
+<li><code>count</code> (T): Number of values to generate (must be positive)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;T&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate integers from 10 to 29 (20 values)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sequenceIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">integers</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with sequence integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">integers</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">20</span><span class="p">));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators, <a href="#genintervaltmin-max">gen::interval<T>(min, max)</a> for inclusive ranges.</p>
+<hr />
+<h3 id="gennaturaltmax"><code>gen::natural&lt;T&gt;(max)</code><a class="headerlink" href="#gennaturaltmax" title="Permanent link">&para;</a></h3>
+<p>Generates positive integers in the range [1, max] (inclusive).</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>max</code> (T): Maximum value (inclusive, must be at least 1)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;T&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate natural numbers from 1 to 1000</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">positiveIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">natural</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+
+<span class="c1">// Different integer types</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uint16Gen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">natural</span><span class="o">&lt;</span><span class="kt">uint16_t</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">65535</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">positive</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with positive integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">natural</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1000</span><span class="p">));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators, <a href="#gennonnegativetmax">gen::nonNegative<T>(max)</a> for non-negative integers.</p>
+<hr />
+<h3 id="gennonnegativetmax"><code>gen::nonNegative&lt;T&gt;(max)</code><a class="headerlink" href="#gennonnegativetmax" title="Permanent link">&para;</a></h3>
+<p>Generates non-negative integers in the range [0, max] (inclusive).</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>max</code> (T): Maximum value (inclusive, must be non-negative)</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;T&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate non-negative integers from 0 to 500</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">nonNegIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">nonNegative</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">nonNeg</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with non-negative integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">nonNegative</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">500</span><span class="p">));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators, <a href="#gennaturaltmax">gen::natural<T>(max)</a> for positive integers.</p>
+<hr />
+<h2 id="string-generators">String Generators<a class="headerlink" href="#string-generators" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Arbitrary</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genstring"><code>gen::string</code></a></td>
+<td><code>Arbi&lt;std::string&gt;</code></td>
+<td>ASCII strings</td>
+</tr>
+<tr>
+<td><a href="#genutf8string"><code>gen::utf8string</code></a></td>
+<td><code>Arbi&lt;UTF8String&gt;</code></td>
+<td>UTF-8 strings</td>
+</tr>
+<tr>
+<td><a href="#utf-16-string-generators"><code>gen::utf16bestring</code>, <code>gen::utf16lestring</code></a></td>
+<td><code>Arbi&lt;UTF16BEString&gt;</code>, <code>Arbi&lt;UTF16LEString&gt;</code></td>
+<td>UTF-16 strings (big-endian, little-endian)</td>
+</tr>
+<tr>
+<td><a href="#gencesu8string"><code>gen::cesu8string</code></a></td>
+<td><code>Arbi&lt;CESU8String&gt;</code></td>
+<td>CESU-8 strings</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genstring"><code>gen::string</code><a class="headerlink" href="#genstring" title="Permanent link">&para;</a></h3>
+<p>Generates ASCII strings. Defaults to printable ASCII characters (0x01-0x7f).</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>charGen</code> (optional): Generator for characters. If not provided, uses printable ASCII.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::string&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate ASCII strings with default character set</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">asciiStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">();</span>
+
+<span class="c1">// Custom string with specific character ranges</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uppercaseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">digitGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">));</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="w"> </span><span class="n">name</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with strings</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for <code>gen::interval</code>, <a href="../Combinators/">Combinators</a> for combining character generators, <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="genutf8string"><code>gen::utf8string</code><a class="headerlink" href="#genutf8string" title="Permanent link">&para;</a></h3>
+<p>Generates UTF-8 strings. Defaults to all UTF-8 characters.<sup id="fnref:encstring"><a class="footnote-ref" href="#fn:encstring">1</a></sup></p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>charGen</code> (optional): Generator for Unicode code points. If not provided, uses all UTF-8 characters.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;UTF8String&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate UTF-8 strings with default character set</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">utf8StringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf8string</span><span class="p">();</span>
+
+<span class="c1">// Custom UTF-8 string with specific character ranges</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">alphanumericGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf8string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">unionOf</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">uint32_t</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">)</span>
+<span class="p">));</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">UTF8String</span><span class="w"> </span><span class="n">text</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// text behaves like std::string for byte-level APIs:</span>
+<span class="w">    </span><span class="c1">// const char* raw      = text.c_str();   // pass to C APIs</span>
+<span class="w">    </span><span class="c1">// auto        byteSize = text.size();    // buffer size in bytes</span>
+<span class="w">    </span><span class="c1">// auto        charCnt  = text.charsize(); // number of UTF-8 code units / characters</span>
+
+<span class="w">    </span><span class="c1">// Property test with UTF-8 strings</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf8string</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Combinators/">Combinators</a> for <code>gen::unionOf</code> and other combinators, <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for <code>gen::interval</code>, <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="utf-16-string-generators">UTF-16 String Generators<a class="headerlink" href="#utf-16-string-generators" title="Permanent link">&para;</a></h3>
+<p>Generate UTF-16 strings in big-endian or little-endian byte order: <code>gen::utf16bestring</code>, <code>gen::utf16lestring</code>.<sup id="fnref2:encstring"><a class="footnote-ref" href="#fn:encstring">1</a></sup></p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>charGen</code> (optional): Generator for Unicode code points. If not provided, uses default character set.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;UTF16BEString&gt;</code> or <code>Generator&lt;UTF16LEString&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate UTF-16 big-endian strings</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">utf16beStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf16bestring</span><span class="p">();</span>
+
+<span class="c1">// Generate UTF-16 little-endian strings</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">utf16leStringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf16lestring</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">UTF16BEString</span><span class="w"> </span><span class="n">beText</span><span class="p">,</span><span class="w"> </span><span class="n">UTF16LEString</span><span class="w"> </span><span class="n">leText</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Underlying storage is std::string; .charsize() reports UTF-16 code units:</span>
+<span class="w">    </span><span class="c1">// const char* rawBE   = beText.c_str();</span>
+<span class="w">    </span><span class="c1">// const char* rawLE   = leText.c_str();</span>
+<span class="w">    </span><span class="c1">// auto        beBytes = beText.size();</span>
+<span class="w">    </span><span class="c1">// auto        beChars = beText.charsize();</span>
+
+<span class="w">    </span><span class="c1">// Property test with UTF-16 strings</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf16bestring</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">utf16lestring</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options, <a href="#genutf8string"><code>gen::utf8string</code></a> for UTF-8 strings.</p>
+<hr />
+<h3 id="gencesu8string"><code>gen::cesu8string</code><a class="headerlink" href="#gencesu8string" title="Permanent link">&para;</a></h3>
+<p>Generates CESU-8 strings.<sup id="fnref3:encstring"><a class="footnote-ref" href="#fn:encstring">1</a></sup></p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>charGen</code> (optional): Generator for Unicode code points.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;CESU8String&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate CESU-8 strings</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">cesu8StringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">cesu8string</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">CESU8String</span><span class="w"> </span><span class="n">text</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Access raw bytes and logical length:</span>
+<span class="w">    </span><span class="c1">// const char* raw      = text.data();</span>
+<span class="w">    </span><span class="c1">// auto        byteSize = text.size();</span>
+<span class="w">    </span><span class="c1">// auto        charCnt  = text.charsize();</span>
+
+<span class="w">    </span><span class="c1">// Property test with CESU-8 strings</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">cesu8string</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h2 id="container-generators">Container Generators<a class="headerlink" href="#container-generators" title="Permanent link">&para;</a></h2>
+<p>Container generators often take size ranges and an element generator (uses default generator for the type if not given) as arguments.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Arbitrary</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genvectort"><code>gen::vector&lt;T&gt;</code></a></td>
+<td><code>Arbi&lt;std::vector&lt;T&gt;&gt;</code></td>
+<td>Vectors</td>
+</tr>
+<tr>
+<td><a href="#genlistt"><code>gen::list&lt;T&gt;</code></a></td>
+<td><code>Arbi&lt;std::list&lt;T&gt;&gt;</code></td>
+<td>Lists</td>
+</tr>
+<tr>
+<td><a href="#gensett"><code>gen::set&lt;T&gt;</code></a></td>
+<td><code>Arbi&lt;std::set&lt;T&gt;&gt;</code></td>
+<td>Sets</td>
+</tr>
+<tr>
+<td><a href="#genmapkv"><code>gen::map&lt;K,V&gt;</code></a></td>
+<td><code>Arbi&lt;std::map&lt;K,V&gt;&gt;</code></td>
+<td>Maps</td>
+</tr>
+<tr>
+<td><a href="#genoptionalt"><code>gen::optional&lt;T&gt;</code></a></td>
+<td><code>Arbi&lt;std::optional&lt;T&gt;&gt;</code></td>
+<td>Optional values</td>
+</tr>
+<tr>
+<td><a href="#gensharedptrt"><code>gen::shared_ptr&lt;T&gt;</code></a></td>
+<td><code>Arbi&lt;std::shared_ptr&lt;T&gt;&gt;</code></td>
+<td>Shared pointers</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genvectort"><code>gen::vector&lt;T&gt;</code><a class="headerlink" href="#genvectort" title="Permanent link">&para;</a></h3>
+<p>Generates random vectors with elements of type <code>T</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>elementGen</code> (optional): Generator for vector elements. If not provided, uses default generator for type <code>T</code>.</li>
+<li><code>minSize</code>, <code>maxSize</code> (optional): Size constraints for the vector.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::vector&lt;T&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic vector generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Vector with custom element generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">smallIntVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+
+<span class="c1">// Vector with size constraints</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">fixedSizeVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">fixedSizeVectorGen</span><span class="p">.</span><span class="n">setSize</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Always generates vectors of size 5</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">boundedVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">boundedVectorGen</span><span class="p">.</span><span class="n">setMinSize</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">boundedVectorGen</span><span class="p">.</span><span class="n">setMaxSize</span><span class="p">(</span><span class="mi">10</span><span class="p">);</span><span class="w"> </span><span class="c1">// Generates vectors of size 1-10</span>
+
+<span class="c1">// Size range in constructor</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vectorGen1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// Fixed size 5</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vectorGen2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">10</span><span class="p">),</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">);</span><span class="w"> </span><span class="c1">// element generator + size range</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">numbers</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with vectors</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options, <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for <code>gen::interval</code>.</p>
+<hr />
+<h3 id="genlistt"><code>gen::list&lt;T&gt;</code><a class="headerlink" href="#genlistt" title="Permanent link">&para;</a></h3>
+<p>Generates random lists with elements of type <code>T</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>elementGen</code> (optional): Generator for list elements. If not provided, uses default generator for type <code>T</code>.</li>
+<li><code>minSize</code>, <code>maxSize</code> (optional): Size constraints for the list.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::list&lt;T&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic list generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringListGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// List with custom element generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uppercaseStringListGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">)));</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">items</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with lists</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options, <a href="#string-generators">String Generators</a> for string element generators.</p>
+<hr />
+<h3 id="gensett"><code>gen::set&lt;T&gt;</code><a class="headerlink" href="#gensett" title="Permanent link">&para;</a></h3>
+<p>Generates random sets with elements of type <code>T</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>elementGen</code> (optional): Generator for set elements. If not provided, uses default generator for type <code>T</code>.</li>
+<li><code>minSize</code>, <code>maxSize</code> (optional): Size constraints for the set.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::set&lt;T&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic set generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intSetGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">uniqueNumbers</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with sets</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="genmapkv"><code>gen::map&lt;K,V&gt;</code><a class="headerlink" href="#genmapkv" title="Permanent link">&para;</a></h3>
+<p>Generates random maps with keys of type <code>K</code> and values of type <code>V</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>keyGen</code> (optional): Generator for map keys. If not provided, uses default generator for type <code>K</code>.</li>
+<li><code>valueGen</code> (optional): Generator for map values. If not provided, uses default generator for type <code>V</code>.</li>
+<li><code>minSize</code>, <code>maxSize</code> (optional): Size constraints for the map.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::map&lt;K,V&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic map generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringIntMapGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Map with custom key and value generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">customMapGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="n">customMapGen</span><span class="p">.</span><span class="n">setKeyGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">)));</span>
+<span class="n">customMapGen</span><span class="p">.</span><span class="n">setElemGen</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">));</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with maps</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options, <a href="#string-generators">String Generators</a> for string key generators, <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for integer value generators.</p>
+<hr />
+<h3 id="genoptionalt"><code>gen::optional&lt;T&gt;</code><a class="headerlink" href="#genoptionalt" title="Permanent link">&para;</a></h3>
+<p>Generates random optional values of type <code>T</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>elementGen</code> (optional): Generator for the contained value. If not provided, uses default generator for type <code>T</code>.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::optional&lt;T&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic optional generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">optionalIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">maybeValue</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with optionals</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">optional</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="genshared_ptrt"><code>gen::shared_ptr&lt;T&gt;</code><a class="headerlink" href="#genshared_ptrt" title="Permanent link">&para;</a></h3>
+<p>Generates random shared pointers to values of type <code>T</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>elementGen</code> (optional): Generator for the pointed-to value. If not provided, uses default generator for type <code>T</code>.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::shared_ptr&lt;T&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic shared_ptr generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">sharedPtrIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ptr</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with shared pointers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">shared_ptr</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h2 id="tuple-and-pair-generators">Tuple and Pair Generators<a class="headerlink" href="#tuple-and-pair-generators" title="Permanent link">&para;</a></h2>
+<p><code>gen::pair</code> and <code>gen::tuple</code> generators take optional element generators as arguments. The generators are optional only if the types have <code>Arbitrary</code> defined.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Arbitrary</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="#genpairt1t2"><code>gen::pair&lt;T1,T2&gt;</code></a></td>
+<td><code>Arbi&lt;std::pair&lt;T1,T2&gt;&gt;</code></td>
+<td>Pairs</td>
+</tr>
+<tr>
+<td><a href="#gentuplets"><code>gen::tuple&lt;Ts...&gt;</code></a></td>
+<td><code>Arbi&lt;std::tuple&lt;Ts...&gt;&gt;</code></td>
+<td>Tuples</td>
+</tr>
+<tr>
+<td><code>gen::pair</code></td>
+<td></td>
+<td>Pairs (type params inferred)</td>
+</tr>
+<tr>
+<td><code>gen::tuple</code></td>
+<td></td>
+<td>Tuples (type params inferred)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="genpairt1t2"><code>gen::pair&lt;T1,T2&gt;</code><a class="headerlink" href="#genpairt1t2" title="Permanent link">&para;</a></h3>
+<p>Generates random pairs with elements of types <code>T1</code> and <code>T2</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>gen1</code>, <code>gen2</code> (optional): Generators for the first and second elements. If not provided, uses default generators for types <code>T1</code> and <code>T2</code>.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::pair&lt;T1,T2&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic pair generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intStringPairGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Pair with custom element generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">smallIntUppercaseStringPairGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">))</span>
+<span class="p">);</span>
+
+<span class="c1">// Type-inferred pair (convenient wrapper)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pairGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">))</span>
+<span class="p">);</span><span class="w"> </span><span class="c1">// generator for pair&lt;int, string&gt;</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">data</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with pairs</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">pair</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for <code>gen::interval</code>, <a href="#string-generators">String Generators</a> for string generators, <a href="../Combinators/">Combinators</a> for <code>gen::chain</code> and dependent pair generation.</p>
+<hr />
+<h3 id="gentuplets"><code>gen::tuple&lt;Ts...&gt;</code><a class="headerlink" href="#gentuplets" title="Permanent link">&para;</a></h3>
+<p>Generates random tuples with elements of types <code>Ts...</code>.</p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><code>...gens</code> (optional): Generators for tuple elements. If not provided, uses default generators for the element types.</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;std::tuple&lt;Ts...&gt;&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic tuple generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intBoolStringTupleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Tuple with custom element generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">customTupleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-50</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">))</span>
+<span class="p">);</span>
+
+<span class="c1">// Type-inferred tuple (convenient wrapper)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">tupleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-50</span><span class="p">,</span><span class="w"> </span><span class="mi">50</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">(),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">))</span>
+<span class="p">);</span><span class="w"> </span><span class="c1">// generator for tuple&lt;int, bool, string&gt;</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">std</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="w"> </span><span class="n">info</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with tuples</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">tuple</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">bool</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">());</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for <code>gen::interval</code>, <a href="#basic-type-generators">Basic Type Generators</a> for element generators, <a href="../Combinators/">Combinators</a> for <code>gen::chain</code> and dependent tuple generation.</p>
+<hr />
+<h2 id="interval-generators">Interval Generators<a class="headerlink" href="#interval-generators" title="Permanent link">&para;</a></h2>
+<p>Interval generators are basically shorthand equivalents for combining multiple numeric ranges (e.g. <code>gen::interval</code>) with a <code>gen::oneOf</code> (<code>gen::unionOf</code>) combinator.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gen::intervals({Interval(min1,max1), ...})</code></td>
+<td>Multiple intervals for signed integers</td>
+</tr>
+<tr>
+<td><code>gen::uintervals({UInterval(min1,max1), ...})</code></td>
+<td>Multiple intervals for unsigned integers</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Multiple interval generators</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">multiRangeIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">intervals</span><span class="p">({</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">Interval</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">),</span><span class="w">    </span><span class="c1">// Negative numbers</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="w">       </span><span class="c1">// Positive numbers</span>
+<span class="p">});</span>
+
+<span class="k">auto</span><span class="w"> </span><span class="n">multiRangeUintGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uintervals</span><span class="p">({</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">UInterval</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="w"> </span><span class="mi">9</span><span class="p">),</span><span class="w">       </span><span class="c1">// Single digits</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">UInterval</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">999</span><span class="p">)</span><span class="w">    </span><span class="c1">// Three digits</span>
+<span class="p">});</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int64_t</span><span class="w"> </span><span class="n">multiRange</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with multi-interval integers</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">intervals</span><span class="p">({</span><span class="n">gen</span><span class="o">::</span><span class="n">Interval</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">-1</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">Interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)}));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Combinators/">Combinators</a> for <code>gen::oneOf</code> and <code>gen::unionOf</code>, <a href="#utility-numeric-range-generators">Utility Numeric Range Generators</a> for single interval generators, <a href="#basic-type-generators">Basic Type Generators</a> for integer type generators.</p>
+<hr />
+<h2 id="floating-point-generators">Floating Point Generators<a class="headerlink" href="#floating-point-generators" title="Permanent link">&para;</a></h2>
+<p>Floating point generators (<code>gen::float32</code> and <code>gen::float64</code>) support configurable probabilities for special IEEE 754 values: NaN, positive infinity, and negative infinity.</p>
+<h3 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">&para;</a></h3>
+<p><strong>Constructor signatures:</strong>
+<div class="highlight"><pre><span></span><code><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">nanProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">posInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">negInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">nanProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">posInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">negInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+
+<span class="c1">// Equivalent to:</span>
+<span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">float</span><span class="o">&gt;</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">nanProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">posInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">negInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+<span class="n">Arbi</span><span class="o">&lt;</span><span class="kt">double</span><span class="o">&gt;</span><span class="p">(</span><span class="kt">double</span><span class="w"> </span><span class="n">nanProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">posInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">negInfProb</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0.0</span><span class="p">)</span>
+</code></pre></div></p>
+<p><strong>Parameters:</strong></p>
+<ul>
+<li><strong><code>nanProb</code></strong> (default: <code>0.0</code>): Probability of generating NaN, must be in range [0.0, 1.0]</li>
+<li><strong><code>posInfProb</code></strong> (default: <code>0.0</code>): Probability of generating positive infinity, must be in range [0.0, 1.0]</li>
+<li><strong><code>negInfProb</code></strong> (default: <code>0.0</code>): Probability of generating negative infinity, must be in range [0.0, 1.0]</li>
+</ul>
+<p><strong>Constraints:</strong></p>
+<ul>
+<li>Each probability must be between 0.0 and 1.0 (inclusive)</li>
+<li>The sum of all probabilities must be ≤ 1.0</li>
+<li>The remaining probability (1.0 - sum) is used for generating finite values</li>
+</ul>
+<p>The constructor validates these requirements and throws <code>runtime_error</code> if they are not met.</p>
+<h3 id="default-behavior">Default Behavior<a class="headerlink" href="#default-behavior" title="Permanent link">&para;</a></h3>
+<p>By default, floating point generators produce only <strong>finite values</strong> (no NaN or infinity):</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Default: generates only finite values</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">doubleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">();</span>
+
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="p">,</span><span class="w"> </span><span class="kt">double</span><span class="w"> </span><span class="n">d</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">isfinite</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<span class="w">    </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">isfinite</span><span class="p">(</span><span class="n">d</span><span class="p">));</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">());</span>
+</code></pre></div>
+<h3 id="special-value-probabilities">Special Value Probabilities<a class="headerlink" href="#special-value-probabilities" title="Permanent link">&para;</a></h3>
+<p>You can configure the probability of generating special values using constructor parameters:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate 10% NaN, 90% finite</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatWithNaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+
+<span class="c1">// Generate 5% +inf, 5% -inf, 90% finite</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatWithInf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">);</span>
+
+<span class="c1">// Generate 5% each special value, 85% finite</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatWithAll</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">);</span>
+
+<span class="c1">// When sum = 1.0, no finite values are generated</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">onlySpecial</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2</span><span class="p">);</span><span class="w"> </span><span class="c1">// 50% NaN, 30% +inf, 20% -inf</span>
+
+<span class="c1">// Same API for double</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">doubleWithNaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">float</span><span class="w"> </span><span class="n">f</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">isfinite</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<span class="w">    </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">isinf</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<span class="w">    </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">std</span><span class="o">::</span><span class="n">isnan</span><span class="p">(</span><span class="n">f</span><span class="p">));</span>
+<span class="w">    </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="w">    </span><span class="n">PROP_STAT</span><span class="p">(</span><span class="n">f</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">));</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="../PropertyAPI/">Property API Reference</a> for <code>PROP_STAT</code> usage, <a href="#basic-type-generators">Basic Type Generators</a> for other numeric generators, <a href="../Arbitrary/">Arbitrary</a> for floating-point generator configuration.</p>
+<hr />
+<h2 id="access-to-an-arbitrary">Access to an Arbitrary<a class="headerlink" href="#access-to-an-arbitrary" title="Permanent link">&para;</a></h2>
+<p>While arbitraries (default generator) for type <code>T</code> can be accessed using <code>proptest::Arbitrary&lt;T&gt;</code>, a proxy in <code>gen</code> namespace is also provided. You may find it useful if type should be parameterized:</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gen::arbitrary&lt;T&gt;(...)</code></td>
+<td>alias to <code>proptest::Arbitrary&lt;T&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for details on arbitraries and how to define custom ones.</p>
+<hr />
+<h2 id="combinator-functions">Combinator Functions<a class="headerlink" href="#combinator-functions" title="Permanent link">&para;</a></h2>
+<p>The second part of <code>gen</code> namespace contains all the combinators provided by <code>cppproptest</code>. Combinators transform or combine existing generators to create new, more complex ones.</p>
+<table>
+<thead>
+<tr>
+<th>Function</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gen::just&lt;T&gt;(value)</code></td>
+<td>Constant value</td>
+</tr>
+<tr>
+<td><code>gen::elementOf&lt;T&gt;(vals...)</code></td>
+<td>Random selection from values</td>
+</tr>
+<tr>
+<td><code>gen::oneOf&lt;T&gt;(gens...)</code></td>
+<td>Union of generators</td>
+</tr>
+<tr>
+<td><code>gen::unionOf&lt;T&gt;(gens...)</code></td>
+<td>Alias for <code>gen::oneOf</code></td>
+</tr>
+<tr>
+<td><code>gen::construct&lt;Class,Args...&gt;(gens...)</code></td>
+<td>Object construction</td>
+</tr>
+<tr>
+<td><code>gen::transform&lt;T,U&gt;(gen, func)</code></td>
+<td>Value transformation</td>
+</tr>
+<tr>
+<td><code>gen::derive&lt;T,U&gt;(gen, genGen)</code></td>
+<td>Value derivation (flat-map)</td>
+</tr>
+<tr>
+<td><code>gen::filter&lt;T&gt;(gen, predicate)</code></td>
+<td>Value filtering</td>
+</tr>
+<tr>
+<td><code>gen::suchThat&lt;T&gt;(gen, predicate)</code></td>
+<td>Alias for filter</td>
+</tr>
+<tr>
+<td><code>gen::dependency&lt;T,U&gt;(genT, genUGen)</code></td>
+<td>Dependency between values</td>
+</tr>
+<tr>
+<td><code>gen::chain&lt;T&gt;(genT, genGen)</code></td>
+<td>Chain of generators</td>
+</tr>
+<tr>
+<td><code>gen::aggregate&lt;T&gt;(genT, aggregator)</code></td>
+<td>Aggregation of values</td>
+</tr>
+<tr>
+<td><code>gen::accumulate&lt;T&gt;(genT, accumulator, min, max)</code></td>
+<td>Accumulation of values</td>
+</tr>
+<tr>
+<td><code>gen::lazy&lt;T&gt;(func)</code></td>
+<td>Lazy evaluation</td>
+</tr>
+<tr>
+<td><code>gen::reference&lt;T&gt;(ref)</code></td>
+<td>Reference wrapper</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Constant value generator</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">constantGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">just</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">42</span><span class="p">);</span>
+
+<span class="c1">// Random selection from values</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">choiceGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"> </span><span class="mi">7</span><span class="p">,</span><span class="w"> </span><span class="mi">11</span><span class="p">,</span><span class="w"> </span><span class="mi">13</span><span class="p">);</span>
+
+<span class="c1">// Union of generators (see [Combinators](Combinators.md) for gen::oneOf, [Utility Numeric Range Generators](#utility-numeric-range-generators) for gen::interval)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mixedIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">oneOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span><span class="w"> </span><span class="mi">110</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span><span class="w"> </span><span class="mi">1010</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">// Object construction (see [Combinators](Combinators.md) for gen::construct, [Utility Numeric Range Generators](#utility-numeric-range-generators) for gen::interval)</span>
+<span class="k">struct</span><span class="w"> </span><span class="nc">Point</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="n">Point</span><span class="p">(</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="n">x</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="w"> </span><span class="n">y</span><span class="p">(</span><span class="n">y</span><span class="p">)</span><span class="w"> </span><span class="p">{}</span>
+<span class="w">    </span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">pointGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span>
+<span class="p">);</span>
+
+<span class="c1">// Value transformation (see [Combinators](Combinators.md) for gen::transform, [String Generators](#string-generators) for gen::string)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringLengthGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">transform</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">();</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Value filtering (see [Combinators](Combinators.md) for gen::filter, [Basic Type Generators](#basic-type-generators) for gen::int32)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">evenIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span>
+<span class="w">    </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Dependency between values (see [Combinators](Combinators.md) for gen::dependency, [Utility Numeric Range Generators](#utility-numeric-range-generators) for gen::interval, [String Generators](#string-generators) for gen::string)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">dependentGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">dependency</span><span class="o">&lt;</span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p">),</span>
+<span class="w">    </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">size</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">().</span><span class="n">setSize</span><span class="p">(</span><span class="n">size</span><span class="p">);</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Usage in forAll</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">choice</span><span class="p">,</span><span class="w"> </span><span class="n">Point</span><span class="w"> </span><span class="n">p</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="w"> </span><span class="n">length</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="n">even</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Property test with combinator-generated values</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">elementOf</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">,</span><span class="w"> </span><span class="mi">3</span><span class="p">),</span>
+<span class="w">   </span><span class="n">gen</span><span class="o">::</span><span class="n">construct</span><span class="o">&lt;</span><span class="n">Point</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="mi">-100</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">)),</span>
+<span class="w">   </span><span class="n">gen</span><span class="o">::</span><span class="n">transform</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">size_t</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&amp;</span><span class="w"> </span><span class="n">s</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">length</span><span class="p">();</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">   </span><span class="n">gen</span><span class="o">::</span><span class="n">filter</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="p">[](</span><span class="kt">int</span><span class="w"> </span><span class="n">n</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">n</span><span class="w"> </span><span class="o">%</span><span class="w"> </span><span class="mi">2</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">;</span><span class="w"> </span><span class="p">}));</span>
+</code></pre></div></p>
+<p><strong>See also:</strong> <a href="../Combinators/">Combinators</a> for comprehensive documentation on all combinators, including detailed examples and use cases.</p>
+<h3 id="utility-functions-for-oneofunionof-and-elementof">Utility Functions for <code>oneOf</code>(<code>unionOf</code>) and <code>elementOf</code><a class="headerlink" href="#utility-functions-for-oneofunionof-and-elementof" title="Permanent link">&para;</a></h3>
+<p>There are utility functions for providing probabilities for each value or generator to be chosen for <code>gen::oneOf</code> or <code>gen::elementOf</code>.</p>
+<table>
+<thead>
+<tr>
+<th>Alias</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>gen::weighted&lt;T&gt;(gen, weight)</code></td>
+<td>Weighted generator decorator</td>
+</tr>
+<tr>
+<td><code>gen::weightedVal&lt;T&gt;(value, weight)</code></td>
+<td>Weighted value decorator</td>
+</tr>
+</tbody>
+</table>
+<p><strong>See also:</strong> <a href="../Combinators/">Combinators</a> for details on weighted selection.</p>
+<hr />
+<h2 id="examples">Examples<a class="headerlink" href="#examples" title="Permanent link">&para;</a></h2>
+<h3 id="basic-generators">Basic Generators<a class="headerlink" href="#basic-generators" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Basic types (see [Basic Type Generators](#basic-type-generators))</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">boolGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">boolean</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">();</span><span class="w"> </span><span class="c1">// see [String Generators](#string-generators)</span>
+
+<span class="c1">// Floating point - default (finite only) (see [Floating Point Generators](#floating-point-generators))</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">doubleGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">();</span>
+
+<span class="c1">// Floating point with special values (see [Floating Point Generators](#floating-point-generators))</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">floatWithNaN</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float32</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.0</span><span class="p">);</span><span class="w"> </span><span class="c1">// 10% NaN, 90% finite</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">doubleWithInf</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">float64</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">,</span><span class="w"> </span><span class="mf">0.05</span><span class="p">);</span><span class="w"> </span><span class="c1">// 5% +inf, 5% -inf, 90% finite</span>
+
+<span class="c1">// Numeric ranges - these are function calls, not type aliases (see [Utility Numeric Range Generators](#utility-numeric-range-generators))</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">smallIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">100</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">positiveIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">natural</span><span class="p">(</span><span class="mi">1000</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">nonNegIntGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">nonNegative</span><span class="p">(</span><span class="mi">500</span><span class="p">);</span>
+</code></pre></div>
+<h3 id="container-generators_1">Container Generators<a class="headerlink" href="#container-generators_1" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Simple containers (see [Container Generators](#container-generators))</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intVectorGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringListGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">list</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">intSetGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">set</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">stringIntMapGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;</span><span class="p">();</span>
+
+<span class="c1">// Nested containers</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">vectorOfMapsGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">mapOfVectorsGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">map</span><span class="o">&lt;</span><span class="n">std</span><span class="o">::</span><span class="n">string</span><span class="p">,</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">vector</span><span class="o">&lt;</span><span class="kt">int</span><span class="o">&gt;&gt;</span><span class="p">();</span>
+</code></pre></div>
+<h3 id="string-generators-with-custom-elements">String Generators with Custom Elements<a class="headerlink" href="#string-generators-with-custom-elements" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1">// Custom character ranges (see [String Generators](#string-generators), [Utility Numeric Range Generators](#utility-numeric-range-generators) for gen::interval, [Combinators](Combinators.md) for gen::unionOf)</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">uppercaseGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">digitGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">));</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">alphanumericGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">string</span><span class="p">(</span><span class="n">gen</span><span class="o">::</span><span class="n">unionOf</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;A&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;Z&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;a&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;z&#39;</span><span class="p">),</span>
+<span class="w">    </span><span class="n">gen</span><span class="o">::</span><span class="n">interval</span><span class="o">&lt;</span><span class="kt">char</span><span class="o">&gt;</span><span class="p">(</span><span class="sc">&#39;0&#39;</span><span class="p">,</span><span class="w"> </span><span class="sc">&#39;9&#39;</span><span class="p">)</span>
+<span class="p">));</span>
+</code></pre></div>
+<p><strong>See also:</strong> <a href="../GeneratorExamples/">Generator Examples</a> for more comprehensive real-world examples.</p>
+<hr />
 <h2 id="building-custom-generators">Building Custom Generators<a class="headerlink" href="#building-custom-generators" title="Permanent link">&para;</a></h2>
 <p>You can build your own generator for type <code>T</code> by manually defining the conforming generator type <code>GenFunction&lt;T&gt;</code>. You can refer to <a href="../CustomGenerator/">Building Custom Generators from Scratch</a> for more information.</p>
-<p>While you can build a custom generator from scratch, it's usually not recommended as there is a better option - using a <strong>generator combinator</strong>. Generator combinators are toolkit for building new generators based on existing ones.
-They can also be chained to create another generator out of themselves. See <a href="../Combinators/">Combinators</a> page for the detail.</p>
-<p>&nbsp;</p>
+<p>While you can build a custom generator from scratch, it's usually not recommended as there is a better option - using a <strong>generator combinator</strong>. Generator combinators are toolkit for building new generators based on existing ones. They can also be chained to create another generator out of themselves.</p>
+<p><strong>See also:</strong> <a href="../Combinators/">Combinators</a> for comprehensive guide on using combinators, <a href="../CustomGenerator/">Custom Generator</a> for building generators from scratch, <a href="../GeneratorExamples/">Generator Examples</a> for practical examples.</p>
+<hr />
+<h2 id="related-topics">Related Topics<a class="headerlink" href="#related-topics" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../Arbitrary/">Arbitrary</a> - Default generators for types</li>
+<li><a href="../Combinators/">Combinators</a> - Transform and combine generators</li>
+<li><a href="../CustomGenerator/">Custom Generator</a> - Building generators from scratch</li>
+<li><a href="../GeneratorExamples/">Generator Examples</a> - Real-world generator usage</li>
+<li><a href="../GenNamespace/">Gen Namespace</a> - Organization of the <code>gen</code> namespace</li>
+<li><a href="../Walkthrough/">Walkthrough</a> - Step-by-step guide to using generators</li>
+<li><a href="../PropertyAPI/">Property API Reference</a> - Using generators with <code>forAll()</code> and <code>property()</code></li>
+<li><a href="../Shrinking/">Shrinking</a> - How generated values are simplified when tests fail</li>
+</ul>
+<p>This design differs from <code>std::u8string</code> / <code>std::u16string</code>, but is used in <code>cppproptest</code> to keep generator and shrinking support built on top of <code>std::string</code> storage.</p>
 <div class="footnote">
 <hr />
 <ol>
-<li id="fn:generatorT">
-<p>In fact, <code>Arbitrary&lt;T&gt;</code> inherits from <code>Generator&lt;T&gt;</code>, which provides those helpers.&#160;<a class="footnote-backref" href="#fnref:generatorT" title="Jump back to footnote 1 in the text">&#8617;</a></p>
+<li id="fn:encstring">
+<p>Encoding-aware string types <code>UTF8String</code>, <code>UTF16BEString</code>, <code>UTF16LEString</code>, and <code>CESU8String</code> are implemented as classes derived from <code>std::string</code>. This lets you use standard string APIs such as <code>.c_str()</code> / <code>.data()</code> to access the underlying bytes and <code>.size()</code> to get the buffer length in bytes, while <code>.charsize()</code> reports the logical character/code-unit count. For example:
+<div class="highlight"><pre><span></span><code><span class="n">UTF8String</span><span class="w"> </span><span class="n">s</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">UTF8String</span><span class="p">(</span><span class="s">&quot;café&quot;</span><span class="p">);</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">bytes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">size</span><span class="p">();</span><span class="w">     </span><span class="c1">// buffer size in bytes</span>
+<span class="k">auto</span><span class="w"> </span><span class="n">chars</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">charsize</span><span class="p">();</span><span class="w"> </span><span class="c1">// number of Unicode code units</span>
+<span class="k">const</span><span class="w"> </span><span class="kt">char</span><span class="o">*</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">s</span><span class="p">.</span><span class="n">c_str</span><span class="p">();</span><span class="w"> </span><span class="c1">// pass to C APIs</span>
+</code></pre></div>&#160;<a class="footnote-backref" href="#fnref:encstring" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref2:encstring" title="Jump back to footnote 1 in the text">&#8617;</a><a class="footnote-backref" href="#fnref3:encstring" title="Jump back to footnote 1 in the text">&#8617;</a></p>
 </li>
 </ol>
 </div>
@@ -878,7 +2748,7 @@ They can also be chained to create another generator out of themselves. See <a h
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">April 4, 2024</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
       
     
   </small>
