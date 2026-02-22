@@ -1,6 +1,10 @@
 # Advanced Stateful & Concurrency Testing
 
+
+!!! STUB "This page is work in progress"
+
 Stateful testing opens new possibilities for testing.
+
 * Finding memory leaks
     * With help of a suitable allocation tracker, we can place postcondition check that allocation numbers should come back to 0, after various actions executed and then destructed the object.
 * Testing with various responses from external dependencies
