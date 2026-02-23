@@ -26,5 +26,5 @@ TEST(Compile, oneOf)
     gen::oneOf<int>(gen::weighted<int>(gen::interval(0, 10), 0.5), gen::weighted<int>(42, 0.5));  // explicit T for both
     // all of possible combinations in one oneOf
     gen::oneOf<int>(1, gen::weightedGen<int>(2, 0.2), gen::weighted<int>(1339, 0.3),
-        gen::weighted(gen::interval(0, 10), 0.1), 42, gen::weighted<int>(gen::interval(10, 20), 0.5));
+        gen::weighted(gen::interval(0, 10), 0.1), 42, gen::weighted<int>(gen::interval(10, 20), 0.2));
 }
