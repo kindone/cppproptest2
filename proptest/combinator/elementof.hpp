@@ -1,6 +1,9 @@
 #pragma once
 
 #include "proptest/Random.hpp"
+#include "proptest/std/type.hpp"
+#include "proptest/std/concepts.hpp"
+#include "proptest/combinator/weighted.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/just.hpp"
 #include "proptest/std/algorithm.hpp"
@@ -13,36 +16,31 @@
 
 namespace proptest {
 
-namespace util {
-template <typename T>
-struct WeightedValue;
-}
-
 namespace gen {
 
 template <typename Impl, typename T = Impl>
 util::WeightedValue<T> weightedVal(Impl&& value, double weight);
 
+/**
+ * @ingroup Combinators
+ * @brief Unified weighted decorator for both elementOf and oneOf.
+ * @details For values: returns WeightedValue<T> (use with elementOf or oneOf).
+ *          For generators: returns Weighted<T> (use with oneOf only).
+ *          Works with or without explicit T: weighted(value, prob), weighted<T>(value, prob),
+ *          weighted(gen, prob), weighted<T>(gen, prob).
+ */
+template <typename Impl, typename T = decay_t<Impl>>
+    requires(!invocable<Impl, Random&>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+util::WeightedValue<T> weighted(Impl&& value, double prob);
+
+template <typename T = void, GenLike GEN>
+    requires(same_as<T, void> || same_as<T, typename invoke_result_t<GEN, Random&>::type>)
+auto weighted(GEN&& gen, double prob)
+    -> util::Weighted<conditional_t<same_as<T, void>, typename invoke_result_t<GEN, Random&>::type, T>>;
+
 } // namespace gen
 
 namespace util {
-
-struct WeightedValueBase
-{
-    template <typename T>
-    WeightedValueBase(const WeightedValue<T>& weighted) : value(weighted.value), weight(weighted.weight) {}
-    WeightedValueBase(const Any& _value, double _weight) : value(_value), weight(_weight) {}
-
-    Any value;
-    double weight;
-};
-
-template <typename T>
-struct WeightedValue : WeightedValueBase
-{
-    WeightedValue(const WeightedValueBase& base) : WeightedValueBase(base) {}
-    WeightedValue(const Any& _value, double _weight) : WeightedValueBase(_value, _weight) {}
-};
 
 template <typename T>
     requires(!is_same_v<decay_t<T>, WeightedValue<T>>)
@@ -57,6 +55,18 @@ WeightedValue<T> ValueToWeighted(const WeightedValue<T>& weighted)
     return weighted;
 }
 
+// Reject gen::weighted(gen, prob) in elementOf — generators not allowed; provide clear error
+template <typename>
+struct dependent_false : false_type {};
+template <typename T>
+WeightedValue<T> ValueToWeighted(const util::Weighted<T>&)
+{
+    static_assert(dependent_false<T>::value,
+        "elementOf accepts values only, not generators. "
+        "Use gen::weighted(value, prob) or gen::weightedVal(value, prob) for values. "
+        "For generators, use gen::oneOf with gen::weighted(gen, prob).");
+}
+
 }  // namespace util
 
 namespace gen {
@@ -65,6 +75,21 @@ template <typename Impl, typename T>
 util::WeightedValue<T> weightedVal(Impl&& value, double weight)
 {
     return util::WeightedValue<T>(Any(util::forward<Impl>(value)), weight);
+}
+
+template <typename Impl, typename T>
+    requires(!invocable<Impl, Random&>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+util::WeightedValue<T> weighted(Impl&& value, double prob)
+{
+    return weightedVal<T>(util::forward<Impl>(value), prob);
+}
+
+template <typename T, GenLike GEN>
+    requires(same_as<T, void> || same_as<T, typename invoke_result_t<GEN, Random&>::type>)
+auto weighted(GEN&& gen, double prob)
+    -> util::Weighted<conditional_t<same_as<T, void>, typename invoke_result_t<GEN, Random&>::type, T>>
+{
+    return gen::weightedGen(util::forward<GEN>(gen), prob);
 }
 
 // a value can be a raw Impl or a weightedVal(Impl, weight)

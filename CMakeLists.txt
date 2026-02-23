@@ -207,6 +207,22 @@ ADD_TEST(compile_proptest_gtest
     EXCLUDE_FROM_ALL
     compile_proptest)
 
+### compile_fail: each .cpp in proptest/test/compile_fail/ must fail to compile.
+# Goal: verify that invalid API usage yields useful error messages (e.g. static_assert),
+# not just that compilation fails. Each file gets compile_fail_<name> target.
+# Build fails (expected); CTest WILL_FAIL so test passes when build fails.
+# Add new test: create .cpp file, run cmake to reconfigure.
+FILE(GLOB compile_fail_sources "proptest/test/compile_fail/*.cpp")
+FOREACH(src ${compile_fail_sources})
+    GET_FILENAME_COMPONENT(name ${src} NAME_WE)
+    ADD_EXECUTABLE(compile_fail_${name} EXCLUDE_FROM_ALL ${src})
+    TARGET_LINK_LIBRARIES(compile_fail_${name} PRIVATE proptest)
+    ADD_TEST(NAME compile_fail_${name}
+        COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target compile_fail_${name}
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+    SET_TESTS_PROPERTIES(compile_fail_${name} PROPERTIES WILL_FAIL TRUE EXCLUDE_FROM_ALL TRUE)
+ENDFOREACH()
+
 SET(test_proptest_mini_sources
     proptest/test/test_mini.cpp
 )

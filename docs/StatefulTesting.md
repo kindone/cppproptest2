@@ -136,9 +136,8 @@ TEST(MyVectorTest, Stateful)
         PROP_ASSERT(obj.size() == 0);
     }));
 
-    auto actionGen = oneOf<SimpleAction<MyVector>>(pushBackGen, popBackGen, weightedGen<SimpleAction<MyVector>>(clearGen, 0.1));
+    auto actionGen = oneOf<SimpleAction<MyVector>>(pushBackGen, popBackGen, gen::weighted(clearGen, 0.1));
     // `oneOf` can take weights, so you can adjust rate of generation of an action
-    //    auto actionGen = oneOf<SimpleAction<MyVector>>(pushBackGen, popBackGen, weightedGen<SimpleAction<MyVector>>(clearGen, 0.1));
     auto prop = statefulProperty<MyVector>(
         /* initial state generator */ lazy<MyVector>([]() { return MyVector(); }),
         /* action generator */ actionGen);

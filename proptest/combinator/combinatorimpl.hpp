@@ -3,13 +3,13 @@
 #include "proptest/api.hpp"
 #include "proptest/util/anyfunction.hpp"
 #include "proptest/Shrinkable.hpp"
+#include "proptest/combinator/weighted.hpp"
 
 namespace proptest {
 
 struct GeneratorCommon;
 
 namespace util {
-struct WeightedBase;
 
 /* fwd-declaration of impl. for combinators */
 PROPTEST_API GeneratorCommon filterImpl(Function1<ShrinkableBase> gen, Function1<bool> criteria);

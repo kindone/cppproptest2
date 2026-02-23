@@ -186,6 +186,7 @@ The `gen::*` functions are the underlying implementations for the utility method
 | [`gen::just<T>`](#genjustt) | Generate a constant value | — |
 | [`gen::lazy<T>`](#genlazyt) | Generate by calling a function | — |
 | [`gen::elementOf<T>`](#genelementoft) | Select from constant values | — |
+| [`gen::weighted`](#genoneoft) | Annotate value or generator with probability | Use with `elementOf` (values) or `oneOf` (values/generators) |
 | [`gen::interval<T>`](#genintervalt), [`gen::natural<T>`](#gennaturalt), etc. | Numeric ranges | [Generators.md](Generators.md#utility-numeric-range-generators) |
 | [`gen::pair`](#genpairt1t2), [`gen::tuple`](#gentuplets) | Combine generators | — |
 | [`gen::oneOf<T>`](#genoneoft) | Select from multiple generators | — |
@@ -260,15 +261,18 @@ auto httpMethodGen = gen::elementOf<std::string>("GET", "POST", "PUT", "DELETE")
 
 `gen::elementOf` supports probabilistic weights (`0 < weight <= 1`). The sum of weights should ideally be 1.0 but must not exceed 1.0. If a weight is unspecified for a value, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the values without specified weights.
 
-Use `gen::weightedVal(<value>, <weight>)` to annotate the desired weight.
+Use `gen::weighted(value, prob)` to annotate the desired weight. For a more explicitly named API, you can use `gen::weightedVal<T>(value, prob)`, which does the same.
 
 **Example:**
 
 ```cpp
 // generates 2, 5, or 10 with specified probabilities
 // weight for 10 automatically becomes 1.0 - 0.8 - 0.15 == 0.05
-gen::elementOf<int>(gen::weightedVal(2, 0.8), gen::weightedVal(5, 0.15), 10);
+gen::elementOf<int>(gen::weighted(2, 0.8), gen::weighted(5, 0.15), 10);
+gen::elementOf<int>(gen::weighted<int>(2, 0.8), gen::weighted<int>(5, 0.15), 10);  // explicit T when needed
 ```
+
+**Note:** `elementOf` accepts *values* only, not generators. Passing `gen::weighted(generator, prob)` will fail to compile with a clear error. For generators, use `gen::oneOf` with `gen::weighted(gen, prob)`.
 
 **See also:** [Generators.md](Generators.md#combinator-functions)
 
@@ -378,7 +382,7 @@ Combine multiple generators of the same type into a single generator that random
 
 Generates a value of type `T` by randomly choosing one of the provided generators or values. Each argument can be:
 - a generator (GenLike)
-- `weightedGen(generator, weight)`
+- `gen::weighted(gen, prob)` or `gen::weighted(value, prob)`
 - a raw value of type `T` (treated as `gen::just(value)`)
 
 **Signature:** `gen::oneOf<T>(gen1, ..., genN)` or `gen::oneOf<T>(val1, val2, ...)` or mixed
@@ -404,7 +408,7 @@ auto mixedGen = gen::oneOf<int>(1339, gen::interval(0, 10), 42);
 
 `gen::oneOf` supports probabilistic weights (`0 < weight <= 1`). The sum of weights should ideally be 1.0 but must not exceed 1.0. If a weight is unspecified for a generator, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the generators without specified weights.
 
-Use `weightedGen(<generator>, <weight>)` to annotate the desired weight. You can also use `weightedGen<T>(<value>, <weight>)` with a raw value for indicating single value generation — it is equivalent to `weightedGen<T>(gen::just<T>(<value>), <weight>)`.
+Use `gen::weighted(gen, prob)` for generators and `gen::weighted(value, prob)` for values. Works with or without explicit `T`. For a more explicitly named API, you can use `gen::weightedGen<T>(gen, prob)` or `gen::weightedGen<T>(value, prob)`, which are essentially the same.
 
 **Example:**
 
@@ -412,15 +416,15 @@ Use `weightedGen(<generator>, <weight>)` to annotate the desired weight. You can
 // generates a numeric within ranges with specified probabilities
 // weight for third generator automatically becomes 1.0 - (0.8 + 0.15) == 0.05
 auto weightedRangeGen = gen::oneOf<int>(
-    weightedGen(gen::interval(0, 10), 0.8),
-    weightedGen(gen::interval(100, 1000), 0.15),
+    gen::weighted(gen::interval(0, 10), 0.8),
+    gen::weighted(gen::interval(100, 1000), 0.15),
     gen::interval(10000, 100000)
 );
 
-// Raw values with weight (implicit gen::just)
+// Raw values with weight
 auto weightedFixedGen = gen::oneOf<int>(
-    gen::weightedGen<int>(1339, 0.9),
-    gen::weightedGen<int>(42, 0.1)
+    gen::weighted(1339, 0.9),
+    gen::weighted(42, 0.1)
 );
 ```
 

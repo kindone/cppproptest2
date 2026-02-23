@@ -6,6 +6,7 @@
 #include "proptest/std/concepts.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/combinator/combinatorimpl.hpp"
+#include "proptest/combinator/weighted.hpp"
 #include "proptest/Shrinkable.hpp"
 
 /**
@@ -14,11 +15,6 @@
  */
 
 namespace proptest {
-
-namespace util {
-template <typename T>
-struct Weighted;
-}  // namespace util
 
 namespace gen {
 
@@ -37,26 +33,6 @@ util::Weighted<T> weightedGen(Impl&& value, double weight);
 
 namespace util {
 
-struct WeightedBase
-{
-    WeightedBase(const Function1<ShrinkableBase>& _func, double _weight) : func(_func), weight(_weight) {}
-    template <typename T>
-    WeightedBase(const Weighted<T>& weighted) : func(weighted.func), weight(weighted.weight) {}
-
-    Function1<ShrinkableBase> func;
-    double weight;
-};
-
-
-template <typename T>
-struct Weighted : WeightedBase
-{
-    using type = T;
-
-    Weighted(const WeightedBase& base) : WeightedBase(base) {}
-    Weighted(const Function1<ShrinkableBase>& _func, double _weight) : WeightedBase(_func, _weight) {}
-};
-
 template <typename T, GenLike<T> GEN>
 Weighted<T> GenToWeighted(GEN&& gen)
 {
@@ -71,11 +47,22 @@ Weighted<T> GenToWeighted(const Weighted<T>& weighted)
 
 // Raw value: treat as gen::just<T>(value) - inline to avoid circular include with just.hpp
 template <typename T, typename Impl>
-    requires (!GenLike<Impl, T>) && (!is_same_v<decay_t<Impl>, Weighted<T>>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+    requires (!GenLike<Impl, T>) && (!is_same_v<decay_t<Impl>, Weighted<T>>) &&
+             (!is_same_v<decay_t<Impl>, WeightedValue<T>>) &&
+             (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
 Weighted<T> GenToWeighted(Impl&& value)
 {
     auto any = util::make_any<T>(util::forward<Impl>(value));
     return Weighted<T>(Function1<ShrinkableBase>([any](Random&) -> ShrinkableBase { return Shrinkable<T>(any); }), 0.0);
+}
+
+// gen::weighted(value, prob) -> WeightedValue<T>; convert to Weighted<T> for oneOf
+template <typename T>
+Weighted<T> GenToWeighted(const WeightedValue<T>& wval)
+{
+    return Weighted<T>(
+        Function1<ShrinkableBase>([val = wval.value](Random&) -> ShrinkableBase { return Shrinkable<T>(val); }),
+        wval.weight);
 }
 
 }  // namespace util
@@ -115,10 +102,12 @@ util::Weighted<T> weightedGen(Impl&& value, double weight)
         Function1<ShrinkableBase>([any](Random&) -> ShrinkableBase { return Shrinkable<T>(any); }), weight);
 }
 
-// Concept: generator, Weighted<T>, or raw value convertible to T
+// Concept: generator, Weighted<T>, WeightedValue<T>, or raw value convertible to T
 template <typename T, typename Impl>
 concept OneOfArg = GenLike<Impl, T> || is_same_v<decay_t<Impl>, util::Weighted<T>> ||
-    ((convertible_to<Impl, T> || same_as<decay_t<Impl>, T>) && !GenLike<Impl, T> && !is_same_v<decay_t<Impl>, util::Weighted<T>>);
+    is_same_v<decay_t<Impl>, util::WeightedValue<T>> ||
+    ((convertible_to<Impl, T> || same_as<decay_t<Impl>, T>) && !GenLike<Impl, T> &&
+     !is_same_v<decay_t<Impl>, util::Weighted<T>> && !is_same_v<decay_t<Impl>, util::WeightedValue<T>>);
 
 /**
  * @ingroup Combinators

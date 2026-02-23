@@ -100,6 +100,23 @@ TEST(OneOf, mixedValueWeightedGenGenerator)
     EXPECT_GT(numInRange, 0);
 }
 
+TEST(Weighted, unifiedElementOf)
+{
+    Random rand(getCurrentTime());
+    // gen::weighted(value, prob) works in elementOf
+    auto elemGen = gen::elementOf<int>(gen::weighted<int>(2, 0.8), gen::weighted<int>(5, 0.15), 10);
+    int num2 = 0, num5 = 0, num10 = 0;
+    for(int i = 0; i < 1000; i++) {
+        int v = elemGen(rand).getRef();
+        if(v == 2) num2++;
+        else if(v == 5) num5++;
+        else if(v == 10) num10++;
+        EXPECT_TRUE(v == 2 || v == 5 || v == 10);
+    }
+    EXPECT_GT(num2, num5);
+    EXPECT_GT(num5, num10);
+}
+
 TEST(ElementOf, basic)
 {
     Random rand(getCurrentTime());

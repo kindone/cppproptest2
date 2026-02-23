@@ -57,8 +57,8 @@ The following table provides a comprehensive overview of all generators availabl
 | | [`gen::accumulate<T>(genT, accumulator, min, max)`](#combinator-functions) | Accumulation of values |
 | | [`gen::lazy<T>(func)`](#combinator-functions) | Lazy evaluation |
 | | [`gen::reference<T>(ref)`](#combinator-functions) | Reference wrapper |
-| | [`gen::weighted<T>(gen, weight)`](#combinator-functions) | Weighted generator decorator |
-| | [`gen::weightedVal<T>(value, weight)`](#combinator-functions) | Weighted value decorator |
+| | [`gen::weighted(value, prob)`](#combinator-functions) | Weighted value (for `elementOf`/`oneOf`) |
+| | [`gen::weighted(gen, prob)`](#combinator-functions) | Weighted generator (for `oneOf`) |
 | **Utilities** | | |
 | | [`gen::arbitrary<T>(...)`](#access-to-an-arbitrary) | Access to arbitrary |
 | | [`gen::noShrink(gen)`](#combinator-functions) | Same values, but with empty shrink stream |
@@ -1010,8 +1010,8 @@ There are utility functions for providing probabilities for each value or genera
 
 | Alias | Description |
 |-------|-------------|
-| `gen::weighted<T>(gen, weight)` | Weighted generator decorator |
-| `gen::weightedVal<T>(value, weight)` | Weighted value decorator |
+| `gen::weighted(value, prob)` | Weighted value (for `elementOf`/`oneOf`) |
+| `gen::weighted(gen, prob)` | Weighted generator (for `oneOf`) |
 
 **See also:** [Combinators](Combinators.md) for details on weighted selection.
 
