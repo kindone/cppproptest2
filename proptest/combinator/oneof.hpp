@@ -28,6 +28,11 @@ util::Weighted<T> weightedGen(GenFunction<T> gen, double weight);
 template <GenLike GEN>
 auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_result_t<GEN, Random&>::type>;
 
+// Raw value: treat as gen::just<T>(value) — avoids weightedGen<T>(gen::just(value), weight) and lvalue deduction issues
+template <typename T, typename Impl>
+    requires(!GenLike<Impl, T>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+util::Weighted<T> weightedGen(Impl&& value, double weight);
+
 } // namespace gen
 
 namespace util {
@@ -94,6 +99,20 @@ auto weightedGen(GEN&& gen, double weight) -> util::Weighted<typename invoke_res
 {
     using T = typename invoke_result_t<GEN, Random&>::type;
     return weightedGen<T>(util::forward<GEN>(gen), weight);
+}
+
+/**
+ * @ingroup Combinators
+ * @brief Decorator to pair a raw value with a weight for use in `oneOf`. Treats value as gen::just(value).
+ * @details Avoids weightedGen<T>(gen::just(value), weight) and lvalue deduction issues. Backward compatible.
+ */
+template <typename T, typename Impl>
+    requires(!GenLike<Impl, T>) && (convertible_to<Impl, T> || same_as<decay_t<Impl>, T>)
+util::Weighted<T> weightedGen(Impl&& value, double weight)
+{
+    auto any = util::make_any<T>(util::forward<Impl>(value));
+    return util::Weighted<T>(
+        Function1<ShrinkableBase>([any](Random&) -> ShrinkableBase { return Shrinkable<T>(any); }), weight);
 }
 
 // Concept: generator, Weighted<T>, or raw value convertible to T

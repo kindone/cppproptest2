@@ -83,13 +83,13 @@ Shrinkable<float> Arbi<float>::operator()(Random& rand) const
 
     // Add special value generators with their probabilities
     if (nanProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<float>(numeric_limits<float>::quiet_NaN()), nanProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<float>(numeric_limits<float>::quiet_NaN(), nanProb)));
     }
     if (posInfProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<float>(numeric_limits<float>::infinity()), posInfProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<float>(numeric_limits<float>::infinity(), posInfProb)));
     }
     if (negInfProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<float>(-numeric_limits<float>::infinity()), negInfProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<float>(-numeric_limits<float>::infinity(), negInfProb)));
     }
 
     // Add finite generator with remaining probability
@@ -146,13 +146,13 @@ Shrinkable<double> Arbi<double>::operator()(Random& rand) const
 
     // Add special value generators with their probabilities
     if (nanProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<double>(numeric_limits<double>::quiet_NaN()), nanProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<double>(numeric_limits<double>::quiet_NaN(), nanProb)));
     }
     if (posInfProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<double>(numeric_limits<double>::infinity()), posInfProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<double>(numeric_limits<double>::infinity(), posInfProb)));
     }
     if (negInfProb > 0.0) {
-        genVecPtr->push_back(util::WeightedBase(gen::weightedGen(gen::just<double>(-numeric_limits<double>::infinity()), negInfProb)));
+        genVecPtr->push_back(util::WeightedBase(gen::weightedGen<double>(-numeric_limits<double>::infinity(), negInfProb)));
     }
 
     // Add finite generator with remaining probability

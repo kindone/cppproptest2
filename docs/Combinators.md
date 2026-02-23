@@ -404,7 +404,7 @@ auto mixedGen = gen::oneOf<int>(1339, gen::interval(0, 10), 42);
 
 `gen::oneOf` supports probabilistic weights (`0 < weight <= 1`). The sum of weights should ideally be 1.0 but must not exceed 1.0. If a weight is unspecified for a generator, the remaining probability (1.0 minus the sum of specified weights) is distributed evenly among the generators without specified weights.
 
-Use `weightedGen(<generator>, <weight>)` to annotate the desired weight.
+Use `weightedGen(<generator>, <weight>)` to annotate the desired weight. You can also use `weightedGen<T>(<value>, <weight>)` with a raw value for indicating single value generation — it is equivalent to `weightedGen<T>(gen::just<T>(<value>), <weight>)`.
 
 **Example:**
 
@@ -415,6 +415,12 @@ auto weightedRangeGen = gen::oneOf<int>(
     weightedGen(gen::interval(0, 10), 0.8),
     weightedGen(gen::interval(100, 1000), 0.15),
     gen::interval(10000, 100000)
+);
+
+// Raw values with weight (implicit gen::just)
+auto weightedFixedGen = gen::oneOf<int>(
+    gen::weightedGen<int>(1339, 0.9),
+    gen::weightedGen<int>(42, 0.1)
 );
 ```
 

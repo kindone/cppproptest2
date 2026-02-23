@@ -14,4 +14,8 @@ TEST(Compile, oneOf)
     // oneOf<int>(weightedGen<int>(gen::int32(), 0.1), gen::float64(), genn::int());
     gen::oneOf<int>(gen::weightedGen<int>(gen::int32(), 0.1), gen::weightedGen(gen::int32(), 0.1),
                gen::weightedGen(gen::int32(), 0.8));
+    // Raw values with weight (implicit just)
+    gen::oneOf<int>(gen::weightedGen<int>(1339, 0.9), gen::weightedGen<int>(42, 0.1));
+    int val = 1339;
+    gen::oneOf<int>(gen::weightedGen<int>(val, 0.9), gen::weightedGen<int>(42, 0.1));
 }

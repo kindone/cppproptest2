@@ -57,6 +57,49 @@ TEST(OneOf, weighted)
     EXPECT_GT(num1339, num42);
 }
 
+TEST(OneOf, weightedRawValue)
+{
+    Random rand(getCurrentTime());
+    // weightedGen(value, weight) — raw value, implicit just
+    auto gen = gen::oneOf<int>(gen::weightedGen<int>(1339, 0.9), gen::weightedGen<int>(42, 0.1));
+    int num1339 = 0, num42 = 0;
+    for(int i = 0; i < 1000; i++) {
+        auto result = gen(rand);
+        if(result.getRef() == 1339)
+            num1339++;
+        else if(result.getRef() == 42)
+            num42++;
+        EXPECT_TRUE(result.getRef() == 1339 || result.getRef() == 42);
+    }
+    EXPECT_GT(num1339, num42);
+}
+
+TEST(OneOf, mixedValueWeightedGenGenerator)
+{
+    Random rand(getCurrentTime());
+    // All three styles in one oneOf: raw value, weightedGen(value, weight), weightedGen(generator, weight)
+    auto gen = gen::oneOf<int>(
+        1339,                                    // raw value (implicit just)
+        gen::weightedGen<int>(42, 0.1),          // value-style weightedGen
+        gen::weightedGen(gen::interval(100, 200), 0.1)  // generator-style weightedGen
+    );
+    int num1339 = 0, num42 = 0, numInRange = 0;
+    for(int i = 0; i < 100; i++) {
+        auto result = gen(rand);
+        int v = result.getRef();
+        if(v == 1339)
+            num1339++;
+        else if(v == 42)
+            num42++;
+        else if(v >= 100 && v <= 200)
+            numInRange++;
+        EXPECT_TRUE(v == 1339 || v == 42 || (v >= 100 && v <= 200));
+    }
+    EXPECT_GT(num1339, 0);
+    EXPECT_GT(num42, 0);
+    EXPECT_GT(numInRange, 0);
+}
+
 TEST(ElementOf, basic)
 {
     Random rand(getCurrentTime());
