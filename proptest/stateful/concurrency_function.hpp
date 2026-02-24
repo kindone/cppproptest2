@@ -337,7 +337,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
     ModelType model = modelFactory ? modelFactory(obj) : ModelType();
     const auto& front = frontShr.getRef();
     vector<string> frontNames;
-    transform(front.begin(), front.end(), util::back_inserter(frontNames), [](const ActionType& action) {
+    util::transform(front.begin(), front.end(), util::back_inserter(frontNames), [](const ActionType& action) {
         return action.name;
     });
 
@@ -368,7 +368,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
             thread_ready.emplace_back(new atomic_bool(false));
             const auto& rear = rearShrs[i].getRef();
             vector<string> rearNames;
-            transform(rear.begin(), rear.end(), util::back_inserter(rearNames), [](const ActionType& action) {
+            util::transform(rear.begin(), rear.end(), util::back_inserter(rearNames), [](const ActionType& action) {
                 return action.name;
             });
             rears.emplace_back(rear);

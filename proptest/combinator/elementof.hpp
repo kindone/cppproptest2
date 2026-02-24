@@ -111,7 +111,7 @@ decltype(auto) elementOf(Impl&&... values)
 
     auto genVecPtr = util::make_shared<WeightedVec>();
 
-    transform(
+    util::transform(
         wvaluevec.begin(), wvaluevec.end(), util::back_inserter(*genVecPtr),
         +[](const util::WeightedValue<T>& wvalue) -> util::WeightedBase { return weightedGen<T>(gen::just<T>(wvalue.value), wvalue.weight); });
 

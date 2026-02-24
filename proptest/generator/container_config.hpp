@@ -18,9 +18,9 @@ namespace util {
  */
 template <typename T>
 struct ContainerGenConfig {
-    optional<GenFunction<T>> elemGen;
-    optional<size_t> minSize;
-    optional<size_t> maxSize;
+    optional<GenFunction<T>> elemGen = nullopt;
+    optional<size_t> minSize = nullopt;
+    optional<size_t> maxSize = nullopt;
 };
 
 /**
@@ -30,10 +30,10 @@ struct ContainerGenConfig {
  */
 template <typename Key, typename Value>
 struct MapGenConfig {
-    optional<GenFunction<Key>> keyGen;
-    optional<GenFunction<Value>> valueGen;
-    optional<size_t> minSize;
-    optional<size_t> maxSize;
+    optional<GenFunction<Key>> keyGen = nullopt;
+    optional<GenFunction<Value>> valueGen = nullopt;
+    optional<size_t> minSize = nullopt;
+    optional<size_t> maxSize = nullopt;
 };
 
 }  // namespace util

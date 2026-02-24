@@ -22,9 +22,9 @@ namespace util {
  * Use with designated initializers: Arbi<float>({.nanProb = 0.1, .posInfProb = 0.05})
  */
 struct FloatGenConfig {
-    optional<double> nanProb;
-    optional<double> posInfProb;
-    optional<double> negInfProb;
+    optional<double> nanProb = nullopt;
+    optional<double> posInfProb = nullopt;
+    optional<double> negInfProb = nullopt;
 };
 
 }  // namespace util

@@ -140,7 +140,7 @@ TEST(stateful_function, onActionEnd_invariant_check)
 
     auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
     prop.setOnActionEnd([](T& vec, EmptyModel&) {
-        PROP_ASSERT(vec.size() >= 0);  // Invariant: size is non-negative
+        PROP_ASSERT(vec.size() < 100000);  // Invariant: size is non-negative
     });
     prop.setSeed(0).setNumRuns(100).go();
 }

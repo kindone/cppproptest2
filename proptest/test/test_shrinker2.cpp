@@ -117,7 +117,7 @@ TEST(ListLikeShrinker, intsN_with_minSize)
         size_t uniqueCount = checkShrinkable(shr);
         // With minSize > 0, we expect fewer than 2^N unique values
         // (since we can't create all subsets due to minSize constraint)
-        EXPECT_GT(uniqueCount, 0);
+        EXPECT_GT(uniqueCount, 0U);
         EXPECT_LE(uniqueCount, pow(2, N));
     }, {4,5,6}, {2,3});
 }
@@ -136,7 +136,7 @@ TEST(ListLikeShrinker, specific_case_minSize2_unique_values)
     Shrinkable<vector<int>> shr = shrinkListLike<vector, int>(baseShr, 2, false, true);
     // This should not throw (no duplicates created by shrinking algorithm)
     size_t uniqueCount = checkShrinkable(shr);
-    EXPECT_GT(uniqueCount, 0);
+    EXPECT_GT(uniqueCount, 0U);
     // Serialize to see the structure
     string serialized = serializeShrinkable(shr);
     // Just verify it serializes without error

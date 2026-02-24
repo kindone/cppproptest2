@@ -71,8 +71,8 @@ TEST(FlatMapEdgeCases, nested_flatmap_independence)
     }
 
     // Check: outer_values should be independent of inner_values
-    EXPECT_GT(outer_values.size(), 0) << "Should generate outer values";
-    EXPECT_GT(inner_values.size(), 0) << "Should generate inner values";
+    EXPECT_GT(outer_values.size(), 0U) << "Should generate outer values";
+    EXPECT_GT(inner_values.size(), 0U) << "Should generate inner values";
 
     // The key test: if we generate with same seed, should get same sequences
     Random rand2(42);

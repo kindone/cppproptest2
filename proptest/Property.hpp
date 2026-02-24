@@ -39,11 +39,11 @@ namespace proptest {
  * @endcode
  */
 struct ForAllConfig {
-    optional<uint64_t> seed;
-    optional<uint32_t> numRuns;
-    optional<uint32_t> maxDurationMs;
-    optional<Function<void()>> onStartup;
-    optional<Function<void()>> onCleanup;
+    optional<uint64_t> seed = nullopt;
+    optional<uint32_t> numRuns = nullopt;
+    optional<uint32_t> maxDurationMs = nullopt;
+    optional<Function<void()>> onStartup = nullopt;
+    optional<Function<void()>> onCleanup = nullopt;
 };
 
 // Forward declaration
