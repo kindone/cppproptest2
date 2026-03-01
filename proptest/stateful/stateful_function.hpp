@@ -13,6 +13,7 @@
 #include "proptest/std/list.hpp"
 #include "proptest/Property.hpp"
 #include "proptest/std/chrono.hpp"
+#include "proptest/std/optional.hpp"
 
 /**
  * @file stateful_function.hpp
@@ -40,7 +41,7 @@ class StatefulProperty {
 
 public:
     StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGen<ObjectType, ModelType>& actGen)
-        : seed(UINT64_MAX), numRuns(UINT32_MAX), maxDurationMs(UINT32_MAX), initialGen(initGen), modelFactory(mdlFactory), actionGen(actGen)
+        : initialGen(initGen), modelFactory(mdlFactory), actionGen(actGen)
     {
     }
 
@@ -61,6 +62,38 @@ public:
         maxDurationMs = durationMs;
         return *this;
     }
+
+    StatefulProperty& setShrinkMaxRetries(uint32_t retries)
+    {
+        shrinkMaxRetries = retries;
+        return *this;
+    }
+
+    StatefulProperty& setShrinkTimeoutMs(uint32_t ms)
+    {
+        shrinkTimeoutMs = ms;
+        return *this;
+    }
+
+    StatefulProperty& setShrinkRetryTimeoutMs(uint32_t ms)
+    {
+        shrinkRetryTimeoutMs = ms;
+        return *this;
+    }
+
+    StatefulProperty& setOnReproductionStats(Function<void(ReproductionStats)> f)
+    {
+        onReproductionStats = util::move(f);
+        return *this;
+    }
+
+    StatefulProperty& setOnFailureReproduction(Function<void(int, const vector<Any>&, const string&)> f)
+    {
+        onFailureReproduction = util::move(f);
+        return *this;
+    }
+
+    optional<ReproductionStats> getLastReproductionStats() const { return lastReproductionStats; }
 
     StatefulProperty& setOnStartup(Function<void()> _onStartup)
     {
@@ -132,19 +165,34 @@ public:
             prop->setOnStartup(onStartup);
         if (onCleanup)
             prop->setOnCleanup(onCleanup);
-        if (seed != UINT64_MAX)
-            prop->setSeed(seed);
-        if (numRuns != UINT32_MAX)
-            prop->setNumRuns(numRuns);
-        if (maxDurationMs != UINT32_MAX)
-            prop->setMaxDurationMs(maxDurationMs);
-        return prop->forAll();
+        if (seed.has_value())
+            prop->setSeed(*seed);
+        if (numRuns.has_value())
+            prop->setNumRuns(*numRuns);
+        if (maxDurationMs.has_value())
+            prop->setMaxDurationMs(*maxDurationMs);
+        if (shrinkMaxRetries.has_value())
+            prop->setShrinkMaxRetries(*shrinkMaxRetries);
+        if (shrinkTimeoutMs.has_value())
+            prop->setShrinkTimeoutMs(*shrinkTimeoutMs);
+        if (shrinkRetryTimeoutMs.has_value())
+            prop->setShrinkRetryTimeoutMs(*shrinkRetryTimeoutMs);
+        if (onReproductionStats)
+            prop->setOnReproductionStats(onReproductionStats);
+        if (onFailureReproduction)
+            prop->setOnFailureReproduction(onFailureReproduction);
+        auto resultProp = prop->forAll();
+        lastReproductionStats = resultProp.getLastReproductionStats();
+        return static_cast<bool>(resultProp);
     }
 
 private:
-    uint64_t seed;
-    uint32_t numRuns;
-    uint32_t maxDurationMs;
+    optional<uint64_t> seed = nullopt;
+    optional<uint32_t> numRuns = nullopt;
+    optional<uint32_t> maxDurationMs = nullopt;
+    optional<uint32_t> shrinkMaxRetries = nullopt;
+    optional<uint32_t> shrinkTimeoutMs = nullopt;
+    optional<uint32_t> shrinkRetryTimeoutMs = nullopt;
     InitialGen initialGen;
     ModelFactoryFunction modelFactory;
     ActionGen<ObjectType, ModelType> actionGen;
@@ -154,6 +202,10 @@ private:
     Function<void(ObjectType&, ModelType&)> onActionEnd;
     Function<void()> onStartup;
     Function<void()> onCleanup;
+    Function<void(ReproductionStats)> onReproductionStats;
+    Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
+
+    optional<ReproductionStats> lastReproductionStats;
 };
 
 template <typename ObjectType, typename InitialGen>

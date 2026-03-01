@@ -2,8 +2,10 @@
 
 #include "proptest/api.hpp"
 #include "proptest/PropertyContext.hpp"
+#include "proptest/std/chrono.hpp"
 #include "proptest/std/io.hpp"
 #include "proptest/std/optional.hpp"
+#include "proptest/std/pair.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/util/function.hpp"
 #include "proptest/Generator.hpp"
@@ -154,6 +156,19 @@
 
 namespace proptest {
 
+/// Stats from a shrink assessment (reproduction rate measurement)
+struct PROPTEST_API ReproductionStats {
+    int numReproduced = 0;   // n in "reproduction: n/T"
+    int totalRuns = 0;       // T
+    double elapsedSec = 0.0;
+    string argsAsString;     // serialized args, e.g. "{ 0 }"
+};
+
+// Shrink retry constants (flaky tests)
+constexpr int kShrinkAssessmentRuns = 10;
+constexpr double kShrinkAdaptiveMultiplier = 3.0;
+constexpr bool kReassessOnEachSucessfulShrink = false;
+
 class Random;
 struct ShrinkableBase;
 struct AnyGenerator;
@@ -162,7 +177,7 @@ class PROPTEST_API PropertyBase {
 public:
     using GenVec = vector<AnyGenerator>;
 
-    PropertyBase(vector<AnyGenerator>&& gens) : seed(util::getGlobalSeed()), numRuns(defaultNumRuns), maxDurationMs(defaultMaxDurationMs), genVec(util::move(gens)) {}
+    PropertyBase(vector<AnyGenerator>&& gens) : genVec(util::move(gens)) {}
     virtual ~PropertyBase() {}
 
     static void setDefaultNumRuns(uint32_t);
@@ -182,6 +197,19 @@ public:
     bool test(const vector<ShrinkableBase>& curShrVec);
 
     void shrink(Random& savedRand, const GenVec& curGenVec);
+
+    /// Last reproduction stats (only when shrinkMaxRetries > 0 and failure triggered shrink).
+    optional<ReproductionStats> getLastReproductionStats() const { return lastReproductionStats; }
+    PropertyBase& setOnReproductionStats(Function<void(ReproductionStats)> f)
+    {
+        onReproductionStats = util::move(f);
+        return *this;
+    }
+    PropertyBase& setOnFailureReproduction(Function<void(int, const vector<Any>&, const string&)> f)
+    {
+        onFailureReproduction = util::move(f);
+        return *this;
+    }
 
     struct ShowShrVec {
         ShowShrVec(const PropertyBase& _property, const vector<ShrinkableBase>& _shrVec) : property(_property), shrVec(_shrVec) {}
@@ -221,19 +249,37 @@ protected:
     static uint32_t defaultNumRuns;
     static uint32_t defaultMaxDurationMs;
 
-    // TODO: configurations
-    uint64_t seed;
-    uint32_t numRuns;
-
-    uint32_t maxDurationMs; // indefinitely if 0
+    // Config: optional = use default at runtime; avoids sentinel-value bugs (e.g. UINT64_MAX as valid seed)
+    optional<uint64_t> seed = nullopt;
+    optional<uint32_t> numRuns = nullopt;
+    optional<uint32_t> maxDurationMs = nullopt;
+    optional<uint32_t> shrinkMaxRetries = nullopt;   // max retries; total trials = 1 + n. 0 = deterministic
+    optional<uint32_t> shrinkTimeoutMs = nullopt;    // default 0 = no limit
+    optional<uint32_t> shrinkRetryTimeoutMs = nullopt;  // default 0 = no limit
 
     Function<void()> onStartup;
     Function<void()> onCleanup;
 
+    Function<void(ReproductionStats)> onReproductionStats;
+    Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
+
     vector<AnyGenerator> genVec;
+
+    optional<ReproductionStats> lastReproductionStats;
 
     /// Last test run result (true = success, false = failure). Used for operator bool() and chainable API.
     bool lastRunOk = true;
+
+    // Shrink helpers (retry/timeout for flaky tests)
+    bool isShrinkPhaseTimedOut(steady_clock::time_point phaseStart, uint32_t timeoutMs) const;
+    /// Test once (deterministic) or with retries (flaky); returns (failed, failureMsg)
+    pair<bool, string> shrinkTestCandidate(const vector<ShrinkableBase>& curShrVec, bool useRetry,
+        uint32_t maxRetries, uint32_t phaseTimeoutMs, int64_t candidateTimeoutMs,
+        steady_clock::time_point phaseStart) const;
+    /// Run assessment (measure reproduction rate), print reproduction, update candidateTimeoutMs
+    /// assessmentIndex: 0 = initial failure, 1 = first successful shrink, etc.
+    void assessFailureForRetry(vector<ShrinkableBase>& shrVec, int64_t& candidateTimeoutMs,
+        int assessmentIndex);
 
     friend struct PropertyContext;
 };

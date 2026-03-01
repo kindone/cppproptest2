@@ -54,6 +54,30 @@ When building [custom generators](CustomGenerator.md), you wrap values with `mak
 
 &nbsp;
 
+## Shrinking with Flaky Tests (Retry)
+
+By default, shrinking assumes deterministic tests: one run per candidate. But for (potentially) flaky tests (e.g., a test that includes a component with random or external factor), a shrink candidate might succeed once and fail next time even though all input parameters are the same. Use retry mode with following configuration parameters:
+
+| Config | Description |
+|--------|-------------|
+| `setShrinkMaxRetries(n)` | Max *retries* per candidate. Total trials = **1 + n** (e.g. 10 → 11 trials). `0` = deterministic, 1 trial only (default). |
+| `setShrinkTimeoutMs(ms)` | Total shrink phase timeout. `0` = no limit. |
+| `setShrinkRetryTimeoutMs(ms)` | Per-candidate timeout. `0` = no limit. |
+
+When `shrinkMaxRetries > 0`, the framework runs an *assessment* phase on each failure: it re-runs the failing input multiple times to measure reproduction rate (e.g., `reproduction: 5/10 in 0.12s`). This informs adaptive retry budgets during shrinking.
+
+**Reproduction stats** — Access programmatically via:
+- `getLastReproductionStats()` — Returns `optional<ReproductionStats>` (populated only after a failure that triggered shrink with retry).
+- `setOnReproductionStats(callback)` — Callback invoked after each assessment.
+
+**`ReproductionStats`** fields: `numReproduced`, `totalRuns`, `elapsedSec`, `argsAsString`.
+
+**Stateful tests** — `StatefulProperty` propagates shrink config to its inner property. Use the same setters before `.go()`.
+
+**See also:** [Property API — Shrinking with Retry](PropertyAPI.md#shrinking-with-retry-flaky-tests)
+
+&nbsp;
+
 ---
 
 ## Related Topics

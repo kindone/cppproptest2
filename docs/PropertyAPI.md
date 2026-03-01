@@ -142,6 +142,9 @@ All configuration methods return a reference to `Property`, allowing method chai
 | [`.setMaxDurationMs(duration)`](#propertysetmaxdurationmsduration) | Set maximum test duration in milliseconds | `uint32_t durationMs` |
 | [`.setOnStartup(callback)`](#propertysetonstartupcallback) | Set callback called before each test run | `Function<void()> callback` |
 | [`.setOnCleanup(callback)`](#propertysetoncleanupcallback) | Set callback called after each test run | `Function<void()> callback` |
+| [`.setShrinkMaxRetries(retries)`](#shrinking-with-retry-flaky-tests) | Max *retries* per candidate; total trials = 1 + retries (0 = deterministic, 1 trial) | `uint32_t retries` |
+| [`.setShrinkTimeoutMs(ms)`](#shrinking-with-retry-flaky-tests) | Total shrink phase timeout in ms (0 = no limit) | `uint32_t ms` |
+| [`.setShrinkRetryTimeoutMs(ms)`](#shrinking-with-retry-flaky-tests) | Per-candidate timeout in ms (0 = no limit) | `uint32_t ms` |
 | [`.setConfig(config)`](#propertysetconfigconfig) | Configure multiple options at once | `ForAllConfig` (designated initializers) |
 
 ### Macros
@@ -482,6 +485,9 @@ Configures multiple options at once using designated initializers.
   - `.maxDurationMs`: `uint32_t`
   - `.onStartup`: `Function<void()>`
   - `.onCleanup`: `Function<void()>`
+  - `.shrinkMaxRetries`: `uint32_t` (max retries; total trials = 1 + n; 0 = deterministic)
+  - `.shrinkTimeoutMs`: `uint32_t` (0 = no limit)
+  - `.shrinkRetryTimeoutMs`: `uint32_t` (0 = no limit)
 
 **Returns:** `Property&`
 
@@ -495,6 +501,36 @@ prop.setConfig({
 ```
 
 **Note:** All fields are optional. This is equivalent to chaining individual setters.
+
+### Shrinking with Retry (Flaky Tests)
+
+When tests are flaky (e.g., component has random or external factors that can succeed or fail a test), shrinking may need multiple runs per candidate to explore the case more reliably. Use these methods:
+
+| Method | Description |
+|--------|-------------|
+| `.setShrinkMaxRetries(retries)` | Max *retries* per candidate. Total trials = **1 + retries** (e.g. 10 → 11 trials). `0` = deterministic (1 trial only). |
+| `.setShrinkTimeoutMs(ms)` | Total shrink phase timeout in ms. `0` = no limit. |
+| `.setShrinkRetryTimeoutMs(ms)` | Per-candidate timeout in ms. `0` = no limit. |
+
+When `shrinkMaxRetries > 0`, the framework runs an *assessment* phase on each failure to measure reproduction rate (e.g., `reproduction: 5/10 in 0.12s`). You can access these stats programmatically:
+
+- **`optional<ReproductionStats> getLastReproductionStats() const`** — Returns stats from the last shrink assessment, or `nullopt` if no assessment ran (e.g., deterministic shrink, or property passed).
+- **`setOnReproductionStats(callback)`** — Callback invoked after each assessment with `ReproductionStats`.
+
+**`ReproductionStats`** fields: `numReproduced`, `totalRuns`, `elapsedSec`, `argsAsString`.
+
+**Example:**
+```cpp
+auto result = prop.setShrinkMaxRetries(10).forAll(gen);
+if (!result) {
+    auto stats = result.getLastReproductionStats();
+    if (stats) {
+        std::cout << "Failure reproduced " << stats->numReproduced << "/" << stats->totalRuns << std::endl;
+    }
+}
+```
+
+**See also:** [Shrinking](Shrinking.md#shrinking-with-flaky-tests-retry)
 
 &nbsp;
 

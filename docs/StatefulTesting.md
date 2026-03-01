@@ -302,6 +302,9 @@ You can alter some of test characteristics of stateful test runs.
 * Random seed
 * Number of runs
 * Maximum time duration of test runs
+* Shrink retry config (for flaky tests; see [Shrinking](Shrinking.md#shrinking-with-flaky-tests-retry))
+
+Configuration is optional: any value you set is applied, while defaults are used for others (e.g., random seed from `PROPTEST_SEED` environment variable or current timestamp).
 
 ```cpp
 auto prop = statefulProperty(...);

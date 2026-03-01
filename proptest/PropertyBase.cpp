@@ -1,7 +1,10 @@
 #include "proptest/PropertyBase.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/std/chrono.hpp"
+#include "proptest/std/pair.hpp"
 #include "proptest/Random.hpp"
+#include "proptest/PropertyContext.hpp"
+#include "proptest/Shrinkable.hpp"
 
 namespace proptest {
 
@@ -111,20 +114,26 @@ bool PropertyBase::exampleImpl(const vector<Any>& values)
 
 bool PropertyBase::runForAll(const GenVec& curGenVec)
 {
-    Random rand(seed);
-    Random savedRand(seed);
-    cout << "random seed: " << seed << endl;
+    const uint64_t effectiveSeed = seed.value_or(util::getGlobalSeed());
+    const uint32_t effectiveNumRuns = numRuns.value_or(defaultNumRuns);
+    const uint32_t effectiveMaxDurationMs = maxDurationMs.value_or(defaultMaxDurationMs);
+
+    Random rand(effectiveSeed);
+    Random savedRand(effectiveSeed);
+    cout << "random seed: " << effectiveSeed << endl;
     PropertyContext ctx;
     auto startedTime = steady_clock::now();
 
     size_t i = 0;
     try {
-        for (; i < numRuns; i++) {
-            if(maxDurationMs != 0) {
+        for (; i < effectiveNumRuns; i++) {
+            if (effectiveMaxDurationMs != 0) {
                 auto currentTime = steady_clock::now();
-                if(duration_cast<util::milliseconds>(currentTime - startedTime).count() > maxDurationMs)
+                if (duration_cast<util::milliseconds>(currentTime - startedTime).count() > effectiveMaxDurationMs)
                 {
-                    cout << "Timed out after " << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed " << i << " tests" << endl;
+                    cout << "Timed out after "
+                         << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed "
+                         << i << " tests" << endl;
                     if (!ctx.checkStatAssertions(i)) {
                         stringstream failures = ctx.flushFailures();
                         cerr << "Stat assertion failed: " << failures.str() << endl;
@@ -187,7 +196,7 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
         return false;
     }
 
-    cout << "OK, passed " << numRuns << " tests" << endl;
+    cout << "OK, passed " << effectiveNumRuns << " tests" << endl;
     if (!ctx.checkStatAssertions(i)) {
         stringstream failures = ctx.flushFailures();
         cerr << "Stat assertion failed: " << failures.str() << endl;
@@ -219,35 +228,141 @@ bool PropertyBase::test(const vector<ShrinkableBase>& curShrVec)
     return result;
 }
 
+bool PropertyBase::isShrinkPhaseTimedOut(steady_clock::time_point phaseStart, uint32_t timeoutMs) const
+{
+    if (timeoutMs == 0)
+        return false;
+    auto elapsed = duration_cast<util::milliseconds>(steady_clock::now() - phaseStart).count();
+    return elapsed >= timeoutMs;
+}
+
+void PropertyBase::assessFailureForRetry(vector<ShrinkableBase>& shrVec,
+    int64_t& candidateTimeoutMs, int assessmentIndex)
+{
+    int failCount = 0;
+    auto start = steady_clock::now();
+
+    vector<Any> argsVec;
+    argsVec.reserve(shrVec.size());
+    for (const auto& s : shrVec)
+        argsVec.push_back(s.getAny());
+
+    for (int r = 0; r < kShrinkAssessmentRuns; r++) {
+        PropertyContext ctx;
+        bool failed = !test(shrVec) || ctx.hasFailures();
+        if (failed) {
+            failCount++;
+            if (onFailureReproduction) {
+                string errMsg = ctx.flushFailures().str();
+                onFailureReproduction(assessmentIndex, argsVec, errMsg);
+            }
+        }
+    }
+
+    auto elapsedMs = duration_cast<util::milliseconds>(steady_clock::now() - start).count();
+    double sec = elapsedMs / 1000.0;
+
+    stringstream argsSs;
+    writeArgs(argsSs, shrVec);
+    ReproductionStats stats{failCount, kShrinkAssessmentRuns, sec, argsSs.str()};
+    lastReproductionStats = stats;
+
+    if (onReproductionStats)
+        onReproductionStats(stats);
+
+    cout << "  reproduction: " << failCount << "/" << kShrinkAssessmentRuns << " in " << std::fixed
+         << std::setprecision(2) << sec << "s" << endl;
+
+    const uint32_t effectiveShrinkRetryTimeoutMs = shrinkRetryTimeoutMs.value_or(0);
+    if (failCount <= 0 || effectiveShrinkRetryTimeoutMs == 0)
+        candidateTimeoutMs = 0;
+    else {
+        candidateTimeoutMs = static_cast<int64_t>(elapsedMs / failCount * kShrinkAdaptiveMultiplier);
+        if (candidateTimeoutMs > effectiveShrinkRetryTimeoutMs)
+            candidateTimeoutMs = effectiveShrinkRetryTimeoutMs;
+    }
+}
+
+pair<bool, string> PropertyBase::shrinkTestCandidate(const vector<ShrinkableBase>& curShrVec, bool useRetry,
+    uint32_t maxRetries, uint32_t phaseTimeoutMs, int64_t candidateTimeoutMs,
+    steady_clock::time_point phaseStart) const
+{
+    auto* self = const_cast<PropertyBase*>(this);
+    if (!useRetry || maxRetries == 0) {
+        // Deterministic: single run per candidate
+        PropertyContext ctx;
+        if (!self->test(curShrVec) || ctx.hasFailures())
+            return {true, ctx.flushFailures(4).str()};
+        return {false, ""};
+    }
+    // Retry mode: run until failure or limits
+    auto candidateStart = steady_clock::now();
+    for (uint32_t retry = 0; retry <= maxRetries; retry++) {
+        if (isShrinkPhaseTimedOut(phaseStart, phaseTimeoutMs))
+            break;
+        PropertyContext retryCtx;
+        if (!self->test(curShrVec) || retryCtx.hasFailures())
+            return {true, retryCtx.flushFailures(4).str()};
+        if (candidateTimeoutMs > 0) {
+            auto candidateElapsed =
+                duration_cast<util::milliseconds>(steady_clock::now() - candidateStart).count();
+            if (candidateElapsed >= candidateTimeoutMs)
+                break;
+        }
+    }
+    return {false, ""};
+}
+
 void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
 {
-    // regenerate failed value tuple
+    // Regenerate failed value tuple from saved seed
     const size_t Arity = curGenVec.size();
     vector<ShrinkableBase> shrVec;
     vector<ShrinkableBase::StreamType> shrinksVec;
     shrVec.reserve(Arity);
     shrinksVec.reserve(Arity);
-    for(size_t i = 0; i < Arity; i++) {
+    for (size_t i = 0; i < Arity; i++) {
         auto shr = curGenVec[i](savedRand);
         shrVec.push_back(shr);
         shrinksVec.push_back(shr.getShrinks());
-    };
+    }
 
     cout << "  with args: " << ShowShrVec{*this, shrVec} << endl;
 
-    for(size_t i = 0; i < Arity; i++) {
+    const uint32_t effectiveShrinkMaxRetries = shrinkMaxRetries.value_or(0);
+    const uint32_t effectiveShrinkTimeoutMs = shrinkTimeoutMs.value_or(0);
+    const bool useRetry = (effectiveShrinkMaxRetries > 0);
+    int64_t candidateTimeoutMs = 0;
+    auto shrinkPhaseStart = steady_clock::now();
+    int assessmentIndex = 0;
+
+    // Initial assessment: measure reproduction rate for adaptive retry budget
+    if (useRetry)
+        assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
+
+    // Try to shrink each argument in turn
+    for (size_t i = 0; i < Arity; i++) {
         auto shrinks = shrinksVec[i];
         while (!shrinks.isEmpty()) {
+            if (isShrinkPhaseTimedOut(shrinkPhaseStart, effectiveShrinkTimeoutMs)) {
+                cout << "  shrink phase timeout (" << effectiveShrinkTimeoutMs << "ms)" << endl;
+                break;
+            }
+
             auto iter = shrinks.iterator<ShrinkableBase::StreamElementType>();
             bool shrinkFound = false;
-            PropertyContext context;
-            // keep trying until failure is reproduced
+            string failureMsg;
             while (iter.hasNext()) {
-                // get shrinkable
                 auto next = iter.next();
                 vector<ShrinkableBase> curShrVec = shrVec;
                 curShrVec[i] = next;
-                if (!test(curShrVec) || context.hasFailures()) {
+
+                auto [failed, msg] = shrinkTestCandidate(curShrVec, useRetry, effectiveShrinkMaxRetries,
+                    effectiveShrinkTimeoutMs, candidateTimeoutMs, shrinkPhaseStart);
+                if (failed)
+                    failureMsg = msg;
+
+                if (failed) {
                     shrinks = next.getShrinks();
                     shrVec[i] = next;
                     shrinkFound = true;
@@ -256,8 +371,10 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
             }
             if (shrinkFound) {
                 cout << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{*this, shrVec} << endl;
-                if (context.hasFailures())
-                    cout << "    by failed expectation: " << context.flushFailures(4).str() << endl;
+                if (!failureMsg.empty())
+                    cout << "    by failed expectation: " << failureMsg << endl;
+                if (useRetry && kReassessOnEachSucessfulShrink)
+                    assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
             } else {
                 break;
             }

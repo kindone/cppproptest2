@@ -44,6 +44,12 @@ struct ForAllConfig {
     optional<uint32_t> maxDurationMs = nullopt;
     optional<Function<void()>> onStartup = nullopt;
     optional<Function<void()>> onCleanup = nullopt;
+    /// Max retries per shrink candidate; total trials = 1 + n (0 = deterministic)
+    optional<uint32_t> shrinkMaxRetries = nullopt;
+    /// Total shrink phase timeout in ms (0 = no limit)
+    optional<uint32_t> shrinkTimeoutMs = nullopt;
+    /// Per-candidate timeout in ms (0 = no limit)
+    optional<uint32_t> shrinkRetryTimeoutMs = nullopt;
 };
 
 // Forward declaration
@@ -76,6 +82,15 @@ void applyConfig(Property<ARGS...>& prop, const ForAllConfig& config)
     }
     if (config.onCleanup.has_value()) {
         prop.setOnCleanup(config.onCleanup.value());
+    }
+    if (config.shrinkMaxRetries.has_value()) {
+        prop.setShrinkMaxRetries(config.shrinkMaxRetries.value());
+    }
+    if (config.shrinkTimeoutMs.has_value()) {
+        prop.setShrinkTimeoutMs(config.shrinkTimeoutMs.value());
+    }
+    if (config.shrinkRetryTimeoutMs.has_value()) {
+        prop.setShrinkRetryTimeoutMs(config.shrinkRetryTimeoutMs.value());
     }
 }
 
@@ -162,6 +177,51 @@ public:
     }
 
     /**
+     * @brief Sets max retries per shrink candidate (0 = deterministic, one run per candidate)
+     */
+    Property& setShrinkMaxRetries(uint32_t retries)
+    {
+        shrinkMaxRetries = retries;
+        return *this;
+    }
+
+    /**
+     * @brief Sets total shrink phase timeout in ms (0 = no limit)
+     */
+    Property& setShrinkTimeoutMs(uint32_t ms)
+    {
+        shrinkTimeoutMs = ms;
+        return *this;
+    }
+
+    /**
+     * @brief Sets per-candidate timeout in ms (0 = no limit)
+     */
+    Property& setShrinkRetryTimeoutMs(uint32_t ms)
+    {
+        shrinkRetryTimeoutMs = ms;
+        return *this;
+    }
+
+    /**
+     * @brief Sets callback invoked after each assessment (reproduction rate measurement)
+     */
+    Property& setOnReproductionStats(Function<void(ReproductionStats)> f)
+    {
+        PropertyBase::setOnReproductionStats(util::move(f));
+        return *this;
+    }
+
+    /**
+     * @brief Sets callback invoked on each individual failure during assessment
+     */
+    Property& setOnFailureReproduction(Function<void(int, const vector<Any>&, const string&)> f)
+    {
+        PropertyBase::setOnFailureReproduction(util::move(f));
+        return *this;
+    }
+
+    /**
      * @brief Sets multiple configuration options at once using designated initializers (C++20)
      *
      * Allows batch configuration of property tests using designated initializers.
@@ -223,7 +283,7 @@ public:
             curGenVec.push_back(genVec[i]);
         }
         Property result = *this;
-        result.lastRunOk = runForAll(curGenVec);
+        result.lastRunOk = result.runForAll(curGenVec);
         return result;
     }
 
