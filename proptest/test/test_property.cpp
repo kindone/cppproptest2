@@ -47,6 +47,126 @@ TEST(Property, NonCopyable)
     }, nonCopyableGen);
 }
 
+TEST(Property, prop_assert_macros_evaluate_arguments_once)
+{
+    int lhsCalls = 0, rhsCalls = 0;
+    auto lhs = [&](int value) {
+        lhsCalls++;
+        return value;
+    };
+    auto rhs = [&](int value) {
+        rhsCalls++;
+        return value;
+    };
+
+    PROP_ASSERT_EQ(lhs(1), rhs(1));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    lhsCalls = rhsCalls = 0;
+    PROP_ASSERT_NE(lhs(1), rhs(2));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    lhsCalls = rhsCalls = 0;
+    PROP_ASSERT_LT(lhs(1), rhs(2));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    lhsCalls = rhsCalls = 0;
+    PROP_ASSERT_GT(lhs(2), rhs(1));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    lhsCalls = rhsCalls = 0;
+    PROP_ASSERT_LE(lhs(1), rhs(1));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    lhsCalls = rhsCalls = 0;
+    PROP_ASSERT_GE(lhs(2), rhs(1));
+    EXPECT_EQ(lhsCalls, 1);
+    EXPECT_EQ(rhsCalls, 1);
+
+    int aCalls = 0, bCalls = 0, nCalls = 0, n1Calls = 0, n2Calls = 0;
+    auto a = [&]() {
+        aCalls++;
+        return "abc";
+    };
+    auto b = [&]() {
+        bCalls++;
+        return "abc";
+    };
+    auto bDiff = [&]() {
+        bCalls++;
+        return "abd";
+    };
+    auto n = [&]() -> size_t {
+        nCalls++;
+        return 3;
+    };
+    auto n1 = [&]() -> size_t {
+        n1Calls++;
+        return 3;
+    };
+    auto n2 = [&]() -> size_t {
+        n2Calls++;
+        return 3;
+    };
+
+    PROP_ASSERT_STREQ(a(), b(), n());
+    EXPECT_EQ(aCalls, 1);
+    EXPECT_EQ(bCalls, 1);
+    EXPECT_EQ(nCalls, 1);
+
+    aCalls = bCalls = n1Calls = n2Calls = 0;
+    PROP_ASSERT_STREQ2(a(), b(), n1(), n2());
+    EXPECT_EQ(aCalls, 1);
+    EXPECT_EQ(bCalls, 1);
+    EXPECT_EQ(n1Calls, 1);
+    EXPECT_EQ(n2Calls, 1);
+
+    aCalls = bCalls = nCalls = 0;
+    PROP_ASSERT_STRNE(a(), bDiff(), n());
+    EXPECT_EQ(aCalls, 1);
+    EXPECT_EQ(bCalls, 1);
+    EXPECT_EQ(nCalls, 1);
+
+    aCalls = bCalls = n1Calls = n2Calls = 0;
+    PROP_ASSERT_STRNE2(a(), bDiff(), n1(), n2());
+    EXPECT_EQ(aCalls, 1);
+    EXPECT_EQ(bCalls, 1);
+    EXPECT_EQ(n1Calls, 1);
+    EXPECT_EQ(n2Calls, 1);
+}
+
+TEST(Property, prop_assert_failure_message_uses_original_expression)
+{
+    int lhs = 1, rhs = 2;
+
+    try {
+        PROP_ASSERT_EQ(lhs, rhs);
+        FAIL() << "Expected PROP_ASSERT_EQ to throw";
+    } catch (const AssertFailed& e) {
+        const string msg = e.what();
+        EXPECT_NE(msg.find("lhs == rhs"), string::npos);
+    }
+}
+
+TEST(Property, prop_expect_failure_message_uses_original_expression)
+{
+    testing::internal::CaptureStderr();
+    const bool ok = forAll([](int x) {
+        const int y = 5;
+        PROP_EXPECT_EQ(x, y);
+        return true;
+    }, gen::just(4));
+    const string output = testing::internal::GetCapturedStderr();
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(output.find("x == y"), string::npos);
+}
+
 TEST(Property, matrix)
 {
     matrix([](int, int) {
@@ -970,4 +1090,46 @@ TEST(Property, propertySetConfig_vs_individualSetters)
     prop.setSeed(555).setNumRuns(1).forAll();
 
     EXPECT_EQ(configRun, individualRun);
+}
+
+// Symptom reproduction for TODO: "Improve EXPECT_FOR_ALL failure report when using inline lambdas"
+// Run with: ./test_proptest --gtest_also_run_disabled_tests --gtest_filter="*EXPECT_FOR_ALL_failure_report*"
+//
+// CONFIRMED SYMPTOM:
+// - Inline lambda: GTest prints "Value of: proptest::forAll([](int x) { do { if (!(x <= 5)) { ..."
+//   and expands the entire macro-expanded lambda body — very noisy. The actual failure line (983) is
+//   reported by proptest above ("Falsifiable... test_property.cpp:983") but GTest's dump obscures it.
+// - Named function: GTest prints "Value of: proptest::forAll(propXLe5, gen::interval(0, 10))" — clean.
+TEST(Property, DISABLED_EXPECT_FOR_ALL_failure_report_inline_lambda)
+{
+    // This fails when x > 5; gen::interval(0, 10) will hit it.
+    EXPECT_FOR_ALL([](int x) {
+        PROP_ASSERT(x <= 5);
+        return true;
+    }, gen::interval(0, 10));
+}
+
+// Compare: named function yields a cleaner failure (function name instead of full lambda body).
+static bool propXLe5(int x)
+{
+    PROP_ASSERT(x <= 5);
+    return true;
+}
+TEST(Property, DISABLED_EXPECT_FOR_ALL_failure_report_named_function)
+{
+    EXPECT_FOR_ALL(propXLe5, gen::interval(0, 10));
+}
+
+// Compare forAll(...) vs EXPECT_FOR_ALL(...) failure messages.
+// Run with: ./test_proptest --gtest_also_run_disabled_tests --gtest_filter="*forAll_vs_EXPECT_FOR_ALL*"
+TEST(Property, DISABLED_forAll_vs_EXPECT_FOR_ALL_inline_lambda)
+{
+    // A: Direct EXPECT_FOR_ALL - GTest expands full forAll(lambda, gen) expression
+    EXPECT_FOR_ALL([](int x) { PROP_ASSERT(x <= 5); return true; }, gen::interval(0, 10));
+}
+TEST(Property, DISABLED_forAll_vs_EXPECT_FOR_ALL_stored_result)
+{
+    // B: forAll into variable, then EXPECT_TRUE(ok) - GTest only shows "Value of: ok"
+    bool ok = forAll([](int x) { PROP_ASSERT(x <= 5); return true; }, gen::interval(0, 10));
+    EXPECT_TRUE(ok);
 }

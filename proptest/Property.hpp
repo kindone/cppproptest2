@@ -538,8 +538,21 @@ auto matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
     return property(util::forward<Callable>(callable)).matrix(util::forward<decltype(lists)>(lists)...);
 }
 
-#define EXPECT_FOR_ALL(...) EXPECT_TRUE(proptest::forAll(__VA_ARGS__))
-#define ASSERT_FOR_ALL(...) ASSERT_TRUE(proptest::forAll(__VA_ARGS__))
+#define EXPECT_FOR_ALL(...)                                                                                                  \
+    EXPECT_PRED_FORMAT1(([](const char* /*expr*/, bool ok) -> ::testing::AssertionResult {                                   \
+                            if (ok) return ::testing::AssertionSuccess();                                                    \
+                            return ::testing::AssertionFailure()                                                             \
+                                   << "forAll: property failed.";                                                            \
+                        }),                                                                                                  \
+                        proptest::forAll(__VA_ARGS__))
+
+#define ASSERT_FOR_ALL(...)                                                                                                  \
+    ASSERT_PRED_FORMAT1(([](const char* /*expr*/, bool ok) -> ::testing::AssertionResult {                                   \
+                            if (ok) return ::testing::AssertionSuccess();                                                    \
+                            return ::testing::AssertionFailure()                                                             \
+                                   << "forAll: property failed.";                                                            \
+                        }),                                                                                                  \
+                        proptest::forAll(__VA_ARGS__))
 
 /**
  * @brief Run matrix(callable, lists...) with EXPECT_TRUE (non-fatal).
@@ -547,7 +560,13 @@ auto matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
  * @param callable Property callable (lambda, function, etc.)
  * @param lists... initializer_list arguments for Cartesian product (same order as in callable parameters)
  */
-#define EXPECT_MATRIX(...) EXPECT_TRUE(proptest::matrix(__VA_ARGS__))
+#define EXPECT_MATRIX(...)                                                                                                  \
+    EXPECT_PRED_FORMAT1(([](const char* /*expr*/, bool ok) -> ::testing::AssertionResult {                                  \
+                            if (ok) return ::testing::AssertionSuccess();                                                   \
+                            return ::testing::AssertionFailure()                                                            \
+                                   << "matrix: property failed.";                                                           \
+                        }),                                                                                                 \
+                        proptest::matrix(__VA_ARGS__))
 
 /**
  * @brief Run matrix(callable, lists...) with ASSERT_TRUE (fatal).
@@ -555,6 +574,12 @@ auto matrix(Callable&& callable, initializer_list<ARGS>&&... lists)
  * @param callable Property callable (lambda, function, etc.)
  * @param lists... initializer_list arguments for Cartesian product (same order as in callable parameters)
  */
-#define ASSERT_MATRIX(...) ASSERT_TRUE(proptest::matrix(__VA_ARGS__))
+#define ASSERT_MATRIX(...)                                                                                                  \
+    ASSERT_PRED_FORMAT1(([](const char* /*expr*/, bool ok) -> ::testing::AssertionResult {                                  \
+                            if (ok) return ::testing::AssertionSuccess();                                                   \
+                            return ::testing::AssertionFailure()                                                            \
+                                   << "matrix: property failed.";                                                           \
+                        }),                                                                                                 \
+                        proptest::matrix(__VA_ARGS__))
 
 }  // namespace proptest

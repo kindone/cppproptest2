@@ -47,15 +47,20 @@ TEST(stateful_function, basic)
     auto actionGen =
         gen::oneOf<SimpleAction<T>>(pushBackGen, popBackAction, popBackAction2, gen::weightedGen<SimpleAction<T>>(gen::just(clearAction), 0.1));
     auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-    prop.setOnStartup([]() { cout << "startup" << endl; });
-    prop.setOnCleanup([]() { cout << "cleanup" << endl; });
+    int startupCount = 0, cleanupCount = 0;
+    prop.setOnStartup([&startupCount]() { ++startupCount; });
+    prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
     prop.setSeed(0).setNumRuns(100).go();
+    EXPECT_GT(startupCount, 0);
+    EXPECT_EQ(startupCount, cleanupCount);
 }
 
 TEST(stateful_function, basic_model)
 {
     using T = vector<int>;
     using Model = VectorModel2;
+
+    int startupCount = 0, cleanupCount = 0, postCheckCount = 0;
 
     auto pushBackGen = gen::int32().map<Action<T, Model>>([](int value) {
         return Action<T, Model>(PROP_ACTION_NAME("PushBack", value), [value](T& obj, Model&) {
@@ -90,16 +95,17 @@ TEST(stateful_function, basic_model)
     auto actionGen = gen::oneOf<Action<T, Model>>(pushBackGen, popBackAction, popBackAction2, clearAction);
     auto prop = statefulProperty<T, Model>(
         Arbi<T>(), [](T& obj) -> Model { return VectorModel2(obj.size()); }, actionGen);
-    prop.setOnStartup([]() { cout << "startup" << endl; });
-    prop.setOnCleanup([]() {
-        cout << "cleanup" << endl;
-        // PROP_ASSERT(false);
-    });
-    prop.setPostCheck([](T&, Model&) { cout << "postCheck" << endl; });
+    prop.setOnStartup([&startupCount]() { ++startupCount; });
+    prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
+    prop.setPostCheck([&postCheckCount](T&, Model&) { ++postCheckCount; });
     auto startTime = steady_clock::now();
     prop.setSeed(0).setNumRuns(1000000).setMaxDurationMs(2000).go();
     auto endTime = steady_clock::now();
+
     EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), 2000);
+    EXPECT_GT(startupCount, 0);
+    EXPECT_EQ(startupCount, cleanupCount);
+    EXPECT_EQ(startupCount, postCheckCount);
 }
 
 TEST(stateful_function, onActionStart_onActionEnd_callbacks)

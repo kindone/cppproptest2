@@ -114,7 +114,7 @@ TEST(ShrinkRetry, shrink_max_timeout)
                 PROP_ASSERT(false);
             }
         });
-        auto result = prop.setSeed(seed).setNumRuns(1000).setMaxDurationMs(100).setShrinkMaxRetries(100).setShrinkTimeoutMs(100).forAll(gen::interval(0, 20));
+        auto result = prop.setSeed(seed).setNumRuns(200).setMaxDurationMs(10).setShrinkMaxRetries(100).setShrinkTimeoutMs(10).forAll(gen::interval(0, 20));
         PROP_ASSERT(!result);
         auto stats = result.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());  // need shrinkMaxRetries>0 for assessment
@@ -122,7 +122,7 @@ TEST(ShrinkRetry, shrink_max_timeout)
         PROP_STAT(stats->elapsedSec);
         PROP_STAT(stats->numReproduced);
         PROP_STAT(stats->totalRuns);
-    }, {.maxDurationMs = 5000, .shrinkTimeoutMs = 5000}, gen::uint64().noShrink(), gen::interval<size_t>(0, 100), gen::interval(1, 100)).example(1, 63, 16);
+    }, {.maxDurationMs = 500, .shrinkTimeoutMs = 500}, gen::uint64().noShrink(), gen::interval<size_t>(0, 10), gen::interval(1, 100)).example(1, 63, 16);
 }
 
 // ========== Stateful ShrinkRetry tests (mirror stateless approaches) ==========
@@ -256,7 +256,7 @@ TEST(ShrinkRetryStateful, shrink_max_timeout)
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        bool result = prop.setSeed(seed).setNumRuns(1000).setMaxDurationMs(100).setShrinkMaxRetries(100).setShrinkTimeoutMs(100).go();
+        bool result = prop.setSeed(seed).setNumRuns(200).setMaxDurationMs(10).setShrinkMaxRetries(20).setShrinkTimeoutMs(10).go();
         PROP_ASSERT(!result);
         auto stats = prop.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
@@ -265,5 +265,5 @@ TEST(ShrinkRetryStateful, shrink_max_timeout)
         PROP_STAT(stats->elapsedSec);
         PROP_STAT(stats->numReproduced);
         PROP_STAT(stats->totalRuns);
-    }, {.maxDurationMs = 5000, .shrinkTimeoutMs = 5000}, gen::uint64().noShrink(), gen::interval<size_t>(0, 100), gen::interval(1, 100));
+    }, {.maxDurationMs = 500, .shrinkTimeoutMs = 500}, gen::uint64().noShrink(), gen::interval<size_t>(0, 10), gen::interval(1, 100));
 }

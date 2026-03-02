@@ -76,12 +76,12 @@ ostream& errorOrEmpty(bool condition);
         }                                                                                                  \
     } while (false)
 
-#define PROP_ASSERT_STREAM(condition, a, sign, b)                                                                  \
+#define PROP_ASSERT_STREAM(condition, displayCondition, a, sign, b)                                                \
     do {                                                                                                           \
         if (!(condition)) {                                                                                        \
             stringstream __prop_assert_stream_str;                                                                 \
-            __prop_assert_stream_str << #condition << " with " << a << sign << b;                                  \
-            ::proptest::AssertFailed __proptest_except_obj(__FILE__, __LINE__, {}, __prop_assert_stream_str.str(), \
+            __prop_assert_stream_str << (displayCondition) << " with " << a << sign << b;                          \
+            ::proptest::AssertFailed __proptest_except_obj(__FILE__, __LINE__, {}, __prop_assert_stream_str.str().c_str(), \
                                                            nullptr);                                               \
             throw __proptest_except_obj;                                                                           \
         }                                                                                                          \
@@ -93,46 +93,46 @@ ostream& errorOrEmpty(bool condition);
 
 #define PROP_ASSERT_EQ(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a == __prop_b, __prop_a, " != ", __prop_b);                                \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a == __prop_b, #a " == " #b, __prop_a, " != ", __prop_b);                   \
     } while (false)
 #define PROP_ASSERT_NE(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a != __prop_b, __prop_a, " == ", __prop_b);                                \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a != __prop_b, #a " != " #b, __prop_a, " == ", __prop_b);                   \
     } while (false)
 #define PROP_ASSERT_LT(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a < __prop_b, __prop_a, " >= ", __prop_b);                                  \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a < __prop_b, #a " < " #b, __prop_a, " >= ", __prop_b);                     \
     } while (false)
 #define PROP_ASSERT_GT(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a > __prop_b, __prop_a, " <= ", __prop_b);                                  \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a > __prop_b, #a " > " #b, __prop_a, " <= ", __prop_b);                     \
     } while (false)
 #define PROP_ASSERT_LE(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a <= __prop_b, __prop_a, " > ", __prop_b);                                  \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a <= __prop_b, #a " <= " #b, __prop_a, " > ", __prop_b);                    \
     } while (false)
 #define PROP_ASSERT_GE(a, b)                                                                                \
     do {                                                                                                   \
-        auto __prop_a = (a);                                                                                \
-        auto __prop_b = (b);                                                                                \
-        PROP_ASSERT_STREAM(__prop_a >= __prop_b, __prop_a, " < ", __prop_b);                                  \
+        const auto& __prop_a = (a);                                                                         \
+        const auto& __prop_b = (b);                                                                         \
+        PROP_ASSERT_STREAM(__prop_a >= __prop_b, #a " >= " #b, __prop_a, " < ", __prop_b);                    \
     } while (false)
 
 #define PROP_ASSERT_STREQ(a, b, n)                                                                            \
     do {                                                                                                      \
-        auto __prop_a = (a);                                                                                   \
-        auto __prop_b = (b);                                                                                   \
-        auto __prop_n = (n);                                                                                   \
+        const auto& __prop_a = (a);                                                                            \
+        const auto& __prop_b = (b);                                                                            \
+        const auto& __prop_n = (n);                                                                            \
         if (!(memcmp(__prop_a, __prop_b, __prop_n) == 0)) {                                                    \
             stringstream __prop_assert_stream_str;                                                            \
             __prop_assert_stream_str << #a << " not equals " << #b << " with " << proptest::Show<char*>(__prop_a, __prop_n) \
@@ -145,10 +145,10 @@ ostream& errorOrEmpty(bool condition);
 
 #define PROP_ASSERT_STREQ2(a, b, n1, n2)                                                                       \
     do {                                                                                                       \
-        auto __prop_a = (a);                                                                                    \
-        auto __prop_b = (b);                                                                                    \
-        auto __prop_n1 = (n1);                                                                                  \
-        auto __prop_n2 = (n2);                                                                                  \
+        const auto& __prop_a = (a);                                                                             \
+        const auto& __prop_b = (b);                                                                             \
+        const auto& __prop_n1 = (n1);                                                                           \
+        const auto& __prop_n2 = (n2);                                                                           \
         if (!(memcmp(__prop_a, __prop_b, (__prop_n1 <= __prop_n2 ? __prop_n1 : __prop_n2)) == 0)) {             \
             stringstream __prop_assert_stream_str;                                                             \
             __prop_assert_stream_str << #a << " not equals " << #b << " with " << proptest::Show<char*>(__prop_a, __prop_n1) \
@@ -161,9 +161,9 @@ ostream& errorOrEmpty(bool condition);
 
 #define PROP_ASSERT_STRNE(a, b, n)                                                                           \
     do {                                                                                                     \
-        auto __prop_a = (a);                                                                                   \
-        auto __prop_b = (b);                                                                                   \
-        auto __prop_n = (n);                                                                                   \
+        const auto& __prop_a = (a);                                                                            \
+        const auto& __prop_b = (b);                                                                            \
+        const auto& __prop_n = (n);                                                                            \
         if (!(memcmp(__prop_a, __prop_b, __prop_n) != 0)) {                                                   \
             stringstream __prop_assert_stream_str;                                                           \
             __prop_assert_stream_str << #a << " equals " << #b << " with " << proptest::Show<char*>(__prop_a, __prop_n)    \
@@ -176,10 +176,10 @@ ostream& errorOrEmpty(bool condition);
 
 #define PROP_ASSERT_STRNE2(a, b, n1, n2)                                                                     \
     do {                                                                                                     \
-        auto __prop_a = (a);                                                                                   \
-        auto __prop_b = (b);                                                                                   \
-        auto __prop_n1 = (n1);                                                                                  \
-        auto __prop_n2 = (n2);                                                                                  \
+        const auto& __prop_a = (a);                                                                            \
+        const auto& __prop_b = (b);                                                                            \
+        const auto& __prop_n1 = (n1);                                                                          \
+        const auto& __prop_n2 = (n2);                                                                          \
         if (!(memcmp(__prop_a, __prop_b, (__prop_n1 <= __prop_n2 ? __prop_n1 : __prop_n2)) != 0)) {            \
             stringstream __prop_assert_stream_str;                                                           \
             __prop_assert_stream_str << #a << " equals " << #b << " with " << proptest::Show<char*>(__prop_a, __prop_n1)   \
