@@ -243,9 +243,15 @@ jobs:
         # Run with retry for flaky property-based tests
         max_attempts=3
         attempt=1
+        log_dir=$(dirname "$results_xml")
+        mkdir -p "$log_dir"
         while [ $attempt -le $max_attempts ]; do
+          attempt_log="$log_dir/test_proptest_attempt_${attempt}.log"
           echo "Running test_proptest (attempt $attempt/$max_attempts)..."
-          if "$test_exe" --gtest_output=xml:"$results_xml"; then
+          "$test_exe" --gtest_output=xml:"$results_xml" 2>&1 | tee "$attempt_log"
+          test_exit=${PIPESTATUS[0]}
+          echo "Saved full test output to: $attempt_log"
+          if [ $test_exit -eq 0 ]; then
             echo "Tests passed on attempt $attempt"
             exit 0
           fi
