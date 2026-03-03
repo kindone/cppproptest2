@@ -233,7 +233,7 @@ bool Concurrency<ObjectType, ModelType>::go()
                 auto currentTime = steady_clock::now();
                 if(duration_cast<util::milliseconds>(currentTime - startedTime).count() > maxDurationMs)
                 {
-                    cout << "Timed out after " << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed " << i << " tests" << endl;
+                    cout << "Timed out after " << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms, passed " << i << " tests" << endl;
                     return true;
                 }
             }

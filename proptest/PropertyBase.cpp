@@ -132,7 +132,7 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
                 if (duration_cast<util::milliseconds>(currentTime - startedTime).count() > effectiveMaxDurationMs)
                 {
                     cout << "Timed out after "
-                         << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms , passed "
+                         << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms, passed "
                          << i << " tests" << endl;
                     if (!ctx.checkStatAssertions(i)) {
                         stringstream failures = ctx.flushFailures();
@@ -218,10 +218,20 @@ bool PropertyBase::test(const vector<ShrinkableBase>& curShrVec)
 
         if (onCleanup)
             onCleanup();
-    } catch (const AssertFailed&) {
+    } catch (const AssertFailed& e) {
         result = false;
-        // cerr << "    assertion failed: " << e.what() << " (" << e.filename << ":"
-        //           << e.lineno << ")" << endl;
+        // Preserve source location in the active PropertyContext so shrink/retry
+        // callers can print informative file:line details.
+        if (context) {
+            stringstream empty;
+            context->fail(e.filename, e.lineno, e.what(), empty);
+        }
+    } catch (const PropertyFailedBase& e) {
+        result = false;
+        if (context) {
+            stringstream empty;
+            context->fail(e.filename, e.lineno, e.what(), empty);
+        }
     } catch (const exception&) {
         result = false;
     }
@@ -335,6 +345,7 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
     int64_t candidateTimeoutMs = 0;
     auto shrinkPhaseStart = steady_clock::now();
     int assessmentIndex = 0;
+    bool anyShrinkFound = false;
 
     // Initial assessment: measure reproduction rate for adaptive retry budget
     if (useRetry)
@@ -370,6 +381,7 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
                 }
             }
             if (shrinkFound) {
+                anyShrinkFound = true;
                 cout << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{*this, shrVec} << endl;
                 if (!failureMsg.empty())
                     cout << "    by failed expectation: " << failureMsg << endl;
@@ -381,7 +393,8 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
         }
     }
 
-    cout << "  simplest args found by shrinking: " << ShowShrVec{*this, shrVec} << endl;
+    if (anyShrinkFound)
+        cout << "  simplest args found by shrinking: " << ShowShrVec{*this, shrVec} << endl;
 }
 
 stringstream& PropertyBase::getLastStream()

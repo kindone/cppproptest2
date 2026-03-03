@@ -167,6 +167,20 @@ TEST(Property, prop_expect_failure_message_uses_original_expression)
     EXPECT_NE(output.find("x == y"), string::npos);
 }
 
+TEST(Property, shrink_output_omits_simplest_line_when_no_shrink_happened)
+{
+    testing::internal::CaptureStdout();
+    const bool ok = forAll([](int) {
+        PROP_ASSERT(false);
+        return true;
+    }, gen::just(7).noShrink());
+    const string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(output.find("with args: { 7 }"), string::npos);
+    EXPECT_EQ(output.find("simplest args found by shrinking"), string::npos);
+}
+
 TEST(Property, matrix)
 {
     matrix([](int, int) {
