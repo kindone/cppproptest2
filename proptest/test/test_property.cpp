@@ -181,6 +181,26 @@ TEST(Property, shrink_output_omits_simplest_line_when_no_shrink_happened)
     EXPECT_EQ(output.find("simplest args found by shrinking"), string::npos);
 }
 
+TEST(Property, seed_generator_has_empty_shrink_stream)
+{
+    Random rand(123);
+    auto shr = gen::seed()(rand);
+    EXPECT_TRUE(shr.getShrinks().isEmpty());
+}
+
+TEST(Property, seed_generator_prints_seed_wrapper_type)
+{
+    testing::internal::CaptureStdout();
+    const bool ok = forAll([](Seed) {
+        PROP_ASSERT(false);
+        return true;
+    }, gen::just(Seed(42)));
+    const string output = testing::internal::GetCapturedStdout();
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(output.find("with args: { Seed(42) }"), string::npos);
+}
+
 TEST(Property, matrix)
 {
     matrix([](int, int) {
@@ -1147,3 +1167,4 @@ TEST(Property, DISABLED_forAll_vs_EXPECT_FOR_ALL_stored_result)
     bool ok = forAll([](int x) { PROP_ASSERT(x <= 5); return true; }, gen::interval(0, 10));
     EXPECT_TRUE(ok);
 }
+

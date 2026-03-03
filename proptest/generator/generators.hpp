@@ -16,3 +16,4 @@
 #include "proptest/generator/unicode.hpp"
 #include "proptest/generator/shared_ptr.hpp"
 #include "proptest/generator/optional.hpp"
+#include "proptest/generator/seed.hpp"

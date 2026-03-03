@@ -148,7 +148,7 @@ TEST(ShrinkRetryStateful, confirmation_runs)
         PROP_ASSERT(!result);
         auto stats = prop.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
-        // PROP_ASSERT(stats->numReproduced >= 1 && stats->numReproduced <= kShrinkAssessmentRuns);
+        PROP_ASSERT_LE(stats->numReproduced, kShrinkAssessmentRuns);
         PROP_ASSERT(stats->totalRuns == kShrinkAssessmentRuns);
     }, gen::seed());
 }
@@ -174,7 +174,7 @@ TEST(ShrinkRetryStateful, shrink_with_retries)
         if (!result) {
             auto stats = prop.getLastReproductionStats();
             PROP_ASSERT(stats.has_value());
-            // PROP_ASSERT(stats->numReproduced >= 1 && stats->numReproduced <= kShrinkAssessmentRuns);
+            PROP_ASSERT_LE(stats->numReproduced, kShrinkAssessmentRuns);
             PROP_ASSERT(stats->totalRuns == kShrinkAssessmentRuns);
             PROP_ASSERT(!stats->argsAsString.empty());
         }
