@@ -61,6 +61,7 @@ The following table provides a comprehensive overview of all generators availabl
 | | [`gen::weighted(gen, prob)`](#combinator-functions) | Weighted generator (for `oneOf`) |
 | **Utilities** | | |
 | | [`gen::arbitrary<T>(...)`](#access-to-an-arbitrary) | Access to arbitrary |
+| | [`gen::seed()`](#genseed) | Uniform random seed wrapper (`Seed`) |
 | | [`gen::noShrink(gen)`](#combinator-functions) | Same values, but with empty shrink stream |
 
 **Note:** For detailed documentation on combinators, see the [Combinators](Combinators.md) page. For building custom generators, see [Custom Generator](CustomGenerator.md).
@@ -209,6 +210,37 @@ forAll([](int32_t i, uint32_t u) {
 ```
 
 **See also:** [Arbitrary](Arbitrary.md) for configuration options.
+
+---
+
+### `gen::seed()`
+
+Generates `Seed` values for reproducible seed-driven tests (meta-properties).
+
+**Why use this instead of `gen::uint64()`:**
+
+- Produces uniform random `uint64_t` seeds without boundary-value bias.
+- Uses a dedicated wrapper type (`Seed`) so logs and shrunk-case prints are clearer.
+- Has no shrink stream (seed is treated as configuration, not as a value to minimize).
+
+**Returns:** `Generator<Seed>`
+
+**Examples:**
+```cpp
+// Generate seeds for an outer property
+forAll([](Seed seed) {
+    auto result = property([](int x) {
+        PROP_ASSERT(x == x);
+    }).setSeed(seed).setNumRuns(100).forAll();
+
+    PROP_ASSERT(result);
+}, gen::seed());
+
+// Printed arguments use Seed(...) format
+// e.g. "with args: { Seed(42) }"
+```
+
+**Note:** `Seed` is convertible to `uint64_t`, so it can be passed directly to `.setSeed(...)`.
 
 ---
 

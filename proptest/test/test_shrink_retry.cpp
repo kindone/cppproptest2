@@ -209,7 +209,6 @@ TEST(ShrinkRetryStateful, report_on_each_shrink)
         if (result)
             return;  // passed, no failure to validate
         PROP_EXPECT_EQ(statsCount, 1U);
-        // PROP_EXPECT_GE(stats.numReproduced, 1);
         PROP_EXPECT_LE(stats.numReproduced, kShrinkAssessmentRuns);
         PROP_EXPECT_EQ(stats.totalRuns, kShrinkAssessmentRuns);
     }, gen::seed());
