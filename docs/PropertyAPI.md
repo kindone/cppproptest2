@@ -416,7 +416,7 @@ forAll([](Seed seed) {
     PROP_ASSERT(result);
 }, gen::seed());
 ```
-`Seed` type is a thin wrapper around a `uint64_t` value which is commonly used as random seeds. Shrinking is skipped for the generated `Seed`, as the 'size' of a random seed does not mean anything. In output, `Seed` values are shown as `Seed(<n>)` to make seed-driven runs easier to read.
+`Seed` type is a thin wrapper around a `uint64_t` value which is commonly used as random seeds. Shrinking is skipped for the generated `Seed`, as 'size' of a random seed does not mean anything. In output, `Seed` values are shown as `Seed(<n>)` to make seed-driven runs easier to read.
 
 **Note:** If no seed is specified, current timestamp in milliseconds is used. You can also set it via environment variable `PROPTEST_SEED`.
 
