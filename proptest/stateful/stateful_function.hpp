@@ -36,8 +36,8 @@ template <typename ObjectType, typename ModelType>
 class StatefulProperty {
     using InitialGen = GenFunction<ObjectType>;
     using ModelFactoryFunction = Function<ModelType(ObjectType&)>;
-    using PropertyType = Property<ObjectType, list<Action<ObjectType, ModelType>>>;
-    using Func = Function<bool(ObjectType, list<Action<ObjectType, ModelType>>)>;
+    using PropertyType = Property<list<Action<ObjectType, ModelType>>, ObjectType>;
+    using Func = Function<bool(list<Action<ObjectType, ModelType>>, ObjectType)>;
 
 public:
     StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGen<ObjectType, ModelType>& actGen)
@@ -142,11 +142,13 @@ public:
     {
         // TODO add interface to adjust list min max sizes
         auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen);
-        vector<AnyGenerator> genVec({initialGen, actionListGen});
+        // Order generators as (action list, initial object) so shrinking
+        // naturally prioritizes action-list simplification first.
+        vector<AnyGenerator> genVec({actionListGen, initialGen});
 
         auto func = [modelFactory = this->modelFactory, postCheck = this->postCheck,
                      onActionStart = this->onActionStart, onActionEnd = this->onActionEnd](
-                        ObjectType obj, list<Action<ObjectType, ModelType>> actions) {
+                        list<Action<ObjectType, ModelType>> actions, ObjectType obj) {
             auto model = modelFactory(obj);
             for (auto action : actions) {
                 if (onActionStart)
