@@ -132,6 +132,8 @@ public:
 
     static constexpr uint32_t defaultNumRuns = 200;
     static constexpr int defaultNumThreads = 2;
+    static constexpr size_t defaultActionListMinSize = 0;
+    static constexpr size_t defaultActionListMaxSize = 20;
 
     Concurrency(ObjectTypeGen _initialGen, ActionGen _actionGen)
         : initialGen(_initialGen),
@@ -207,6 +209,29 @@ public:
         return *this;
     }
 
+    Concurrency& setActionListMinSize(size_t minSize)
+    {
+        actionListMinSize = minSize;
+        if (actionListMaxSize < actionListMinSize)
+            actionListMaxSize = actionListMinSize;
+        return *this;
+    }
+
+    Concurrency& setActionListMaxSize(size_t maxSize)
+    {
+        actionListMaxSize = maxSize;
+        if (actionListMaxSize < actionListMinSize)
+            actionListMinSize = actionListMaxSize;
+        return *this;
+    }
+
+    Concurrency& setActionListSize(size_t size)
+    {
+        actionListMinSize = size;
+        actionListMaxSize = size;
+        return *this;
+    }
+
     // Retry/timeout knobs aligned with PropertyBase shrink configuration.
     Concurrency& setShrinkMaxRetries(uint32_t retries)
     {
@@ -237,6 +262,8 @@ private:
     int numRuns;
     int numThreads;
     uint32_t maxDurationMs;
+    size_t actionListMinSize = defaultActionListMinSize;
+    size_t actionListMaxSize = defaultActionListMaxSize;
     uint32_t shrinkMaxRetries = 0;
     uint32_t shrinkTimeoutMs = 0;
     uint32_t shrinkRetryTimeoutMs = 0;
@@ -349,7 +376,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
     constexpr int FRONT_THREAD_ID = -1;
     Shrinkable<ObjectType> initialShr = initialGen(rand);
 
-    auto actionListGen = Arbi<list<Action<ObjectType,ModelType>>>(actionGen);
+    auto actionListGen = Arbi<list<Action<ObjectType,ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
     Shrinkable<ActionList> frontShr = actionListGen(rand);
     vector<Shrinkable<ActionList>> rearShrs;
     rearShrs.reserve(numThreads);
@@ -436,7 +463,7 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random&)
         return elapsed >= timeoutMs;
     };
 
-    auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen);
+    auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
 
     // Re-generate the failing tuple from the saved seed.
     Random rand(seed);

@@ -61,6 +61,7 @@ TEST(stateful_function, basic_model)
     using Model = VectorModel2;
 
     int startupCount = 0, cleanupCount = 0, postCheckCount = 0;
+    const uint32_t maxDurationMs = 2000;
 
     auto pushBackGen = gen::int32().map<Action<T, Model>>([](int value) {
         return Action<T, Model>(PROP_ACTION_NAME("PushBack", value), [value](T& obj, Model&) {
@@ -99,10 +100,10 @@ TEST(stateful_function, basic_model)
     prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
     prop.setPostCheck([&postCheckCount](T&, Model&) { ++postCheckCount; });
     auto startTime = steady_clock::now();
-    prop.setSeed(0).setNumRuns(1000000).setMaxDurationMs(2000).go();
+    prop.setSeed(0).setNumRuns(1000000).setMaxDurationMs(maxDurationMs).go();
     auto endTime = steady_clock::now();
 
-    EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), 2000);
+    EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), maxDurationMs);
     EXPECT_GT(startupCount, 0);
     EXPECT_EQ(startupCount, cleanupCount);
     EXPECT_EQ(startupCount, postCheckCount);
@@ -149,4 +150,18 @@ TEST(stateful_function, onActionEnd_invariant_check)
         PROP_ASSERT(vec.size() < 100000);  // Invariant: size is non-negative
     });
     prop.setSeed(0).setNumRuns(100).go();
+}
+
+TEST(stateful_function, action_list_size_configuration)
+{
+    auto incAction = gen::just(SimpleAction<int>([](int& v) { ++v; }));
+    auto prop = statefulProperty<int>(gen::just(0), incAction);
+
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(20)
+                  .setActionListSize(3)
+                  .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 3); })
+                  .go();
+
+    EXPECT_TRUE(ok);
 }

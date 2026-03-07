@@ -126,3 +126,18 @@ TEST(concurrency_function, shrink_with_retry_timeout_smoke)
                   .go();
     EXPECT_FALSE(ok);
 }
+
+TEST(concurrency_function, action_list_size_configuration)
+{
+    auto incAction = gen::just(SimpleAction<int>([](int& v) { ++v; }));
+    auto prop = concurrency<int>(gen::just(0), incAction);
+
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(20)
+                  .setMaxConcurrency(1)
+                  .setActionListSize(4)
+                  .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 4); })
+                  .go();
+
+    EXPECT_TRUE(ok);
+}

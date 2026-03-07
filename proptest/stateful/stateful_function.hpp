@@ -40,6 +40,9 @@ class StatefulProperty {
     using Func = Function<bool(list<Action<ObjectType, ModelType>>, ObjectType)>;
 
 public:
+    static constexpr size_t defaultActionListMinSize = 0;
+    static constexpr size_t defaultActionListMaxSize = 20;
+
     StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGen<ObjectType, ModelType>& actGen)
         : initialGen(initGen), modelFactory(mdlFactory), actionGen(actGen)
     {
@@ -138,10 +141,33 @@ public:
         return *this;
     }
 
+    StatefulProperty& setActionListMinSize(size_t minSize)
+    {
+        actionListMinSize = minSize;
+        if (actionListMaxSize < actionListMinSize)
+            actionListMaxSize = actionListMinSize;
+        return *this;
+    }
+
+    StatefulProperty& setActionListMaxSize(size_t maxSize)
+    {
+        actionListMaxSize = maxSize;
+        if (actionListMaxSize < actionListMinSize)
+            actionListMinSize = actionListMaxSize;
+        return *this;
+    }
+
+    StatefulProperty& setActionListSize(size_t size)
+    {
+        actionListMinSize = size;
+        actionListMaxSize = size;
+        return *this;
+    }
+
     bool go()
     {
-        // TODO add interface to adjust list min max sizes
-        auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen);
+        auto actionListGen =
+            Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
         // Order generators as (action list, initial object) so shrinking
         // naturally prioritizes action-list simplification first.
         vector<AnyGenerator> genVec({actionListGen, initialGen});
@@ -198,6 +224,8 @@ private:
     InitialGen initialGen;
     ModelFactoryFunction modelFactory;
     ActionGen<ObjectType, ModelType> actionGen;
+    size_t actionListMinSize = defaultActionListMinSize;
+    size_t actionListMaxSize = defaultActionListMaxSize;
 
     Function<void(ObjectType&, ModelType&)> postCheck;
     Function<void(ObjectType&, ModelType&)> onActionStart;
@@ -211,14 +239,14 @@ private:
 };
 
 template <typename ObjectType, typename InitialGen>
-decltype(auto) statefulProperty(InitialGen&& initialGen, SimpleActionGen<ObjectType>& actionGen)
+decltype(auto) statefulProperty(InitialGen&& initialGen, SimpleActionGen<ObjectType>& simpleActionGen)
 {
     static EmptyModel emptyModel;
-    auto actionGen2 = actionGen.template map<Action<ObjectType, EmptyModel>>(
+    auto actionGen = simpleActionGen.template map<Action<ObjectType, EmptyModel>>(
         [](const SimpleAction<ObjectType>& simpleAction) { return Action<ObjectType, EmptyModel>(simpleAction); });
 
     auto modelFactory = +[](ObjectType&) { return emptyModel; };
-    return StatefulProperty<ObjectType, EmptyModel>(util::forward<InitialGen>(initialGen), modelFactory, actionGen2);
+    return StatefulProperty<ObjectType, EmptyModel>(util::forward<InitialGen>(initialGen), modelFactory, actionGen);
 }
 
 template <typename ObjectType, typename ModelType, typename InitialGen>
