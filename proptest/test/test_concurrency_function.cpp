@@ -111,3 +111,18 @@ TEST(concurrency_function, bitmap)
         gen::just<Bitmap>(Bitmap()), actionGen);
     prop.go();
 }
+
+TEST(concurrency_function, shrink_with_retry_timeout_smoke)
+{
+    auto noopGen = gen::just(SimpleAction<int>([](int&) {}));
+    auto prop = concurrency<int>(gen::interval<int>(0, 100), noopGen);
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(1)
+                  .setMaxConcurrency(2)
+                  .setShrinkMaxRetries(2)
+                  .setShrinkTimeoutMs(200)
+                  .setShrinkRetryTimeoutMs(100)
+                  .setPostCheck([](int&) { PROP_ASSERT(false); })
+                  .go();
+    EXPECT_FALSE(ok);
+}

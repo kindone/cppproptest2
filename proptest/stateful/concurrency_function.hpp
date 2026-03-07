@@ -2,10 +2,12 @@
 
 #include "proptest/api.hpp"
 #include "proptest/stateful/stateful_function.hpp"
+#include "proptest/util/assert.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/PropertyContext.hpp"
 #include "proptest/Generator.hpp"
+#include "proptest/util/printing.hpp"
 #include "proptest/std/chrono.hpp"
 #include <thread>
 #include <atomic>
@@ -205,6 +207,25 @@ public:
         return *this;
     }
 
+    // Retry/timeout knobs aligned with PropertyBase shrink configuration.
+    Concurrency& setShrinkMaxRetries(uint32_t retries)
+    {
+        shrinkMaxRetries = retries;
+        return *this;
+    }
+
+    Concurrency& setShrinkTimeoutMs(uint32_t ms)
+    {
+        shrinkTimeoutMs = ms;
+        return *this;
+    }
+
+    Concurrency& setShrinkRetryTimeoutMs(uint32_t ms)
+    {
+        shrinkRetryTimeoutMs = ms;
+        return *this;
+    }
+
 private:
     ObjectTypeGen initialGen;
     ModelTypeGen modelFactory;
@@ -216,6 +237,9 @@ private:
     int numRuns;
     int numThreads;
     uint32_t maxDurationMs;
+    uint32_t shrinkMaxRetries = 0;
+    uint32_t shrinkTimeoutMs = 0;
+    uint32_t shrinkRetryTimeoutMs = 0;
 };
 
 template <typename ObjectType, typename ModelType>
@@ -405,7 +429,208 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 template <typename ObjectType, typename ModelType>
 void Concurrency<ObjectType, ModelType>::handleShrink(Random&)
 {
+    auto isShrinkPhaseTimedOut = +[](steady_clock::time_point phaseStart, uint32_t timeoutMs) -> bool {
+        if (timeoutMs == 0)
+            return false;
+        auto elapsed = duration_cast<util::milliseconds>(steady_clock::now() - phaseStart).count();
+        return elapsed >= timeoutMs;
+    };
 
+    auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen);
+
+    // Re-generate the failing tuple from the saved seed.
+    Random rand(seed);
+    auto initialShr = initialGen(rand);
+    auto frontShr = actionListGen(rand);
+    vector<Shrinkable<ActionList>> rearShrs;
+    rearShrs.reserve(numThreads);
+    for (int i = 0; i < numThreads; i++) {
+        rearShrs.push_back(actionListGen(rand));
+    }
+
+    vector<ShrinkableBase> shrVec;
+    vector<ShrinkableBase::StreamType> shrinksVec;
+    shrVec.reserve(2 + rearShrs.size());
+    shrinksVec.reserve(2 + rearShrs.size());
+
+    shrVec.push_back(initialShr);
+    shrinksVec.push_back(initialShr.getShrinks());
+    shrVec.push_back(frontShr);
+    shrinksVec.push_back(frontShr.getShrinks());
+    for (const auto& rearShr : rearShrs) {
+        shrVec.push_back(rearShr);
+        shrinksVec.push_back(rearShr.getShrinks());
+    }
+
+    const auto writeArgs = +[](ostream& os, const vector<ShrinkableBase>& args) {
+        os << "{ initial: " << Show<ShrinkableBase, ObjectType>(args[0]);
+        if (args.size() > 1)
+            os << ", front: " << Show<ShrinkableBase, ActionList>(args[1]);
+        for (size_t i = 2; i < args.size(); i++)
+            os << ", rear" << (i - 2) << ": " << Show<ShrinkableBase, ActionList>(args[i]);
+        os << " }";
+    };
+
+    cout << "  with args: ";
+    writeArgs(cout, shrVec);
+    cout << endl;
+
+    auto runCandidate = [&](const vector<ShrinkableBase>& args) -> pair<bool, string> {
+        try {
+            if (onStartup)
+                onStartup();
+
+            ObjectType obj = args[0].getAny().template getRef<ObjectType>();
+            ModelType model = modelFactory ? modelFactory(obj) : ModelType();
+            const auto& front = args[1].getAny().template getRef<ActionList>();
+
+            stateful::Context frontCtx{ConcurrentTestDump::FRONT_THREAD_ID};
+            for (auto action : front)
+                action(obj, model, frontCtx);
+
+            if (numThreads > 1) {
+                atomic_bool sync_ready(false);
+                vector<shared_ptr<atomic_bool>> thread_ready;
+                vector<thread> rearRunners;
+                thread_ready.reserve(numThreads);
+                rearRunners.reserve(numThreads);
+                vector<ActionList> rearCopies;
+                rearCopies.reserve(numThreads);
+                ConcurrentTestDump dump;
+                for (int i = 0; i < numThreads; i++) {
+                    thread_ready.emplace_back(new atomic_bool(false));
+                    rearCopies.push_back(args[2 + i].getAny().template getRef<ActionList>());
+                    vector<string> rearNames;
+                    util::transform(
+                        rearCopies.back().begin(), rearCopies.back().end(), util::back_inserter(rearNames),
+                        [](const ActionType& action) { return action.name; });
+                    dump.initRear(rearNames);
+                }
+                for (int i = 0; i < numThreads; i++) {
+                    rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(
+                        i, obj, model, rearCopies[i], *thread_ready[i], sync_ready, dump));
+                }
+                for (int i = 0; i < numThreads; i++) {
+                    while (!*thread_ready[i]) {}
+                }
+                sync_ready = true;
+                for (int i = 0; i < numThreads; i++)
+                    rearRunners[i].join();
+            }
+
+            if (postCheck)
+                postCheck(obj, model);
+
+            if (onCleanup)
+                onCleanup();
+            return {false, ""};
+        } catch (const AssertFailed& e) {
+            return {true, string(e.what()) + " (" + e.filename + ":" + to_string(e.lineno) + ")"};
+        } catch (const PropertyFailedBase& e) {
+            return {true, string(e.what()) + " (" + e.filename + ":" + to_string(e.lineno) + ")"};
+        } catch (const exception& e) {
+            return {true, string("exception: ") + e.what()};
+        }
+    };
+
+    const bool useRetry = (shrinkMaxRetries > 0);
+    int64_t candidateTimeoutMs = 0;
+    auto shrinkPhaseStart = steady_clock::now();
+    bool anyShrinkFound = false;
+
+    auto assessFailureForRetry = [&](vector<ShrinkableBase>& args) {
+        int failCount = 0;
+        auto start = steady_clock::now();
+        for (int r = 0; r < kShrinkAssessmentRuns; r++) {
+            auto [failed, _] = runCandidate(args);
+            if (failed)
+                failCount++;
+        }
+        auto elapsedMs = duration_cast<util::milliseconds>(steady_clock::now() - start).count();
+        double sec = elapsedMs / 1000.0;
+        cout << "  reproduction: " << failCount << "/" << kShrinkAssessmentRuns << " in " << std::fixed
+             << std::setprecision(2) << sec << "s" << endl;
+
+        if (failCount <= 0 || shrinkRetryTimeoutMs == 0) {
+            candidateTimeoutMs = 0;
+        } else {
+            candidateTimeoutMs =
+                static_cast<int64_t>(elapsedMs / failCount * kShrinkAdaptiveMultiplier);
+            if (candidateTimeoutMs > shrinkRetryTimeoutMs)
+                candidateTimeoutMs = shrinkRetryTimeoutMs;
+        }
+    };
+
+    auto shrinkTestCandidate = [&](const vector<ShrinkableBase>& curArgs) -> pair<bool, string> {
+        if (!useRetry) {
+            return runCandidate(curArgs);
+        }
+        auto candidateStart = steady_clock::now();
+        for (uint32_t retry = 0; retry <= shrinkMaxRetries; retry++) {
+            if (isShrinkPhaseTimedOut(shrinkPhaseStart, shrinkTimeoutMs))
+                break;
+            auto [failed, msg] = runCandidate(curArgs);
+            if (failed)
+                return {true, msg};
+            if (candidateTimeoutMs > 0) {
+                auto candidateElapsed =
+                    duration_cast<util::milliseconds>(steady_clock::now() - candidateStart).count();
+                if (candidateElapsed >= candidateTimeoutMs)
+                    break;
+            }
+        }
+        return {false, ""};
+    };
+
+    if (useRetry)
+        assessFailureForRetry(shrVec);
+
+    for (size_t i = 0; i < shrVec.size(); i++) {
+        auto shrinks = shrinksVec[i];
+        while (!shrinks.isEmpty()) {
+            if (isShrinkPhaseTimedOut(shrinkPhaseStart, shrinkTimeoutMs)) {
+                cout << "  shrink phase timeout (" << shrinkTimeoutMs << "ms)" << endl;
+                break;
+            }
+
+            auto iter = shrinks.iterator<ShrinkableBase::StreamElementType>();
+            bool shrinkFound = false;
+            string failureMsg;
+            while (iter.hasNext()) {
+                auto next = iter.next();
+                auto cur = shrVec;
+                cur[i] = next;
+                auto [failed, msg] = shrinkTestCandidate(cur);
+                if (failed)
+                    failureMsg = msg;
+                if (failed) {
+                    shrVec[i] = next;
+                    shrinks = next.getShrinks();
+                    shrinkFound = true;
+                    break;
+                }
+            }
+
+            if (shrinkFound) {
+                anyShrinkFound = true;
+                cout << "  shrinking found simpler failing arg " << i << ": ";
+                writeArgs(cout, shrVec);
+                cout << endl;
+                if (!failureMsg.empty())
+                    cout << "    by failed expectation: " << failureMsg << endl;
+                if (useRetry && kReassessOnEachSucessfulShrink)
+                    assessFailureForRetry(shrVec);
+            } else {
+                break;
+            }
+        }
+    }
+
+    if (anyShrinkFound) {
+        cout << "  simplest args found by shrinking: ";
+        writeArgs(cout, shrVec);
+        cout << endl;
+    }
 }
 
 /* without model */
