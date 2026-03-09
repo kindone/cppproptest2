@@ -168,12 +168,12 @@ bool PropertyContext::checkStatAssertions(size_t totalRuns)
     return allPassed;
 }
 
-void PropertyContext::printSummary()
+void PropertyContext::printSummary(ostream& os)
 {
     for (const auto& tagKV : tags) {
         auto& key = tagKV.first;
         auto& valueMap = tagKV.second;
-        cout << "  " << key << ": " << endl;
+        os << "  " << key << ": " << endl;
         size_t total = 0;
         for (const auto& valueKV : valueMap) {
             auto tag = valueKV.second;
@@ -183,8 +183,8 @@ void PropertyContext::printSummary()
         for (const auto& valueKV : valueMap) {
             auto value = valueKV.first;
             auto tag = valueKV.second;
-            cout << "    " << value << ": " << tag.count << "/" << total << " ("
-                      << static_cast<double>(tag.count) / total * 100 << "%)" << endl;
+            os << "    " << value << ": " << tag.count << "/" << total << " ("
+               << static_cast<double>(tag.count) / total * 100 << "%)" << endl;
         }
     }
 }

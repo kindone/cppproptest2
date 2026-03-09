@@ -50,6 +50,10 @@ struct ForAllConfig {
     optional<uint32_t> shrinkTimeoutMs = nullopt;
     /// Per-candidate timeout in ms (0 = no limit)
     optional<uint32_t> shrinkRetryTimeoutMs = nullopt;
+    /// Optional output stream for informational logs (defaults to stdout)
+    optional<ostream*> outputStream = nullopt;
+    /// Optional error stream for failure logs (defaults to stderr)
+    optional<ostream*> errorStream = nullopt;
 };
 
 // Forward declaration
@@ -91,6 +95,12 @@ void applyConfig(Property<ARGS...>& prop, const ForAllConfig& config)
     }
     if (config.shrinkRetryTimeoutMs.has_value()) {
         prop.setShrinkRetryTimeoutMs(config.shrinkRetryTimeoutMs.value());
+    }
+    if (config.outputStream.has_value() && config.outputStream.value() != nullptr) {
+        prop.setOutputStream(*config.outputStream.value());
+    }
+    if (config.errorStream.has_value() && config.errorStream.value() != nullptr) {
+        prop.setErrorStream(*config.errorStream.value());
     }
 }
 
@@ -218,6 +228,33 @@ public:
     Property& setOnFailureReproduction(Function<void(int, const vector<Any>&, const string&)> f)
     {
         PropertyBase::setOnFailureReproduction(util::move(f));
+        return *this;
+    }
+
+    /**
+     * @brief Sets output stream for informational logs (defaults to stdout)
+     */
+    Property& setOutputStream(ostream& os)
+    {
+        PropertyBase::setOutputStream(os);
+        return *this;
+    }
+
+    /**
+     * @brief Sets error stream for failure logs (defaults to stderr)
+     */
+    Property& setErrorStream(ostream& os)
+    {
+        PropertyBase::setErrorStream(os);
+        return *this;
+    }
+
+    /**
+     * @brief Sets both output and error streams
+     */
+    Property& setOutputStreams(ostream& out, ostream& err)
+    {
+        PropertyBase::setOutputStreams(out, err);
         return *this;
     }
 

@@ -70,7 +70,7 @@ struct PROPTEST_API PropertyContext
     void tag(string key, string value) { tag("?", -1, key, value); }
     stringstream& getLastStream();
     stringstream flushFailures(int indent = 0);
-    void printSummary();
+    void printSummary(ostream& os = cout);
     bool hasFailures() const { return !failures.empty(); }
 
     void addStatAssertGe(string&& key, double minBound, const char* filename, int lineno);

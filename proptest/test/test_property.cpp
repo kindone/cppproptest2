@@ -155,13 +155,13 @@ TEST(Property, prop_assert_failure_message_uses_original_expression)
 
 TEST(Property, prop_expect_failure_message_uses_original_expression)
 {
-    testing::internal::CaptureStderr();
+    stringstream err;
     const bool ok = forAll([](int x) {
         const int y = 5;
         PROP_EXPECT_EQ(x, y);
         return true;
-    }, gen::just(4));
-    const string output = testing::internal::GetCapturedStderr();
+    }, {.errorStream = &err}, gen::just(4));
+    const string output = err.str();
 
     EXPECT_FALSE(ok);
     EXPECT_NE(output.find("x == y"), string::npos);
@@ -169,12 +169,12 @@ TEST(Property, prop_expect_failure_message_uses_original_expression)
 
 TEST(Property, shrink_output_omits_simplest_line_when_no_shrink_happened)
 {
-    testing::internal::CaptureStdout();
+    stringstream out;
     const bool ok = forAll([](int) {
         PROP_ASSERT(false);
         return true;
-    }, gen::just(7).noShrink());
-    const string output = testing::internal::GetCapturedStdout();
+    }, {.outputStream = &out}, gen::just(7).noShrink());
+    const string output = out.str();
 
     EXPECT_FALSE(ok);
     EXPECT_NE(output.find("with args: { 7 }"), string::npos);
@@ -190,12 +190,12 @@ TEST(Property, seed_generator_has_empty_shrink_stream)
 
 TEST(Property, seed_generator_prints_seed_wrapper_type)
 {
-    testing::internal::CaptureStdout();
+    stringstream out;
     const bool ok = forAll([](Seed) {
         PROP_ASSERT(false);
         return true;
-    }, gen::just(Seed(42)));
-    const string output = testing::internal::GetCapturedStdout();
+    }, {.outputStream = &out}, gen::just(Seed(42)));
+    const string output = out.str();
 
     EXPECT_FALSE(ok);
     EXPECT_NE(output.find("with args: { Seed(42) }"), string::npos);

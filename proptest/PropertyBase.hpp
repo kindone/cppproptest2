@@ -210,6 +210,22 @@ public:
         onFailureReproduction = util::move(f);
         return *this;
     }
+    PropertyBase& setOutputStream(ostream& os)
+    {
+        outputStream = &os;
+        return *this;
+    }
+    PropertyBase& setErrorStream(ostream& os)
+    {
+        errorStream = &os;
+        return *this;
+    }
+    PropertyBase& setOutputStreams(ostream& out, ostream& err)
+    {
+        outputStream = &out;
+        errorStream = &err;
+        return *this;
+    }
 
     struct ShowShrVec {
         ShowShrVec(const PropertyBase& _property, const vector<ShrinkableBase>& _shrVec) : property(_property), shrVec(_shrVec) {}
@@ -262,6 +278,8 @@ protected:
 
     Function<void(ReproductionStats)> onReproductionStats;
     Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
+    ostream* outputStream = &cout;
+    ostream* errorStream = &cerr;
 
     vector<AnyGenerator> genVec;
 

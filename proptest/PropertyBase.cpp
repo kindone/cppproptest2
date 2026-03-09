@@ -97,16 +97,16 @@ bool PropertyBase::exampleImpl(const vector<Any>& values)
             return true;
         } catch (const Discard&) {
             // silently discard combination
-            cerr << "Discard is not supported for single run" << endl;
+            *errorStream << "Discard is not supported for single run" << endl;
         }
     } catch (const PropertyFailedBase& e) {
-        cerr << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
-        cerr << "  with args: " << ShowAnyVec{*this, values} << endl;
+        *errorStream << "example failed: " << e.what() << " (" << e.filename << ":" << e.lineno << ")" << endl;
+        *errorStream << "  with args: " << ShowAnyVec{*this, values} << endl;
         return false;
     } catch (const exception& e) {
         // skip shrinking?
-        cerr << "example failed by exception: " << e.what() << endl;
-        cerr << "  with args: " << ShowAnyVec{*this, values} << endl;
+        *errorStream << "example failed by exception: " << e.what() << endl;
+        *errorStream << "  with args: " << ShowAnyVec{*this, values} << endl;
         return false;
     }
     return false;
@@ -120,7 +120,7 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
 
     Random rand(effectiveSeed);
     Random savedRand(effectiveSeed);
-    cout << "random seed: " << effectiveSeed << endl;
+    *outputStream << "random seed: " << effectiveSeed << endl;
     PropertyContext ctx;
     auto startedTime = steady_clock::now();
 
@@ -131,16 +131,16 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
                 auto currentTime = steady_clock::now();
                 if (duration_cast<util::milliseconds>(currentTime - startedTime).count() > effectiveMaxDurationMs)
                 {
-                    cout << "Timed out after "
-                         << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms, passed "
-                         << i << " tests" << endl;
+                    *outputStream << "Timed out after "
+                                  << duration_cast<util::milliseconds>(currentTime - startedTime).count() << "ms, passed "
+                                  << i << " tests" << endl;
                     if (!ctx.checkStatAssertions(i)) {
                         stringstream failures = ctx.flushFailures();
-                        cerr << "Stat assertion failed: " << failures.str() << endl;
-                        ctx.printSummary();
+                        *errorStream << "Stat assertion failed: " << failures.str() << endl;
+                        ctx.printSummary(*outputStream);
                         return false;
                     }
-                    ctx.printSummary();
+                    ctx.printSummary(*outputStream);
                     return true;
                 }
             }
@@ -159,12 +159,12 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
                     stringstream failures = ctx.flushFailures();
                     // failed expectations
                     if (failures.rdbuf()->in_avail()) {
-                        cerr << "Falsifiable, after " << (i + 1) << " tests: ";
-                        cerr << failures.str();
+                        *errorStream << "Falsifiable, after " << (i + 1) << " tests: ";
+                        *errorStream << failures.str();
                         shrink(savedRand, curGenVec);
                         return false;
                     } else if (!result) {
-                        cerr << "Falsifiable, after " << (i + 1) << " tests" << endl;
+                        *errorStream << "Falsifiable, after " << (i + 1) << " tests" << endl;
                         shrink(savedRand, curGenVec);
                         return false;
                     }
@@ -178,32 +178,32 @@ bool PropertyBase::runForAll(const GenVec& curGenVec)
             } while (!pass);
         }
     } catch (const AssertFailed& e) {
-        cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
-                << ")" << endl;
+        *errorStream << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
+                     << ")" << endl;
         // shrink
         shrink(savedRand, curGenVec);
         return false;
     } catch (const PropertyFailedBase& e) {
-        cerr << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
-                << ")" << endl;
+        *errorStream << "Falsifiable, after " << (i + 1) << " tests: " << e.what() << " (" << e.filename << ":" << e.lineno
+                     << ")" << endl;
         // shrink
         shrink(savedRand, curGenVec);
         return false;
     } catch (const exception& e) {
-        cerr << "Falsifiable, after " << (i + 1) << " tests - unhandled exception thrown: " << e.what() << endl;
+        *errorStream << "Falsifiable, after " << (i + 1) << " tests - unhandled exception thrown: " << e.what() << endl;
         // shrink
         shrink(savedRand, curGenVec);
         return false;
     }
 
-    cout << "OK, passed " << effectiveNumRuns << " tests" << endl;
+    *outputStream << "OK, passed " << effectiveNumRuns << " tests" << endl;
     if (!ctx.checkStatAssertions(i)) {
         stringstream failures = ctx.flushFailures();
-        cerr << "Stat assertion failed: " << failures.str() << endl;
-        ctx.printSummary();
+        *errorStream << "Stat assertion failed: " << failures.str() << endl;
+        ctx.printSummary(*outputStream);
         return false;
     }
-    ctx.printSummary();
+    ctx.printSummary(*outputStream);
     return true;
 }
 
@@ -280,8 +280,8 @@ void PropertyBase::assessFailureForRetry(vector<ShrinkableBase>& shrVec,
     if (onReproductionStats)
         onReproductionStats(stats);
 
-    cout << "  reproduction: " << failCount << "/" << kShrinkAssessmentRuns << " in " << std::fixed
-         << std::setprecision(2) << sec << "s" << endl;
+    *outputStream << "  reproduction: " << failCount << "/" << kShrinkAssessmentRuns << " in " << std::fixed
+                  << std::setprecision(2) << sec << "s" << endl;
 
     const uint32_t effectiveShrinkRetryTimeoutMs = shrinkRetryTimeoutMs.value_or(0);
     if (failCount <= 0 || effectiveShrinkRetryTimeoutMs == 0)
@@ -337,7 +337,7 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
         shrinksVec.push_back(shr.getShrinks());
     }
 
-    cout << "  with args: " << ShowShrVec{*this, shrVec} << endl;
+    *outputStream << "  with args: " << ShowShrVec{*this, shrVec} << endl;
 
     const uint32_t effectiveShrinkMaxRetries = shrinkMaxRetries.value_or(0);
     const uint32_t effectiveShrinkTimeoutMs = shrinkTimeoutMs.value_or(0);
@@ -356,7 +356,7 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
         auto shrinks = shrinksVec[i];
         while (!shrinks.isEmpty()) {
             if (isShrinkPhaseTimedOut(shrinkPhaseStart, effectiveShrinkTimeoutMs)) {
-                cout << "  shrink phase timeout (" << effectiveShrinkTimeoutMs << "ms)" << endl;
+                *outputStream << "  shrink phase timeout (" << effectiveShrinkTimeoutMs << "ms)" << endl;
                 break;
             }
 
@@ -382,9 +382,9 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
             }
             if (shrinkFound) {
                 anyShrinkFound = true;
-                cout << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{*this, shrVec} << endl;
+                *outputStream << "  shrinking found simpler failing arg " << i << ": " << ShowShrVec{*this, shrVec} << endl;
                 if (!failureMsg.empty())
-                    cout << "    by failed expectation: " << failureMsg << endl;
+                    *outputStream << "    by failed expectation: " << failureMsg << endl;
                 if (useRetry && kReassessOnEachSucessfulShrink)
                     assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
             } else {
@@ -394,7 +394,7 @@ void PropertyBase::shrink(Random& savedRand, const GenVec& curGenVec)
     }
 
     if (anyShrinkFound)
-        cout << "  simplest args found by shrinking: " << ShowShrVec{*this, shrVec} << endl;
+        *outputStream << "  simplest args found by shrinking: " << ShowShrVec{*this, shrVec} << endl;
 }
 
 stringstream& PropertyBase::getLastStream()
