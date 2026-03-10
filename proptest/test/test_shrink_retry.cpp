@@ -28,6 +28,8 @@ TEST(ShrinkRetry, confirmation_runs)
 {
     EXPECT_FOR_ALL([](Seed seed) {
         int n = 0;
+        stringstream innerOut;
+        stringstream innerErr;
         auto prop = property([&n](int x) {
             (void)x;
             n++;
@@ -35,7 +37,9 @@ TEST(ShrinkRetry, confirmation_runs)
                 PROP_ASSERT(false);
             }
         });
-        auto result = prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).forAll(gen::interval(0, 100));
+        auto result =
+            prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).forAll(
+                gen::interval(0, 100));
         PROP_ASSERT(!result);  // property must fail
         auto stats = result.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
@@ -52,6 +56,8 @@ TEST(ShrinkRetry, shrink_with_retries)
     EXPECT_FOR_ALL([](Seed seed) {
         int n = 0;
         int lastArg = -999;
+        std::stringstream innerOut;
+        std::stringstream innerErr;
         auto prop = property([&n, &lastArg](int x) {
             n++;
             if (n == 1 || n % 2 == 0) {  // fail first run, then 50% flaky
@@ -59,7 +65,9 @@ TEST(ShrinkRetry, shrink_with_retries)
                 PROP_ASSERT(false);
             }
         });
-        auto result = prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).forAll(gen::interval(0, 100));
+        auto result =
+            prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).forAll(
+                gen::interval(0, 100));
         PROP_ASSERT(!result);
         PROP_ASSERT(lastArg == 0);  // shrunk to 0
         auto stats2 = result.getLastReproductionStats();
@@ -80,13 +88,15 @@ TEST(ShrinkRetry, report_on_each_shrink)
         int n = 0;
         size_t statsCount = 0;
         ReproductionStats stats;
+        std::stringstream innerOut;
+        std::stringstream innerErr;
         auto prop = property([&n](int) {
             n++;
             if (n % 2 == 0) {
                 PROP_ASSERT(false);
             }
         });
-        prop.setSeed(seed).setNumRuns(10).setShrinkMaxRetries(10)
+        prop.setSeed(seed).setNumRuns(10).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr)
             .setOnReproductionStats([&statsCount, &stats](const ReproductionStats& _stats) {
                 statsCount++;
                 stats = _stats;
@@ -134,17 +144,20 @@ TEST(ShrinkRetryStateful, confirmation_runs)
     EXPECT_FOR_ALL([](Seed seed) {
         using T = vector<int>;
         int n = 0;
-        auto failWhenNonEmpty = SimpleAction<T>([&n](T& obj) {
+        std::stringstream innerOut;
+        std::stringstream innerErr;
+        auto failWhenNonEmpty = SimpleAction<T>("FailWhenNonEmpty", [&n](T& obj) {
             n++;
             if (!obj.empty() && (n == 1 || n % 2 == 0))
                 PROP_ASSERT(false);
         });
         auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int v) {
-            return SimpleAction<T>([v](T& obj) { obj.push_back(v); });
+            return SimpleAction<T>(PROP_ACTION_NAME("PushBack", v), [v](T& obj) { obj.push_back(v); });
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        bool result = prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).go();
+        bool result =
+            prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).go();
         PROP_ASSERT(!result);
         auto stats = prop.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
@@ -160,17 +173,20 @@ TEST(ShrinkRetryStateful, shrink_with_retries)
     EXPECT_FOR_ALL([](Seed seed) {
         using T = vector<int>;
         int n = 0;
-        auto failWhenNonEmpty = SimpleAction<T>([&n](T& obj) {
+        std::stringstream innerOut;
+        std::stringstream innerErr;
+        auto failWhenNonEmpty = SimpleAction<T>("FailWhenNonEmpty", [&n](T& obj) {
             n++;
             if (!obj.empty() && (n == 1 || n % 2 == 0))
                 PROP_ASSERT(false);
         });
         auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int v) {
-            return SimpleAction<T>([v](T& obj) { obj.push_back(v); });
+            return SimpleAction<T>(PROP_ACTION_NAME("PushBack", v), [v](T& obj) { obj.push_back(v); });
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        bool result = prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).go();
+        bool result =
+            prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).go();
         if (!result) {
             auto stats = prop.getLastReproductionStats();
             PROP_ASSERT(stats.has_value());
@@ -190,17 +206,22 @@ TEST(ShrinkRetryStateful, report_on_each_shrink)
         int n = 0;
         size_t statsCount = 0;
         ReproductionStats stats;
-        auto failWhenNonEmpty = SimpleAction<T>([&n](T& obj) {
+        std::stringstream innerOut;
+        std::stringstream innerErr;
+        auto failWhenNonEmpty = SimpleAction<T>("FailWhenNonEmpty", [&n](T& obj) {
             n++;
             if (!obj.empty() && n % 2 == 0)
                 PROP_ASSERT(false);
         });
         auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int v) {
-            return SimpleAction<T>([v](T& obj) { obj.push_back(v); });
+            return SimpleAction<T>(PROP_ACTION_NAME("PushBack", v), [v](T& obj) { obj.push_back(v); });
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        bool result = prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10)
+        bool result = prop.setSeed(seed)
+            .setNumRuns(20)
+            .setShrinkMaxRetries(10)
+            .setOutputStreams(innerOut, innerErr)
             .setOnReproductionStats([&statsCount, &stats](const ReproductionStats& _stats) {
                 statsCount++;
                 stats = _stats;
@@ -221,17 +242,19 @@ TEST(ShrinkRetryStateful, config_propagation)
     EXPECT_FOR_ALL([](Seed seed) {
         using T = vector<int>;
         int n = 0;
-        auto failWhenNonEmpty = SimpleAction<T>([&n](T& obj) {
+        std::stringstream innerOut;
+        std::stringstream innerErr;
+        auto failWhenNonEmpty = SimpleAction<T>("FailWhenNonEmpty", [&n](T& obj) {
             n++;
             if (!obj.empty() && n % 2 == 0)
                 PROP_ASSERT(obj.empty());  // fail when non-empty
         });
         auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int v) {
-            return SimpleAction<T>([v](T& obj) { obj.push_back(v); });
+            return SimpleAction<T>(PROP_ACTION_NAME("PushBack", v), [v](T& obj) { obj.push_back(v); });
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(1).go();
+        prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(1).setOutputStreams(innerOut, innerErr).go();
     }, gen::seed());
 }
 
@@ -244,14 +267,14 @@ TEST(ShrinkRetryStateful, shrink_max_timeout)
     forAll([](Seed seed, size_t sleepMs, int failDenominator) {
         using T = vector<int>;
         int n = 0;
-        auto failWhenNonEmpty = SimpleAction<T>([&n, sleepMs, failDenominator](T& obj) {
+        auto failWhenNonEmpty = SimpleAction<T>("FailWhenNonEmpty", [&n, sleepMs, failDenominator](T& obj) {
             n++;
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepMs));
             if (!obj.empty() && n % failDenominator == 0)
                 PROP_ASSERT(false);
         });
         auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int v) {
-            return SimpleAction<T>([v](T& obj) { obj.push_back(v); });
+            return SimpleAction<T>(PROP_ACTION_NAME("PushBack", v), [v](T& obj) { obj.push_back(v); });
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);

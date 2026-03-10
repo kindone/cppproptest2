@@ -16,14 +16,14 @@ TEST(stateful_function, basic)
     using T = vector<int>;
 
     auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
-        return SimpleAction<T>([value](T& obj) {
+        return SimpleAction<T>(PROP_ACTION_NAME("PushBack", value), [value](T& obj) {
             auto size = obj.size();
             obj.push_back(value);
             PROP_ASSERT(obj.size() == size + 1);
         });
     });
 
-    auto popBackAction = SimpleAction<T>([](T& obj) {
+    auto popBackAction = SimpleAction<T>("PopBack", [](T& obj) {
         auto size = obj.size();
         if (obj.empty())
             return;
@@ -31,7 +31,7 @@ TEST(stateful_function, basic)
         PROP_ASSERT(obj.size() == size - 1);
     });
 
-    auto popBackAction2 = SimpleAction<T>([](T& obj) {
+    auto popBackAction2 = SimpleAction<T>("PopBack2", [](T& obj) {
         auto size = obj.size();
         if (obj.empty())
             return;
@@ -39,7 +39,7 @@ TEST(stateful_function, basic)
         PROP_ASSERT(obj.size() == size - 1);
     });
 
-    auto clearAction = SimpleAction<T>([](T& obj) {
+    auto clearAction = SimpleAction<T>("Clear", [](T& obj) {
         obj.clear();
         PROP_ASSERT(obj.size() == 0);
     });
@@ -115,9 +115,9 @@ TEST(stateful_function, onActionStart_onActionEnd_callbacks)
     int startCount = 0, endCount = 0;
 
     auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
-        return SimpleAction<T>([value](T& obj) { obj.push_back(value); });
+        return SimpleAction<T>(PROP_ACTION_NAME("PushBack", value), [value](T& obj) { obj.push_back(value); });
     });
-    auto popBackAction = SimpleAction<T>([](T& obj) {
+    auto popBackAction = SimpleAction<T>("PopBack", [](T& obj) {
         if (!obj.empty())
             obj.pop_back();
     });
@@ -137,9 +137,9 @@ TEST(stateful_function, onActionEnd_invariant_check)
     using T = vector<int>;
 
     auto pushBackGen = gen::int32().map<SimpleAction<T>>([](int value) {
-        return SimpleAction<T>([value](T& obj) { obj.push_back(value); });
+        return SimpleAction<T>(PROP_ACTION_NAME("PushBack", value), [value](T& obj) { obj.push_back(value); });
     });
-    auto popBackAction = SimpleAction<T>([](T& obj) {
+    auto popBackAction = SimpleAction<T>("PopBack", [](T& obj) {
         if (!obj.empty())
             obj.pop_back();
     });
@@ -154,7 +154,7 @@ TEST(stateful_function, onActionEnd_invariant_check)
 
 TEST(stateful_function, action_list_size_configuration)
 {
-    auto incAction = gen::just(SimpleAction<int>([](int& v) { ++v; }));
+    auto incAction = gen::just(SimpleAction<int>("Inc", [](int& v) { ++v; }));
     auto prop = statefulProperty<int>(gen::just(0), incAction);
 
     bool ok = prop.setSeed(0)
@@ -164,4 +164,24 @@ TEST(stateful_function, action_list_size_configuration)
                   .go();
 
     EXPECT_TRUE(ok);
+}
+
+TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
+{
+    auto noopAction = gen::just(SimpleAction<int>("Noop", [](int&) {}));
+    auto prop = statefulProperty<int>(gen::just(0), noopAction);
+
+    optional<ReproductionStats> stats = nullopt;
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(1)
+                  .setActionListSize(0)
+                  .setShrinkMaxRetries(1)
+                  .setOnReproductionStats([&stats](ReproductionStats s) { stats = s; })
+                  .setPostCheck([](int&) { PROP_ASSERT(false); })
+                  .go();
+
+    EXPECT_FALSE(ok);
+    ASSERT_TRUE(stats.has_value());
+    EXPECT_NE(stats->argsAsString.find("actions:"), string::npos);
+    EXPECT_NE(stats->argsAsString.find("initial:"), string::npos);
 }

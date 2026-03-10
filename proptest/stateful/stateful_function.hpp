@@ -6,6 +6,7 @@
 #include "proptest/combinator/transform.hpp"
 #include "proptest/combinator/oneof.hpp"
 #include "proptest/combinator/just.hpp"
+#include "proptest/combinator/construct.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Arbitrary.hpp"
@@ -33,11 +34,32 @@ template <typename ObjectType, typename ModelType>
 using ActionGen = Generator<Action<ObjectType, ModelType>>;
 
 template <typename ObjectType, typename ModelType>
+struct StatefulArgs {
+    StatefulArgs() = default;
+    StatefulArgs(list<Action<ObjectType, ModelType>> actions, ObjectType initial)
+        : actions(util::move(actions)), initial(util::move(initial))
+    {
+    }
+
+    list<Action<ObjectType, ModelType>> actions;
+    ObjectType initial;
+};
+
+template <typename ObjectType, typename ModelType>
+inline ostream& show(ostream& os, const StatefulArgs<ObjectType, ModelType>& args)
+{
+    os << "{ initial: " << Show<ObjectType>(args.initial)
+       << ", actions: " << Show<list<Action<ObjectType, ModelType>>>(args.actions) << " }";
+    return os;
+}
+
+template <typename ObjectType, typename ModelType>
 class StatefulProperty {
     using InitialGen = GenFunction<ObjectType>;
     using ModelFactoryFunction = Function<ModelType(ObjectType&)>;
-    using PropertyType = Property<list<Action<ObjectType, ModelType>>, ObjectType>;
-    using Func = Function<bool(list<Action<ObjectType, ModelType>>, ObjectType)>;
+    using ArgsType = StatefulArgs<ObjectType, ModelType>;
+    using PropertyType = Property<ArgsType>;
+    using Func = Function<bool(ArgsType)>;
 
 public:
     static constexpr size_t defaultActionListMinSize = 0;
@@ -141,6 +163,25 @@ public:
         return *this;
     }
 
+    StatefulProperty& setOutputStream(ostream& os)
+    {
+        outputStream = &os;
+        return *this;
+    }
+
+    StatefulProperty& setErrorStream(ostream& os)
+    {
+        errorStream = &os;
+        return *this;
+    }
+
+    StatefulProperty& setOutputStreams(ostream& out, ostream& err)
+    {
+        outputStream = &out;
+        errorStream = &err;
+        return *this;
+    }
+
     StatefulProperty& setActionListMinSize(size_t minSize)
     {
         actionListMinSize = minSize;
@@ -168,15 +209,17 @@ public:
     {
         auto actionListGen =
             Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
-        // Order generators as (action list, initial object) so shrinking
-        // naturally prioritizes action-list simplification first.
-        vector<AnyGenerator> genVec({actionListGen, initialGen});
+        // Preserve action-list-first shrinking by constructing stateful args
+        // with constructor order (actions, initial).
+        auto argsGen = gen::construct<ArgsType, list<Action<ObjectType, ModelType>>, ObjectType>(
+            actionListGen, initialGen);
+        vector<AnyGenerator> genVec({argsGen});
 
         auto func = [modelFactory = this->modelFactory, postCheck = this->postCheck,
-                     onActionStart = this->onActionStart, onActionEnd = this->onActionEnd](
-                        list<Action<ObjectType, ModelType>> actions, ObjectType obj) {
+                     onActionStart = this->onActionStart, onActionEnd = this->onActionEnd](ArgsType args) {
+            ObjectType obj = args.initial;
             auto model = modelFactory(obj);
-            for (auto action : actions) {
+            for (auto action : args.actions) {
                 if (onActionStart)
                     onActionStart(obj, model);
                 action(obj, model);
@@ -209,6 +252,10 @@ public:
             prop->setOnReproductionStats(onReproductionStats);
         if (onFailureReproduction)
             prop->setOnFailureReproduction(onFailureReproduction);
+        if (outputStream)
+            prop->setOutputStream(*outputStream);
+        if (errorStream)
+            prop->setErrorStream(*errorStream);
         auto resultProp = prop->forAll();
         lastReproductionStats = resultProp.getLastReproductionStats();
         return static_cast<bool>(resultProp);
@@ -234,6 +281,8 @@ private:
     Function<void()> onCleanup;
     Function<void(ReproductionStats)> onReproductionStats;
     Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
+    ostream* outputStream = nullptr;
+    ostream* errorStream = nullptr;
 
     optional<ReproductionStats> lastReproductionStats;
 };
