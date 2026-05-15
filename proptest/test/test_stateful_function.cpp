@@ -166,6 +166,56 @@ TEST(stateful_function, action_list_size_configuration)
     EXPECT_TRUE(ok);
 }
 
+TEST(stateful_function, state_dependent_simple_action_factory)
+{
+    using T = vector<int>;
+
+    auto prop = statefulProperty<T>(gen::just(T{}), [](T& obj) -> SimpleActionGen<T> {
+        if (obj.empty()) {
+            return gen::just(SimpleAction<T>("Push", [](T& vec) { vec.push_back(1); }));
+        }
+        return gen::just(SimpleAction<T>("Pop", [](T& vec) { vec.pop_back(); }));
+    });
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(20)
+                  .setActionListSize(2)
+                  .setPostCheck([](T& vec) { PROP_ASSERT(vec.empty()); })
+                  .go();
+
+    EXPECT_TRUE(ok);
+}
+
+TEST(stateful_function, state_dependent_model_action_factory)
+{
+    using T = vector<int>;
+    using Model = VectorModel2;
+
+    auto prop = statefulProperty<T, Model>(
+        gen::just(T{}), [](T& obj) -> Model { return VectorModel2(obj.size()); },
+        [](T&, Model& model) -> ActionGen<T, Model> {
+            if (model.size == 0) {
+                return gen::just(Action<T, Model>("Push", [](T& vec, Model& mdl) {
+                    vec.push_back(1);
+                    ++mdl.size;
+                }));
+            }
+            return gen::just(Action<T, Model>("Pop", [](T& vec, Model& mdl) {
+                vec.pop_back();
+                --mdl.size;
+            }));
+        });
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(20)
+                  .setActionListSize(2)
+                  .setPostCheck([](T& vec, Model& mdl) {
+                      PROP_ASSERT(vec.empty());
+                      PROP_ASSERT_EQ(mdl.size, 0);
+                  })
+                  .go();
+
+    EXPECT_TRUE(ok);
+}
+
 TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
 {
     auto noopAction = gen::just(SimpleAction<int>("Noop", [](int&) {}));

@@ -146,6 +146,30 @@ TEST(MyVectorTest, Stateful)
 }
 ```
 
+### State-dependent action generation
+
+The examples above use a static action generator: every step samples from the same `actionGen`, regardless of the current object state. When the valid next action depends on the current state, pass an action generator factory instead. The factory is called before each action with the current object.
+
+```cpp
+auto prop = statefulProperty<MyVector>(
+    /* initial state generator */ lazy<MyVector>([]() { return MyVector(); }),
+    /* action generator factory */
+    [](MyVector& obj) -> SimpleActionGen<MyVector> {
+        if (obj.size() == 0) {
+            return just(SimpleAction<MyVector>("PushBack", [](MyVector& obj) {
+                obj.push_back(1);
+            }));
+        }
+
+        return just(SimpleAction<MyVector>("PopBack", [](MyVector& obj) {
+            obj.pop_back();
+        }));
+    });
+prop.go();
+```
+
+The static generator form is still useful when every action can handle its own preconditions. The factory form is better when you want the generator to avoid invalid actions entirely, or when the distribution should change as the object changes.
+
 ### Option 2: `Action` - Working with a model
 
 If you need a model for advanced tracking of state changes, use `Action` instead of `SimpleAction`. `Action` takes additional parameter indicating the model type. Let's define our model for tracking number of elements for `MyVector`
@@ -239,6 +263,29 @@ TEST(MyVectorTest, Stateful)
     // Tests massive cases with randomly generated action sequences
     prop.go();
 }
+```
+
+Model-based properties support the same pattern with an `Action` generator factory. The factory receives both the current object and current model, so it can choose actions from either view of state:
+
+```cpp
+auto prop = statefulProperty<MyVector, Counter>(
+    /* initial state generator */ Arbi<MyVector>(),
+    /* initial model factory */ [](MyVector& vec) { return Counter(vec.size()); },
+    /* action generator factory */
+    [](MyVector&, Counter& counter) -> ActionGen<MyVector, Counter> {
+        if (counter.num == 0) {
+            return just(Action<MyVector, Counter>("PushBack", [](MyVector& obj, Counter& cnt) {
+                obj.push_back(1);
+                cnt.num++;
+            }));
+        }
+
+        return just(Action<MyVector, Counter>("PopBack", [](MyVector& obj, Counter& cnt) {
+            obj.pop_back();
+            cnt.num--;
+        }));
+    });
+prop.go();
 ```
 
 ### Debugging stateful test failures

@@ -5,6 +5,7 @@
 #include "proptest/generator/vector.hpp"
 #include "proptest/util/bitmap.hpp"
 #include <mutex>
+#include <sstream>
 
 using namespace proptest;
 using namespace proptest::concurrent;
@@ -125,6 +126,44 @@ TEST(concurrency_function, shrink_with_retry_timeout_smoke)
                   .setPostCheck([](int&) { PROP_ASSERT(false); })
                   .go();
     EXPECT_FALSE(ok);
+}
+
+TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
+{
+    constexpr uint64_t seed = 123;
+    auto initialGen = gen::interval<int>(1000, 1000000);
+    auto noopGen = gen::just(SimpleAction<int>("Noop", [](int&) {}));
+    auto actionGen = noopGen.template map<Action<int, EmptyModel>>(
+        +[](const SimpleAction<int>& simpleAction) { return Action<int, EmptyModel>(simpleAction); });
+    auto actionListGen = Arbi<list<Action<int, EmptyModel>>>(actionGen, 0, 0);
+
+    Random expectedRand(seed);
+    const int firstInitial = initialGen(expectedRand).getRef();
+    actionListGen(expectedRand);
+    actionListGen(expectedRand);
+    const int secondInitial = initialGen(expectedRand).getRef();
+    actionListGen(expectedRand);
+    actionListGen(expectedRand);
+    ASSERT_NE(firstInitial, secondInitial);
+
+    auto prop = concurrency<int>(initialGen, noopGen);
+    std::ostringstream out;
+    auto* oldOut = cout.rdbuf(out.rdbuf());
+    bool ok = prop.setSeed(seed)
+                  .setNumRuns(2)
+                  .setMaxConcurrency(1)
+                  .setActionListSize(0)
+                  .setPostCheck([secondInitial](int& value) {
+                      PROP_ASSERT(value != secondInitial);
+                  })
+                  .go();
+    cout.rdbuf(oldOut);
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(out.str().find("initial: " + to_string(secondInitial)), string::npos)
+        << "shrink should regenerate the second failing run from savedRand, not run 1"
+        << "\nfirstInitial=" << firstInitial << "\nsecondInitial=" << secondInitial
+        << "\noutput:\n" << out.str();
 }
 
 TEST(concurrency_function, action_list_size_configuration)

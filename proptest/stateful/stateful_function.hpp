@@ -15,6 +15,8 @@
 #include "proptest/Property.hpp"
 #include "proptest/std/chrono.hpp"
 #include "proptest/std/optional.hpp"
+#include "proptest/shrinker/listlike.hpp"
+#include "proptest/std/concepts.hpp"
 
 /**
  * @file stateful_function.hpp
@@ -32,6 +34,12 @@ using SimpleActionGen = Generator<SimpleAction<ObjectType>>;
 
 template <typename ObjectType, typename ModelType>
 using ActionGen = Generator<Action<ObjectType, ModelType>>;
+
+template <typename ObjectType>
+using SimpleActionGenFactory = Function<SimpleActionGen<ObjectType>(ObjectType&)>;
+
+template <typename ObjectType, typename ModelType>
+using ActionGenFactory = Function<ActionGen<ObjectType, ModelType>(ObjectType&, ModelType&)>;
 
 template <typename ObjectType, typename ModelType>
 struct StatefulArgs {
@@ -67,6 +75,11 @@ public:
 
     StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGen<ObjectType, ModelType>& actGen)
         : initialGen(initGen), modelFactory(mdlFactory), actionGen(actGen)
+    {
+    }
+
+    StatefulProperty(InitialGen&& initGen, ModelFactoryFunction mdlFactory, ActionGenFactory<ObjectType, ModelType> actGenFactory)
+        : initialGen(initGen), modelFactory(mdlFactory), actionGenFactory(util::move(actGenFactory))
     {
     }
 
@@ -207,12 +220,7 @@ public:
 
     bool go()
     {
-        auto actionListGen =
-            Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
-        // Preserve action-list-first shrinking by constructing stateful args
-        // with constructor order (actions, initial).
-        auto argsGen = gen::construct<ArgsType, list<Action<ObjectType, ModelType>>, ObjectType>(
-            actionListGen, initialGen);
+        Generator<ArgsType> argsGen = actionGenFactory ? makeStateDependentArgsGen() : makeStaticArgsGen();
         vector<AnyGenerator> genVec({argsGen});
 
         auto func = [modelFactory = this->modelFactory, postCheck = this->postCheck,
@@ -270,7 +278,8 @@ private:
     optional<uint32_t> shrinkRetryTimeoutMs = nullopt;
     InitialGen initialGen;
     ModelFactoryFunction modelFactory;
-    ActionGen<ObjectType, ModelType> actionGen;
+    optional<ActionGen<ObjectType, ModelType>> actionGen = nullopt;
+    ActionGenFactory<ObjectType, ModelType> actionGenFactory;
     size_t actionListMinSize = defaultActionListMinSize;
     size_t actionListMaxSize = defaultActionListMaxSize;
 
@@ -285,6 +294,49 @@ private:
     ostream* errorStream = nullptr;
 
     optional<ReproductionStats> lastReproductionStats;
+
+    Generator<ArgsType> makeStaticArgsGen() const
+    {
+        auto actionListGen =
+            Arbi<list<Action<ObjectType, ModelType>>>(*actionGen, actionListMinSize, actionListMaxSize);
+        // Preserve action-list-first shrinking by constructing stateful args
+        // with constructor order (actions, initial).
+        return gen::construct<ArgsType, list<Action<ObjectType, ModelType>>, ObjectType>(actionListGen, initialGen);
+    }
+
+    Generator<ArgsType> makeStateDependentArgsGen() const
+    {
+        return Generator<ObjectType>(initialGen).template flatMap<ArgsType>(
+            [modelFactory = this->modelFactory, actionGenFactory = this->actionGenFactory,
+             actionListMinSize = this->actionListMinSize, actionListMaxSize = this->actionListMaxSize](
+                ObjectType& initial) -> Generator<ArgsType> {
+                return Generator<ArgsType>(Function<Shrinkable<ArgsType>(Random&)>(
+                    [initial, modelFactory, actionGenFactory, actionListMinSize, actionListMaxSize](
+                        Random& rand) mutable -> Shrinkable<ArgsType> {
+                        ObjectType obj = initial;
+                        auto model = modelFactory(obj);
+                        const size_t numActions = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+
+                        auto actionShrinkables = make_shrinkable<vector<ShrinkableBase>>();
+                        auto& actionShrinkableVec = actionShrinkables.getMutableRef();
+                        actionShrinkableVec.reserve(numActions);
+
+                        for (size_t i = 0; i < numActions; ++i) {
+                            auto nextActionGen = actionGenFactory(obj, model);
+                            auto actionShr = nextActionGen(rand);
+                            actionShrinkableVec.push_back(actionShr);
+                            actionShr.getRef()(obj, model);
+                        }
+
+                        auto actionListShr =
+                            shrinkListLike<list, Action<ObjectType, ModelType>>(actionShrinkables, actionListMinSize);
+                        return actionListShr.template map<ArgsType>(
+                            [initial](list<Action<ObjectType, ModelType>>& actions) {
+                                return ArgsType(actions, initial);
+                            });
+                    }));
+            });
+    }
 };
 
 template <typename ObjectType, typename InitialGen>
@@ -298,11 +350,58 @@ decltype(auto) statefulProperty(InitialGen&& initialGen, SimpleActionGen<ObjectT
     return StatefulProperty<ObjectType, EmptyModel>(util::forward<InitialGen>(initialGen), modelFactory, actionGen);
 }
 
+template <typename ObjectType, typename InitialGen>
+decltype(auto) statefulProperty(InitialGen&& initialGen, SimpleActionGenFactory<ObjectType> simpleActionGenFactory)
+{
+    static EmptyModel emptyModel;
+    ActionGenFactory<ObjectType, EmptyModel> actionGenFactory =
+        [simpleActionGenFactory](ObjectType& obj, EmptyModel&) {
+            return simpleActionGenFactory(obj).template map<Action<ObjectType, EmptyModel>>(
+                [](const SimpleAction<ObjectType>& simpleAction) {
+                    return Action<ObjectType, EmptyModel>(simpleAction);
+                });
+        };
+
+    auto modelFactory = +[](ObjectType&) { return emptyModel; };
+    return StatefulProperty<ObjectType, EmptyModel>(
+        util::forward<InitialGen>(initialGen), modelFactory, util::move(actionGenFactory));
+}
+
+template <typename ObjectType, typename InitialGen, typename Factory>
+    requires std::invocable<Factory, ObjectType&> &&
+             std::constructible_from<SimpleActionGen<ObjectType>, std::invoke_result_t<Factory, ObjectType&>>
+decltype(auto) statefulProperty(InitialGen&& initialGen, Factory&& simpleActionGenFactory)
+{
+    return statefulProperty<ObjectType>(
+        util::forward<InitialGen>(initialGen),
+        SimpleActionGenFactory<ObjectType>(util::forward<Factory>(simpleActionGenFactory)));
+}
+
 template <typename ObjectType, typename ModelType, typename InitialGen>
 decltype(auto) statefulProperty(InitialGen&& initialGen, Function<ModelType(ObjectType&)> modelFactory,
                                 ActionGen<ObjectType, ModelType>& actionGen)
 {
     return StatefulProperty<ObjectType, ModelType>(util::forward<InitialGen>(initialGen), modelFactory, actionGen);
+}
+
+template <typename ObjectType, typename ModelType, typename InitialGen>
+decltype(auto) statefulProperty(InitialGen&& initialGen, Function<ModelType(ObjectType&)> modelFactory,
+                                ActionGenFactory<ObjectType, ModelType> actionGenFactory)
+{
+    return StatefulProperty<ObjectType, ModelType>(
+        util::forward<InitialGen>(initialGen), modelFactory, util::move(actionGenFactory));
+}
+
+template <typename ObjectType, typename ModelType, typename InitialGen, typename Factory>
+    requires std::invocable<Factory, ObjectType&, ModelType&> &&
+             std::constructible_from<ActionGen<ObjectType, ModelType>,
+                                     std::invoke_result_t<Factory, ObjectType&, ModelType&>>
+decltype(auto) statefulProperty(InitialGen&& initialGen, Function<ModelType(ObjectType&)> modelFactory,
+                                Factory&& actionGenFactory)
+{
+    return statefulProperty<ObjectType, ModelType>(
+        util::forward<InitialGen>(initialGen), modelFactory,
+        ActionGenFactory<ObjectType, ModelType>(util::forward<Factory>(actionGenFactory)));
 }
 
 }  // namespace stateful

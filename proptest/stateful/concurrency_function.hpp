@@ -454,7 +454,7 @@ bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 }
 
 template <typename ObjectType, typename ModelType>
-void Concurrency<ObjectType, ModelType>::handleShrink(Random&)
+void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
 {
     auto isShrinkPhaseTimedOut = +[](steady_clock::time_point phaseStart, uint32_t timeoutMs) -> bool {
         if (timeoutMs == 0)
@@ -465,8 +465,8 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random&)
 
     auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
 
-    // Re-generate the failing tuple from the saved seed.
-    Random rand(seed);
+    // Re-generate the failing tuple from the RNG state captured before the failing run.
+    Random rand(savedRand);
     auto initialShr = initialGen(rand);
     auto frontShr = actionListGen(rand);
     vector<Shrinkable<ActionList>> rearShrs;
