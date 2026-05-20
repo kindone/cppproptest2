@@ -115,6 +115,12 @@ auto charGen = gen::interval(0, 2).flatMap<char>([](const int& n) {
 });
 ```
 
+**Shrinking:** `flatMap`/`derive` maintains two concurrent shrink axes. When a property fails:
+- **T-axis** — tries simpler values of `T` (and re-generates `U` from each).
+- **U-axis** — keeps `T` fixed and tries simpler values of `U` directly.
+
+Both axes are explored at every level of the shrink tree (not T-first, then U). This means the shrunk counterexample minimises both the context (`T`) and the result (`U`) independently, giving tighter results.
+
 **See also:** [gen::derive](#genderivetu) (standalone form), [Deriving or Flat-mapping](#deriving-or-flat-mapping)
 
 &nbsp;
@@ -587,9 +593,9 @@ auto stringGen = gen::derive<int, std::string>(
 | `gen::transform<T,U>` | `function<U(T)>` | `Generator<U>` |
 | `gen::derive<T,U>` | `function<Generator<U>(T)>` | `Generator<U>` |
 
+**Shrinking:** See [`.flatMap<U>()` shrinking note](#flatmapugenufromt) — `gen::derive` uses the same two-axis strategy.
+
 **See also:** [Transforming or Mapping](#transforming-or-mapping), [Utility Methods](#utility-methods-in-standard-generators) for fluent chaining with `.flatMap<U>()`
-
-
 
 ### Values with Dependencies
 
