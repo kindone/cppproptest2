@@ -328,8 +328,11 @@ private:
                             actionShr.getRef()(obj, model);
                         }
 
+                        auto prefixLengthShr = shrinkVectorLength(actionShrinkables, actionListMinSize);
+                        auto prefixLengthThenElementShr =
+                            shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
                         auto actionListShr =
-                            shrinkListLike<list, Action<ObjectType, ModelType>>(actionShrinkables, actionListMinSize);
+                            toListLikeTShrinkable<list, Action<ObjectType, ModelType>>(prefixLengthThenElementShr);
                         return actionListShr.template map<ArgsType>(
                             [initial](list<Action<ObjectType, ModelType>>& actions) {
                                 return ArgsType(actions, initial);

@@ -11,6 +11,48 @@ using namespace proptest;
  * These tests check if the theoretical issues identified actually manifest in practice.
  */
 
+/**
+ * Verifies that U-axis shrinks (inner generator) are reachable directly at the root node,
+ * not only after T-axis (outer generator) shrinks are exhausted.
+ *
+ * Without the fix (andThen), U-axis children only appear at leaf nodes of the T-axis tree.
+ * With the fix (concat), U-axis children are appended at every node including the root.
+ *
+ * Setup: T = interval(2, 10), U = interval(0, T-1)
+ * Root value is (T, U). A U-axis shrink keeps T fixed and reduces U.
+ * We check that at least one direct child of root has the same T but smaller U.
+ */
+TEST(FlatMapEdgeCases, flatmap_U_axis_reachable_at_root)
+{
+    Random rand(42);
+
+    // Find a seed that generates a root with T >= 2 and U >= 1 so shrinks exist on both axes
+    Shrinkable<pair<int,int>> root = gen::interval(2, 10).flatMap<pair<int,int>>([](const int& t) {
+        return gen::interval(0, t - 1).map<pair<int,int>>([t](const int& u) {
+            return util::make_pair(t, u);
+        });
+    })(rand);
+
+    const int rootT = root.getRef().first;
+    const int rootU = root.getRef().second;
+
+    // Scan direct children of root for a U-axis shrink: same T, strictly smaller U
+    bool uAxisShrinkAtRoot = false;
+    auto shrinks = root.getShrinks();
+    for (auto itr = shrinks.template iterator<Shrinkable<pair<int,int>>::StreamElementType>(); itr.hasNext();) {
+        auto child = itr.next();
+        auto childVal = child.template getRef<pair<int,int>>();
+        if (childVal.first == rootT && childVal.second < rootU) {
+            uAxisShrinkAtRoot = true;
+            break;
+        }
+    }
+
+    EXPECT_TRUE(uAxisShrinkAtRoot)
+        << "U-axis shrink (same T=" << rootT << ", smaller U than " << rootU
+        << ") must be reachable as a direct child of root (concat, not andThen)";
+}
+
 TEST(FlatMapEdgeCases, nested_flatmap_determinism)
 {
     /**

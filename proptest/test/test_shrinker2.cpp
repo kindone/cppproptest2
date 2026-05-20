@@ -30,6 +30,29 @@ TEST(ListLikeShrinker, ints3)
     EXPECT_EQ(serializeShrinkable(shr3), "{value: [ 1, 2, 3 ], shrinks: [{value: [  ]}, {value: [ 1 ], shrinks: [{value: [ 0 ]}]}, {value: [ 1, 2 ], shrinks: [{value: [ 2 ], shrinks: [{value: [ 0 ]}, {value: [ 1 ]}]}]}, {value: [ 3 ], shrinks: [{value: [ 0 ]}, {value: [ 1 ]}, {value: [ 2 ]}]}, {value: [ 1, 3 ], shrinks: [{value: [ 0, 0 ]}, {value: [ 1, 1 ], shrinks: [{value: [ 0, 1 ]}]}, {value: [ 1, 2 ], shrinks: [{value: [ 0, 2 ]}]}]}, {value: [ 2, 3 ], shrinks: [{value: [ 0, 0 ]}, {value: [ 1, 1 ]}, {value: [ 2, 2 ], shrinks: [{value: [ 0, 2 ]}, {value: [ 1, 2 ]}]}]}]}");
 }
 
+TEST(ListLikeShrinker, prefixLengthThenElementwise)
+{
+    Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>, initializer_list<ShrinkableBase>>({
+        ShrinkableBase(shrinkIntegral<int>(1)),
+        ShrinkableBase(shrinkIntegral<int>(2)),
+        ShrinkableBase(shrinkIntegral<int>(3))});
+
+    auto lengthShr = shrinkVectorLength(baseShr, 0);
+    auto lengthThenElementShr = shrinkAnyVector(lengthShr, 0, true, false);
+    Shrinkable<vector<int>> shr = toListLikeTShrinkable<vector, int>(lengthThenElementShr);
+
+    string serialized = serializeShrinkable(shr);
+    EXPECT_NE(serialized.find("{value: [  ]}"), string::npos);
+    EXPECT_NE(serialized.find("{value: [ 1 ]"), string::npos);
+    EXPECT_NE(serialized.find("{value: [ 1, 2 ]"), string::npos);
+    EXPECT_NE(serialized.find("{value: [ 0, 0 ]"), string::npos);
+
+    EXPECT_EQ(serialized.find("{value: [ 2 ]"), string::npos);
+    EXPECT_EQ(serialized.find("{value: [ 3 ]"), string::npos);
+    EXPECT_EQ(serialized.find("{value: [ 1, 3 ]"), string::npos);
+    EXPECT_EQ(serialized.find("{value: [ 2, 3 ]"), string::npos);
+}
+
 TEST(ListLikeShrinker, ints8)
 {
     Shrinkable<vector<ShrinkableBase>> baseShr = make_shrinkable<vector<ShrinkableBase>, initializer_list<ShrinkableBase>>({

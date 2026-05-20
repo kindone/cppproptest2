@@ -21,8 +21,10 @@ GeneratorCommon deriveImpl(Function1<ShrinkableBase> gen1, Function1<Function1<S
             });
 
         // shrink strategy 2: expand Shrinkable<U>
+        // Use concat (not andThen) so U-axis shrinks are reachable from the root node,
+        // not only after T-axis exhaustion. T and U are concurrent axes.
         intermediate =
-            intermediate.andThen(+[](const ShrinkableBase& interShr) -> ShrinkableBase::StreamType {
+            intermediate.concat(+[](const ShrinkableBase& interShr) -> ShrinkableBase::StreamType {
                 // assume interShr has no shrinks
                 const ShrinkableBase& shrinkableU = interShr.getRef<Intermediate>().second;
                 ShrinkableBase newShrinkableU =

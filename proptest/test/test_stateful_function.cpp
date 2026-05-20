@@ -216,6 +216,52 @@ TEST(stateful_function, state_dependent_model_action_factory)
     EXPECT_TRUE(ok);
 }
 
+struct StatefulShrinkStepModel
+{
+    int step = 0;
+};
+
+TEST(stateful_function, state_dependent_shrink_keeps_generated_prefix)
+{
+    optional<ReproductionStats> stats = nullopt;
+    stringstream out;
+    stringstream err;
+
+    auto prop = statefulProperty<int, StatefulShrinkStepModel>(
+        gen::just(0),
+        [](int&) -> StatefulShrinkStepModel { return StatefulShrinkStepModel{}; },
+        [](int&, StatefulShrinkStepModel& model) -> ActionGen<int, StatefulShrinkStepModel> {
+            if (model.step == 0) {
+                return gen::just(Action<int, StatefulShrinkStepModel>(
+                    "Setup", [](int& obj, StatefulShrinkStepModel& mdl) {
+                        obj = 1;
+                        ++mdl.step;
+                    }));
+            }
+            return gen::just(Action<int, StatefulShrinkStepModel>(
+                "FailAfterSetup", [](int& obj, StatefulShrinkStepModel& mdl) {
+                    obj = 2;
+                    ++mdl.step;
+                }));
+        });
+
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(1)
+                  .setActionListSize(2)
+                  .setShrinkMaxRetries(1)
+                  .setOutputStreams(out, err)
+                  .setOnReproductionStats([&stats](ReproductionStats s) { stats = s; })
+                  .setPostCheck([](int& obj, StatefulShrinkStepModel&) {
+                      PROP_ASSERT(obj != 2);
+                  })
+                  .go();
+
+    EXPECT_FALSE(ok);
+    ASSERT_TRUE(stats.has_value());
+    EXPECT_NE(stats->argsAsString.find("Setup"), string::npos);
+    EXPECT_NE(stats->argsAsString.find("FailAfterSetup"), string::npos);
+}
+
 TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
 {
     auto noopAction = gen::just(SimpleAction<int>("Noop", [](int&) {}));
