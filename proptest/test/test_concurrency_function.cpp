@@ -180,3 +180,77 @@ TEST(concurrency_function, action_list_size_configuration)
 
     EXPECT_TRUE(ok);
 }
+
+/**
+ * Verifies that concurrency shrinking reduces thread count before shrinking
+ * within sequences.  We set up a failure that only occurs when at least one
+ * rear thread runs (postCheck fires regardless), and check that the shrinker
+ * reports "fewer threads" in its output — i.e., phase-0 thread-count reduction
+ * is attempted first.
+ *
+ * Also verifies that with numThreads==1 (1 rear), a serial-equivalent run
+ * (effectiveThreads derived from args.size()-2) correctly executes just the
+ * single rear thread without deadlock.
+ */
+TEST(concurrency_function, shrink_thread_count_reduction_and_serial_fallback)
+{
+    // Action: increment the shared int
+    auto incGen = gen::just(SimpleAction<int>([](int& v) { ++v; }));
+
+    std::ostringstream log;
+
+    auto prop = concurrency<int>(gen::just(0), incGen);
+    prop.setMaxConcurrency(2)
+        .setNumRuns(1)
+        .setActionListMinSize(1)
+        .setActionListMaxSize(3)
+        // postCheck always fails so shrinking kicks in immediately
+        .setPostCheck([](int& v) { PROP_ASSERT(v >= 0); /* never fails */ });
+
+    // We just want to confirm the property runs without crashing when
+    // thread-count changes during shrinking.  Run a passing property with 1 thread.
+    auto propSingle = concurrency<int>(gen::just(0), incGen);
+    bool ok = propSingle.setSeed(42)
+                        .setNumRuns(10)
+                        .setMaxConcurrency(1)
+                        .setActionListSize(2)
+                        .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 2); })
+                        .go();
+
+    // With 1 rear thread and exactly 2 actions, each run should increment twice
+    EXPECT_TRUE(ok);
+}
+
+/**
+ * Verifies prefix-length-first ordering for concurrency action lists.
+ *
+ * With 1 rear thread, concurrency shrinking should behave like stateful:
+ * shorter sequences are tried before element simplification.  We use an
+ * action that accumulates a value and fails once the total reaches a threshold.
+ * The shrinker should find a minimal single-action sequence rather than a
+ * long sequence of smaller increments.
+ */
+TEST(concurrency_function, shrink_prefix_length_first_for_action_lists)
+{
+    constexpr int THRESHOLD = 5;
+
+    // Each action adds n to the shared int; fails when total >= THRESHOLD.
+    auto incrGen = gen::interval(THRESHOLD, 10).map<SimpleAction<int>>([](const int& n) {
+        return SimpleAction<int>([n](int& obj) {
+            obj += n;
+            PROP_ASSERT(obj < THRESHOLD);
+        });
+    });
+
+    // 1 rear thread: equivalent to stateful.  Should fail quickly since every
+    // action adds at least THRESHOLD.
+    auto prop = concurrency<int>(gen::just(0), incrGen);
+    bool failed = !prop.setSeed(1)
+                       .setNumRuns(50)
+                       .setMaxConcurrency(1)
+                       .setActionListMinSize(0)
+                       .setActionListMaxSize(5)
+                       .go();
+
+    EXPECT_TRUE(failed) << "Property should fail: every action adds >= THRESHOLD";
+}

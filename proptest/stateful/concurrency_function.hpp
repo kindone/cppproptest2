@@ -465,7 +465,9 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
 
     auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
 
-    // Re-generate the failing tuple from the RNG state captured before the failing run.
+    // Re-generate the failing tuple from the same RNG state used in invoke().
+    // Must use actionListGen here (same rand consumption as invoke) so regenerated
+    // shrinkables correspond to the original failing case.
     Random rand(savedRand);
     auto initialShr = initialGen(rand);
     auto frontShr = actionListGen(rand);
@@ -475,6 +477,22 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
         rearShrs.push_back(actionListGen(rand));
     }
 
+    // Rewrap a Shrinkable<list<ActionType>> (from Arbi) with prefix-length-first
+    // shrinking: shorter sequences are tried before element-wise simplification,
+    // matching the stateful shrinker strategy.
+    auto rewrapWithPrefixFirst = [&](const Shrinkable<ActionList>& listShr) -> Shrinkable<ActionList> {
+        vector<ShrinkableBase> vec;
+        vec.reserve(listShr.getRef().size());
+        for (const auto& action : listShr.getRef())
+            vec.push_back(make_shrinkable<ActionType>(action));
+        auto vecShr = make_shrinkable<vector<ShrinkableBase>>(vec);
+        auto prefixLengthShr = shrinkVectorLength(vecShr, actionListMinSize);
+        auto prefixThenElementShr = shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
+        return toListLikeTShrinkable<list, ActionType>(prefixThenElementShr);
+    };
+
+    // Build shrVec/shrinksVec: initial uses its own shrink tree; front and each
+    // rear are rewrapped with prefix-length-first ordering.
     vector<ShrinkableBase> shrVec;
     vector<ShrinkableBase::StreamType> shrinksVec;
     shrVec.reserve(2 + rearShrs.size());
@@ -482,11 +500,15 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
 
     shrVec.push_back(initialShr);
     shrinksVec.push_back(initialShr.getShrinks());
-    shrVec.push_back(frontShr);
-    shrinksVec.push_back(frontShr.getShrinks());
+
+    auto rewrappedFront = rewrapWithPrefixFirst(frontShr);
+    shrVec.push_back(rewrappedFront);
+    shrinksVec.push_back(rewrappedFront.getShrinks());
+
     for (const auto& rearShr : rearShrs) {
-        shrVec.push_back(rearShr);
-        shrinksVec.push_back(rearShr.getShrinks());
+        auto rewrappedRear = rewrapWithPrefixFirst(rearShr);
+        shrVec.push_back(rewrappedRear);
+        shrinksVec.push_back(rewrappedRear.getShrinks());
     }
 
     const auto writeArgs = +[](ostream& os, const vector<ShrinkableBase>& args) {
@@ -502,6 +524,8 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
     writeArgs(cout, shrVec);
     cout << endl;
 
+    // runCandidate uses args.size()-2 as the effective thread count so that
+    // thread-count reduction (dropping rear sequences) works correctly.
     auto runCandidate = [&](const vector<ShrinkableBase>& args) -> pair<bool, string> {
         try {
             if (onStartup)
@@ -515,16 +539,19 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
             for (auto action : front)
                 action(obj, model, frontCtx);
 
-            if (numThreads > 1) {
+            // Derive thread count from args so that shrinking can reduce
+            // the number of active threads below the original numThreads.
+            const int effectiveThreads = static_cast<int>(args.size()) - 2;
+            if (effectiveThreads > 0) {
                 atomic_bool sync_ready(false);
                 vector<shared_ptr<atomic_bool>> thread_ready;
                 vector<thread> rearRunners;
-                thread_ready.reserve(numThreads);
-                rearRunners.reserve(numThreads);
+                thread_ready.reserve(effectiveThreads);
+                rearRunners.reserve(effectiveThreads);
                 vector<ActionList> rearCopies;
-                rearCopies.reserve(numThreads);
+                rearCopies.reserve(effectiveThreads);
                 ConcurrentTestDump dump;
-                for (int i = 0; i < numThreads; i++) {
+                for (int i = 0; i < effectiveThreads; i++) {
                     thread_ready.emplace_back(new atomic_bool(false));
                     rearCopies.push_back(args[2 + i].getAny().template getRef<ActionList>());
                     vector<string> rearNames;
@@ -533,15 +560,15 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
                         [](const ActionType& action) { return action.name; });
                     dump.initRear(rearNames);
                 }
-                for (int i = 0; i < numThreads; i++) {
+                for (int i = 0; i < effectiveThreads; i++) {
                     rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(
                         i, obj, model, rearCopies[i], *thread_ready[i], sync_ready, dump));
                 }
-                for (int i = 0; i < numThreads; i++) {
+                for (int i = 0; i < effectiveThreads; i++) {
                     while (!*thread_ready[i]) {}
                 }
                 sync_ready = true;
-                for (int i = 0; i < numThreads; i++)
+                for (int i = 0; i < effectiveThreads; i++)
                     rearRunners[i].join();
             }
 
@@ -612,6 +639,35 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
     if (useRetry)
         assessFailureForRetry(shrVec);
 
+    // Phase 0: reduce thread count.
+    // Try removing rear sequences from the end before shrinking within sequences.
+    // If the failure reproduces with fewer threads (or no threads = serial front-only),
+    // that is a strictly simpler counterexample.
+    while (shrVec.size() > 2) {
+        if (isShrinkPhaseTimedOut(shrinkPhaseStart, shrinkTimeoutMs)) {
+            cout << "  shrink phase timeout (" << shrinkTimeoutMs << "ms)" << endl;
+            break;
+        }
+        vector<ShrinkableBase> reduced(shrVec.begin(), shrVec.end() - 1);
+        auto [failed, msg] = shrinkTestCandidate(reduced);
+        if (failed) {
+            shrVec = reduced;
+            shrinksVec.pop_back();  // keep shrinksVec in sync with shrVec
+            anyShrinkFound = true;
+            cout << "  shrinking found simpler (fewer threads): ";
+            writeArgs(cout, shrVec);
+            cout << endl;
+            if (!msg.empty())
+                cout << "    by failed expectation: " << msg << endl;
+            if (useRetry && kReassessOnEachSucessfulShrink)
+                assessFailureForRetry(shrVec);
+        } else {
+            break;
+        }
+    }
+
+    // Phase 1+: shrink each component (initial object, front, remaining rears)
+    // using prefix-length-first ordering for the action lists.
     for (size_t i = 0; i < shrVec.size(); i++) {
         auto shrinks = shrinksVec[i];
         while (!shrinks.isEmpty()) {
