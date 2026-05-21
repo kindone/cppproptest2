@@ -639,30 +639,34 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
     if (useRetry)
         assessFailureForRetry(shrVec);
 
-    // Phase 0: reduce thread count.
-    // Try removing rear sequences from the end before shrinking within sequences.
-    // If the failure reproduces with fewer threads (or no threads = serial front-only),
-    // that is a strictly simpler counterexample.
-    while (shrVec.size() > 2) {
-        if (isShrinkPhaseTimedOut(shrinkPhaseStart, shrinkTimeoutMs)) {
-            cout << "  shrink phase timeout (" << shrinkTimeoutMs << "ms)" << endl;
-            break;
-        }
-        vector<ShrinkableBase> reduced(shrVec.begin(), shrVec.end() - 1);
-        auto [failed, msg] = shrinkTestCandidate(reduced);
-        if (failed) {
-            shrVec = reduced;
-            shrinksVec.pop_back();  // keep shrinksVec in sync with shrVec
-            anyShrinkFound = true;
-            cout << "  shrinking found simpler (fewer threads): ";
-            writeArgs(cout, shrVec);
-            cout << endl;
-            if (!msg.empty())
-                cout << "    by failed expectation: " << msg << endl;
-            if (useRetry && kReassessOnEachSucessfulShrink)
-                assessFailureForRetry(shrVec);
-        } else {
-            break;
+    // Phase 0: reduce thread count, simplest first.
+    // Try 0 rear threads first (front-only serial execution), then 1, 2, ...
+    // up to numThreads-1.  Accept the first (fewest-thread) count that still
+    // reproduces the failure — matching the shrink-tree convention of trying
+    // simpler values before more complex ones.
+    {
+        const int originalNumRears = static_cast<int>(shrVec.size()) - 2;
+        for (int tryRears = 0; tryRears < originalNumRears; tryRears++) {
+            if (isShrinkPhaseTimedOut(shrinkPhaseStart, shrinkTimeoutMs)) {
+                cout << "  shrink phase timeout (" << shrinkTimeoutMs << "ms)" << endl;
+                break;
+            }
+            vector<ShrinkableBase> reduced(shrVec.begin(), shrVec.begin() + 2 + tryRears);
+            auto [failed, msg] = shrinkTestCandidate(reduced);
+            if (failed) {
+                while (shrinksVec.size() > reduced.size())
+                    shrinksVec.pop_back();
+                shrVec = reduced;
+                anyShrinkFound = true;
+                cout << "  shrinking found simpler (fewer threads, " << tryRears << " rear(s)): ";
+                writeArgs(cout, shrVec);
+                cout << endl;
+                if (!msg.empty())
+                    cout << "    by failed expectation: " << msg << endl;
+                if (useRetry && kReassessOnEachSucessfulShrink)
+                    assessFailureForRetry(shrVec);
+                break;  // found minimal thread count; proceed to element shrinking
+            }
         }
     }
 
