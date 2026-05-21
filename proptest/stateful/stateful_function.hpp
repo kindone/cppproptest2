@@ -331,8 +331,25 @@ private:
                         auto prefixLengthShr = shrinkVectorLength(actionShrinkables, actionListMinSize);
                         auto prefixLengthThenElementShr =
                             shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
+                        // Phase 3: at every length/element node, also try shrinking the last
+                        // action's own parameters via its stored shrink tree.
+                        auto withPhase3 = prefixLengthThenElementShr.concat(
+                            [actionListMinSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
+                                const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
+                                if (vec.empty())
+                                    return ShrinkableBase::StreamType::empty();
+                                return vec.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
+                                    [vec, actionListMinSize](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
+                                        auto newVec = vec;
+                                        newVec.back() = shrunkLast;
+                                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
+                                        auto newLengthShr = shrinkVectorLength(newVecShr, actionListMinSize);
+                                        return ShrinkableBase(
+                                            shrinkAnyVector(newLengthShr, actionListMinSize, true, false));
+                                    });
+                            });
                         auto actionListShr =
-                            toListLikeTShrinkable<list, Action<ObjectType, ModelType>>(prefixLengthThenElementShr);
+                            toListLikeTShrinkable<list, Action<ObjectType, ModelType>>(withPhase3);
                         return actionListShr.template map<ArgsType>(
                             [initial](list<Action<ObjectType, ModelType>>& actions) {
                                 return ArgsType(actions, initial);

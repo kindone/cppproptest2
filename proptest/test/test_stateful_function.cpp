@@ -281,3 +281,41 @@ TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
     EXPECT_NE(stats->argsAsString.find("actions:"), string::npos);
     EXPECT_NE(stats->argsAsString.find("initial:"), string::npos);
 }
+
+/**
+ * Verifies Phase 3 (last-action parameter) shrinking for state-dependent stateful tests.
+ *
+ * Actions are generated with gen::interval so they carry real shrink trees.
+ * The property fails when the accumulated value meets a threshold.  Phase 3
+ * should walk the last action's shrink tree and find the minimal value that
+ * still triggers the failure (the threshold itself).
+ */
+TEST(stateful_function, shrink_phase3_last_action_parameters)
+{
+    constexpr int THRESHOLD = 10;
+
+    // Each action adds n to the int; fails inside the action when total >= THRESHOLD.
+    auto incrGen = gen::interval(THRESHOLD, 100).map<SimpleAction<int>>([](const int& n) {
+        return SimpleAction<int>(PROP_ACTION_NAME("Incr", n), [n](int& obj) {
+            obj += n;
+            PROP_ASSERT(obj < THRESHOLD);
+        });
+    });
+
+    auto prop = statefulProperty<int>(gen::just(0), incrGen);
+    std::ostringstream out;
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(20)
+                  .setActionListMinSize(1)
+                  .setActionListMaxSize(3)
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
+    // Phase 1 should reduce to a single-action sequence.
+    // Phase 3 should shrink that action's value down to THRESHOLD.
+    const auto& output = out.str();
+    EXPECT_NE(output.find("Incr(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << output;
+}
