@@ -463,50 +463,75 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
         return elapsed >= timeoutMs;
     };
 
-    auto actionListGen = Arbi<list<Action<ObjectType, ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
+    // Re-generate per-action shrinkables from the same RNG state used in invoke().
+    // Consumes random identically to Arbi<list<ActionType>>(actionGen, minSize, maxSize):
+    //   1. rand.getRandomSize(minSize, maxSize+1) — pick list length
+    //   2. actionGen(rand) for each slot
+    // The resulting Shrinkable<ActionType> values carry real shrink trees from
+    // the action generator, enabling Phase 3 (last-action parameter shrinking).
+    auto genActionShrinkables = [&](Random& r) -> vector<Shrinkable<ActionType>> {
+        size_t size = r.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+        vector<Shrinkable<ActionType>> result;
+        result.reserve(size);
+        for (size_t i = 0; i < size; i++)
+            result.push_back(actionGen(r));
+        return result;
+    };
 
-    // Re-generate the failing tuple from the same RNG state used in invoke().
-    // Must use actionListGen here (same rand consumption as invoke) so regenerated
-    // shrinkables correspond to the original failing case.
     Random rand(savedRand);
     auto initialShr = initialGen(rand);
-    auto frontShr = actionListGen(rand);
-    vector<Shrinkable<ActionList>> rearShrs;
-    rearShrs.reserve(numThreads);
+    auto frontActionShrs = genActionShrinkables(rand);
+    vector<vector<Shrinkable<ActionType>>> rearActionShrs;
+    rearActionShrs.reserve(numThreads);
     for (int i = 0; i < numThreads; i++) {
-        rearShrs.push_back(actionListGen(rand));
+        rearActionShrs.push_back(genActionShrinkables(rand));
     }
 
-    // Rewrap a Shrinkable<list<ActionType>> (from Arbi) with prefix-length-first
-    // shrinking: shorter sequences are tried before element-wise simplification,
-    // matching the stateful shrinker strategy.
-    auto rewrapWithPrefixFirst = [&](const Shrinkable<ActionList>& listShr) -> Shrinkable<ActionList> {
+    // Rewrap a per-action shrinkable list with:
+    //   Phase 1: prefix-length-first ordering (shorter sequences before element simplification)
+    //   Phase 3: last-action parameter shrinking via each action's own shrink tree
+    auto rewrapWithPrefixFirst = [&](const vector<Shrinkable<ActionType>>& actionShrs) -> Shrinkable<ActionList> {
         vector<ShrinkableBase> vec;
-        vec.reserve(listShr.getRef().size());
-        for (const auto& action : listShr.getRef())
-            vec.push_back(make_shrinkable<ActionType>(action));
+        vec.reserve(actionShrs.size());
+        for (const auto& shr : actionShrs)
+            vec.push_back(shr);  // Shrinkable<ActionType> → ShrinkableBase, shrink tree preserved
         auto vecShr = make_shrinkable<vector<ShrinkableBase>>(vec);
         auto prefixLengthShr = shrinkVectorLength(vecShr, actionListMinSize);
         auto prefixThenElementShr = shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
-        return toListLikeTShrinkable<list, ActionType>(prefixThenElementShr);
+        // Phase 3: at every node, also try shrinking the last action's own parameters.
+        auto withPhase3 = prefixThenElementShr.concat(
+            [minSz = actionListMinSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
+                const auto& v = nodeShr.getRef<vector<ShrinkableBase>>();
+                if (v.empty())
+                    return ShrinkableBase::StreamType::empty();
+                return v.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
+                    [v, minSz](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
+                        auto newVec = v;
+                        newVec.back() = shrunkLast;
+                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
+                        auto newLengthShr = shrinkVectorLength(newVecShr, minSz);
+                        return ShrinkableBase(shrinkAnyVector(newLengthShr, minSz, true, false));
+                    });
+            });
+        return toListLikeTShrinkable<list, ActionType>(withPhase3);
     };
 
     // Build shrVec/shrinksVec: initial uses its own shrink tree; front and each
-    // rear are rewrapped with prefix-length-first ordering.
+    // rear are rewrapped with prefix-length-first + Phase 3 ordering.
     vector<ShrinkableBase> shrVec;
     vector<ShrinkableBase::StreamType> shrinksVec;
-    shrVec.reserve(2 + rearShrs.size());
-    shrinksVec.reserve(2 + rearShrs.size());
+    shrVec.reserve(2 + rearActionShrs.size());
+    shrinksVec.reserve(2 + rearActionShrs.size());
 
     shrVec.push_back(initialShr);
     shrinksVec.push_back(initialShr.getShrinks());
 
-    auto rewrappedFront = rewrapWithPrefixFirst(frontShr);
+    auto rewrappedFront = rewrapWithPrefixFirst(frontActionShrs);
     shrVec.push_back(rewrappedFront);
     shrinksVec.push_back(rewrappedFront.getShrinks());
 
-    for (const auto& rearShr : rearShrs) {
-        auto rewrappedRear = rewrapWithPrefixFirst(rearShr);
+    for (const auto& rearShrs : rearActionShrs) {
+        auto rewrappedRear = rewrapWithPrefixFirst(rearShrs);
         shrVec.push_back(rewrappedRear);
         shrinksVec.push_back(rewrappedRear.getShrinks());
     }

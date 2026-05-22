@@ -254,3 +254,43 @@ TEST(concurrency_function, shrink_prefix_length_first_for_action_lists)
 
     EXPECT_TRUE(failed) << "Property should fail: every action adds >= THRESHOLD";
 }
+
+/**
+ * Verifies Phase 3 (last-action parameter) shrinking for concurrency tests.
+ *
+ * Actions are generated with gen::interval so they carry real shrink trees.
+ * With 1 rear thread (serial-equivalent), Phase 1 should reduce to a single
+ * action, then Phase 3 should walk the last action's shrink tree down to
+ * the minimal value that still triggers the failure (the threshold itself).
+ */
+TEST(concurrency_function, shrink_phase3_last_action_parameters)
+{
+    constexpr int THRESHOLD = 10;
+
+    // Each action adds n to the int and asserts the total stays below THRESHOLD.
+    // Actions are labelled so we can find the shrunk value in the output.
+    auto incrGen = gen::interval(THRESHOLD, 100).map<SimpleAction<int>>([](const int& n) {
+        return SimpleAction<int>(PROP_ACTION_NAME("Incr", n), [n](int& obj) {
+            obj += n;
+            PROP_ASSERT(obj < THRESHOLD);
+        });
+    });
+
+    auto prop = concurrency<int>(gen::just(0), incrGen);
+    std::ostringstream out;
+    auto* oldOut = cout.rdbuf(out.rdbuf());
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(20)
+                  .setMaxConcurrency(1)
+                  .setActionListMinSize(1)
+                  .setActionListMaxSize(3)
+                  .go();
+    cout.rdbuf(oldOut);
+
+    EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
+    // Phase 1 reduces to a single action; Phase 3 shrinks its value to THRESHOLD.
+    const auto& output = out.str();
+    EXPECT_NE(output.find("Incr(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << output;
+}
