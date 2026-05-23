@@ -304,6 +304,58 @@ private:
         return gen::construct<ArgsType, list<Action<ObjectType, ModelType>>, ObjectType>(actionListGen, initialGen);
     }
 
+    // ── Helpers for makeStateDependentArgsGen ────────────────────────────────
+
+    // Step 1: Call the factory per slot with live (obj, model), execute each
+    // action immediately so the next factory call sees the updated state.
+    // Returns a Shrinkable<vector<ShrinkableBase>> preserving per-action shrink trees.
+    static Shrinkable<vector<ShrinkableBase>> genActionShrinkables(
+        Random& rand, ObjectType& obj, ModelType& model,
+        const ActionGenFactory<ObjectType, ModelType>& factory, size_t numActions)
+    {
+        auto actionShrinkables = make_shrinkable<vector<ShrinkableBase>>();
+        auto& vec = actionShrinkables.getMutableRef();
+        vec.reserve(numActions);
+        for (size_t i = 0; i < numActions; ++i) {
+            auto nextActionGen = factory(obj, model);
+            auto actionShr = nextActionGen(rand);
+            vec.push_back(actionShr);
+            actionShr.getRef()(obj, model);
+        }
+        return actionShrinkables;
+    }
+
+    // Step 2: Wrap a Shrinkable<vector<ShrinkableBase>> with:
+    //   Phase 1 — prefix-length-first ordering (shorter sequences before element simplification)
+    //   Phase 3 — last-action parameter shrinking via each action's own shrink tree
+    // Returns Shrinkable<list<Action<...>>> ready for use as a StatefulArgs component.
+    static Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
+        Shrinkable<vector<ShrinkableBase>> actionShrinkables, size_t minSize)
+    {
+        auto prefixLengthShr = shrinkVectorLength(actionShrinkables, minSize);
+        auto prefixLengthThenElementShr = shrinkAnyVector(prefixLengthShr, minSize, true, false);
+        // Phase 3: at every length/element node, also try shrinking the last
+        // action's own parameters via its stored shrink tree.
+        auto withPhase3 = prefixLengthThenElementShr.concat(
+            [minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
+                const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
+                if (vec.empty())
+                    return ShrinkableBase::StreamType::empty();
+                return vec.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
+                    [vec, minSize](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
+                        auto newVec = vec;
+                        newVec.back() = shrunkLast;
+                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
+                        auto newLengthShr = shrinkVectorLength(newVecShr, minSize);
+                        return ShrinkableBase(shrinkAnyVector(newLengthShr, minSize, true, false));
+                    });
+            });
+        return toListLikeTShrinkable<list, Action<ObjectType, ModelType>>(withPhase3);
+    }
+
+    // Step 3 (outer): for a given initial object, build the full args generator.
+    // Captures are passed by value so the resulting Generator<ArgsType> outlives
+    // the StatefulProperty that created it.
     Generator<ArgsType> makeStateDependentArgsGen() const
     {
         return Generator<ObjectType>(initialGen).template flatMap<ArgsType>(
@@ -316,40 +368,9 @@ private:
                         ObjectType obj = initial;
                         auto model = modelFactory(obj);
                         const size_t numActions = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
-
-                        auto actionShrinkables = make_shrinkable<vector<ShrinkableBase>>();
-                        auto& actionShrinkableVec = actionShrinkables.getMutableRef();
-                        actionShrinkableVec.reserve(numActions);
-
-                        for (size_t i = 0; i < numActions; ++i) {
-                            auto nextActionGen = actionGenFactory(obj, model);
-                            auto actionShr = nextActionGen(rand);
-                            actionShrinkableVec.push_back(actionShr);
-                            actionShr.getRef()(obj, model);
-                        }
-
-                        auto prefixLengthShr = shrinkVectorLength(actionShrinkables, actionListMinSize);
-                        auto prefixLengthThenElementShr =
-                            shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
-                        // Phase 3: at every length/element node, also try shrinking the last
-                        // action's own parameters via its stored shrink tree.
-                        auto withPhase3 = prefixLengthThenElementShr.concat(
-                            [actionListMinSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
-                                const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
-                                if (vec.empty())
-                                    return ShrinkableBase::StreamType::empty();
-                                return vec.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
-                                    [vec, actionListMinSize](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
-                                        auto newVec = vec;
-                                        newVec.back() = shrunkLast;
-                                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
-                                        auto newLengthShr = shrinkVectorLength(newVecShr, actionListMinSize);
-                                        return ShrinkableBase(
-                                            shrinkAnyVector(newLengthShr, actionListMinSize, true, false));
-                                    });
-                            });
-                        auto actionListShr =
-                            toListLikeTShrinkable<list, Action<ObjectType, ModelType>>(withPhase3);
+                        auto actionShrinkables =
+                            genActionShrinkables(rand, obj, model, actionGenFactory, numActions);
+                        auto actionListShr = applyStatefulShrinkTree(actionShrinkables, actionListMinSize);
                         return actionListShr.template map<ArgsType>(
                             [initial](list<Action<ObjectType, ModelType>>& actions) {
                                 return ArgsType(actions, initial);

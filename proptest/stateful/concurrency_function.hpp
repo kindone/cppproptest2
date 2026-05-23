@@ -135,9 +135,12 @@ public:
     static constexpr size_t defaultActionListMinSize = 0;
     static constexpr size_t defaultActionListMaxSize = 20;
 
+    using ActionGenFactory = stateful::ActionGenFactory<ObjectType, ModelType>;
+
+    // Plain ActionGen: wrap into a state-ignorant factory so there is one code path.
     Concurrency(ObjectTypeGen _initialGen, ActionGen _actionGen)
         : initialGen(_initialGen),
-          actionGen(_actionGen),
+          actionGenFactory([gen = _actionGen](ObjectType&, ModelType&) -> ActionGen { return gen; }),
           seed(util::getGlobalSeed()),
           numRuns(defaultNumRuns),
           numThreads(defaultNumThreads),
@@ -149,7 +152,29 @@ public:
                 ActionGen _actionGen)
         : initialGen(_initialGen),
           modelFactory(_modelFactory),
-          actionGen(_actionGen),
+          actionGenFactory([gen = _actionGen](ObjectType&, ModelType&) -> ActionGen { return gen; }),
+          seed(util::getGlobalSeed()),
+          numRuns(defaultNumRuns),
+          numThreads(defaultNumThreads),
+          maxDurationMs(0)
+    {
+    }
+
+    Concurrency(ObjectTypeGen _initialGen, ActionGenFactory _actionGenFactory)
+        : initialGen(_initialGen),
+          actionGenFactory(_actionGenFactory),
+          seed(util::getGlobalSeed()),
+          numRuns(defaultNumRuns),
+          numThreads(defaultNumThreads),
+          maxDurationMs(0)
+    {
+    }
+
+    Concurrency(ObjectTypeGen _initialGen, ModelTypeGen _modelFactory,
+                ActionGenFactory _actionGenFactory)
+        : initialGen(_initialGen),
+          modelFactory(_modelFactory),
+          actionGenFactory(_actionGenFactory),
           seed(util::getGlobalSeed()),
           numRuns(defaultNumRuns),
           numThreads(defaultNumThreads),
@@ -254,7 +279,7 @@ public:
 private:
     ObjectTypeGen initialGen;
     ModelTypeGen modelFactory;
-    ActionGen actionGen;
+    ActionGenFactory actionGenFactory;
     Function<void()> onStartup;
     Function<void()> onCleanup;
     Function<void(ObjectType&, ModelType&)> postCheck;
@@ -372,84 +397,93 @@ struct RearRunner
 template <typename ObjectType, typename ModelType>
 bool Concurrency<ObjectType, ModelType>::invoke(Random& rand)
 {
-    constexpr int UNINITIALIZED_THREAD_ID = -2;
     constexpr int FRONT_THREAD_ID = -1;
     Shrinkable<ObjectType> initialShr = initialGen(rand);
-
-    auto actionListGen = Arbi<list<Action<ObjectType,ModelType>>>(actionGen, actionListMinSize, actionListMaxSize);
-    Shrinkable<ActionList> frontShr = actionListGen(rand);
-    vector<Shrinkable<ActionList>> rearShrs;
-    rearShrs.reserve(numThreads);
-    for (int i = 0; i < numThreads; i++) {
-        rearShrs.push_back(actionListGen(rand));
-    }
-
     ObjectType& obj = initialShr.getMutableRef();
     ModelType model = modelFactory ? modelFactory(obj) : ModelType();
-    const auto& front = frontShr.getRef();
+
+    // Front: call factory per slot with live (obj, model), execute immediately.
+    // For plain ActionGen, the factory ignores (obj, model) and returns the same gen.
+    // For state-dependent factory, parameter bounds are computed from live state.
+    ConcurrentTestDump dump;
+    vector<ActionList> rearLists;
+    rearLists.reserve(numThreads);
+
+    const size_t frontSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
     vector<string> frontNames;
-    util::transform(front.begin(), front.end(), util::back_inserter(frontNames), [](const ActionType& action) {
-        return action.name;
-    });
-
-    ConcurrentTestDump dump(frontNames);
-
-    // run front
-    stateful::Context context{FRONT_THREAD_ID};
-    for (auto action : front) {
-        action(obj, model, context);
+    frontNames.reserve(frontSize);
+    stateful::Context frontCtx{FRONT_THREAD_ID};
+    for (size_t i = 0; i < frontSize; i++) {
+        auto nextActionGen = actionGenFactory(obj, model);
+        auto actionShr = nextActionGen(rand);
+        const auto& action = actionShr.getRef();
+        frontNames.push_back(action.name);
+        action(obj, model, frontCtx);
         dump.appendFront();
     }
+    dump.setFront(frontNames);
 
-    // serial execution
+    // Rear: pre-generated against post-front state snapshot.
+    // All numThreads rear lists are always generated (even for the numThreads <= 1
+    // serial path) so that random consumption stays identical regardless of thread count.
+    // Each rear thread gets its own independent copy of post-front state for simulation.
+    // User is responsible for concurrency primitives inside factory reads.
+    for (int t = 0; t < numThreads; t++) {
+        ObjectType simObj = obj;
+        ModelType simModel = model;
+        const size_t rearSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+        ActionList rearList;
+        stateful::Context dummyCtx{-99};
+        bool simFailed = false;
+        for (size_t i = 0; i < rearSize && !simFailed; i++) {
+            auto nextActionGen = actionGenFactory(simObj, simModel);
+            auto actionShr = nextActionGen(rand);
+            const auto& action = actionShr.getRef();
+            rearList.push_back(action);
+            try {
+                action(simObj, simModel, dummyCtx);
+            } catch (...) {
+                simFailed = true;  // state invalid; stop generating for this thread
+            }
+        }
+        rearLists.push_back(util::move(rearList));
+    }
+
+    // Serial execution: rear lists were generated (for rand consistency) but not run.
     if (numThreads <= 1) {
-        if(postCheck)
-            postCheck(obj, model);
+        if (postCheck) postCheck(obj, model);
         return true;
     }
 
-    // run rear
+    // ── Spawn rear threads ────────────────────────────────────────────────────
     thread spawner([&]() {
         atomic_bool sync_ready(false);
         vector<shared_ptr<atomic_bool>> thread_ready;
         vector<thread> rearRunners;
-        vector<ActionList> rears;
 
         for (int i = 0; i < numThreads; i++) {
             thread_ready.emplace_back(new atomic_bool(false));
-            const auto& rear = rearShrs[i].getRef();
             vector<string> rearNames;
-            util::transform(rear.begin(), rear.end(), util::back_inserter(rearNames), [](const ActionType& action) {
-                return action.name;
-            });
-            rears.emplace_back(rear);
-
+            util::transform(rearLists[i].begin(), rearLists[i].end(), util::back_inserter(rearNames),
+                            [](const ActionType& action) { return action.name; });
             dump.initRear(rearNames);
         }
 
-        // start threads
-        for(int i = 0; i < numThreads; i++) {
-            rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(i, obj, model, rearShrs[i].getMutableRef(),
-                                                                       *thread_ready[i], sync_ready, dump));
+        for (int i = 0; i < numThreads; i++) {
+            rearRunners.emplace_back(RearRunner<ObjectType, ModelType>(
+                i, obj, model, rearLists[i], *thread_ready[i], sync_ready, dump));
         }
 
-        for (int i = 0; i < numThreads; i++) {
+        for (int i = 0; i < numThreads; i++)
             while (!*thread_ready[i]) {}
-        }
-
         sync_ready = true;
-
-        for (int i = 0; i < numThreads; i++) {
+        for (int i = 0; i < numThreads; i++)
             rearRunners[i].join();
-        }
-
-        // dump.print(cout);
     });
 
     spawner.join();
 
-    if(postCheck)
-        postCheck(obj, model);
+    if (postCheck) postCheck(obj, model);
     return true;
 }
 
@@ -463,29 +497,63 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
         return elapsed >= timeoutMs;
     };
 
+    Random rand(savedRand);
+    auto initialShr = initialGen(rand);
+
     // Re-generate per-action shrinkables from the same RNG state used in invoke().
-    // Consumes random identically to Arbi<list<ActionType>>(actionGen, minSize, maxSize):
-    //   1. rand.getRandomSize(minSize, maxSize+1) — pick list length
-    //   2. actionGen(rand) for each slot
-    // The resulting Shrinkable<ActionType> values carry real shrink trees from
-    // the action generator, enabling Phase 3 (last-action parameter shrinking).
-    auto genActionShrinkables = [&](Random& r) -> vector<Shrinkable<ActionType>> {
+    // Simulates execution so factory sees correct live state between slots.
+    // For state-ignorant (plain-gen-wrapped) factories, simulation is a no-op on factory
+    // behaviour but still runs the actions — if they throw, we stop early and return a
+    // shorter (still valid) shrink candidate.
+
+    // Front: returns {shrinkables, {postFrontObj, postFrontModel}}.
+    auto genFrontActionShrinkables =
+        [&](Random& r) -> pair<vector<Shrinkable<ActionType>>, pair<ObjectType, ModelType>> {
+        ObjectType simObj = initialShr.getRef();
+        ModelType simModel = modelFactory ? modelFactory(simObj) : ModelType();
         size_t size = r.getRandomSize(actionListMinSize, actionListMaxSize + 1);
         vector<Shrinkable<ActionType>> result;
         result.reserve(size);
-        for (size_t i = 0; i < size; i++)
-            result.push_back(actionGen(r));
+        stateful::Context dummyCtx{-99};
+        for (size_t i = 0; i < size; i++) {
+            auto nextActionGen = actionGenFactory(simObj, simModel);
+            auto actionShr = nextActionGen(r);
+            result.push_back(actionShr);
+            try {
+                actionShr.getRef()(simObj, simModel, dummyCtx);
+            } catch (...) {
+                break;  // state invalid beyond this point; stop simulation
+            }
+        }
+        return {result, {simObj, simModel}};
+    };
+
+    // Rear: each thread simulates independently against a copy of post-front state.
+    auto genRearActionShrinkables =
+        [&](Random& r, ObjectType postFrontObj, ModelType postFrontModel) -> vector<Shrinkable<ActionType>> {
+        size_t size = r.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+        vector<Shrinkable<ActionType>> result;
+        result.reserve(size);
+        stateful::Context dummyCtx{-99};
+        for (size_t i = 0; i < size; i++) {
+            auto nextActionGen = actionGenFactory(postFrontObj, postFrontModel);
+            auto actionShr = nextActionGen(r);
+            result.push_back(actionShr);
+            try {
+                actionShr.getRef()(postFrontObj, postFrontModel, dummyCtx);
+            } catch (...) {
+                break;
+            }
+        }
         return result;
     };
 
-    Random rand(savedRand);
-    auto initialShr = initialGen(rand);
-    auto frontActionShrs = genActionShrinkables(rand);
+    auto [frontActionShrs, postFrontState] = genFrontActionShrinkables(rand);
     vector<vector<Shrinkable<ActionType>>> rearActionShrs;
     rearActionShrs.reserve(numThreads);
-    for (int i = 0; i < numThreads; i++) {
-        rearActionShrs.push_back(genActionShrinkables(rand));
-    }
+    for (int i = 0; i < numThreads; i++)
+        rearActionShrs.push_back(
+            genRearActionShrinkables(rand, postFrontState.first, postFrontState.second));
 
     // Rewrap a per-action shrinkable list with:
     //   Phase 1: prefix-length-first ordering (shorter sequences before element simplification)
@@ -745,7 +813,7 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
     }
 }
 
-/* without model */
+/* without model — plain action gen */
 template <typename ObjectType>
 decltype(auto) concurrency(GenFunction<ObjectType> initialGen, SimpleActionGen<ObjectType>& actionGen)
 {
@@ -757,11 +825,57 @@ decltype(auto) concurrency(GenFunction<ObjectType> initialGen, SimpleActionGen<O
     return Concurrency<ObjectType, EmptyModel>(initialGen, actionGen2);
 }
 
-/* with model */
+/* with model — plain action gen */
 template <typename ObjectType, typename ModelType>
 decltype(auto) concurrency(GenFunction<ObjectType> initialGen, Function<ModelType(const ObjectType&)> modelFactory, ActionGen<ObjectType, ModelType>& actionGen)
 {
     return Concurrency<ObjectType, ModelType>(initialGen, modelFactory, actionGen);
+}
+
+/* without model — ActionGenFactory (state-dependent, no model)
+ * Accepts any callable matching (ObjectType&, EmptyModel&) -> ActionGen<ObjectType, EmptyModel>,
+ * including ActionGenFactory<ObjectType, EmptyModel> directly. */
+template <typename ObjectType, typename Factory>
+    requires std::invocable<Factory, ObjectType&, EmptyModel&> &&
+             std::constructible_from<ActionGen<ObjectType, EmptyModel>,
+                                     std::invoke_result_t<Factory, ObjectType&, EmptyModel&>>
+decltype(auto) concurrency(GenFunction<ObjectType> initialGen, Factory&& actionGenFactory)
+{
+    return Concurrency<ObjectType, EmptyModel>(
+        initialGen,
+        stateful::ActionGenFactory<ObjectType, EmptyModel>(util::forward<Factory>(actionGenFactory)));
+}
+
+/* without model — SimpleActionGenFactory (state-dependent, simple actions, no model)
+ * Accepts any callable matching (ObjectType&) -> SimpleActionGen<ObjectType>. */
+template <typename ObjectType, typename Factory>
+    requires std::invocable<Factory, ObjectType&> &&
+             std::constructible_from<SimpleActionGen<ObjectType>,
+                                     std::invoke_result_t<Factory, ObjectType&>>
+decltype(auto) concurrency(GenFunction<ObjectType> initialGen, Factory&& simpleActionGenFactory)
+{
+    static EmptyModel emptyModel;
+    stateful::ActionGenFactory<ObjectType, EmptyModel> actionGenFactory =
+        [f = util::forward<Factory>(simpleActionGenFactory)](ObjectType& obj, EmptyModel&) {
+            return f(obj).template map<Action<ObjectType, EmptyModel>>(
+                +[](const SimpleAction<ObjectType>& sa) { return Action<ObjectType, EmptyModel>(sa); });
+        };
+    return Concurrency<ObjectType, EmptyModel>(initialGen, actionGenFactory);
+}
+
+/* with model — ActionGenFactory (state-dependent)
+ * Accepts any callable matching (ObjectType&, ModelType&) -> ActionGen<ObjectType, ModelType>. */
+template <typename ObjectType, typename ModelType, typename Factory>
+    requires std::invocable<Factory, ObjectType&, ModelType&> &&
+             std::constructible_from<ActionGen<ObjectType, ModelType>,
+                                     std::invoke_result_t<Factory, ObjectType&, ModelType&>>
+decltype(auto) concurrency(GenFunction<ObjectType> initialGen,
+                           Function<ModelType(const ObjectType&)> modelFactory,
+                           Factory&& actionGenFactory)
+{
+    return Concurrency<ObjectType, ModelType>(
+        initialGen, modelFactory,
+        stateful::ActionGenFactory<ObjectType, ModelType>(util::forward<Factory>(actionGenFactory)));
 }
 
 }  // namespace concurrent

@@ -294,3 +294,117 @@ TEST(concurrency_function, shrink_phase3_last_action_parameters)
         << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
+
+/**
+ * Verifies state-dependent action factory for concurrency: front actions are generated
+ * and executed with interleaved factory calls; rear actions are pre-generated against
+ * the post-front state snapshot (each thread independently simulates execution).
+ *
+ * A vector starts empty.  The factory only allows Push when empty; otherwise also allows Pop.
+ * The postCheck verifies the vector size is in the expected range, confirming that
+ * state-dependent generation doesn't produce out-of-bounds operations.
+ */
+TEST(concurrency_function, state_dependent_action_factory_without_model)
+{
+    using T = vector<int>;
+
+    // Factory: only allow Push when empty; otherwise allow Push or Pop.
+    auto factory = [](T& obj, EmptyModel&) -> ActionGen<T, EmptyModel> {
+        Action<T, EmptyModel> pushAction("Push", [](T& v, EmptyModel&) {
+            lock_guard<mutex> guard(getMutex());
+            v.push_back(1);
+        });
+        Action<T, EmptyModel> popAction("Pop", [](T& v, EmptyModel&) {
+            lock_guard<mutex> guard(getMutex());
+            if (!v.empty()) v.pop_back();
+        });
+        if (obj.empty()) {
+            return gen::just<Action<T, EmptyModel>>(pushAction);
+        }
+        return gen::oneOf<Action<T, EmptyModel>>(pushAction, popAction);
+    };
+
+    auto prop = concurrency<T>(gen::just(T{}), factory);
+    bool ok = prop.setSeed(0).setNumRuns(100).setMaxConcurrency(2).go();
+    EXPECT_TRUE(ok);
+}
+
+/**
+ * Verifies state-dependent action factory with model for concurrency.
+ * The model tracks element count; factory uses model size to bound random indices.
+ * With 1 rear thread (serial-equivalent), front+rear together run 2 actions each,
+ * and postCheck verifies the model and object stay in sync.
+ */
+TEST(concurrency_function, state_dependent_action_factory_with_model)
+{
+    using T = vector<int>;
+    struct Model {
+        int size = 0;
+    };
+
+    auto modelFactory = +[](const T& obj) { return Model{static_cast<int>(obj.size())}; };
+
+    auto factory = [](T& obj, Model&) -> ActionGen<T, Model> {
+        Action<T, Model> pushAction("Push", [](T& v, Model& m) {
+            lock_guard<mutex> guard(getMutex());
+            v.push_back(1);
+            ++m.size;
+        });
+        Action<T, Model> popAction("Pop", [](T& v, Model& m) {
+            lock_guard<mutex> guard(getMutex());
+            if (!v.empty()) { v.pop_back(); --m.size; }
+        });
+        if (obj.empty()) {
+            return gen::just<Action<T, Model>>(pushAction);
+        }
+        return gen::oneOf<Action<T, Model>>(pushAction, popAction);
+    };
+
+    auto prop = concurrency<T, Model>(gen::just(T{}), modelFactory, factory);
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(50)
+                  .setMaxConcurrency(1)
+                  .setPostCheck([](T& v, Model& m) {
+                      PROP_ASSERT_EQ(static_cast<int>(v.size()), m.size);
+                  })
+                  .go();
+    EXPECT_TRUE(ok);
+}
+
+/**
+ * Verifies that shrinking works correctly for factory-based concurrency.
+ * With 1 rear thread (serial-equivalent), the shrinker should reduce a failing
+ * factory-generated sequence to a single action.
+ */
+TEST(concurrency_function, state_dependent_factory_shrink)
+{
+    using T = int;
+    constexpr int THRESHOLD = 5;
+
+    // Factory ignores state; generates an action that increments and fails above threshold.
+    auto factory = [](T&, EmptyModel&) -> ActionGen<T, EmptyModel> {
+        return gen::interval(THRESHOLD, 20).map<Action<T, EmptyModel>>([](const int& n) {
+            return Action<T, EmptyModel>(PROP_ACTION_NAME("Add", n), [n](T& v, EmptyModel&) {
+                v += n;
+                PROP_ASSERT(v < THRESHOLD);
+            });
+        });
+    };
+
+    auto prop = concurrency<T>(gen::just(0), factory);
+    std::ostringstream out;
+    auto* oldOut = cout.rdbuf(out.rdbuf());
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(20)
+                  .setMaxConcurrency(1)
+                  .setActionListMinSize(1)
+                  .setActionListMaxSize(3)
+                  .go();
+    cout.rdbuf(oldOut);
+
+    EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
+    const auto& output = out.str();
+    EXPECT_NE(output.find("Add(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 3 should shrink action value down to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << output;
+}
