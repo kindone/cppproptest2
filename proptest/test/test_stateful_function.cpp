@@ -319,3 +319,186 @@ TEST(stateful_function, shrink_phase3_last_action_parameters)
         << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
+
+// ── Phase 2b (bookmark-based, non-last element shrinking) ────────────────────
+//
+// Feature:     Phase 2b in applyStatefulShrinkTree explores shrink candidates for
+//              every non-last position by: (1) replaying the prefix to reconstruct
+//              the live state, (2) regenerating the action from its stored bookmark
+//              using that correct state, (3) yielding shrinks of the fresh tree.
+//
+// Spec:        ∀ failing state-dependent factory sequences where a non-last element
+//              has a shrinkable parameter, Phase 2b walks that element's fresh
+//              state-aware shrink tree and converges to the minimal parameter value.
+//
+// Complement:  Phase 3 covers the LAST element; Phase 2b covers all others.
+//              The single-element guard (vec.size()<=1) prevents Phase 2b from
+//              firing when there is nothing to the right.
+
+/**
+ * Phase 2b: 2-action state-dependent sequence, non-last element shrinks.
+ *
+ * Factory: obj==0 → Latch(n) with n ∈ [THRESHOLD, 2·THRESHOLD], sets obj=n
+ *          obj>0  → Check: PROP_ASSERT(obj < THRESHOLD)
+ *
+ * setActionListSize(2) forces exactly [Latch(n), Check].  Phase 1 cannot reduce
+ * (minSize=2).  Phase 2b fires at position 0 (Latch, non-last) and walks its
+ * shrink tree; Phase 3 fires at position 1 (Check, last) — Check has no shrinks.
+ *
+ * Expected shrunken output: Latch(THRESHOLD), Check.
+ */
+TEST(stateful_function, shrink_phase2b_non_last_element_parameter)
+{
+    constexpr int THRESHOLD = 10;
+
+    // Factory: obj==0 → Latch(n) with n ∈ [THRESHOLD, 2·THRESHOLD], sets obj=n.
+    //          obj>0  → Observe: state-dependent no-op marker (no assert — failure
+    //                   detected via postCheck so it does not throw during generation).
+    auto prop = statefulProperty<int>(
+        gen::just(0),
+        [](int& obj) -> SimpleActionGen<int> {
+            if (obj == 0) {
+                return gen::interval(THRESHOLD, 2 * THRESHOLD)
+                    .map<SimpleAction<int>>([](const int& n) {
+                        return SimpleAction<int>(PROP_ACTION_NAME("Latch", n),
+                            [n](int& v) { v = n; });
+                    });
+            }
+            return gen::just(SimpleAction<int>("Observe", [](int&) {}));
+        });
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(5)
+                  .setActionListSize(2)
+                  .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok)
+        << "Always fails: Latch sets v=n>=THRESHOLD, postCheck asserts v<THRESHOLD";
+    const auto& output = out.str();
+    EXPECT_NE(output.find("Latch(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 2b should shrink Latch's n to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << output;
+    EXPECT_NE(output.find("Observe"), string::npos)
+        << "Shrunken sequence must still contain Observe\nactual output:\n" << output;
+}
+
+struct Phase2bStateMachineModel { int phase = 0; };
+
+/**
+ * Phase 2b: 3-action state machine — Phase 2b fires at two non-last positions.
+ *
+ * Factory (model-based):
+ *   phase=0 → Init(n) with n ∈ [THRESHOLD, 3·THRESHOLD], sets obj=n, phase→1
+ *   phase=1 → Mutate: transitions phase→2 (obj unchanged)
+ *   phase=2 → Verify: no-op marker (failure detected via postCheck)
+ *
+ * setActionListSize(3) forces [Init(n), Mutate, Verify].  The 3-action chain is
+ * necessary: removing any one action stops the failure (no Verify without Init+Mutate).
+ * Phase 1 cannot reduce below 3.
+ *
+ * Phase 2b fires at position 0 (Init, non-last): replays empty prefix → state
+ * phase=0, correctly regenerates Init and walks its shrink tree.
+ * Phase 2b fires at position 1 (Mutate, non-last): replays [Init(n)] → phase=1,
+ * regenerates Mutate — Mutate carries no shrink tree, so no candidates.
+ * Phase 3 fires at position 2 (Verify, last): Verify has no shrinks.
+ *
+ * This verifies state-awareness: if Phase 2b used the wrong state at position 0
+ * (e.g. phase=2), it would regenerate Verify instead of Init and find no shrinks,
+ * failing to minimise n.
+ *
+ * Note: PROP_ASSERT is NOT placed inside action bodies — doing so would throw
+ * during generation-time state advancement in genActionShrinkables, escaping the
+ * property framework.  Failure is detected via setPostCheck instead.
+ *
+ * Expected shrunken output: Init(THRESHOLD), Mutate, Verify.
+ */
+TEST(stateful_function, shrink_phase2b_three_action_state_machine)
+{
+    constexpr int THRESHOLD = 10;
+
+    auto prop = statefulProperty<int, Phase2bStateMachineModel>(
+        gen::just(0),
+        [](int&) -> Phase2bStateMachineModel { return Phase2bStateMachineModel{}; },
+        [](int&, Phase2bStateMachineModel& m) -> ActionGen<int, Phase2bStateMachineModel> {
+            if (m.phase == 0) {
+                return gen::interval(THRESHOLD, 3 * THRESHOLD)
+                    .map<Action<int, Phase2bStateMachineModel>>([](const int& n) {
+                        return Action<int, Phase2bStateMachineModel>(
+                            PROP_ACTION_NAME("Init", n),
+                            [n](int& v, Phase2bStateMachineModel& mdl) {
+                                v = n;
+                                mdl.phase = 1;
+                            });
+                    });
+            }
+            if (m.phase == 1) {
+                return gen::just(Action<int, Phase2bStateMachineModel>(
+                    "Mutate",
+                    [](int&, Phase2bStateMachineModel& mdl) { mdl.phase = 2; }));
+            }
+            // phase == 2: no-op marker; failure is detected via setPostCheck below
+            return gen::just(Action<int, Phase2bStateMachineModel>(
+                "Verify",
+                [](int&, Phase2bStateMachineModel&) {}));
+        });
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(5)
+                  .setActionListSize(3)
+                  .setPostCheck([](int& v, Phase2bStateMachineModel&) { PROP_ASSERT(v < THRESHOLD); })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok)
+        << "Always fails: Init sets v=n>=THRESHOLD, postCheck asserts v<THRESHOLD";
+    const auto& output = out.str();
+    // Phase 2b at position 0 uses state phase=0, correctly regenerates Init,
+    // and walks its shrink tree down to n = THRESHOLD.
+    EXPECT_NE(output.find("Init(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 2b should shrink Init's n to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << output;
+    EXPECT_NE(output.find("Mutate"), string::npos)
+        << "Shrunken sequence must still contain Mutate\nactual output:\n" << output;
+    EXPECT_NE(output.find("Verify"), string::npos)
+        << "Shrunken sequence must still contain Verify\nactual output:\n" << output;
+}
+
+/**
+ * Phase 2b: single-element guard — vec.size()<=1 returns empty stream.
+ *
+ * Spec: When the action list contains exactly one element (the last), Phase 2b's
+ * guard (vec.size() <= 1) fires and produces no candidates.  Shrinking delegates
+ * entirely to Phase 3, which walks the sole element's own shrink tree.
+ *
+ * Observable: the shrunken output still reaches the minimal parameter value,
+ * confirming Phase 3 compensates correctly and no crash occurs from Phase 2b.
+ */
+TEST(stateful_function, shrink_phase2b_single_element_guard)
+{
+    constexpr int THRESHOLD = 10;
+
+    auto incrGen = gen::interval(THRESHOLD, 100).map<SimpleAction<int>>([](const int& n) {
+        return SimpleAction<int>(PROP_ACTION_NAME("Add", n),
+            [n](int& obj) { obj += n; PROP_ASSERT(obj < THRESHOLD); });
+    });
+
+    auto prop = statefulProperty<int>(gen::just(0), incrGen);
+    std::ostringstream out;
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(20)
+                  .setActionListSize(1)
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok) << "Always fails: Add(n>=THRESHOLD) makes obj >= THRESHOLD";
+    // Phase 2b guard: vec.size()<=1 → empty stream — no Phase 2b candidates.
+    // Phase 3 takes over and shrinks the sole element's n down to THRESHOLD.
+    EXPECT_NE(out.str().find("Add(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 3 should shrink Add's n to THRESHOLD=" << THRESHOLD
+        << " (Phase 2b guard correct for single-element sequences)"
+        << "\nactual output:\n" << out.str();
+}
