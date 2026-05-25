@@ -1,7 +1,8 @@
 #pragma once
 
 #include "proptest/util/function_traits.hpp"
-#include "proptest/stateful/action.hpp"
+#include "proptest/stateful/action_gen.hpp"
+#include "proptest/stateful/shrink_pipeline.hpp"
 #include "proptest/Generator.hpp"
 #include "proptest/combinator/transform.hpp"
 #include "proptest/combinator/oneof.hpp"
@@ -27,19 +28,7 @@ namespace proptest {
 
 namespace stateful {
 
-// template <typename ObjectType, typename ModelType>
-// using ActionListGen = GenFunction<list<Action<ObjectType, ModelType>>>;
-template <typename ObjectType>
-using SimpleActionGen = Generator<SimpleAction<ObjectType>>;
-
-template <typename ObjectType, typename ModelType>
-using ActionGen = Generator<Action<ObjectType, ModelType>>;
-
-template <typename ObjectType>
-using SimpleActionGenFactory = Function<SimpleActionGen<ObjectType>(ObjectType&)>;
-
-template <typename ObjectType, typename ModelType>
-using ActionGenFactory = Function<ActionGen<ObjectType, ModelType>(ObjectType&, ModelType&)>;
+// SimpleActionGen, ActionGen, SimpleActionGenFactory, ActionGenFactory are in action_gen.hpp.
 
 template <typename ObjectType, typename ModelType>
 struct StatefulArgs {
@@ -305,144 +294,8 @@ private:
     }
 
     // ── Helpers for makeStateDependentArgsGen ────────────────────────────────
-
-    // Step 1: Call the factory per slot with live (obj, model), execute each
-    // action immediately so the next factory call sees the updated state.
-    // Saves a Random bookmark before each generation so shrinking can later
-    // regenerate the same action slot from the same random seed with a
-    // (prefix-replayed) state.  Elements are Shrinkable<pair<Random,Action>>
-    // with the action's full shrink tree transferred via map<PairType>.
-    static Shrinkable<vector<ShrinkableBase>> genActionShrinkables(
-        Random& rand, ObjectType& obj, ModelType& model,
-        const ActionGenFactory<ObjectType, ModelType>& factory, size_t numActions)
-    {
-        using ActionType = Action<ObjectType, ModelType>;
-        using PairType = pair<Random, ActionType>;
-
-        auto actionShrinkables = make_shrinkable<vector<ShrinkableBase>>();
-        auto& vec = actionShrinkables.getMutableRef();
-        vec.reserve(numActions);
-        for (size_t i = 0; i < numActions; ++i) {
-            Random bookmark = rand;  // snapshot before generation
-            auto nextActionGen = factory(obj, model);
-            auto actionShr = nextActionGen(rand);  // advances rand
-            // Map action → pair<bookmark,action>, preserving entire shrink tree:
-            // every shrunken action becomes pair<same-bookmark, shrunken-action>.
-            auto pairShr = actionShr.template map<PairType>(
-                [bookmark](const ActionType& action) -> PairType {
-                    return PairType(bookmark, action);
-                });
-            vec.push_back(ShrinkableBase(pairShr));
-            actionShr.getRef()(obj, model);  // execute to advance state
-        }
-        return actionShrinkables;
-    }
-
-    // Step 2: Wrap a Shrinkable<vector<ShrinkableBase>> (elements: Shrinkable<pair<Random,Action>>)
-    // with four shrink phases and extract the final list<Action>:
-    //   Phase 1  — prefix-length-first (shorter sequences before element simplification)
-    //   Phase 2  — element-wise via stored pair shrink trees (fast; uses the shrink tree baked
-    //              in at generation time, which may be stale for state-dependent factories)
-    //   Phase 2b — state-aware bookmark shrinking: for each non-last position replay the
-    //              prefix, regenerate the action from its bookmark with the correct state,
-    //              and yield shrinks of that fresh generation
-    //   Phase 3  — last-action parameter shrinking via the last element's stored shrink tree
-    static Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
-        Shrinkable<vector<ShrinkableBase>> actionShrinkables,
-        size_t minSize,
-        const ObjectType& initial,
-        const ModelFactoryFunction& modelFactory,
-        const ActionGenFactory<ObjectType, ModelType>& actionGenFactory)
-    {
-        using ActionType = Action<ObjectType, ModelType>;
-        using PairType = pair<Random, ActionType>;
-
-        // Phase 1: prefix-length-first shrinking
-        auto withPhase1 = shrinkVectorLength(actionShrinkables, minSize);
-
-        // Phase 2: element-wise shrinking via stored pair shrink trees
-        auto withPhase2 = shrinkAnyVector(withPhase1, minSize, true, false);
-
-        // Phase 2b: state-aware bookmark-based shrinking for each non-last position.
-        // Replays the prefix to reconstruct the live state at position i, regenerates
-        // the action from its stored bookmark, and yields shrinks of that fresh tree.
-        auto withPhase2b = withPhase2.concat(
-            [initial, modelFactory, actionGenFactory, minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
-                const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
-                // Only meaningful when there is at least one non-last element
-                if (vec.size() <= 1)
-                    return ShrinkableBase::StreamType::empty();
-
-                Stream result = Stream::empty();
-                for (size_t i = 0; i + 1 < vec.size(); i++) {
-                    // Replay prefix [0, i) to obtain the correct state at position i
-                    ObjectType simObj = initial;
-                    ModelType simModel = modelFactory(simObj);
-                    bool replayFailed = false;
-                    for (size_t j = 0; j < i && !replayFailed; j++) {
-                        try {
-                            vec[j].getAny().getRef<PairType>().second(simObj, simModel);
-                        } catch (...) {
-                            replayFailed = true;
-                        }
-                    }
-                    if (replayFailed)
-                        break;  // prefix diverged; skip remaining positions
-
-                    // Regenerate action i from its bookmark using the replayed state
-                    const PairType& pairI = vec[i].getAny().getRef<PairType>();
-                    Random bookmark = pairI.first;    // copy for capture
-                    Random randForGen = pairI.first;  // copy to consume during generation
-                    auto freshActionShr = actionGenFactory(simObj, simModel)(randForGen);
-
-                    // Each shrink of the fresh action becomes a candidate vector
-                    auto candidates = freshActionShr.getShrinks()
-                        .template transform<ShrinkableBase, ShrinkableBase>(
-                            [vec, i, minSize, bookmark](const ShrinkableBase& shrunkAction) -> ShrinkableBase {
-                                // Map shrunkAction → pair, preserving its further shrink tree
-                                Shrinkable<ActionType> shrunkActionShr(shrunkAction);
-                                auto newPairShr = shrunkActionShr.template map<PairType>(
-                                    [bookmark](const ActionType& action) -> PairType {
-                                        return PairType(bookmark, action);
-                                    });
-                                auto newVec = vec;
-                                newVec[i] = ShrinkableBase(newPairShr);
-                                auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
-                                auto newLengthShr = shrinkVectorLength(newVecShr, minSize);
-                                return ShrinkableBase(shrinkAnyVector(newLengthShr, minSize, true, false));
-                            });
-
-                    result = result.concat(candidates);
-                }
-                return result;
-            });
-
-        // Phase 3: last-action parameter shrinking via the last element's stored shrink tree
-        auto withPhase3 = withPhase2b.concat(
-            [minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
-                const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
-                if (vec.empty())
-                    return ShrinkableBase::StreamType::empty();
-                return vec.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
-                    [vec, minSize](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
-                        auto newVec = vec;
-                        newVec.back() = shrunkLast;
-                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
-                        auto newLengthShr = shrinkVectorLength(newVecShr, minSize);
-                        return ShrinkableBase(shrinkAnyVector(newLengthShr, minSize, true, false));
-                    });
-            });
-
-        // Final extraction: pull the action out of each pair<Random,Action> element
-        return withPhase3.template flatMap<list<ActionType>>(
-            +[](const vector<ShrinkableBase>& vec) {
-                auto resultPtr = util::make_unique<list<ActionType>>();
-                for (const auto& shr : vec)
-                    resultPtr->push_back(shr.getAny().getRef<PairType>().second);
-                return Shrinkable<list<ActionType>>(
-                    util::make_any<list<ActionType>>(util::move(resultPtr)));
-            });
-    }
+    // genActionShrinkables and applyStatefulShrinkTree are free function templates
+    // in shrink_pipeline.hpp (shared with the concurrency pipeline).
 
     // Step 3 (outer): for a given initial object, build the full args generator.
     // Captures are passed by value so the resulting Generator<ArgsType> outlives

@@ -2,6 +2,7 @@
 
 #include "proptest/api.hpp"
 #include "proptest/stateful/stateful_function.hpp"
+#include "proptest/stateful/shrink_pipeline.hpp"
 #include "proptest/util/assert.hpp"
 #include "proptest/Random.hpp"
 #include "proptest/Shrinkable.hpp"
@@ -501,107 +502,87 @@ void Concurrency<ObjectType, ModelType>::handleShrink(Random& savedRand)
     auto initialShr = initialGen(rand);
 
     // Re-generate per-action shrinkables from the same RNG state used in invoke().
-    // Simulates execution so factory sees correct live state between slots.
-    // For state-ignorant (plain-gen-wrapped) factories, simulation is a no-op on factory
-    // behaviour but still runs the actions — if they throw, we stop early and return a
-    // shorter (still valid) shrink candidate.
+    // Uses the shared four-phase shrink pipeline (shrink_pipeline.hpp):
+    //   Phase 1  — prefix-length-first
+    //   Phase 2  — element-wise via stored pair shrink trees
+    //   Phase 2b — state-aware bookmark shrinking (replay prefix, regenerate from bookmark)
+    //   Phase 3  — last-action parameter shrinking
+    //
+    // Front thread: identical to the stateful pipeline — per-action bookmarks, replay
+    // from initial object state.
+    //
+    // Rear threads: per-action bookmarks with post-front state as the anchor.  Phase 2b
+    // replays the intra-thread prefix sequentially from post-front state to reconstruct
+    // the approximate state at each position.  Concurrent sibling thread effects are not
+    // modelled; the retry tolerance in shrinkTestCandidate compensates for the approximation.
 
-    // Front: returns {shrinkables, {postFrontObj, postFrontModel}}.
-    auto genFrontActionShrinkables =
-        [&](Random& r) -> pair<vector<Shrinkable<ActionType>>, pair<ObjectType, ModelType>> {
-        ObjectType simObj = initialShr.getRef();
-        ModelType simModel = modelFactory ? modelFactory(simObj) : ModelType();
-        size_t size = r.getRandomSize(actionListMinSize, actionListMaxSize + 1);
-        vector<Shrinkable<ActionType>> result;
-        result.reserve(size);
-        stateful::Context dummyCtx{-99};
-        for (size_t i = 0; i < size; i++) {
-            auto nextActionGen = actionGenFactory(simObj, simModel);
-            auto actionShr = nextActionGen(r);
-            result.push_back(actionShr);
-            try {
-                actionShr.getRef()(simObj, simModel, dummyCtx);
-            } catch (...) {
-                break;  // state invalid beyond this point; stop simulation
-            }
-        }
-        return {result, {simObj, simModel}};
+    ObjectType initialObj = initialShr.getRef();
+    ModelType initialModel = modelFactory ? modelFactory(initialObj) : ModelType();
+
+    // Front: call shared genActionShrinkables; on return, frontObj/frontModel hold
+    // the post-front state.
+    ObjectType frontObj = initialObj;
+    ModelType frontModel = initialModel;
+    const size_t frontSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+    auto frontActionShrinkables = stateful::genActionShrinkables(
+        rand, frontObj, frontModel, actionGenFactory, frontSize);
+
+    // Build model factory wrapper for applyStatefulShrinkTree (takes ObjectType& → ModelType).
+    Function<ModelType(ObjectType&)> frontModelFactory =
+        modelFactory
+            ? Function<ModelType(ObjectType&)>([mf = modelFactory](ObjectType& obj) { return mf(obj); })
+            : Function<ModelType(ObjectType&)>([](ObjectType&) { return ModelType(); });
+
+    auto wrappedFront = stateful::applyStatefulShrinkTree(
+        frontActionShrinkables, actionListMinSize,
+        initialObj, frontModelFactory, actionGenFactory);
+
+    // Rear threads: each simulates independently against a copy of post-front state.
+    // genActionShrinkables advances simObj/simModel per action; capture the post-front
+    // snapshot before each thread's generation.
+    struct RearShrinkables {
+        Shrinkable<ActionList> wrapped;
     };
+    vector<RearShrinkables> rearShrinkablesList;
+    rearShrinkablesList.reserve(numThreads);
 
-    // Rear: each thread simulates independently against a copy of post-front state.
-    auto genRearActionShrinkables =
-        [&](Random& r, ObjectType postFrontObj, ModelType postFrontModel) -> vector<Shrinkable<ActionType>> {
-        size_t size = r.getRandomSize(actionListMinSize, actionListMaxSize + 1);
-        vector<Shrinkable<ActionType>> result;
-        result.reserve(size);
-        stateful::Context dummyCtx{-99};
-        for (size_t i = 0; i < size; i++) {
-            auto nextActionGen = actionGenFactory(postFrontObj, postFrontModel);
-            auto actionShr = nextActionGen(r);
-            result.push_back(actionShr);
-            try {
-                actionShr.getRef()(postFrontObj, postFrontModel, dummyCtx);
-            } catch (...) {
-                break;
-            }
-        }
-        return result;
-    };
+    for (int t = 0; t < numThreads; t++) {
+        ObjectType rearObj = frontObj;     // post-front snapshot
+        ModelType rearModel = frontModel;
+        const size_t rearSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
+        auto rearActionShrinkables = stateful::genActionShrinkables(
+            rand, rearObj, rearModel, actionGenFactory, rearSize);
 
-    auto [frontActionShrs, postFrontState] = genFrontActionShrinkables(rand);
-    vector<vector<Shrinkable<ActionType>>> rearActionShrs;
-    rearActionShrs.reserve(numThreads);
-    for (int i = 0; i < numThreads; i++)
-        rearActionShrs.push_back(
-            genRearActionShrinkables(rand, postFrontState.first, postFrontState.second));
+        // Model factory for Phase 2b: always returns postFrontModel regardless of obj,
+        // since the rear thread's anchor state is post-front, not the initial state.
+        ObjectType postFrontObjCapture = frontObj;
+        ModelType postFrontModelCapture = frontModel;
+        Function<ModelType(ObjectType&)> rearModelFactory =
+            [postFrontModelCapture](ObjectType&) { return postFrontModelCapture; };
 
-    // Rewrap a per-action shrinkable list with:
-    //   Phase 1: prefix-length-first ordering (shorter sequences before element simplification)
-    //   Phase 3: last-action parameter shrinking via each action's own shrink tree
-    auto rewrapWithPrefixFirst = [&](const vector<Shrinkable<ActionType>>& actionShrs) -> Shrinkable<ActionList> {
-        vector<ShrinkableBase> vec;
-        vec.reserve(actionShrs.size());
-        for (const auto& shr : actionShrs)
-            vec.push_back(shr);  // Shrinkable<ActionType> → ShrinkableBase, shrink tree preserved
-        auto vecShr = make_shrinkable<vector<ShrinkableBase>>(vec);
-        auto prefixLengthShr = shrinkVectorLength(vecShr, actionListMinSize);
-        auto prefixThenElementShr = shrinkAnyVector(prefixLengthShr, actionListMinSize, true, false);
-        // Phase 3: at every node, also try shrinking the last action's own parameters.
-        auto withPhase3 = prefixThenElementShr.concat(
-            [minSz = actionListMinSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
-                const auto& v = nodeShr.getRef<vector<ShrinkableBase>>();
-                if (v.empty())
-                    return ShrinkableBase::StreamType::empty();
-                return v.back().getShrinks().template transform<ShrinkableBase, ShrinkableBase>(
-                    [v, minSz](const ShrinkableBase& shrunkLast) -> ShrinkableBase {
-                        auto newVec = v;
-                        newVec.back() = shrunkLast;
-                        auto newVecShr = make_shrinkable<vector<ShrinkableBase>>(newVec);
-                        auto newLengthShr = shrinkVectorLength(newVecShr, minSz);
-                        return ShrinkableBase(shrinkAnyVector(newLengthShr, minSz, true, false));
-                    });
-            });
-        return toListLikeTShrinkable<list, ActionType>(withPhase3);
-    };
+        auto wrappedRear = stateful::applyStatefulShrinkTree(
+            rearActionShrinkables, actionListMinSize,
+            postFrontObjCapture, rearModelFactory, actionGenFactory);
+
+        rearShrinkablesList.push_back({util::move(wrappedRear)});
+    }
 
     // Build shrVec/shrinksVec: initial uses its own shrink tree; front and each
-    // rear are rewrapped with prefix-length-first + Phase 3 ordering.
+    // rear use the full four-phase pipeline.
     vector<ShrinkableBase> shrVec;
     vector<ShrinkableBase::StreamType> shrinksVec;
-    shrVec.reserve(2 + rearActionShrs.size());
-    shrinksVec.reserve(2 + rearActionShrs.size());
+    shrVec.reserve(2 + rearShrinkablesList.size());
+    shrinksVec.reserve(2 + rearShrinkablesList.size());
 
     shrVec.push_back(initialShr);
     shrinksVec.push_back(initialShr.getShrinks());
 
-    auto rewrappedFront = rewrapWithPrefixFirst(frontActionShrs);
-    shrVec.push_back(rewrappedFront);
-    shrinksVec.push_back(rewrappedFront.getShrinks());
+    shrVec.push_back(wrappedFront);
+    shrinksVec.push_back(wrappedFront.getShrinks());
 
-    for (const auto& rearShrs : rearActionShrs) {
-        auto rewrappedRear = rewrapWithPrefixFirst(rearShrs);
-        shrVec.push_back(rewrappedRear);
-        shrinksVec.push_back(rewrappedRear.getShrinks());
+    for (auto& rs : rearShrinkablesList) {
+        shrVec.push_back(rs.wrapped);
+        shrinksVec.push_back(rs.wrapped.getShrinks());
     }
 
     const auto writeArgs = +[](ostream& os, const vector<ShrinkableBase>& args) {

@@ -408,3 +408,120 @@ TEST(concurrency_function, state_dependent_factory_shrink)
         << "Phase 3 should shrink action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
+
+// ── Phase 2b tests ────────────────────────────────────────────────────────────
+
+/**
+ * Phase 2b — front thread, state-dependent factory (serial concurrency).
+ *
+ * setMaxConcurrency(1): rear lists are generated (for rand parity) but not
+ * executed.  Shrinking uses the shared applyStatefulShrinkTree for the front,
+ * which includes Phase 2b.
+ *
+ * Factory:
+ *   obj = 0 → Latch(n) with n ∈ [THRESHOLD, 2·THRESHOLD]: sets obj = n
+ *   obj > 0 → Observe: no-op
+ *
+ * setActionListSize(2) forces front = [Latch(n), Observe].
+ * Failure: postCheck PROP_ASSERT(obj < THRESHOLD).
+ *
+ * Phase 1 cannot shorten below 1 action (Latch alone still fails).
+ * Phase 2b at position 0 (Latch, non-last): replays empty prefix → state 0,
+ * regenerates Latch from bookmark → shrinks n to THRESHOLD.
+ * Phase 3 at position 1 (Observe, last): no shrinks.
+ *
+ * Note: PROP_ASSERT placed in setPostCheck, not in action bodies, to avoid
+ * exceptions during generation-time state advancement in genActionShrinkables.
+ */
+TEST(concurrency_function, shrink_phase2b_non_last_front_element)
+{
+    constexpr int THRESHOLD = 10;
+
+    auto factory = [](int& obj, EmptyModel&) -> ActionGen<int, EmptyModel> {
+        if (obj == 0) {
+            return gen::interval(THRESHOLD, 2 * THRESHOLD)
+                .map<Action<int, EmptyModel>>([](const int& n) {
+                    return Action<int, EmptyModel>(
+                        PROP_ACTION_NAME("Latch", n),
+                        [n](int& v, EmptyModel&) { v = n; });
+                });
+        }
+        return gen::just(Action<int, EmptyModel>("Observe", [](int&, EmptyModel&) {}));
+    };
+
+    std::ostringstream out;
+    auto* oldOut = cout.rdbuf(out.rdbuf());
+    auto* oldErr = cerr.rdbuf(out.rdbuf());
+    bool ok = concurrency<int>(gen::just(0), factory)
+        .setSeed(1)
+        .setNumRuns(5)
+        .setMaxConcurrency(1)
+        .setActionListSize(2)
+        .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
+        .go();
+    cout.rdbuf(oldOut);
+    cerr.rdbuf(oldErr);
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(out.str().find("Latch(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Phase 2b should shrink Latch's n to THRESHOLD=" << THRESHOLD
+        << "\nactual output:\n" << out.str();
+    EXPECT_NE(out.str().find("Observe"), string::npos)
+        << "Shrunken front must still contain Observe\nactual output:\n" << out.str();
+}
+
+/**
+ * Phase 2b — rear thread pipeline smoke test.
+ *
+ * Uses a state-independent factory (same generator regardless of state) so
+ * Phase 2b and Phase 2 yield equivalent candidates.  The goal is to exercise
+ * the full rear-thread applyStatefulShrinkTree code path — including Phase 2b —
+ * without crashing, and to confirm that the shrunken output is still minimal.
+ *
+ * setMaxConcurrency(2): 1 rear thread actually spawned.
+ * setShrinkMaxRetries(5): retry tolerance for scheduler non-determinism.
+ *
+ * Factory (state-independent):
+ *   always → Inc(n) with n ∈ [THRESHOLD, 2·THRESHOLD]: obj += n
+ *
+ * With setActionListSize(1): front=[Inc(n1)], rear=[Inc(n2)].
+ * Both add at least THRESHOLD; postCheck PROP_ASSERT(obj < THRESHOLD) fails.
+ *
+ * Phase 0 tries to remove the rear thread.  If the front alone reproduces
+ * the failure (Inc(n1) makes obj=n1 ≥ THRESHOLD), rear is removed and
+ * Phase 2b/3 on the front shrinks n1 to THRESHOLD.
+ * Either way the shrunken output reaches the minimal value THRESHOLD.
+ */
+TEST(concurrency_function, shrink_phase2b_rear_thread_pipeline)
+{
+    constexpr int THRESHOLD = 5;
+
+    auto factory = [](int&, EmptyModel&) -> ActionGen<int, EmptyModel> {
+        return gen::interval(THRESHOLD, 2 * THRESHOLD)
+            .map<Action<int, EmptyModel>>([](const int& n) {
+                return Action<int, EmptyModel>(
+                    PROP_ACTION_NAME("Inc", n),
+                    [n](int& v, EmptyModel&) { v += n; });
+            });
+    };
+
+    std::ostringstream out;
+    auto* oldOut2 = cout.rdbuf(out.rdbuf());
+    auto* oldErr2 = cerr.rdbuf(out.rdbuf());
+    bool ok = concurrency<int>(gen::just(0), factory)
+        .setSeed(1)
+        .setNumRuns(10)
+        .setMaxConcurrency(2)
+        .setActionListSize(1)
+        .setShrinkMaxRetries(5)
+        .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
+        .go();
+    cout.rdbuf(oldOut2);
+    cerr.rdbuf(oldErr2);
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(out.str().find("Inc(" + to_string(THRESHOLD) + ")"), string::npos)
+        << "Shrink pipeline should reduce Inc's n to THRESHOLD=" << THRESHOLD
+        << " (rear Phase 2b code path exercised without crash)"
+        << "\nactual output:\n" << out.str();
+}
