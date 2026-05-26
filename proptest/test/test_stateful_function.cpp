@@ -502,3 +502,75 @@ TEST(stateful_function, shrink_phase2b_single_element_guard)
         << " (Phase 2b guard correct for single-element sequences)"
         << "\nactual output:\n" << out.str();
 }
+
+/**
+ * Phase 2b effectiveness: demonstrates that Phase 2b finds a strictly better
+ * counterexample than Phase 3 (last-action) alone.
+ *
+ * Factory (state-dependent):
+ *   obj == 0 → Latch(n), n ∈ [10, 200]: sets obj = n
+ *   obj  > 0 → Scale(m), m ∈ [1, 10]:  multiplies obj by m
+ *
+ * Failure (postCheck): obj > FAIL_THRESHOLD (= 500).
+ * List sizes [1, 3]: Phase 1 tries shorter prefixes; only 3 actions reproduce.
+ *
+ * Seed 1 generates: [Latch(99), Scale(1), Scale(6)] → 99×1×6 = 594 > 500.
+ *
+ * Phase 3 alone (last action = Scale(6)):
+ *   Tries m < 6: 99×1×5 = 495 ≤ 500 — cannot reproduce.
+ *   Phase 3 is stuck. Result without Phase 2b: [Latch(99), Scale(1), Scale(6)].
+ *
+ * Phase 2b (non-last position 0 = Latch(99)):
+ *   Replays empty prefix → state = 0; regenerates Latch from bookmark → n = 99.
+ *   Explores shrink tree toward lower bound (10).
+ *   Minimum reachable via binary search that still reproduces: n = 87 (87×6=522>500).
+ *   (Mathematical minimum is 84 = ⌊500/6⌋+1; shrink tree reaches 87 via its path.)
+ *   Phase 2b result: [Latch(87), Scale(1), Scale(6)].
+ *
+ * Effectiveness: Phase 2b reduces Latch from 99 → 87; Phase 3 alone was unable
+ * to improve anything. The range floor (n=10) cannot reproduce (10×6=60≤500),
+ * confirming Phase 2b found a genuine functional minimum above the range floor.
+ */
+TEST(stateful_function, phase2b_effectiveness_beats_phase3_alone)
+{
+    constexpr int FAIL_THRESHOLD = 500;
+
+    auto prop = statefulProperty<int>(
+        gen::just(0),
+        [](int& obj) -> SimpleActionGen<int> {
+            if (obj == 0) {
+                return gen::interval(10, 200)
+                    .map<SimpleAction<int>>([](const int& n) {
+                        return SimpleAction<int>(PROP_ACTION_NAME("Latch", n),
+                            [n](int& v) { v = n; });
+                    });
+            }
+            return gen::interval(1, 10)
+                .map<SimpleAction<int>>([](const int& m) {
+                    return SimpleAction<int>(PROP_ACTION_NAME("Scale", m),
+                        [m](int& v) { v *= m; });
+                });
+        });
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(1)
+                  .setNumRuns(5)
+                  .setActionListMinSize(1)
+                  .setActionListMaxSize(3)
+                  .setPostCheck([](int& v) { PROP_ASSERT(v <= FAIL_THRESHOLD); })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok) << "Should always fail with seed 1 (99×1×6 = 594 > 500)";
+    const auto& output = out.str();
+
+    // Phase 2b shrinks Latch from 99 → 87.
+    // Phase 3 alone is stuck: Scale(6) cannot reduce (99×5 = 495 ≤ 500).
+    EXPECT_NE(output.find("Latch(87)"), string::npos)
+        << "Phase 2b should shrink Latch's n from 99 to 87 (Phase 3 alone is stuck at 99)"
+        << "\noutput:\n" << output;
+    EXPECT_NE(output.find("Scale(1)"), string::npos)
+        << "Scale(1) should remain at minimum m=1\noutput:\n" << output;
+    EXPECT_NE(output.find("Scale(6)"), string::npos)
+        << "Scale(6) should remain (Phase 3 cannot reduce: 99×5=495≤500)\noutput:\n" << output;
+}
