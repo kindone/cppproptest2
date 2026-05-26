@@ -283,14 +283,14 @@ TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
 }
 
 /**
- * Verifies Phase 3 (last-action parameter) shrinking for state-dependent stateful tests.
+ * Verifies LastActionParams shrinking for state-dependent stateful tests.
  *
  * Actions are generated with gen::interval so they carry real shrink trees.
- * The property fails when the accumulated value meets a threshold.  Phase 3
+ * The property fails when the accumulated value meets a threshold.  LastActionParams
  * should walk the last action's shrink tree and find the minimal value that
  * still triggers the failure (the threshold itself).
  */
-TEST(stateful_function, shrink_phase3_last_action_parameters)
+TEST(stateful_function, shrink_last_action_params)
 {
     constexpr int THRESHOLD = 10;
 
@@ -312,42 +312,42 @@ TEST(stateful_function, shrink_phase3_last_action_parameters)
                   .go();
 
     EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
-    // Phase 1 should reduce to a single-action sequence.
-    // Phase 3 should shrink that action's value down to THRESHOLD.
+    // SequencePruning should reduce to a single-action sequence.
+    // LastActionParams should shrink that action's value down to THRESHOLD.
     const auto& output = out.str();
     EXPECT_NE(output.find("Incr(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
+        << "LastActionParams should shrink last action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
 
-// ── Phase 2b (bookmark-based, non-last element shrinking) ────────────────────
+// ── PrefixParams (bookmark-based, non-last element shrinking) ────────────────
 //
-// Feature:     Phase 2b in applyStatefulShrinkTree explores shrink candidates for
+// Feature:     PrefixParams in applyStatefulShrinkTree explores shrink candidates for
 //              every non-last position by: (1) replaying the prefix to reconstruct
 //              the live state, (2) regenerating the action from its stored bookmark
 //              using that correct state, (3) yielding shrinks of the fresh tree.
 //
 // Spec:        ∀ failing state-dependent factory sequences where a non-last element
-//              has a shrinkable parameter, Phase 2b walks that element's fresh
+//              has a shrinkable parameter, PrefixParams walks that element's fresh
 //              state-aware shrink tree and converges to the minimal parameter value.
 //
-// Complement:  Phase 3 covers the LAST element; Phase 2b covers all others.
-//              The single-element guard (vec.size()<=1) prevents Phase 2b from
+// Complement:  LastActionParams covers the LAST element; PrefixParams covers all others.
+//              The single-element guard (vec.size()<=1) prevents PrefixParams from
 //              firing when there is nothing to the right.
 
 /**
- * Phase 2b: 2-action state-dependent sequence, non-last element shrinks.
+ * PrefixParams: 2-action state-dependent sequence, non-last element shrinks.
  *
  * Factory: obj==0 → Latch(n) with n ∈ [THRESHOLD, 2·THRESHOLD], sets obj=n
  *          obj>0  → Check: PROP_ASSERT(obj < THRESHOLD)
  *
- * setActionListSize(2) forces exactly [Latch(n), Check].  Phase 1 cannot reduce
- * (minSize=2).  Phase 2b fires at position 0 (Latch, non-last) and walks its
- * shrink tree; Phase 3 fires at position 1 (Check, last) — Check has no shrinks.
+ * setActionListSize(2) forces exactly [Latch(n), Check].  SequencePruning cannot reduce
+ * (minSize=2).  PrefixParams fires at position 0 (Latch, non-last) and walks its
+ * shrink tree; LastActionParams fires at position 1 (Check, last) — Check has no shrinks.
  *
  * Expected shrunken output: Latch(THRESHOLD), Check.
  */
-TEST(stateful_function, shrink_phase2b_non_last_element_parameter)
+TEST(stateful_function, shrink_prefix_params_non_last)
 {
     constexpr int THRESHOLD = 10;
 
@@ -379,16 +379,16 @@ TEST(stateful_function, shrink_phase2b_non_last_element_parameter)
         << "Always fails: Latch sets v=n>=THRESHOLD, postCheck asserts v<THRESHOLD";
     const auto& output = out.str();
     EXPECT_NE(output.find("Latch(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 2b should shrink Latch's n to THRESHOLD=" << THRESHOLD
+        << "PrefixParams should shrink Latch's n to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
     EXPECT_NE(output.find("Observe"), string::npos)
         << "Shrunken sequence must still contain Observe\nactual output:\n" << output;
 }
 
-struct Phase2bStateMachineModel { int phase = 0; };
+struct ThreeStateModel { int phase = 0; };
 
 /**
- * Phase 2b: 3-action state machine — Phase 2b fires at two non-last positions.
+ * PrefixParams: 3-action state machine — PrefixParams fires at two non-last positions.
  *
  * Factory (model-based):
  *   phase=0 → Init(n) with n ∈ [THRESHOLD, 3·THRESHOLD], sets obj=n, phase→1
@@ -397,17 +397,17 @@ struct Phase2bStateMachineModel { int phase = 0; };
  *
  * setActionListSize(3) forces [Init(n), Mutate, Verify].  The 3-action chain is
  * necessary: removing any one action stops the failure (no Verify without Init+Mutate).
- * Phase 1 cannot reduce below 3.
+ * SequencePruning cannot reduce below 3.
  *
- * Phase 2b fires at position 0 (Init, non-last): replays empty prefix → state
+ * PrefixParams fires at position 0 (Init, non-last): replays empty prefix → model
  * phase=0, correctly regenerates Init and walks its shrink tree.
- * Phase 2b fires at position 1 (Mutate, non-last): replays [Init(n)] → phase=1,
+ * PrefixParams fires at position 1 (Mutate, non-last): replays [Init(n)] → phase=1,
  * regenerates Mutate — Mutate carries no shrink tree, so no candidates.
- * Phase 3 fires at position 2 (Verify, last): Verify has no shrinks.
+ * LastActionParams fires at position 2 (Verify, last): Verify has no shrinks.
  *
- * This verifies state-awareness: if Phase 2b used the wrong state at position 0
- * (e.g. phase=2), it would regenerate Verify instead of Init and find no shrinks,
- * failing to minimise n.
+ * This verifies state-awareness: if PrefixParams used the wrong model state at
+ * position 0 (e.g. phase=2), it would regenerate Verify instead of Init and find
+ * no shrinks, failing to minimise n.
  *
  * Note: PROP_ASSERT is NOT placed inside action bodies — doing so would throw
  * during generation-time state advancement in genActionShrinkables, escaping the
@@ -415,51 +415,51 @@ struct Phase2bStateMachineModel { int phase = 0; };
  *
  * Expected shrunken output: Init(THRESHOLD), Mutate, Verify.
  */
-TEST(stateful_function, shrink_phase2b_three_action_state_machine)
+TEST(stateful_function, shrink_prefix_params_state_machine)
 {
     constexpr int THRESHOLD = 10;
 
-    auto prop = statefulProperty<int, Phase2bStateMachineModel>(
+    auto prop = statefulProperty<int, ThreeStateModel>(
         gen::just(0),
-        [](const int&) -> Phase2bStateMachineModel { return Phase2bStateMachineModel{}; },
-        [](int&, Phase2bStateMachineModel& m) -> ActionGen<int, Phase2bStateMachineModel> {
+        [](const int&) -> ThreeStateModel { return ThreeStateModel{}; },
+        [](int&, ThreeStateModel& m) -> ActionGen<int, ThreeStateModel> {
             if (m.phase == 0) {
                 return gen::interval(THRESHOLD, 3 * THRESHOLD)
-                    .map<Action<int, Phase2bStateMachineModel>>([](const int& n) {
-                        return Action<int, Phase2bStateMachineModel>(
+                    .map<Action<int, ThreeStateModel>>([](const int& n) {
+                        return Action<int, ThreeStateModel>(
                             PROP_ACTION_NAME("Init", n),
-                            [n](int& v, Phase2bStateMachineModel& mdl) {
+                            [n](int& v, ThreeStateModel& mdl) {
                                 v = n;
                                 mdl.phase = 1;
                             });
                     });
             }
             if (m.phase == 1) {
-                return gen::just(Action<int, Phase2bStateMachineModel>(
+                return gen::just(Action<int, ThreeStateModel>(
                     "Mutate",
-                    [](int&, Phase2bStateMachineModel& mdl) { mdl.phase = 2; }));
+                    [](int&, ThreeStateModel& mdl) { mdl.phase = 2; }));
             }
             // phase == 2: no-op marker; failure is detected via setPostCheck below
-            return gen::just(Action<int, Phase2bStateMachineModel>(
+            return gen::just(Action<int, ThreeStateModel>(
                 "Verify",
-                [](int&, Phase2bStateMachineModel&) {}));
+                [](int&, ThreeStateModel&) {}));
         });
 
     std::ostringstream out;
     bool ok = prop.setSeed(1)
                   .setNumRuns(5)
                   .setActionListSize(3)
-                  .setPostCheck([](int& v, Phase2bStateMachineModel&) { PROP_ASSERT(v < THRESHOLD); })
+                  .setPostCheck([](int& v, ThreeStateModel&) { PROP_ASSERT(v < THRESHOLD); })
                   .setOutputStreams(out, out)
                   .go();
 
     EXPECT_FALSE(ok)
         << "Always fails: Init sets v=n>=THRESHOLD, postCheck asserts v<THRESHOLD";
     const auto& output = out.str();
-    // Phase 2b at position 0 uses state phase=0, correctly regenerates Init,
+    // PrefixParams at position 0 uses model state phase=0, correctly regenerates Init,
     // and walks its shrink tree down to n = THRESHOLD.
     EXPECT_NE(output.find("Init(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 2b should shrink Init's n to THRESHOLD=" << THRESHOLD
+        << "PrefixParams should shrink Init's n to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
     EXPECT_NE(output.find("Mutate"), string::npos)
         << "Shrunken sequence must still contain Mutate\nactual output:\n" << output;
@@ -468,16 +468,16 @@ TEST(stateful_function, shrink_phase2b_three_action_state_machine)
 }
 
 /**
- * Phase 2b: single-element guard — vec.size()<=1 returns empty stream.
+ * PrefixParams: single-element guard — vec.size()<=1 returns empty stream.
  *
- * Spec: When the action list contains exactly one element (the last), Phase 2b's
+ * Spec: When the action list contains exactly one element (the last), PrefixParams'
  * guard (vec.size() <= 1) fires and produces no candidates.  Shrinking delegates
- * entirely to Phase 3, which walks the sole element's own shrink tree.
+ * entirely to LastActionParams, which walks the sole element's own shrink tree.
  *
  * Observable: the shrunken output still reaches the minimal parameter value,
- * confirming Phase 3 compensates correctly and no crash occurs from Phase 2b.
+ * confirming LastActionParams compensates correctly and no crash occurs from PrefixParams.
  */
-TEST(stateful_function, shrink_phase2b_single_element_guard)
+TEST(stateful_function, shrink_prefix_params_single_guard)
 {
     constexpr int THRESHOLD = 10;
 
@@ -495,43 +495,43 @@ TEST(stateful_function, shrink_phase2b_single_element_guard)
                   .go();
 
     EXPECT_FALSE(ok) << "Always fails: Add(n>=THRESHOLD) makes obj >= THRESHOLD";
-    // Phase 2b guard: vec.size()<=1 → empty stream — no Phase 2b candidates.
-    // Phase 3 takes over and shrinks the sole element's n down to THRESHOLD.
+    // PrefixParams guard: vec.size()<=1 → empty stream — no PrefixParams candidates.
+    // LastActionParams takes over and shrinks the sole element's n down to THRESHOLD.
     EXPECT_NE(out.str().find("Add(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 3 should shrink Add's n to THRESHOLD=" << THRESHOLD
-        << " (Phase 2b guard correct for single-element sequences)"
+        << "LastActionParams should shrink Add's n to THRESHOLD=" << THRESHOLD
+        << " (PrefixParams guard correct for single-element sequences)"
         << "\nactual output:\n" << out.str();
 }
 
 /**
- * Phase 2b effectiveness: demonstrates that Phase 2b finds a strictly better
- * counterexample than Phase 3 (last-action) alone.
+ * PrefixParams effectiveness: demonstrates that PrefixParams finds a strictly better
+ * counterexample than LastActionParams alone.
  *
  * Factory (state-dependent):
  *   obj == 0 → Latch(n), n ∈ [10, 200]: sets obj = n
  *   obj  > 0 → Scale(m), m ∈ [1, 10]:  multiplies obj by m
  *
  * Failure (postCheck): obj > FAIL_THRESHOLD (= 500).
- * List sizes [1, 3]: Phase 1 tries shorter prefixes; only 3 actions reproduce.
+ * List sizes [1, 3]: SequencePruning tries shorter prefixes; only 3 actions reproduce.
  *
  * Seed 1 generates: [Latch(99), Scale(1), Scale(6)] → 99×1×6 = 594 > 500.
  *
- * Phase 3 alone (last action = Scale(6)):
+ * LastActionParams alone (last action = Scale(6)):
  *   Tries m < 6: 99×1×5 = 495 ≤ 500 — cannot reproduce.
- *   Phase 3 is stuck. Result without Phase 2b: [Latch(99), Scale(1), Scale(6)].
+ *   LastActionParams is stuck. Result without PrefixParams: [Latch(99), Scale(1), Scale(6)].
  *
- * Phase 2b (non-last position 0 = Latch(99)):
+ * PrefixParams (non-last position 0 = Latch(99)):
  *   Replays empty prefix → state = 0; regenerates Latch from bookmark → n = 99.
  *   Explores shrink tree toward lower bound (10).
  *   Minimum reachable via binary search that still reproduces: n = 87 (87×6=522>500).
  *   (Mathematical minimum is 84 = ⌊500/6⌋+1; shrink tree reaches 87 via its path.)
- *   Phase 2b result: [Latch(87), Scale(1), Scale(6)].
+ *   PrefixParams result: [Latch(87), Scale(1), Scale(6)].
  *
- * Effectiveness: Phase 2b reduces Latch from 99 → 87; Phase 3 alone was unable
- * to improve anything. The range floor (n=10) cannot reproduce (10×6=60≤500),
- * confirming Phase 2b found a genuine functional minimum above the range floor.
+ * Effectiveness: PrefixParams reduces Latch from 99 → 87; LastActionParams alone was
+ * unable to improve anything. The range floor (n=10) cannot reproduce (10×6=60≤500),
+ * confirming PrefixParams found a genuine functional minimum above the range floor.
  */
-TEST(stateful_function, phase2b_effectiveness_beats_phase3_alone)
+TEST(stateful_function, prefix_params_effectiveness)
 {
     constexpr int FAIL_THRESHOLD = 500;
 
@@ -564,13 +564,13 @@ TEST(stateful_function, phase2b_effectiveness_beats_phase3_alone)
     EXPECT_FALSE(ok) << "Should always fail with seed 1 (99×1×6 = 594 > 500)";
     const auto& output = out.str();
 
-    // Phase 2b shrinks Latch from 99 → 87.
-    // Phase 3 alone is stuck: Scale(6) cannot reduce (99×5 = 495 ≤ 500).
+    // PrefixParams shrinks Latch from 99 → 87.
+    // LastActionParams alone is stuck: Scale(6) cannot reduce (99×5 = 495 ≤ 500).
     EXPECT_NE(output.find("Latch(87)"), string::npos)
-        << "Phase 2b should shrink Latch's n from 99 to 87 (Phase 3 alone is stuck at 99)"
+        << "PrefixParams should shrink Latch's n from 99 to 87 (LastActionParams alone is stuck at 99)"
         << "\noutput:\n" << output;
     EXPECT_NE(output.find("Scale(1)"), string::npos)
         << "Scale(1) should remain at minimum m=1\noutput:\n" << output;
     EXPECT_NE(output.find("Scale(6)"), string::npos)
-        << "Scale(6) should remain (Phase 3 cannot reduce: 99×5=495≤500)\noutput:\n" << output;
+        << "Scale(6) should remain (LastActionParams cannot reduce: 99×5=495≤500)\noutput:\n" << output;
 }

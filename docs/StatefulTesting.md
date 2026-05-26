@@ -346,17 +346,20 @@ When `setMaxConcurrency(n)` is greater than `1`, these callbacks also run for ac
 
 ### How stateful shrinking works
 
-When a stateful property fails, the framework automatically shrinks the counterexample in three phases, each trying to produce a simpler failing case:
+When a stateful property fails, the framework automatically shrinks the counterexample in four passes, each trying to produce a simpler failing case:
 
-| Phase | What it shrinks | Strategy |
-|-------|----------------|----------|
-| **1 — Sequence length** | Number of actions in the failing sequence | Tries shorter prefixes first, before element-wise simplification |
-| **2 — Initial object** | The generated initial state | Uses the shrink tree of the initial-state generator |
-| **3 — Last action parameters** | Generated arguments of the last action | Walks the shrink tree of that action's `Shrinkable` |
+| Pass | What it shrinks | Strategy |
+|------|----------------|----------|
+| **SequencePruning** | Number of actions in the failing sequence | Tries shorter prefixes first, before element-wise simplification |
+| **InitialStateShrink** | The generated initial state | Uses the shrink tree of the initial-state generator |
+| **PrefixParams** | Parameters of every non-last action | Replays the prefix to reconstruct live state, regenerates each non-last action from its stored bookmark, and walks the fresh state-aware shrink tree |
+| **LastActionParams** | Generated arguments of the last action | Walks the shrink tree of that action's `Shrinkable` |
 
-**Phase 1 details — prefix-length-first ordering.** The shrinker tries removing trailing actions before it tries simplifying individual action arguments. This means a sequence like `[PushBack(42), PopBack, Clear]` will first be reduced to `[PushBack(42)]` (if that still fails) before the `42` is minimized further. Shorter sequences are almost always easier to debug, so length reduction is prioritised.
+**SequencePruning — prefix-length-first ordering.** The shrinker tries removing trailing actions before it tries simplifying individual action arguments. This means a sequence like `[PushBack(42), PopBack, Clear]` will first be reduced to `[PushBack(42)]` (if that still fails) before the `42` is minimized further. Shorter sequences are almost always easier to debug, so length reduction is prioritised.
 
-**Phase 3 — last action parameters.** After phases 1 and 2, the last remaining action in the sequence is further shrunk via its own shrink tree. For example, a `PushBack(10000)` action will walk down to `PushBack(0)` if the failure persists at smaller values. This relies on the action being built via a generator with shrink support (e.g., `gen::int32().map<Action<T>>(...)`)—actions constructed with `just(...)` have no shrink tree for their parameters.
+**PrefixParams — state-aware bookmark shrinking.** For each non-last position `i`, the shrinker replays actions `[0, i)` to reconstruct the exact live state, then regenerates action `i` from its stored random bookmark using that state. This produces a fresh, state-correct shrink tree whose candidates are tested in turn. Because the factory is called with the reconstructed state, state-dependent generators (e.g. ones that change behaviour above a threshold) adapt correctly rather than producing stale candidates.
+
+**LastActionParams — last action parameters.** After SequencePruning and PrefixParams, the last remaining action in the sequence is further shrunk via its own shrink tree. For example, a `PushBack(10000)` action will walk down to `PushBack(0)` if the failure persists at smaller values. This relies on the action being built via a generator with shrink support (e.g., `gen::int32().map<Action<T>>(...)`)—actions constructed with `just(...)` have no shrink tree for their parameters.
 
 **Example outcome.** A failure initially reported as:
 ```

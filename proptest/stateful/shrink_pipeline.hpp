@@ -9,12 +9,13 @@
 
 /**
  * @file shrink_pipeline.hpp
- * @brief Shared four-phase shrink pipeline for stateful and concurrency testing.
+ * @brief Shared shrink pipeline for stateful and concurrency testing.
  *
  * Provides two free function templates consumed by StatefulProperty:
  *
  *   genActionShrinkables   — generate a per-action bookmarked shrinkable vector
- *   applyStatefulShrinkTree — wrap that vector with Phase 1/2/2b/3 and extract list<Action>
+ *   applyStatefulShrinkTree — wrap that vector with SequencePruning / InitialStateShrink /
+ *                             PrefixParams / LastActionParams and extract list<Action>
  */
 
 namespace proptest {
@@ -66,12 +67,12 @@ Shrinkable<vector<ShrinkableBase>> genActionShrinkables(
  * Wrap a Shrinkable<vector<ShrinkableBase>> (elements: Shrinkable<pair<Random,Action>>)
  * with four shrink phases, then extract the final Shrinkable<list<Action>>:
  *
- *   Phase 1  — prefix-length-first (shorter sequences tried before element simplification)
- *   Phase 2  — element-wise via stored pair shrink trees (fast, may be stale after Phase 1)
- *   Phase 2b — state-aware bookmark shrinking: for each non-last position replay the prefix,
- *              call the factory with the reconstructed state, regenerate from the bookmark,
- *              and yield shrinks of that fresh generation
- *   Phase 3  — last-action parameter shrinking via the last element's stored shrink tree
+ *   SequencePruning   — prefix-length-first (shorter sequences tried before element simplification)
+ *   InitialStateShrink — element-wise via stored pair shrink trees (fast, may be stale after SequencePruning)
+ *   PrefixParams      — state-aware bookmark shrinking: for each non-last position replay the prefix,
+ *                       call the factory with the reconstructed state, regenerate from the bookmark,
+ *                       and yield shrinks of that fresh generation
+ *   LastActionParams  — last-action parameter shrinking via the last element's stored shrink tree
  *
  * @param initial       Initial object state (used to replay prefix in Phase 2b).
  * @param modelFactory  Factory returning a fresh ModelType from an ObjectType.
@@ -90,13 +91,13 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
     using ActionType = Action<ObjectType, ModelType>;
     using PairType = pair<Random, ActionType>;
 
-    // Phase 1: prefix-length-first shrinking
+    // SequencePruning: prefix-length-first shrinking
     auto withPhase1 = shrinkVectorLength(actionShrinkables, minSize);
 
-    // Phase 2: element-wise shrinking via stored pair shrink trees
+    // InitialStateShrink: element-wise shrinking via stored pair shrink trees
     auto withPhase2 = shrinkAnyVector(withPhase1, minSize, true, false);
 
-    // Phase 2b: state-aware bookmark-based shrinking for each non-last position.
+    // PrefixParams: state-aware bookmark-based shrinking for each non-last position.
     // Replays prefix [0,i) to reconstruct live state at position i, regenerates
     // the action from its stored bookmark, yields shrinks of that fresh tree.
     auto withPhase2b = withPhase2.concat(
@@ -145,7 +146,7 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
             return result;
         });
 
-    // Phase 3: last-action parameter shrinking via the last element's stored shrink tree
+    // LastActionParams: parameter shrinking via the last element's stored shrink tree
     auto withPhase3 = withPhase2b.concat(
         [minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
             const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();

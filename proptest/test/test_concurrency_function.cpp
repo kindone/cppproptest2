@@ -257,14 +257,14 @@ TEST(concurrency_function, shrink_prefix_length_first_for_action_lists)
 }
 
 /**
- * Verifies Phase 3 (last-action parameter) shrinking for concurrency tests.
+ * Verifies LastActionParams shrinking for concurrency tests.
  *
  * Actions are generated with gen::interval so they carry real shrink trees.
- * With 1 rear thread (serial-equivalent), Phase 1 should reduce to a single
- * action, then Phase 3 should walk the last action's shrink tree down to
+ * With 1 rear thread (serial-equivalent), SequencePruning should reduce to a single
+ * action, then LastActionParams should walk the last action's shrink tree down to
  * the minimal value that still triggers the failure (the threshold itself).
  */
-TEST(concurrency_function, shrink_phase3_last_action_parameters)
+TEST(concurrency_function, shrink_last_action_params)
 {
     constexpr int THRESHOLD = 10;
 
@@ -289,10 +289,10 @@ TEST(concurrency_function, shrink_phase3_last_action_parameters)
     cout.rdbuf(oldOut);
 
     EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
-    // Phase 1 reduces to a single action; Phase 3 shrinks its value to THRESHOLD.
+    // SequencePruning reduces to a single action; LastActionParams shrinks its value to THRESHOLD.
     const auto& output = out.str();
     EXPECT_NE(output.find("Incr(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 3 should shrink last action value down to THRESHOLD=" << THRESHOLD
+        << "LastActionParams should shrink last action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
 
@@ -406,18 +406,18 @@ TEST(concurrency_function, state_dependent_factory_shrink)
     EXPECT_FALSE(ok) << "Property should fail: every action adds >= THRESHOLD";
     const auto& output = out.str();
     EXPECT_NE(output.find("Add(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 3 should shrink action value down to THRESHOLD=" << THRESHOLD
+        << "LastActionParams should shrink action value down to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << output;
 }
 
-// ── Phase 2b tests ────────────────────────────────────────────────────────────
+// ── PrefixParams tests ────────────────────────────────────────────────────────
 
 /**
- * Phase 2b — front thread, state-dependent factory (serial concurrency).
+ * PrefixParams — front thread, state-dependent factory (serial concurrency).
  *
  * setMaxConcurrency(1): rear lists are generated (for rand parity) but not
  * executed.  Shrinking uses the shared applyStatefulShrinkTree for the front,
- * which includes Phase 2b.
+ * which includes PrefixParams.
  *
  * Factory:
  *   obj = 0 → Latch(n) with n ∈ [THRESHOLD, 2·THRESHOLD]: sets obj = n
@@ -426,15 +426,15 @@ TEST(concurrency_function, state_dependent_factory_shrink)
  * setActionListSize(2) forces front = [Latch(n), Observe].
  * Failure: postCheck PROP_ASSERT(obj < THRESHOLD).
  *
- * Phase 1 cannot shorten below 1 action (Latch alone still fails).
- * Phase 2b at position 0 (Latch, non-last): replays empty prefix → state 0,
+ * SequencePruning cannot shorten below 1 action (Latch alone still fails).
+ * PrefixParams at position 0 (Latch, non-last): replays empty prefix → state 0,
  * regenerates Latch from bookmark → shrinks n to THRESHOLD.
- * Phase 3 at position 1 (Observe, last): no shrinks.
+ * LastActionParams at position 1 (Observe, last): no shrinks.
  *
  * Note: PROP_ASSERT placed in setPostCheck, not in action bodies, to avoid
  * exceptions during generation-time state advancement in genActionShrinkables.
  */
-TEST(concurrency_function, shrink_phase2b_non_last_front_element)
+TEST(concurrency_function, shrink_prefix_params_front_thread)
 {
     constexpr int THRESHOLD = 10;
 
@@ -465,19 +465,19 @@ TEST(concurrency_function, shrink_phase2b_non_last_front_element)
 
     EXPECT_FALSE(ok);
     EXPECT_NE(out.str().find("Latch(" + to_string(THRESHOLD) + ")"), string::npos)
-        << "Phase 2b should shrink Latch's n to THRESHOLD=" << THRESHOLD
+        << "PrefixParams should shrink Latch's n to THRESHOLD=" << THRESHOLD
         << "\nactual output:\n" << out.str();
     EXPECT_NE(out.str().find("Observe"), string::npos)
         << "Shrunken front must still contain Observe\nactual output:\n" << out.str();
 }
 
 /**
- * Phase 2b — rear thread pipeline smoke test.
+ * PrefixParams — rear thread pipeline smoke test.
  *
  * Uses a state-independent factory (same generator regardless of state) so
- * Phase 2b and Phase 2 yield equivalent candidates.  The goal is to exercise
- * the full rear-thread applyStatefulShrinkTree code path — including Phase 2b —
- * without crashing, and to confirm that the shrunken output is still minimal.
+ * PrefixParams and InitialStateShrink yield equivalent candidates.  The goal is
+ * to exercise the full rear-thread applyStatefulShrinkTree code path — including
+ * PrefixParams — without crashing, and to confirm that the shrunken output is minimal.
  *
  * setMaxConcurrency(2): two rear workers are spawned.
  * setShrinkMaxRetries(5): retry tolerance for scheduler non-determinism.
@@ -488,12 +488,12 @@ TEST(concurrency_function, shrink_phase2b_non_last_front_element)
  * With setActionListSize(1): front=[Inc(n1)], rear=[Inc(n2)].
  * Both add at least THRESHOLD; postCheck PROP_ASSERT(obj < THRESHOLD) fails.
  *
- * Phase 0 tries to remove the rear thread.  If the front alone reproduces
+ * ThreadReduction tries to remove the rear thread.  If the front alone reproduces
  * the failure (Inc(n1) makes obj=n1 ≥ THRESHOLD), rear is removed and
- * Phase 2b/3 on the front shrinks n1 to THRESHOLD.
+ * PrefixParams/LastActionParams on the front shrinks n1 to THRESHOLD.
  * Either way the shrunken output reaches the minimal value THRESHOLD.
  */
-TEST(concurrency_function, shrink_phase2b_rear_thread_pipeline)
+TEST(concurrency_function, shrink_prefix_params_rear_thread)
 {
     constexpr int THRESHOLD = 5;
 
@@ -523,6 +523,6 @@ TEST(concurrency_function, shrink_phase2b_rear_thread_pipeline)
     EXPECT_FALSE(ok);
     EXPECT_NE(out.str().find("Inc(" + to_string(THRESHOLD) + ")"), string::npos)
         << "Shrink pipeline should reduce Inc's n to THRESHOLD=" << THRESHOLD
-        << " (rear Phase 2b code path exercised without crash)"
+        << " (rear PrefixParams code path exercised without crash)"
         << "\nactual output:\n" << out.str();
 }
