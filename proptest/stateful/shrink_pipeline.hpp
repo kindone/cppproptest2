@@ -11,8 +11,7 @@
  * @file shrink_pipeline.hpp
  * @brief Shared four-phase shrink pipeline for stateful and concurrency testing.
  *
- * Provides two free function templates consumed by both StatefulProperty and
- * Concurrency::handleShrink:
+ * Provides two free function templates consumed by StatefulProperty:
  *
  *   genActionShrinkables   — generate a per-action bookmarked shrinkable vector
  *   applyStatefulShrinkTree — wrap that vector with Phase 1/2/2b/3 and extract list<Action>
@@ -85,7 +84,7 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
     Shrinkable<vector<ShrinkableBase>> actionShrinkables,
     size_t minSize,
     const ObjectType& initial,
-    const Function<ModelType(ObjectType&)>& modelFactory,
+    const Function<ModelType(const ObjectType&)>& modelFactory,
     const ActionGenFactory<ObjectType, ModelType>& actionGenFactory)
 {
     using ActionType = Action<ObjectType, ModelType>;

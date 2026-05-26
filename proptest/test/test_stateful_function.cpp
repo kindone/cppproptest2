@@ -95,7 +95,7 @@ TEST(stateful_function, basic_model)
 
     auto actionGen = gen::oneOf<Action<T, Model>>(pushBackGen, popBackAction, popBackAction2, clearAction);
     auto prop = statefulProperty<T, Model>(
-        Arbi<T>(), [](T& obj) -> Model { return VectorModel2(obj.size()); }, actionGen);
+        Arbi<T>(), [](const T& obj) -> Model { return VectorModel2(obj.size()); }, actionGen);
     prop.setOnStartup([&startupCount]() { ++startupCount; });
     prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
     prop.setPostCheck([&postCheckCount](T&, Model&) { ++postCheckCount; });
@@ -191,7 +191,7 @@ TEST(stateful_function, state_dependent_model_action_factory)
     using Model = VectorModel2;
 
     auto prop = statefulProperty<T, Model>(
-        gen::just(T{}), [](T& obj) -> Model { return VectorModel2(obj.size()); },
+        gen::just(T{}), [](const T& obj) -> Model { return VectorModel2(obj.size()); },
         [](T&, Model& model) -> ActionGen<T, Model> {
             if (model.size == 0) {
                 return gen::just(Action<T, Model>("Push", [](T& vec, Model& mdl) {
@@ -229,7 +229,7 @@ TEST(stateful_function, state_dependent_shrink_keeps_generated_prefix)
 
     auto prop = statefulProperty<int, StatefulShrinkStepModel>(
         gen::just(0),
-        [](int&) -> StatefulShrinkStepModel { return StatefulShrinkStepModel{}; },
+        [](const int&) -> StatefulShrinkStepModel { return StatefulShrinkStepModel{}; },
         [](int&, StatefulShrinkStepModel& model) -> ActionGen<int, StatefulShrinkStepModel> {
             if (model.step == 0) {
                 return gen::just(Action<int, StatefulShrinkStepModel>(
@@ -421,7 +421,7 @@ TEST(stateful_function, shrink_phase2b_three_action_state_machine)
 
     auto prop = statefulProperty<int, Phase2bStateMachineModel>(
         gen::just(0),
-        [](int&) -> Phase2bStateMachineModel { return Phase2bStateMachineModel{}; },
+        [](const int&) -> Phase2bStateMachineModel { return Phase2bStateMachineModel{}; },
         [](int&, Phase2bStateMachineModel& m) -> ActionGen<int, Phase2bStateMachineModel> {
             if (m.phase == 0) {
                 return gen::interval(THRESHOLD, 3 * THRESHOLD)

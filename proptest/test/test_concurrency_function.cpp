@@ -1,5 +1,4 @@
 #include "proptest/statefultest.hpp"
-#include "proptest/stateful/concurrency_function.hpp"
 #include "proptest/test/gtest.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/generator/vector.hpp"
@@ -8,7 +7,7 @@
 #include <sstream>
 
 using namespace proptest;
-using namespace proptest::concurrent;
+using namespace proptest::stateful;
 
 using std::mutex;
 using std::lock_guard;
@@ -49,7 +48,8 @@ TEST(concurrency_function, WithoutModel)
 
     auto actionGen = gen::oneOf<SimpleAction<vector<int>>>(pushBackGen, popBackGen, clearGen);
 
-    auto prop = concurrency<vector<int>>(gen::vector<int>(), actionGen);
+    auto prop = statefulProperty<vector<int>>(gen::vector<int>(), actionGen);
+    prop.setMaxConcurrency(2);
     prop.go();
 }
 
@@ -81,7 +81,7 @@ TEST(concurrency_function, WithModel)
 
     auto actionGen = gen::oneOf<Action<vector<int>, Model>>(pushBackGen, popBackGen, clearGen);
 
-    auto prop = concurrency<vector<int>, Model>(
+    auto prop = statefulProperty<vector<int>, Model>(
         gen::vector<int>(), [](const vector<int>&) { return Model(); }, actionGen);
     prop.setMaxConcurrency(2);
     prop.go();
@@ -108,15 +108,16 @@ TEST(concurrency_function, bitmap)
     });
 
     auto actionGen = gen::oneOf<SimpleAction<Bitmap>>(acquireGen/*, unacquireGen*/);
-    auto prop = concurrency<Bitmap>(
+    auto prop = statefulProperty<Bitmap>(
         gen::just<Bitmap>(Bitmap()), actionGen);
+    prop.setMaxConcurrency(2);
     prop.go();
 }
 
 TEST(concurrency_function, shrink_with_retry_timeout_smoke)
 {
     auto noopGen = gen::just(SimpleAction<int>([](int&) {}));
-    auto prop = concurrency<int>(gen::interval<int>(0, 100), noopGen);
+    auto prop = statefulProperty<int>(gen::interval<int>(0, 100), noopGen);
     bool ok = prop.setSeed(1)
                   .setNumRuns(1)
                   .setMaxConcurrency(2)
@@ -146,7 +147,7 @@ TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
     actionListGen(expectedRand);
     ASSERT_NE(firstInitial, secondInitial);
 
-    auto prop = concurrency<int>(initialGen, noopGen);
+    auto prop = statefulProperty<int>(initialGen, noopGen);
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
     bool ok = prop.setSeed(seed)
@@ -169,7 +170,7 @@ TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
 TEST(concurrency_function, action_list_size_configuration)
 {
     auto incAction = gen::just(SimpleAction<int>([](int& v) { ++v; }));
-    auto prop = concurrency<int>(gen::just(0), incAction);
+    auto prop = statefulProperty<int>(gen::just(0), incAction);
 
     bool ok = prop.setSeed(0)
                   .setNumRuns(20)
@@ -199,7 +200,7 @@ TEST(concurrency_function, shrink_thread_count_reduction_and_serial_fallback)
 
     std::ostringstream log;
 
-    auto prop = concurrency<int>(gen::just(0), incGen);
+    auto prop = statefulProperty<int>(gen::just(0), incGen);
     prop.setMaxConcurrency(2)
         .setNumRuns(1)
         .setActionListMinSize(1)
@@ -209,7 +210,7 @@ TEST(concurrency_function, shrink_thread_count_reduction_and_serial_fallback)
 
     // We just want to confirm the property runs without crashing when
     // thread-count changes during shrinking.  Run a passing property with 1 thread.
-    auto propSingle = concurrency<int>(gen::just(0), incGen);
+    auto propSingle = statefulProperty<int>(gen::just(0), incGen);
     bool ok = propSingle.setSeed(42)
                         .setNumRuns(10)
                         .setMaxConcurrency(1)
@@ -244,7 +245,7 @@ TEST(concurrency_function, shrink_prefix_length_first_for_action_lists)
 
     // 1 rear thread: equivalent to stateful.  Should fail quickly since every
     // action adds at least THRESHOLD.
-    auto prop = concurrency<int>(gen::just(0), incrGen);
+    auto prop = statefulProperty<int>(gen::just(0), incrGen);
     bool failed = !prop.setSeed(1)
                        .setNumRuns(50)
                        .setMaxConcurrency(1)
@@ -276,7 +277,7 @@ TEST(concurrency_function, shrink_phase3_last_action_parameters)
         });
     });
 
-    auto prop = concurrency<int>(gen::just(0), incrGen);
+    auto prop = statefulProperty<int>(gen::just(0), incrGen);
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
     bool ok = prop.setSeed(1)
@@ -324,7 +325,7 @@ TEST(concurrency_function, state_dependent_action_factory_without_model)
         return gen::oneOf<Action<T, EmptyModel>>(pushAction, popAction);
     };
 
-    auto prop = concurrency<T>(gen::just(T{}), factory);
+    auto prop = statefulProperty<T>(gen::just(T{}), factory);
     bool ok = prop.setSeed(0).setNumRuns(100).setMaxConcurrency(2).go();
     EXPECT_TRUE(ok);
 }
@@ -360,7 +361,7 @@ TEST(concurrency_function, state_dependent_action_factory_with_model)
         return gen::oneOf<Action<T, Model>>(pushAction, popAction);
     };
 
-    auto prop = concurrency<T, Model>(gen::just(T{}), modelFactory, factory);
+    auto prop = statefulProperty<T, Model>(gen::just(T{}), modelFactory, factory);
     bool ok = prop.setSeed(0)
                   .setNumRuns(50)
                   .setMaxConcurrency(1)
@@ -391,7 +392,7 @@ TEST(concurrency_function, state_dependent_factory_shrink)
         });
     };
 
-    auto prop = concurrency<T>(gen::just(0), factory);
+    auto prop = statefulProperty<T>(gen::just(0), factory);
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
     bool ok = prop.setSeed(1)
@@ -452,7 +453,7 @@ TEST(concurrency_function, shrink_phase2b_non_last_front_element)
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
     auto* oldErr = cerr.rdbuf(out.rdbuf());
-    bool ok = concurrency<int>(gen::just(0), factory)
+    bool ok = statefulProperty<int>(gen::just(0), factory)
         .setSeed(1)
         .setNumRuns(5)
         .setMaxConcurrency(1)
@@ -478,7 +479,7 @@ TEST(concurrency_function, shrink_phase2b_non_last_front_element)
  * the full rear-thread applyStatefulShrinkTree code path — including Phase 2b —
  * without crashing, and to confirm that the shrunken output is still minimal.
  *
- * setMaxConcurrency(2): 1 rear thread actually spawned.
+ * setMaxConcurrency(2): two rear workers are spawned.
  * setShrinkMaxRetries(5): retry tolerance for scheduler non-determinism.
  *
  * Factory (state-independent):
@@ -508,7 +509,7 @@ TEST(concurrency_function, shrink_phase2b_rear_thread_pipeline)
     std::ostringstream out;
     auto* oldOut2 = cout.rdbuf(out.rdbuf());
     auto* oldErr2 = cerr.rdbuf(out.rdbuf());
-    bool ok = concurrency<int>(gen::just(0), factory)
+    bool ok = statefulProperty<int>(gen::just(0), factory)
         .setSeed(1)
         .setNumRuns(10)
         .setMaxConcurrency(2)

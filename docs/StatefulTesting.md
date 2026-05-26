@@ -199,12 +199,12 @@ You can use `oneOf<Action<ObjectType, ModelType>>` to get the combined action ge
 auto actionGen = oneOf<Action<MyVector, Counter>>(pushBackGen, popBackGen, clearGen);
 ```
 
-Finally, we can define a stateful property by calling `statefulProperty<ObjectType,ModelType>()`. This method requires an initial state generator, and the `actionGen` we've just obtained. Compared to `SimpleAction` case, it additionally requires a model factory in the form of `ObjectType& -> ModelType`. This factory is to induce initial model from initial object. Calling `statefulProperty::go()` will execute the stateful property test.
+Finally, we can define a stateful property by calling `statefulProperty<ObjectType,ModelType>()`. This method requires an initial state generator, and the `actionGen` we've just obtained. Compared to `SimpleAction` case, it additionally requires a model factory in the form of `const ObjectType& -> ModelType`. This factory induces the initial model from the initial object and must not mutate it. Calling `statefulProperty::go()` will execute the stateful property test.
 
 ```cpp
 auto prop = statefulProperty<T>(
     /* initial state generator */ Arbi<MyVector>(),
-    /* model factory */ [](MyVector& vec) { return Counter(vec.size()); },
+    /* model factory */ [](const MyVector& vec) { return Counter(vec.size()); },
     /* action generator */ actionGen);
 prop.go();
 ```
@@ -258,7 +258,7 @@ TEST(MyVectorTest, Stateful)
     //    auto actionGen = oneOf<Action<MyVector, Counter>>(pushBackGen, popBackGen, weightedGen<Action<MyVector, Counter>>(clearGen, 0.1));
     auto prop = statefulProperty<MyVector, Counter>(
         /* initial state generator */ Arbi<MyVector>(),
-        /* initial model factory */ [](MyVector& vec) { return Counter(vec.size()); },
+        /* initial model factory */ [](const MyVector& vec) { return Counter(vec.size()); },
         /* action generator */ actionGen);
     // Tests massive cases with randomly generated action sequences
     prop.go();
@@ -270,7 +270,7 @@ Model-based properties support the same pattern with an `Action` generator facto
 ```cpp
 auto prop = statefulProperty<MyVector, Counter>(
     /* initial state generator */ Arbi<MyVector>(),
-    /* initial model factory */ [](MyVector& vec) { return Counter(vec.size()); },
+    /* initial model factory */ [](const MyVector& vec) { return Counter(vec.size()); },
     /* action generator factory */
     [](MyVector&, Counter& counter) -> ActionGen<MyVector, Counter> {
         if (counter.num == 0) {
@@ -342,6 +342,8 @@ prop.go();
 
 Use `setOnActionEnd` for invariant checks; use `setOnActionStart` for pre-condition checks or debugging. Both receive `(ObjectType&, ModelType&)` (use `EmptyModel&` when using `SimpleAction`).
 
+When `setMaxConcurrency(n)` is greater than `1`, these callbacks also run for actions executed by rear worker threads. In that mode the callbacks must be thread-safe.
+
 ### How stateful shrinking works
 
 When a stateful property fails, the framework automatically shrinks the counterexample in three phases, each trying to produce a simpler failing case:
@@ -373,6 +375,7 @@ You can alter some of test characteristics of stateful test runs.
 * Random seed
 * Number of runs
 * Maximum time duration of test runs
+* Maximum concurrency (`setMaxConcurrency(n)`; `0` is sequential, values greater than `1` enable rear worker threads)
 * Shrink retry config (for flaky tests; see [Shrinking](Shrinking.md#shrinking-with-flaky-tests-retry))
 
 Configuration is optional: any value you set is applied, while defaults are used for others (e.g., random seed from `PROPTEST_SEED` environment variable or current timestamp).
