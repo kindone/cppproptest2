@@ -1,6 +1,6 @@
 #pragma once
 
-#include <memory>
+#include "proptest/std/memory.hpp"
 #include "proptest/api.hpp"
 #include "proptest/typefwd.hpp"
 #include "proptest/util/any.hpp"

@@ -21,7 +21,7 @@
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/concepts.hpp"
 #include <atomic>
-#include <exception>
+#include "proptest/std/exception.hpp"
 #include <mutex>
 #include <thread>
 

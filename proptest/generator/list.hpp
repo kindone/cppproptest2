@@ -6,7 +6,7 @@
 #include "proptest/shrinker/listlike.hpp"
 #include "proptest/std/list.hpp"
 #include "proptest/std/vector.hpp"
-#include <concepts>
+#include "proptest/std/concepts.hpp"
 
 /**
  * @file list.hpp
