@@ -35,6 +35,15 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+# Global -Werror applies to FetchContent deps; Clang 21+ warns on gtest's char8_t printers.
+if(NOT MSVC)
+  foreach(_gtest_dep gtest gtest_main gmock gmock_main)
+    if(TARGET ${_gtest_dep})
+      target_compile_options(${_gtest_dep} PRIVATE -Wno-character-conversion)
+    endif()
+  endforeach()
+endif()
+
 #include_directories(. googletest/googletest/include googletest/googlemock/include/)
 include_directories(.)
 
