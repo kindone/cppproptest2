@@ -21,8 +21,11 @@
         <link rel="next" href="../ConcurrencyTesting/">
       
       
+        
+      
+      
       <link rel="icon" href="../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
@@ -30,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -52,11 +55,10 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
-    
     
     
   </head>
@@ -69,7 +71,6 @@
     
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -96,12 +97,12 @@
     <a href=".." title="cppproptest" class="md-header__button md-logo" aria-label="cppproptest" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -124,26 +125,29 @@
     
     
     
-      <label class="md-header__button md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
@@ -151,7 +155,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -162,13 +166,14 @@
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
         <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     kindone/cppproptest2
@@ -204,7 +209,7 @@
     <a href=".." title="cppproptest" class="md-nav__button md-logo" aria-label="cppproptest" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     cppproptest
@@ -214,7 +219,7 @@
       <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     kindone/cppproptest2
@@ -229,6 +234,7 @@
   
   
     
+  
   
   
     
@@ -262,18 +268,23 @@
       
         
         
-        
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
         
-          
           
           <div class="md-nav__link md-nav__container">
             <a href=".." class="md-nav__link ">
               
   
+  
   <span class="md-ellipsis">
+    
+  
     cppproptest
+  
+
+    
   </span>
+  
   
 
             </a>
@@ -288,7 +299,11 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
-            cppproptest
+            
+  
+    cppproptest
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -299,13 +314,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../GettingStarted/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Getting Started
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -316,6 +339,7 @@
             
               
                 
+  
   
   
   
@@ -323,9 +347,16 @@
       <a href="../Walkthrough/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Step-by-Step Walkthrough
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -336,6 +367,7 @@
             
               
                 
+  
   
   
   
@@ -343,9 +375,16 @@
       <a href="../PropertyAPI/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Property API Reference
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -356,6 +395,7 @@
             
               
                 
+  
   
   
   
@@ -376,7 +416,6 @@
       
         
         
-        
           
         
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_5" >
@@ -385,9 +424,16 @@
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Generating Inputs
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -396,7 +442,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
-            Generating Inputs
+            
+  
+    Generating Inputs
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -405,13 +455,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../Generators/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Generators
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -422,6 +480,7 @@
             
               
                 
+  
   
   
   
@@ -429,9 +488,16 @@
       <a href="../Combinators/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Generator Combinators
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -445,13 +511,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../GeneratorExamples/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Real World Examples
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -473,13 +547,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../Shrinking/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Shrinking - Simplifying Failed Inputs
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -493,13 +575,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../Printing/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Displaying Custom Types
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -513,6 +603,7 @@
   
   
     
+  
   
   
     
@@ -532,16 +623,22 @@
       
         
         
-        
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_8" checked>
         
           
           <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Stateful & Concurrency Testing
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -550,7 +647,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_8">
             <span class="md-nav__icon md-icon"></span>
-            Stateful & Concurrency Testing
+            
+  
+    Stateful & Concurrency Testing
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -559,6 +660,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -572,9 +674,16 @@
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
+  
   <span class="md-ellipsis">
+    
+  
     Stateful Testing
+  
+
+    
   </span>
+  
   
 
           <span class="md-nav__icon md-icon"></span>
@@ -583,9 +692,16 @@
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Stateful Testing
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -607,7 +723,11 @@
       
         <li class="md-nav__item">
   <a href="#using-action-functions" class="md-nav__link">
-    Using Action Functions
+    <span class="md-ellipsis">
+      
+        Using Action Functions
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Using Action Functions">
@@ -615,7 +735,11 @@
         
           <li class="md-nav__item">
   <a href="#option-1-simpleaction-working-without-a-model" class="md-nav__link">
-    Option 1: SimpleAction - Working without a model
+    <span class="md-ellipsis">
+      
+        Option 1: SimpleAction - Working without a model
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Option 1: SimpleAction - Working without a model">
@@ -623,7 +747,11 @@
         
           <li class="md-nav__item">
   <a href="#putting-it-together" class="md-nav__link">
-    Putting it together:
+    <span class="md-ellipsis">
+      
+        Putting it together:
+      
+    </span>
   </a>
   
 </li>
@@ -634,8 +762,23 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#state-dependent-action-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State-dependent action generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-2-action-working-with-a-model" class="md-nav__link">
-    Option 2: Action - Working with a model
+    <span class="md-ellipsis">
+      
+        Option 2: Action - Working with a model
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Option 2: Action - Working with a model">
@@ -643,7 +786,11 @@
         
           <li class="md-nav__item">
   <a href="#putting-it-together_1" class="md-nav__link">
-    Putting it together:
+    <span class="md-ellipsis">
+      
+        Putting it together:
+      
+    </span>
   </a>
   
 </li>
@@ -655,21 +802,44 @@
         
           <li class="md-nav__item">
   <a href="#debugging-stateful-test-failures" class="md-nav__link">
-    Debugging stateful test failures
+    <span class="md-ellipsis">
+      
+        Debugging stateful test failures
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#action-callbacks-setonactionstart-setonactionend" class="md-nav__link">
-    Action callbacks: setOnActionStart / setOnActionEnd
+    <span class="md-ellipsis">
+      
+        Action callbacks: setOnActionStart / setOnActionEnd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-stateful-shrinking-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How stateful shrinking works
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#configuring-stateful-test-runs" class="md-nav__link">
-    Configuring stateful test runs
+    <span class="md-ellipsis">
+      
+        Configuring stateful test runs
+      
+    </span>
   </a>
   
 </li>
@@ -681,7 +851,11 @@
       
         <li class="md-nav__item">
   <a href="#alternative-style-using-action-classes" class="md-nav__link">
-    Alternative Style: Using Action Classes
+    <span class="md-ellipsis">
+      
+        Alternative Style: Using Action Classes
+      
+    </span>
   </a>
   
 </li>
@@ -700,13 +874,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../ConcurrencyTesting/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Concurrency Testing
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -720,13 +902,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../AdvancedStatefulTesting/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Advanced Scenarios
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -748,6 +938,7 @@
   
   
   
+  
     
     
       
@@ -761,7 +952,6 @@
       
         
         
-        
           
         
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
@@ -770,9 +960,16 @@
           <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Tips & Best Practices
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -781,7 +978,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_9">
             <span class="md-nav__icon md-icon"></span>
-            Tips & Best Practices
+            
+  
+    Tips & Best Practices
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -790,13 +991,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../TestStrategies/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Test Strategies
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -848,7 +1057,11 @@
       
         <li class="md-nav__item">
   <a href="#using-action-functions" class="md-nav__link">
-    Using Action Functions
+    <span class="md-ellipsis">
+      
+        Using Action Functions
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Using Action Functions">
@@ -856,7 +1069,11 @@
         
           <li class="md-nav__item">
   <a href="#option-1-simpleaction-working-without-a-model" class="md-nav__link">
-    Option 1: SimpleAction - Working without a model
+    <span class="md-ellipsis">
+      
+        Option 1: SimpleAction - Working without a model
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Option 1: SimpleAction - Working without a model">
@@ -864,7 +1081,11 @@
         
           <li class="md-nav__item">
   <a href="#putting-it-together" class="md-nav__link">
-    Putting it together:
+    <span class="md-ellipsis">
+      
+        Putting it together:
+      
+    </span>
   </a>
   
 </li>
@@ -875,8 +1096,23 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#state-dependent-action-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        State-dependent action generation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#option-2-action-working-with-a-model" class="md-nav__link">
-    Option 2: Action - Working with a model
+    <span class="md-ellipsis">
+      
+        Option 2: Action - Working with a model
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Option 2: Action - Working with a model">
@@ -884,7 +1120,11 @@
         
           <li class="md-nav__item">
   <a href="#putting-it-together_1" class="md-nav__link">
-    Putting it together:
+    <span class="md-ellipsis">
+      
+        Putting it together:
+      
+    </span>
   </a>
   
 </li>
@@ -896,21 +1136,44 @@
         
           <li class="md-nav__item">
   <a href="#debugging-stateful-test-failures" class="md-nav__link">
-    Debugging stateful test failures
+    <span class="md-ellipsis">
+      
+        Debugging stateful test failures
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#action-callbacks-setonactionstart-setonactionend" class="md-nav__link">
-    Action callbacks: setOnActionStart / setOnActionEnd
+    <span class="md-ellipsis">
+      
+        Action callbacks: setOnActionStart / setOnActionEnd
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#how-stateful-shrinking-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How stateful shrinking works
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#configuring-stateful-test-runs" class="md-nav__link">
-    Configuring stateful test runs
+    <span class="md-ellipsis">
+      
+        Configuring stateful test runs
+      
+    </span>
   </a>
   
 </li>
@@ -922,7 +1185,11 @@
       
         <li class="md-nav__item">
   <a href="#alternative-style-using-action-classes" class="md-nav__link">
-    Alternative Style: Using Action Classes
+    <span class="md-ellipsis">
+      
+        Alternative Style: Using Action Classes
+      
+    </span>
   </a>
   
 </li>
@@ -937,9 +1204,60 @@
           
           
             <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href=".." class="md-path__link">
+          
+  <span class="md-ellipsis">
+    cppproptest
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Stateful & Concurrency Testing
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
               <article class="md-content__inner md-typeset">
                 
                   
+
 
   
   
@@ -1051,9 +1369,8 @@
 <span class="w">        </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">obj</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">);</span>
 <span class="w">    </span><span class="p">}));</span>
 
-<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">actionGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">oneOf</span><span class="o">&lt;</span><span class="n">SimpleAction</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">pushBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">popBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">weightedGen</span><span class="o">&lt;</span><span class="n">SimpleAction</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">clearGen</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">));</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">actionGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">oneOf</span><span class="o">&lt;</span><span class="n">SimpleAction</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">pushBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">popBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">weighted</span><span class="p">(</span><span class="n">clearGen</span><span class="p">,</span><span class="w"> </span><span class="mf">0.1</span><span class="p">));</span>
 <span class="w">    </span><span class="c1">// `oneOf` can take weights, so you can adjust rate of generation of an action</span>
-<span class="w">    </span><span class="c1">//    auto actionGen = oneOf&lt;SimpleAction&lt;MyVector&gt;&gt;(pushBackGen, popBackGen, weightedGen&lt;SimpleAction&lt;MyVector&gt;&gt;(clearGen, 0.1));</span>
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(</span>
 <span class="w">        </span><span class="cm">/* initial state generator */</span><span class="w"> </span><span class="n">lazy</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">([]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">MyVector</span><span class="p">();</span><span class="w"> </span><span class="p">}),</span>
 <span class="w">        </span><span class="cm">/* action generator */</span><span class="w"> </span><span class="n">actionGen</span><span class="p">);</span>
@@ -1061,6 +1378,25 @@
 <span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
 <span class="p">}</span>
 </code></pre></div>
+<h3 id="state-dependent-action-generation">State-dependent action generation<a class="headerlink" href="#state-dependent-action-generation" title="Permanent link">&para;</a></h3>
+<p>The examples above use a static action generator: every step samples from the same <code>actionGen</code>, regardless of the current object state. When the valid next action depends on the current state, pass an action generator factory instead. The factory is called before each action with the current object.</p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="cm">/* initial state generator */</span><span class="w"> </span><span class="n">lazy</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">([]()</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">MyVector</span><span class="p">();</span><span class="w"> </span><span class="p">}),</span>
+<span class="w">    </span><span class="cm">/* action generator factory */</span>
+<span class="w">    </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">SimpleActionGen</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">obj</span><span class="p">.</span><span class="n">size</span><span class="p">()</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">just</span><span class="p">(</span><span class="n">SimpleAction</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;PushBack&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">obj</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">            </span><span class="p">}));</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">just</span><span class="p">(</span><span class="n">SimpleAction</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;PopBack&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">obj</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+<span class="w">        </span><span class="p">}));</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
+</code></pre></div>
+<p>The static generator form is still useful when every action can handle its own preconditions. The factory form is better when you want the generator to avoid invalid actions entirely, or when the distribution should change as the object changes.</p>
 <h3 id="option-2-action-working-with-a-model">Option 2: <code>Action</code> - Working with a model<a class="headerlink" href="#option-2-action-working-with-a-model" title="Permanent link">&para;</a></h3>
 <p>If you need a model for advanced tracking of state changes, use <code>Action</code> instead of <code>SimpleAction</code>. <code>Action</code> takes additional parameter indicating the model type. Let's define our model for tracking number of elements for <code>MyVector</code></p>
 <div class="highlight"><pre><span></span><code><span class="c1">// our simple model that tracks number of elements</span>
@@ -1080,10 +1416,10 @@
 <p>You can use <code>oneOf&lt;Action&lt;ObjectType, ModelType&gt;&gt;</code> to get the combined action generator:</p>
 <div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">actionGen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">oneOf</span><span class="o">&lt;</span><span class="n">Action</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;&gt;</span><span class="p">(</span><span class="n">pushBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">popBackGen</span><span class="p">,</span><span class="w"> </span><span class="n">clearGen</span><span class="p">);</span>
 </code></pre></div>
-<p>Finally, we can define a stateful property by calling <code>statefulProperty&lt;ObjectType,ModelType&gt;()</code>. This method requires an initial state generator, and the <code>actionGen</code> we've just obtained. Compared to <code>SimpleAction</code> case, it additionally requires a model factory in the form of <code>ObjectType&amp; -&gt; ModelType</code>. This factory is to induce initial model from initial object. Calling <code>statefulProperty::go()</code> will execute the stateful property test.</p>
+<p>Finally, we can define a stateful property by calling <code>statefulProperty&lt;ObjectType,ModelType&gt;()</code>. This method requires an initial state generator, and the <code>actionGen</code> we've just obtained. Compared to <code>SimpleAction</code> case, it additionally requires a model factory in the form of <code>const ObjectType&amp; -&gt; ModelType</code>. This factory induces the initial model from the initial object and must not mutate it. Calling <code>statefulProperty::go()</code> will execute the stateful property test.</p>
 <div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">T</span><span class="o">&gt;</span><span class="p">(</span>
 <span class="w">    </span><span class="cm">/* initial state generator */</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(),</span>
-<span class="w">    </span><span class="cm">/* model factory */</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Counter</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">());</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="cm">/* model factory */</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Counter</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">());</span><span class="w"> </span><span class="p">},</span>
 <span class="w">    </span><span class="cm">/* action generator */</span><span class="w"> </span><span class="n">actionGen</span><span class="p">);</span>
 <span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
 </code></pre></div>
@@ -1133,11 +1469,31 @@
 <span class="w">    </span><span class="c1">//    auto actionGen = oneOf&lt;Action&lt;MyVector, Counter&gt;&gt;(pushBackGen, popBackGen, weightedGen&lt;Action&lt;MyVector, Counter&gt;&gt;(clearGen, 0.1));</span>
 <span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;</span><span class="p">(</span>
 <span class="w">        </span><span class="cm">/* initial state generator */</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(),</span>
-<span class="w">        </span><span class="cm">/* initial model factory */</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Counter</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">());</span><span class="w"> </span><span class="p">},</span>
+<span class="w">        </span><span class="cm">/* initial model factory */</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Counter</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">());</span><span class="w"> </span><span class="p">},</span>
 <span class="w">        </span><span class="cm">/* action generator */</span><span class="w"> </span><span class="n">actionGen</span><span class="p">);</span>
 <span class="w">    </span><span class="c1">// Tests massive cases with randomly generated action sequences</span>
 <span class="w">    </span><span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
 <span class="p">}</span>
+</code></pre></div>
+<p>Model-based properties support the same pattern with an <code>Action</code> generator factory. The factory receives both the current object and current model, so it can choose actions from either view of state:</p>
+<div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;</span><span class="p">(</span>
+<span class="w">    </span><span class="cm">/* initial state generator */</span><span class="w"> </span><span class="n">Arbi</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="o">&gt;</span><span class="p">(),</span>
+<span class="w">    </span><span class="cm">/* initial model factory */</span><span class="w"> </span><span class="p">[](</span><span class="k">const</span><span class="w"> </span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">vec</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="k">return</span><span class="w"> </span><span class="n">Counter</span><span class="p">(</span><span class="n">vec</span><span class="p">.</span><span class="n">size</span><span class="p">());</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="cm">/* action generator factory */</span>
+<span class="w">    </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&amp;</span><span class="w"> </span><span class="n">counter</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">ActionGen</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">counter</span><span class="p">.</span><span class="n">num</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">just</span><span class="p">(</span><span class="n">Action</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;PushBack&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">                </span><span class="n">obj</span><span class="p">.</span><span class="n">push_back</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="w">                </span><span class="n">cnt</span><span class="p">.</span><span class="n">num</span><span class="o">++</span><span class="p">;</span>
+<span class="w">            </span><span class="p">}));</span>
+<span class="w">        </span><span class="p">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">just</span><span class="p">(</span><span class="n">Action</span><span class="o">&lt;</span><span class="n">MyVector</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&gt;</span><span class="p">(</span><span class="s">&quot;PopBack&quot;</span><span class="p">,</span><span class="w"> </span><span class="p">[](</span><span class="n">MyVector</span><span class="o">&amp;</span><span class="w"> </span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Counter</span><span class="o">&amp;</span><span class="w"> </span><span class="n">cnt</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">            </span><span class="n">obj</span><span class="p">.</span><span class="n">pop_back</span><span class="p">();</span>
+<span class="w">            </span><span class="n">cnt</span><span class="p">.</span><span class="n">num</span><span class="o">--</span><span class="p">;</span>
+<span class="w">        </span><span class="p">}));</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="n">prop</span><span class="p">.</span><span class="n">go</span><span class="p">();</span>
 </code></pre></div>
 <h3 id="debugging-stateful-test-failures">Debugging stateful test failures<a class="headerlink" href="#debugging-stateful-test-failures" title="Permanent link">&para;</a></h3>
 <p>A stateful test is succesful if all tried combinations were complete without issues. On the other hand, a failed assertion or an unexpected exception would end up with a stateful test failure. The framework will print the failed condition and tried input combinations so that you can debug the failure. Among the <code>args</code>, the first arg is the initial state, and the second one is the action list:</p>
@@ -1190,13 +1546,60 @@
 </tbody>
 </table>
 <p>Use <code>setOnActionEnd</code> for invariant checks; use <code>setOnActionStart</code> for pre-condition checks or debugging. Both receive <code>(ObjectType&amp;, ModelType&amp;)</code> (use <code>EmptyModel&amp;</code> when using <code>SimpleAction</code>).</p>
+<p>When <code>setMaxConcurrency(n)</code> is greater than <code>1</code>, these callbacks also run for actions executed by rear worker threads. In that mode the callbacks must be thread-safe.</p>
+<h3 id="how-stateful-shrinking-works">How stateful shrinking works<a class="headerlink" href="#how-stateful-shrinking-works" title="Permanent link">&para;</a></h3>
+<p>When a stateful property fails, the framework automatically shrinks the counterexample in four passes, each trying to produce a simpler failing case:</p>
+<table>
+<thead>
+<tr>
+<th>Pass</th>
+<th>What it shrinks</th>
+<th>Strategy</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>SequencePruning</strong></td>
+<td>Number of actions in the failing sequence</td>
+<td>Tries shorter prefixes first, before element-wise simplification</td>
+</tr>
+<tr>
+<td><strong>InitialStateShrink</strong></td>
+<td>The generated initial state</td>
+<td>Uses the shrink tree of the initial-state generator</td>
+</tr>
+<tr>
+<td><strong>PrefixParams</strong></td>
+<td>Parameters of every non-last action</td>
+<td>Replays the prefix to reconstruct live state, regenerates each non-last action from its stored bookmark, and walks the fresh state-aware shrink tree</td>
+</tr>
+<tr>
+<td><strong>LastActionParams</strong></td>
+<td>Generated arguments of the last action</td>
+<td>Walks the shrink tree of that action's <code>Shrinkable</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>SequencePruning — prefix-length-first ordering.</strong> The shrinker tries removing trailing actions before it tries simplifying individual action arguments. This means a sequence like <code>[PushBack(42), PopBack, Clear]</code> will first be reduced to <code>[PushBack(42)]</code> (if that still fails) before the <code>42</code> is minimized further. Shorter sequences are almost always easier to debug, so length reduction is prioritised.</p>
+<p><strong>PrefixParams — state-aware bookmark shrinking.</strong> For each non-last position <code>i</code>, the shrinker replays actions <code>[0, i)</code> to reconstruct the exact live state, then regenerates action <code>i</code> from its stored random bookmark using that state. This produces a fresh, state-correct shrink tree whose candidates are tested in turn. Because the factory is called with the reconstructed state, state-dependent generators (e.g. ones that change behaviour above a threshold) adapt correctly rather than producing stale candidates.</p>
+<p><strong>LastActionParams — last action parameters.</strong> After SequencePruning and PrefixParams, the last remaining action in the sequence is further shrunk via its own shrink tree. For example, a <code>PushBack(10000)</code> action will walk down to <code>PushBack(0)</code> if the failure persists at smaller values. This relies on the action being built via a generator with shrink support (e.g., <code>gen::int32().map&lt;Action&lt;T&gt;&gt;(...)</code>)—actions constructed with <code>just(...)</code> have no shrink tree for their parameters.</p>
+<p><strong>Example outcome.</strong> A failure initially reported as:
+<div class="highlight"><pre><span></span><code>with args: { [1882384569, -1157159508, 840506558], [PushBack(9374), PopBack, PushBack(10000), Clear] }
+</code></pre></div>
+might shrink to:
+<div class="highlight"><pre><span></span><code>with args: { [], [PushBack(5)] }
+</code></pre></div>
+showing exactly the minimal initial state and action needed to reproduce the bug.</p>
 <h3 id="configuring-stateful-test-runs">Configuring stateful test runs<a class="headerlink" href="#configuring-stateful-test-runs" title="Permanent link">&para;</a></h3>
 <p>You can alter some of test characteristics of stateful test runs.</p>
 <ul>
 <li>Random seed</li>
 <li>Number of runs</li>
 <li>Maximum time duration of test runs</li>
+<li>Maximum concurrency (<code>setMaxConcurrency(n)</code>; <code>0</code> is sequential, values greater than <code>1</code> enable rear worker threads)</li>
+<li>Shrink retry config (for flaky tests; see <a href="../Shrinking/#shrinking-with-flaky-tests-retry">Shrinking</a>)</li>
 </ul>
+<p>Configuration is optional: any value you set is applied, while defaults are used for others (e.g., random seed from <code>PROPTEST_SEED</code> environment variable or current timestamp).</p>
 <div class="highlight"><pre><span></span><code><span class="k">auto</span><span class="w"> </span><span class="n">prop</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">statefulProperty</span><span class="p">(...);</span>
 <span class="c1">// set random seed</span>
 <span class="n">prop</span><span class="p">.</span><span class="n">setSeed</span><span class="p">(</span><span class="mf">5464561L</span><span class="p">);</span>
@@ -1215,16 +1618,33 @@
 <li>See <a href="../ConcurrencyTesting/">Concurrency Testing</a> for testing for concurrent changes of a stateful object.</li>
 </ul>
 
-  <hr>
-<div class="md-source-file">
-  <small>
+
+
+
+
+
+
+  
     
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
+  
+  
+
+
+  <aside class="md-source-file">
+    
       
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="May 26, 2026 14:40:27 UTC">May 26, 2026</span>
+  </span>
+
     
-  </small>
-</div>
+    
+    
+    
+  </aside>
 
 
 
@@ -1235,11 +1655,12 @@
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
         
@@ -1269,10 +1690,13 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>

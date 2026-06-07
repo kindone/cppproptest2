@@ -21,8 +21,11 @@
         <link rel="next" href="../Combinators/">
       
       
+        
+      
+      
       <link rel="icon" href="../assets/favicon.ico">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.0">
     
     
       
@@ -30,10 +33,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.4b4a2bd9.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.618322db.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.356b1318.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -52,11 +55,10 @@
       
     
     
-    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
-    
     
     
   </head>
@@ -69,7 +71,6 @@
     
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="light-green">
   
-    
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -96,12 +97,12 @@
     <a href=".." title="cppproptest" class="md-header__button md-logo" aria-label="cppproptest" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
       
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
     </label>
     <div class="md-header__title" data-md-component="header-title">
       <div class="md-header__ellipsis">
@@ -124,26 +125,29 @@
     
     
     
-      <label class="md-header__button md-icon" for="__search">
-        
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
       <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
         
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
       </label>
       <nav class="md-search__options" aria-label="Search">
         
         <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
           
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
         </button>
       </nav>
       
@@ -151,7 +155,7 @@
       
     </form>
     <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
         <div class="md-search-result" data-md-component="search-result">
           <div class="md-search-result__meta">
             Initializing search
@@ -162,13 +166,14 @@
     </div>
   </div>
 </div>
+      
     
     
       <div class="md-header__source">
         <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     kindone/cppproptest2
@@ -204,7 +209,7 @@
     <a href=".." title="cppproptest" class="md-nav__button md-logo" aria-label="cppproptest" data-md-component="logo">
       
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
 
     </a>
     cppproptest
@@ -214,7 +219,7 @@
       <a href="https://github.com/kindone/cppproptest2" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2023 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
   </div>
   <div class="md-source__repository">
     kindone/cppproptest2
@@ -231,6 +236,7 @@
     
   
   
+  
     
     
       
@@ -262,18 +268,23 @@
       
         
         
-        
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
         
-          
           
           <div class="md-nav__link md-nav__container">
             <a href=".." class="md-nav__link ">
               
   
+  
   <span class="md-ellipsis">
+    
+  
     cppproptest
+  
+
+    
   </span>
+  
   
 
             </a>
@@ -288,7 +299,11 @@
         <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
-            cppproptest
+            
+  
+    cppproptest
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -299,13 +314,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../GettingStarted/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Getting Started
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -316,6 +339,7 @@
             
               
                 
+  
   
   
   
@@ -323,9 +347,16 @@
       <a href="../Walkthrough/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Step-by-Step Walkthrough
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -339,13 +370,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../PropertyAPI/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Property API Reference
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -359,6 +398,7 @@
   
   
     
+  
   
   
     
@@ -378,16 +418,22 @@
       
         
         
-        
         <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_5" checked>
         
           
           <label class="md-nav__link" for="__nav_1_5" id="__nav_1_5_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Generating Inputs
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -396,7 +442,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_1_5">
             <span class="md-nav__icon md-icon"></span>
-            Generating Inputs
+            
+  
+    Generating Inputs
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -405,6 +455,7 @@
   
   
     
+  
   
   
     <li class="md-nav__item md-nav__item--active">
@@ -418,9 +469,16 @@
         <label class="md-nav__link md-nav__link--active" for="__toc">
           
   
+  
   <span class="md-ellipsis">
+    
+  
     Generators
+  
+
+    
   </span>
+  
   
 
           <span class="md-nav__icon md-icon"></span>
@@ -429,9 +487,16 @@
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Generators
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -453,28 +518,44 @@
       
         <li class="md-nav__item">
   <a href="#generator-quick-reference" class="md-nav__link">
-    Generator Quick Reference
+    <span class="md-ellipsis">
+      
+        Generator Quick Reference
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#generators-in-property-based-testing" class="md-nav__link">
-    Generators in Property-Based Testing
+    <span class="md-ellipsis">
+      
+        Generators in Property-Based Testing
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#built-in-arbitraries-and-their-generator-aliases" class="md-nav__link">
-    Built-in Arbitraries and Their Generator Aliases
+    <span class="md-ellipsis">
+      
+        Built-in Arbitraries and Their Generator Aliases
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#basic-type-generators" class="md-nav__link">
-    Basic Type Generators
+    <span class="md-ellipsis">
+      
+        Basic Type Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Basic Type Generators">
@@ -482,21 +563,44 @@
         
           <li class="md-nav__item">
   <a href="#genboolean" class="md-nav__link">
-    gen::boolean
+    <span class="md-ellipsis">
+      
+        gen::boolean
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gencharacter" class="md-nav__link">
-    gen::character
+    <span class="md-ellipsis">
+      
+        gen::character
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#integer-generators" class="md-nav__link">
-    Integer Generators
+    <span class="md-ellipsis">
+      
+        Integer Generators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genseed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gen::seed()
+      
+    </span>
   </a>
   
 </li>
@@ -508,7 +612,11 @@
       
         <li class="md-nav__item">
   <a href="#utility-numeric-range-generators" class="md-nav__link">
-    Utility Numeric Range Generators
+    <span class="md-ellipsis">
+      
+        Utility Numeric Range Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Utility Numeric Range Generators">
@@ -516,35 +624,55 @@
         
           <li class="md-nav__item">
   <a href="#genintervaltmin-max" class="md-nav__link">
-    gen::interval&lt;T&gt;(min, max)
+    <span class="md-ellipsis">
+      
+        gen::interval&lt;T&gt;(min, max)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#geninrangetfrom-to" class="md-nav__link">
-    gen::inRange&lt;T&gt;(from, to)
+    <span class="md-ellipsis">
+      
+        gen::inRange&lt;T&gt;(from, to)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genintegerststart-count" class="md-nav__link">
-    gen::integers&lt;T&gt;(start, count)
+    <span class="md-ellipsis">
+      
+        gen::integers&lt;T&gt;(start, count)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gennaturaltmax" class="md-nav__link">
-    gen::natural&lt;T&gt;(max)
+    <span class="md-ellipsis">
+      
+        gen::natural&lt;T&gt;(max)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gennonnegativetmax" class="md-nav__link">
-    gen::nonNegative&lt;T&gt;(max)
+    <span class="md-ellipsis">
+      
+        gen::nonNegative&lt;T&gt;(max)
+      
+    </span>
   </a>
   
 </li>
@@ -556,7 +684,11 @@
       
         <li class="md-nav__item">
   <a href="#string-generators" class="md-nav__link">
-    String Generators
+    <span class="md-ellipsis">
+      
+        String Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="String Generators">
@@ -564,28 +696,44 @@
         
           <li class="md-nav__item">
   <a href="#genstring" class="md-nav__link">
-    gen::string
+    <span class="md-ellipsis">
+      
+        gen::string
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genutf8string" class="md-nav__link">
-    gen::utf8string
+    <span class="md-ellipsis">
+      
+        gen::utf8string
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#utf-16-string-generators" class="md-nav__link">
-    UTF-16 String Generators
+    <span class="md-ellipsis">
+      
+        UTF-16 String Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gencesu8string" class="md-nav__link">
-    gen::cesu8string
+    <span class="md-ellipsis">
+      
+        gen::cesu8string
+      
+    </span>
   </a>
   
 </li>
@@ -597,7 +745,11 @@
       
         <li class="md-nav__item">
   <a href="#container-generators" class="md-nav__link">
-    Container Generators
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Container Generators">
@@ -605,42 +757,66 @@
         
           <li class="md-nav__item">
   <a href="#genvectort" class="md-nav__link">
-    gen::vector&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::vector&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genlistt" class="md-nav__link">
-    gen::list&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::list&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gensett" class="md-nav__link">
-    gen::set&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::set&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genmapkv" class="md-nav__link">
-    gen::map&lt;K,V&gt;
+    <span class="md-ellipsis">
+      
+        gen::map&lt;K,V&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genoptionalt" class="md-nav__link">
-    gen::optional&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::optional&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genshared_ptrt" class="md-nav__link">
-    gen::shared_ptr&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::shared_ptr&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
@@ -652,7 +828,11 @@
       
         <li class="md-nav__item">
   <a href="#tuple-and-pair-generators" class="md-nav__link">
-    Tuple and Pair Generators
+    <span class="md-ellipsis">
+      
+        Tuple and Pair Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Tuple and Pair Generators">
@@ -660,14 +840,22 @@
         
           <li class="md-nav__item">
   <a href="#genpairt1t2" class="md-nav__link">
-    gen::pair&lt;T1,T2&gt;
+    <span class="md-ellipsis">
+      
+        gen::pair&lt;T1,T2&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gentuplets" class="md-nav__link">
-    gen::tuple&lt;Ts...&gt;
+    <span class="md-ellipsis">
+      
+        gen::tuple&lt;Ts...&gt;
+      
+    </span>
   </a>
   
 </li>
@@ -679,14 +867,22 @@
       
         <li class="md-nav__item">
   <a href="#interval-generators" class="md-nav__link">
-    Interval Generators
+    <span class="md-ellipsis">
+      
+        Interval Generators
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#floating-point-generators" class="md-nav__link">
-    Floating Point Generators
+    <span class="md-ellipsis">
+      
+        Floating Point Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Floating Point Generators">
@@ -694,21 +890,33 @@
         
           <li class="md-nav__item">
   <a href="#interface" class="md-nav__link">
-    Interface
+    <span class="md-ellipsis">
+      
+        Interface
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#default-behavior" class="md-nav__link">
-    Default Behavior
+    <span class="md-ellipsis">
+      
+        Default Behavior
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#special-value-probabilities" class="md-nav__link">
-    Special Value Probabilities
+    <span class="md-ellipsis">
+      
+        Special Value Probabilities
+      
+    </span>
   </a>
   
 </li>
@@ -720,14 +928,22 @@
       
         <li class="md-nav__item">
   <a href="#access-to-an-arbitrary" class="md-nav__link">
-    Access to an Arbitrary
+    <span class="md-ellipsis">
+      
+        Access to an Arbitrary
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#combinator-functions" class="md-nav__link">
-    Combinator Functions
+    <span class="md-ellipsis">
+      
+        Combinator Functions
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Combinator Functions">
@@ -735,7 +951,11 @@
         
           <li class="md-nav__item">
   <a href="#utility-functions-for-oneofunionof-and-elementof" class="md-nav__link">
-    Utility Functions for oneOf(unionOf) and elementOf
+    <span class="md-ellipsis">
+      
+        Utility Functions for oneOf(unionOf) and elementOf
+      
+    </span>
   </a>
   
 </li>
@@ -747,7 +967,11 @@
       
         <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
-    Examples
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Examples">
@@ -755,21 +979,33 @@
         
           <li class="md-nav__item">
   <a href="#basic-generators" class="md-nav__link">
-    Basic Generators
+    <span class="md-ellipsis">
+      
+        Basic Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#container-generators_1" class="md-nav__link">
-    Container Generators
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#string-generators-with-custom-elements" class="md-nav__link">
-    String Generators with Custom Elements
+    <span class="md-ellipsis">
+      
+        String Generators with Custom Elements
+      
+    </span>
   </a>
   
 </li>
@@ -781,14 +1017,22 @@
       
         <li class="md-nav__item">
   <a href="#building-custom-generators" class="md-nav__link">
-    Building Custom Generators
+    <span class="md-ellipsis">
+      
+        Building Custom Generators
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#related-topics" class="md-nav__link">
-    Related Topics
+    <span class="md-ellipsis">
+      
+        Related Topics
+      
+    </span>
   </a>
   
 </li>
@@ -807,13 +1051,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../Combinators/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Generator Combinators
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -827,13 +1079,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../GeneratorExamples/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Real World Examples
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -855,13 +1115,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../Shrinking/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Shrinking - Simplifying Failed Inputs
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -872,6 +1140,7 @@
             
               
                 
+  
   
   
   
@@ -879,9 +1148,16 @@
       <a href="../Printing/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Displaying Custom Types
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -892,6 +1168,7 @@
             
               
                 
+  
   
   
   
@@ -910,7 +1187,6 @@
     
     <li class="md-nav__item md-nav__item--nested">
       
-        
         
         
           
@@ -921,9 +1197,16 @@
           <label class="md-nav__link" for="__nav_1_8" id="__nav_1_8_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Stateful & Concurrency Testing
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -932,7 +1215,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_8_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_8">
             <span class="md-nav__icon md-icon"></span>
-            Stateful & Concurrency Testing
+            
+  
+    Stateful & Concurrency Testing
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -941,13 +1228,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../StatefulTesting/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Stateful Testing
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -958,6 +1253,7 @@
             
               
                 
+  
   
   
   
@@ -965,9 +1261,16 @@
       <a href="../ConcurrencyTesting/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Concurrency Testing
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -981,13 +1284,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../AdvancedStatefulTesting/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Advanced Scenarios
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -1009,6 +1320,7 @@
   
   
   
+  
     
     
       
@@ -1022,7 +1334,6 @@
       
         
         
-        
           
         
         <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_9" >
@@ -1031,9 +1342,16 @@
           <label class="md-nav__link" for="__nav_1_9" id="__nav_1_9_label" tabindex="0">
             
   
+  
   <span class="md-ellipsis">
+    
+  
     Tips & Best Practices
+  
+
+    
   </span>
+  
   
 
             <span class="md-nav__icon md-icon"></span>
@@ -1042,7 +1360,11 @@
         <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_9_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1_9">
             <span class="md-nav__icon md-icon"></span>
-            Tips & Best Practices
+            
+  
+    Tips & Best Practices
+  
+
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
             
@@ -1051,13 +1373,21 @@
   
   
   
+  
     <li class="md-nav__item">
       <a href="../TestStrategies/" class="md-nav__link">
         
   
+  
   <span class="md-ellipsis">
+    
+  
     Test Strategies
+  
+
+    
   </span>
+  
   
 
       </a>
@@ -1109,28 +1439,44 @@
       
         <li class="md-nav__item">
   <a href="#generator-quick-reference" class="md-nav__link">
-    Generator Quick Reference
+    <span class="md-ellipsis">
+      
+        Generator Quick Reference
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#generators-in-property-based-testing" class="md-nav__link">
-    Generators in Property-Based Testing
+    <span class="md-ellipsis">
+      
+        Generators in Property-Based Testing
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#built-in-arbitraries-and-their-generator-aliases" class="md-nav__link">
-    Built-in Arbitraries and Their Generator Aliases
+    <span class="md-ellipsis">
+      
+        Built-in Arbitraries and Their Generator Aliases
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#basic-type-generators" class="md-nav__link">
-    Basic Type Generators
+    <span class="md-ellipsis">
+      
+        Basic Type Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Basic Type Generators">
@@ -1138,21 +1484,44 @@
         
           <li class="md-nav__item">
   <a href="#genboolean" class="md-nav__link">
-    gen::boolean
+    <span class="md-ellipsis">
+      
+        gen::boolean
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gencharacter" class="md-nav__link">
-    gen::character
+    <span class="md-ellipsis">
+      
+        gen::character
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#integer-generators" class="md-nav__link">
-    Integer Generators
+    <span class="md-ellipsis">
+      
+        Integer Generators
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#genseed" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        gen::seed()
+      
+    </span>
   </a>
   
 </li>
@@ -1164,7 +1533,11 @@
       
         <li class="md-nav__item">
   <a href="#utility-numeric-range-generators" class="md-nav__link">
-    Utility Numeric Range Generators
+    <span class="md-ellipsis">
+      
+        Utility Numeric Range Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Utility Numeric Range Generators">
@@ -1172,35 +1545,55 @@
         
           <li class="md-nav__item">
   <a href="#genintervaltmin-max" class="md-nav__link">
-    gen::interval&lt;T&gt;(min, max)
+    <span class="md-ellipsis">
+      
+        gen::interval&lt;T&gt;(min, max)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#geninrangetfrom-to" class="md-nav__link">
-    gen::inRange&lt;T&gt;(from, to)
+    <span class="md-ellipsis">
+      
+        gen::inRange&lt;T&gt;(from, to)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genintegerststart-count" class="md-nav__link">
-    gen::integers&lt;T&gt;(start, count)
+    <span class="md-ellipsis">
+      
+        gen::integers&lt;T&gt;(start, count)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gennaturaltmax" class="md-nav__link">
-    gen::natural&lt;T&gt;(max)
+    <span class="md-ellipsis">
+      
+        gen::natural&lt;T&gt;(max)
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gennonnegativetmax" class="md-nav__link">
-    gen::nonNegative&lt;T&gt;(max)
+    <span class="md-ellipsis">
+      
+        gen::nonNegative&lt;T&gt;(max)
+      
+    </span>
   </a>
   
 </li>
@@ -1212,7 +1605,11 @@
       
         <li class="md-nav__item">
   <a href="#string-generators" class="md-nav__link">
-    String Generators
+    <span class="md-ellipsis">
+      
+        String Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="String Generators">
@@ -1220,28 +1617,44 @@
         
           <li class="md-nav__item">
   <a href="#genstring" class="md-nav__link">
-    gen::string
+    <span class="md-ellipsis">
+      
+        gen::string
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genutf8string" class="md-nav__link">
-    gen::utf8string
+    <span class="md-ellipsis">
+      
+        gen::utf8string
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#utf-16-string-generators" class="md-nav__link">
-    UTF-16 String Generators
+    <span class="md-ellipsis">
+      
+        UTF-16 String Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gencesu8string" class="md-nav__link">
-    gen::cesu8string
+    <span class="md-ellipsis">
+      
+        gen::cesu8string
+      
+    </span>
   </a>
   
 </li>
@@ -1253,7 +1666,11 @@
       
         <li class="md-nav__item">
   <a href="#container-generators" class="md-nav__link">
-    Container Generators
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Container Generators">
@@ -1261,42 +1678,66 @@
         
           <li class="md-nav__item">
   <a href="#genvectort" class="md-nav__link">
-    gen::vector&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::vector&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genlistt" class="md-nav__link">
-    gen::list&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::list&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gensett" class="md-nav__link">
-    gen::set&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::set&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genmapkv" class="md-nav__link">
-    gen::map&lt;K,V&gt;
+    <span class="md-ellipsis">
+      
+        gen::map&lt;K,V&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genoptionalt" class="md-nav__link">
-    gen::optional&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::optional&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#genshared_ptrt" class="md-nav__link">
-    gen::shared_ptr&lt;T&gt;
+    <span class="md-ellipsis">
+      
+        gen::shared_ptr&lt;T&gt;
+      
+    </span>
   </a>
   
 </li>
@@ -1308,7 +1749,11 @@
       
         <li class="md-nav__item">
   <a href="#tuple-and-pair-generators" class="md-nav__link">
-    Tuple and Pair Generators
+    <span class="md-ellipsis">
+      
+        Tuple and Pair Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Tuple and Pair Generators">
@@ -1316,14 +1761,22 @@
         
           <li class="md-nav__item">
   <a href="#genpairt1t2" class="md-nav__link">
-    gen::pair&lt;T1,T2&gt;
+    <span class="md-ellipsis">
+      
+        gen::pair&lt;T1,T2&gt;
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#gentuplets" class="md-nav__link">
-    gen::tuple&lt;Ts...&gt;
+    <span class="md-ellipsis">
+      
+        gen::tuple&lt;Ts...&gt;
+      
+    </span>
   </a>
   
 </li>
@@ -1335,14 +1788,22 @@
       
         <li class="md-nav__item">
   <a href="#interval-generators" class="md-nav__link">
-    Interval Generators
+    <span class="md-ellipsis">
+      
+        Interval Generators
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#floating-point-generators" class="md-nav__link">
-    Floating Point Generators
+    <span class="md-ellipsis">
+      
+        Floating Point Generators
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Floating Point Generators">
@@ -1350,21 +1811,33 @@
         
           <li class="md-nav__item">
   <a href="#interface" class="md-nav__link">
-    Interface
+    <span class="md-ellipsis">
+      
+        Interface
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#default-behavior" class="md-nav__link">
-    Default Behavior
+    <span class="md-ellipsis">
+      
+        Default Behavior
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#special-value-probabilities" class="md-nav__link">
-    Special Value Probabilities
+    <span class="md-ellipsis">
+      
+        Special Value Probabilities
+      
+    </span>
   </a>
   
 </li>
@@ -1376,14 +1849,22 @@
       
         <li class="md-nav__item">
   <a href="#access-to-an-arbitrary" class="md-nav__link">
-    Access to an Arbitrary
+    <span class="md-ellipsis">
+      
+        Access to an Arbitrary
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#combinator-functions" class="md-nav__link">
-    Combinator Functions
+    <span class="md-ellipsis">
+      
+        Combinator Functions
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Combinator Functions">
@@ -1391,7 +1872,11 @@
         
           <li class="md-nav__item">
   <a href="#utility-functions-for-oneofunionof-and-elementof" class="md-nav__link">
-    Utility Functions for oneOf(unionOf) and elementOf
+    <span class="md-ellipsis">
+      
+        Utility Functions for oneOf(unionOf) and elementOf
+      
+    </span>
   </a>
   
 </li>
@@ -1403,7 +1888,11 @@
       
         <li class="md-nav__item">
   <a href="#examples" class="md-nav__link">
-    Examples
+    <span class="md-ellipsis">
+      
+        Examples
+      
+    </span>
   </a>
   
     <nav class="md-nav" aria-label="Examples">
@@ -1411,21 +1900,33 @@
         
           <li class="md-nav__item">
   <a href="#basic-generators" class="md-nav__link">
-    Basic Generators
+    <span class="md-ellipsis">
+      
+        Basic Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#container-generators_1" class="md-nav__link">
-    Container Generators
+    <span class="md-ellipsis">
+      
+        Container Generators
+      
+    </span>
   </a>
   
 </li>
         
           <li class="md-nav__item">
   <a href="#string-generators-with-custom-elements" class="md-nav__link">
-    String Generators with Custom Elements
+    <span class="md-ellipsis">
+      
+        String Generators with Custom Elements
+      
+    </span>
   </a>
   
 </li>
@@ -1437,14 +1938,22 @@
       
         <li class="md-nav__item">
   <a href="#building-custom-generators" class="md-nav__link">
-    Building Custom Generators
+    <span class="md-ellipsis">
+      
+        Building Custom Generators
+      
+    </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
   <a href="#related-topics" class="md-nav__link">
-    Related Topics
+    <span class="md-ellipsis">
+      
+        Related Topics
+      
+    </span>
   </a>
   
 </li>
@@ -1459,9 +1968,60 @@
           
           
             <div class="md-content" data-md-component="content">
+              
+                
+
+
+
+
+  <nav class="md-path" aria-label="Navigation" >
+    <ol class="md-path__list">
+      
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href=".." class="md-path__link">
+          
+  <span class="md-ellipsis">
+    cppproptest
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+    
+      <li class="md-path__item">
+        <a href="./" class="md-path__link">
+          
+  <span class="md-ellipsis">
+    Generating Inputs
+  </span>
+
+        </a>
+      </li>
+    
+  
+
+      
+    </ol>
+  </nav>
+
+              
               <article class="md-content__inner md-typeset">
                 
                   
+
 
   
   
@@ -1711,13 +2271,13 @@
 </tr>
 <tr>
 <td></td>
-<td><a href="#combinator-functions"><code>gen::weighted&lt;T&gt;(gen, weight)</code></a></td>
-<td>Weighted generator decorator</td>
+<td><a href="#combinator-functions"><code>gen::weighted(value, prob)</code></a></td>
+<td>Weighted value (for <code>elementOf</code>/<code>oneOf</code>)</td>
 </tr>
 <tr>
 <td></td>
-<td><a href="#combinator-functions"><code>gen::weightedVal&lt;T&gt;(value, weight)</code></a></td>
-<td>Weighted value decorator</td>
+<td><a href="#combinator-functions"><code>gen::weighted(gen, prob)</code></a></td>
+<td>Weighted generator (for <code>oneOf</code>)</td>
 </tr>
 <tr>
 <td><strong>Utilities</strong></td>
@@ -1728,6 +2288,11 @@
 <td></td>
 <td><a href="#access-to-an-arbitrary"><code>gen::arbitrary&lt;T&gt;(...)</code></a></td>
 <td>Access to arbitrary</td>
+</tr>
+<tr>
+<td></td>
+<td><a href="#genseed"><code>gen::seed()</code></a></td>
+<td>Uniform random seed wrapper (<code>Seed</code>)</td>
 </tr>
 <tr>
 <td></td>
@@ -1863,6 +2428,30 @@ Previous code is actually equivalent to:</p>
 <span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">int32</span><span class="p">(),</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">uint32</span><span class="p">());</span>
 </code></pre></div></p>
 <p><strong>See also:</strong> <a href="../Arbitrary/">Arbitrary</a> for configuration options.</p>
+<hr />
+<h3 id="genseed"><code>gen::seed()</code><a class="headerlink" href="#genseed" title="Permanent link">&para;</a></h3>
+<p>Generates <code>Seed</code> values for reproducible seed-driven tests (meta-properties).</p>
+<p><strong>Why use this instead of <code>gen::uint64()</code>:</strong></p>
+<ul>
+<li>Produces uniform random <code>uint64_t</code> seeds without boundary-value bias.</li>
+<li>Uses a dedicated wrapper type (<code>Seed</code>) so logs and shrunk-case prints are clearer.</li>
+<li>Has no shrink stream (seed is treated as configuration, not as a value to minimize).</li>
+</ul>
+<p><strong>Returns:</strong> <code>Generator&lt;Seed&gt;</code></p>
+<p><strong>Examples:</strong>
+<div class="highlight"><pre><span></span><code><span class="c1">// Generate seeds for an outer property</span>
+<span class="n">forAll</span><span class="p">([](</span><span class="n">Seed</span><span class="w"> </span><span class="n">seed</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">auto</span><span class="w"> </span><span class="n">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">property</span><span class="p">([](</span><span class="kt">int</span><span class="w"> </span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">x</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">x</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}).</span><span class="n">setSeed</span><span class="p">(</span><span class="n">seed</span><span class="p">).</span><span class="n">setNumRuns</span><span class="p">(</span><span class="mi">100</span><span class="p">).</span><span class="n">forAll</span><span class="p">();</span>
+
+<span class="w">    </span><span class="n">PROP_ASSERT</span><span class="p">(</span><span class="n">result</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="n">gen</span><span class="o">::</span><span class="n">seed</span><span class="p">());</span>
+
+<span class="c1">// Printed arguments use Seed(...) format</span>
+<span class="c1">// e.g. &quot;with args: { Seed(42) }&quot;</span>
+</code></pre></div></p>
+<p><strong>Note:</strong> <code>Seed</code> is convertible to <code>uint64_t</code>, so it can be passed directly to <code>.setSeed(...)</code>.</p>
 <hr />
 <h2 id="utility-numeric-range-generators">Utility Numeric Range Generators<a class="headerlink" href="#utility-numeric-range-generators" title="Permanent link">&para;</a></h2>
 <p>There are also utility integer generators based on numeric range for everyday use. These are function calls, not type aliases. The first three (<code>gen::interval</code>, <code>gen::inRange</code>, <code>gen::integers</code>) are essentially the same concept with different parameter styles and inclusive/exclusive semantics, so you can choose based on preference and clarity.</p>
@@ -2686,12 +3275,12 @@ Previous code is actually equivalent to:</p>
 </thead>
 <tbody>
 <tr>
-<td><code>gen::weighted&lt;T&gt;(gen, weight)</code></td>
-<td>Weighted generator decorator</td>
+<td><code>gen::weighted(value, prob)</code></td>
+<td>Weighted value (for <code>elementOf</code>/<code>oneOf</code>)</td>
 </tr>
 <tr>
-<td><code>gen::weightedVal&lt;T&gt;(value, weight)</code></td>
-<td>Weighted value decorator</td>
+<td><code>gen::weighted(gen, prob)</code></td>
+<td>Weighted generator (for <code>oneOf</code>)</td>
 </tr>
 </tbody>
 </table>
@@ -2771,16 +3360,33 @@ Previous code is actually equivalent to:</p>
 </ol>
 </div>
 
-  <hr>
-<div class="md-source-file">
-  <small>
+
+
+
+
+
+
+  
     
-      Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">February 22, 2026</span>
+  
+  
+
+
+  <aside class="md-source-file">
+    
       
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="March 4, 2026 15:30:30 UTC">March 4, 2026</span>
+  </span>
+
     
-  </small>
-</div>
+    
+    
+    
+  </aside>
 
 
 
@@ -2791,11 +3397,12 @@ Previous code is actually equivalent to:</p>
             </div>
           
           
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
         </div>
         
           <button type="button" class="md-top md-icon" data-md-component="top" hidden>
   
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
   Back to top
 </button>
         
@@ -2825,10 +3432,13 @@ Previous code is actually equivalent to:</p>
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.tracking", "navigation.tabs.sticky", "navigation.indexes", "navigation.path", "toc.follow", "navigation.top", "search.highlight", "search.suggest", "navigation.expand"], "search": "../assets/javascripts/workers/search.7a47a382.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.aecac24b.min.js"></script>
+      <script src="../assets/javascripts/bundle.e71a0d61.min.js"></script>
       
     
   </body>
