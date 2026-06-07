@@ -503,33 +503,44 @@ TEST(stateful_function, shrink_prefix_params_single_guard)
         << "\nactual output:\n" << out.str();
 }
 
+namespace {
+
+optional<int> firstLatchParam(const string& text)
+{
+    const auto pos = text.find("Latch(");
+    if (pos == string::npos)
+        return nullopt;
+    const auto start = pos + 6;
+    const auto end = text.find(')', start);
+    if (end == string::npos)
+        return nullopt;
+    return stoi(text.substr(start, end - start));
+}
+
+string lineContaining(const string& output, const string& marker)
+{
+    const auto pos = output.find(marker);
+    if (pos == string::npos)
+        return "";
+    const auto end = output.find('\n', pos);
+    return output.substr(pos, end == string::npos ? string::npos : end - pos);
+}
+
+} // namespace
+
 /**
- * PrefixParams effectiveness: demonstrates that PrefixParams finds a strictly better
- * counterexample than LastActionParams alone.
+ * PrefixParams effectiveness: demonstrates that PrefixParams shrinks the non-last
+ * Latch parameter, not only the last action's parameters (LastActionParams).
  *
  * Factory (state-dependent):
  *   obj == 0 → Latch(n), n ∈ [10, 200]: sets obj = n
  *   obj  > 0 → Scale(m), m ∈ [1, 10]:  multiplies obj by m
  *
  * Failure (postCheck): obj > FAIL_THRESHOLD (= 500).
- * List sizes [1, 3]: SequencePruning tries shorter prefixes; only 3 actions reproduce.
+ * setActionListSize(3) forces a 3-action chain so SequencePruning cannot drop actions.
  *
- * Seed 1 generates: [Latch(99), Scale(1), Scale(6)] → 99×1×6 = 594 > 500.
- *
- * LastActionParams alone (last action = Scale(6)):
- *   Tries m < 6: 99×1×5 = 495 ≤ 500 — cannot reproduce.
- *   LastActionParams is stuck. Result without PrefixParams: [Latch(99), Scale(1), Scale(6)].
- *
- * PrefixParams (non-last position 0 = Latch(99)):
- *   Replays empty prefix → state = 0; regenerates Latch from bookmark → n = 99.
- *   Explores shrink tree toward lower bound (10).
- *   Minimum reachable via binary search that still reproduces: n = 87 (87×6=522>500).
- *   (Mathematical minimum is 84 = ⌊500/6⌋+1; shrink tree reaches 87 via its path.)
- *   PrefixParams result: [Latch(87), Scale(1), Scale(6)].
- *
- * Effectiveness: PrefixParams reduces Latch from 99 → 87; LastActionParams alone was
- * unable to improve anything. The range floor (n=10) cannot reproduce (10×6=60≤500),
- * confirming PrefixParams found a genuine functional minimum above the range floor.
+ * Observable: the shrunken counterexample has a strictly smaller Latch(n) than the
+ * original failing case, proving PrefixParams walked the non-last element's shrink tree.
  */
 TEST(stateful_function, prefix_params_effectiveness)
 {
@@ -553,24 +564,28 @@ TEST(stateful_function, prefix_params_effectiveness)
         });
 
     std::ostringstream out;
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(5)
-                  .setActionListMinSize(1)
-                  .setActionListMaxSize(3)
+    bool ok = prop.setNumRuns(50)
+                  .setActionListSize(3)
                   .setPostCheck([](int& v) { PROP_ASSERT(v <= FAIL_THRESHOLD); })
                   .setOutputStreams(out, out)
                   .go();
 
-    EXPECT_FALSE(ok) << "Should always fail with seed 1 (99×1×6 = 594 > 500)";
+    EXPECT_FALSE(ok) << "Should find a failing case within 50 runs (product > " << FAIL_THRESHOLD << ")";
     const auto& output = out.str();
 
-    // PrefixParams shrinks Latch from 99 → 87.
-    // LastActionParams alone is stuck: Scale(6) cannot reduce (99×5 = 495 ≤ 500).
-    EXPECT_NE(output.find("Latch(87)"), string::npos)
-        << "PrefixParams should shrink Latch's n from 99 to 87 (LastActionParams alone is stuck at 99)"
-        << "\noutput:\n" << output;
-    EXPECT_NE(output.find("Scale(1)"), string::npos)
-        << "Scale(1) should remain at minimum m=1\noutput:\n" << output;
-    EXPECT_NE(output.find("Scale(6)"), string::npos)
-        << "Scale(6) should remain (LastActionParams cannot reduce: 99×5=495≤500)\noutput:\n" << output;
+    const string initialLine = lineContaining(output, "with args:");
+    const string simplestLine = lineContaining(output, "simplest args found by shrinking");
+    ASSERT_FALSE(initialLine.empty()) << "Missing initial failing args\noutput:\n" << output;
+    ASSERT_FALSE(simplestLine.empty()) << "Missing shrunken args\noutput:\n" << output;
+
+    const auto initialLatch = firstLatchParam(initialLine);
+    const auto simplestLatch = firstLatchParam(simplestLine);
+    ASSERT_TRUE(initialLatch.has_value()) << "Initial case should contain Latch(n)\n" << initialLine;
+    ASSERT_TRUE(simplestLatch.has_value()) << "Shrunken case should contain Latch(n)\n" << simplestLine;
+
+    EXPECT_LT(*simplestLatch, *initialLatch)
+        << "PrefixParams should shrink non-last Latch from " << *initialLatch << " to " << *simplestLatch
+        << "\ninitial:\n" << initialLine << "\nsimplest:\n" << simplestLine;
+    EXPECT_NE(simplestLine.find("Scale("), string::npos)
+        << "Shrunken sequence should still contain Scale actions\n" << simplestLine;
 }

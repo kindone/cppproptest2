@@ -24,26 +24,35 @@ using namespace proptest;
  */
 TEST(FlatMapEdgeCases, flatmap_U_axis_reachable_at_root)
 {
-    Random rand(42);
-
-    // Find a seed that generates a root with T >= 2 and U >= 1 so shrinks exist on both axes
-    Shrinkable<pair<int,int>> root = gen::interval(2, 10).flatMap<pair<int,int>>([](const int& t) {
+    auto gen = gen::interval(2, 10).flatMap<pair<int,int>>([](const int& t) {
         return gen::interval(0, t - 1).map<pair<int,int>>([t](const int& u) {
             return util::make_pair(t, u);
         });
-    })(rand);
+    });
 
-    const int rootT = root.getRef().first;
-    const int rootU = root.getRef().second;
-
-    // Scan direct children of root for a U-axis shrink: same T, strictly smaller U
+    // Sample enough generated roots until U >= 1 (U=0 has no smaller U-axis shrink).
     bool uAxisShrinkAtRoot = false;
-    auto shrinks = root.getShrinks();
-    for (auto itr = shrinks.template iterator<Shrinkable<pair<int,int>>::StreamElementType>(); itr.hasNext();) {
-        auto child = itr.next();
-        auto childVal = child.template getRef<pair<int,int>>();
-        if (childVal.first == rootT && childVal.second < rootU) {
-            uAxisShrinkAtRoot = true;
+    int rootT = 0;
+    int rootU = 0;
+    Random rand(0);
+    for (int attempt = 0; attempt < 512; ++attempt) {
+        Shrinkable<pair<int,int>> root = gen(rand);
+        rootT = root.getRef().first;
+        rootU = root.getRef().second;
+        if (rootU < 1) {
+            continue;
+        }
+
+        auto shrinks = root.getShrinks();
+        for (auto itr = shrinks.template iterator<Shrinkable<pair<int,int>>::StreamElementType>(); itr.hasNext();) {
+            auto child = itr.next();
+            auto childVal = child.template getRef<pair<int,int>>();
+            if (childVal.first == rootT && childVal.second < rootU) {
+                uAxisShrinkAtRoot = true;
+                break;
+            }
+        }
+        if (uAxisShrinkAtRoot) {
             break;
         }
     }
