@@ -26,6 +26,9 @@ endif()
 # add_subdirectory("proptest")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag("-Wno-character-conversion" COMPILER_SUPPORTS_WNO_CHARACTER_CONVERSION)
+
 include(FetchContent)
 FetchContent_Declare(
   googletest
@@ -36,7 +39,7 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 # Global -Werror applies to FetchContent deps; Clang 21+ warns on gtest's char8_t printers.
-if(NOT MSVC)
+if(NOT MSVC AND COMPILER_SUPPORTS_WNO_CHARACTER_CONVERSION)
   foreach(_gtest_dep gtest gtest_main gmock gmock_main)
     if(TARGET ${_gtest_dep})
       target_compile_options(${_gtest_dep} PRIVATE -Wno-character-conversion)
