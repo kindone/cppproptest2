@@ -589,3 +589,191 @@ TEST(stateful_function, prefix_params_effectiveness)
     EXPECT_NE(simplestLine.find("Scale("), string::npos)
         << "Shrunken sequence should still contain Scale actions\n" << simplestLine;
 }
+
+// ── Non-copyable ObjectType: shared_ptr workaround and its shrinker limitation ──
+//
+// Problem: statefulProperty requires ObjectType to be copy-constructible at three
+// sites (invoke() pre-simulation, runCandidate(), applyStatefulShrinkTree Phase 2b).
+// For identity-typed objects (mutex-owning, resource-owning) that are semantically
+// non-copyable, the only current workaround is shared_ptr<T> as the ObjectType.
+//
+// The workaround compiles but silently breaks shrinker isolation: a shared_ptr
+// "copy" is a refcount bump aliasing the same underlying object.  Shrink candidates
+// are validated against already-mutated state instead of a fresh initial state,
+// so the shrinker reports spurious minimal counterexamples.
+//
+// Fix tracked as: HDBPROPTEST-11 (factory-based initial-state regeneration).
+// Idea: store Function<ObjectType()> closing over (initialGen + Random snapshot)
+// instead of ObjectType value.  Every replay calls the factory for a truly fresh
+// instance.  Requires compile-time constraint shift: copy-constructible → move-
+// constructible-or-factory-returnable.
+
+namespace {
+
+// A type that explicitly deletes its copy constructor — stands in for a
+// mutex-owning or resource-owning "identity" object.
+struct NonCopyableCounter {
+    explicit NonCopyableCounter(int v = 0) : value(v) {}
+    NonCopyableCounter(const NonCopyableCounter&) = delete;
+    NonCopyableCounter& operator=(const NonCopyableCounter&) = delete;
+    NonCopyableCounter(NonCopyableCounter&&) = default;
+    int value;
+};
+
+// Scenario constants used by both tests below.
+// n ∈ [1, 3], THRESHOLD = 5.
+// Only valid 2-action failing CE from a clean counter: [Add(3), Add(3)] (sum=6>5).
+// Any 2-action sequence with max(n_i) ≤ 2 gives sum ≤ 2+3=5 ≤ THRESHOLD — a PASS.
+constexpr int NON_COPYABLE_N_MAX = 3;
+constexpr int NON_COPYABLE_THRESHOLD = 5;
+
+using CounterPtr = shared_ptr<NonCopyableCounter>;
+
+auto makeNonCopyableAddGen()
+{
+    return gen::interval(1, NON_COPYABLE_N_MAX).map<SimpleAction<CounterPtr>>([](const int& n) {
+        return SimpleAction<CounterPtr>(PROP_ACTION_NAME("Add", n),
+            [n](CounterPtr& ptr) { ptr->value += n; });
+    });
+}
+
+} // anonymous namespace
+
+/**
+ * Non-copyable workaround: shared_ptr<T> compiles and finds failures at runtime.
+ *
+ * This test verifies that using shared_ptr<NonCopyableCounter> as ObjectType is
+ * a valid workaround for the copy-constructibility requirement — the property runs
+ * to completion and detects actual failures.  Shrinker output quality is a
+ * separate concern (see the DISABLED test below).
+ */
+TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
+{
+    // Workaround: wrap the non-copyable type in shared_ptr so that the three
+    // copy sites (invoke pre-sim, runCandidate, shrink_pipeline Phase 2b) only
+    // copy the pointer (refcount bump), not the underlying NonCopyableCounter.
+    auto addGen = makeNonCopyableAddGen();
+    auto prop = statefulProperty<CounterPtr>(
+        gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+        addGen);
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(200)
+                  .setActionListMinSize(2)
+                  .setActionListMaxSize(4)
+                  .setPostCheck([](CounterPtr& ptr) {
+                      PROP_ASSERT(ptr->value <= NON_COPYABLE_THRESHOLD);
+                  })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    // The workaround compiles and the framework correctly detects the failure.
+    EXPECT_FALSE(ok) << "Should find a failing action sequence (sum of Add(n) > THRESHOLD)";
+    EXPECT_NE(out.str().find("simplest args found by shrinking"), string::npos)
+        << "Shrinker should run and emit output";
+}
+
+/**
+ * BUG DOCUMENTATION: shared_ptr workaround causes shrinker to accumulate state.
+ *
+ * This test PASSES NOW because the bug is present.  When HDBPROPTEST-11
+ * (factory-based initial-state regeneration) lands, this test should be deleted
+ * and the DISABLED test below should be enabled instead.
+ *
+ * Root cause: shared_ptr copies in runCandidate() and shrink_pipeline Phase 2b
+ * alias the same underlying NonCopyableCounter.  After each candidate replay,
+ * the counter's value has grown — the next candidate starts from the accumulated
+ * state instead of from 0.
+ *
+ * Observable symptom: the "simplest" CE contains Add(1), which from a clean
+ * initial counter (value=0) gives sum ≤ 1 + 3 = 4 ≤ THRESHOLD=5 — a PASS, not
+ * a failure.  A correct shrinker would report [Add(3), Add(3)] (sum=6>5).
+ */
+TEST(stateful_function, non_copyable_shared_ptr_shrinker_accumulates_state_bug)
+{
+    auto addGen2 = makeNonCopyableAddGen();
+    auto prop = statefulProperty<CounterPtr>(
+        gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+        addGen2);
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(200)
+                  .setActionListMinSize(2)
+                  .setActionListMaxSize(4)
+                  .setShrinkMaxRetries(1)
+                  .setPostCheck([](CounterPtr& ptr) {
+                      PROP_ASSERT(ptr->value <= NON_COPYABLE_THRESHOLD);
+                  })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok);
+    const auto& output = out.str();
+
+    // Extract the "simplest args" line to inspect the reported minimal CE.
+    const auto simplestPos = output.find("simplest args found by shrinking");
+    ASSERT_NE(simplestPos, string::npos) << "Shrinker must have fired\n" << output;
+    const auto simplestEnd = output.find('\n', simplestPos);
+    const string simplestLine = output.substr(simplestPos, simplestEnd - simplestPos);
+
+    // BUG: accumulated counter state causes the shrinker to accept Add(1) as a
+    // "failing" action even though it cannot exceed THRESHOLD from a clean counter.
+    // This assertion documents the wrong behavior — it is currently TRUE (bug present).
+    EXPECT_NE(simplestLine.find("Add(1)"), string::npos)
+        << "BUG CONFIRMED: Add(1) in minimal CE demonstrates shrinker state accumulation.\n"
+           "From a clean counter: 1 + max(3) = 4 <= THRESHOLD=5 — this CE is a false positive.\n"
+           "True minimal CE is [Add(3), Add(3)] (sum=6>5).\n"
+           "simplest line: " << simplestLine;
+}
+
+/**
+ * TARGET BEHAVIOR after HDBPROPTEST-11 (factory-based initial-state regeneration).
+ *
+ * This test is DISABLED because it documents CORRECT shrinker behavior that the
+ * shared_ptr workaround cannot provide.  Enable it — and delete the
+ * non_copyable_shared_ptr_shrinker_accumulates_state_bug test above — once the
+ * factory-based regeneration approach is implemented.
+ *
+ * Expected post-fix behavior:
+ *   The shrinker regenerates the initial state via the factory closure on every
+ *   candidate replay, so state does not accumulate.  The true minimal CE
+ *   [Add(3), Add(3)] (the only 2-action sequence with n_i ∈ [1,3] summing to > 5)
+ *   is correctly identified.  Add(1) and Add(2) must not appear in the minimal CE.
+ */
+TEST(stateful_function, DISABLED_non_copyable_correct_shrinker_after_hdbproptest11)
+{
+    auto addGen3 = makeNonCopyableAddGen();
+    auto prop = statefulProperty<CounterPtr>(
+        gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+        addGen3);
+
+    std::ostringstream out;
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(200)
+                  .setActionListMinSize(2)
+                  .setActionListMaxSize(4)
+                  .setShrinkMaxRetries(1)
+                  .setPostCheck([](CounterPtr& ptr) {
+                      PROP_ASSERT(ptr->value <= NON_COPYABLE_THRESHOLD);
+                  })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok);
+    const auto& output = out.str();
+
+    const auto simplestPos = output.find("simplest args found by shrinking");
+    ASSERT_NE(simplestPos, string::npos) << "Shrinker must have fired\n" << output;
+    const auto simplestEnd = output.find('\n', simplestPos);
+    const string simplestLine = output.substr(simplestPos, simplestEnd - simplestPos);
+
+    // After the fix: only Add(3) may appear in the minimal CE (true minimum).
+    EXPECT_NE(simplestLine.find("Add(3)"), string::npos)
+        << "True minimal CE must contain Add(3)\nsimplest: " << simplestLine;
+    EXPECT_EQ(simplestLine.find("Add(1)"), string::npos)
+        << "Add(1) must NOT appear: 1+3=4<=5 passes from a clean counter\nsimplest: " << simplestLine;
+    EXPECT_EQ(simplestLine.find("Add(2)"), string::npos)
+        << "Add(2) must NOT appear: 2+3=5<=5 passes from a clean counter\nsimplest: " << simplestLine;
+}
