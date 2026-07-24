@@ -605,7 +605,10 @@ bool StatefulProperty<ObjectType, ModelType>::invoke(Random& rand)
 template <typename ObjectType, typename ModelType>
 void StatefulProperty<ObjectType, ModelType>::writeArgs(ostream& os, const vector<ShrinkableBase>& args) const
 {
-    os << "{ initial: " << Show<ShrinkableBase, ObjectType>(args[0]);
+    // args[0] holds a Function<ObjectType()> factory; call it once for display.
+    const auto& displayFactory = args[0].getAny().template getRef<Function<ObjectType()>>();
+    auto displayShr = make_shrinkable<ObjectType>(displayFactory());
+    os << "{ initial: " << Show<ShrinkableBase, ObjectType>(displayShr);
     if (args.size() > 1) {
         if (maxConcurrency == 0)
             os << ", actions: " << Show<ShrinkableBase, ActionList>(args[1]);
@@ -624,7 +627,10 @@ pair<bool, string> StatefulProperty<ObjectType, ModelType>::runCandidate(const v
         if (onStartup)
             onStartup();
 
-        ObjectType obj = args[0].getAny().template getRef<ObjectType>();
+        // args[0] holds a Function<ObjectType()> factory (set in handleShrink).
+        // Call it to get a fresh initial state for this candidate replay.
+        const auto& initialFactory = args[0].getAny().template getRef<Function<ObjectType()>>();
+        ObjectType obj = initialFactory();
         ModelType model = modelFactory(obj);
         const auto& front = args[1].getAny().template getRef<ActionList>();
 
@@ -742,20 +748,36 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     };
 
     Random rand(savedRand);
-    auto initialShr = initialGen(rand);
 
-    ObjectType initialObj = initialShr.getRef();
+    // Snapshot the RNG state *before* generating the initial object so we can
+    // reproduce a fresh, equivalent initial state on every shrink-candidate
+    // replay.  This eliminates the shared_ptr aliasing problem: instead of
+    // copying a shared_ptr (which aliases the same underlying object and causes
+    // state to accumulate across replays), each replay calls the factory and
+    // gets a brand-new instance.  Fix for HDBPROPTEST-11.
+    Random randBeforeInitial = rand;
+    initialGen(rand);  // advance rand past initial-state generation (result not used)
+
+    Function<ObjectType()> initialFactory =
+        [capturedGen = initialGen, seed = randBeforeInitial]() -> ObjectType {
+            Random r = seed;                          // fresh RNG copy per call
+            Shrinkable<ObjectType> shr = capturedGen(r);
+            return std::move(shr.getMutableRef());    // move value out of Shrinkable
+        };
+
+    // Use the factory to get fresh initial objects: no shared aliasing.
+    ObjectType initialObj = initialFactory();
     ModelType initialModel = modelFactory(initialObj);
 
-    ObjectType frontObj = initialObj;
-    ModelType frontModel = initialModel;
+    ObjectType frontObj = initialFactory();  // independent fresh object for front replay
+    ModelType frontModel = modelFactory(frontObj);
     const size_t frontSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);
     auto frontActionShrinkables = genActionShrinkables(
         rand, frontObj, frontModel, actionGenFactory, frontSize);
 
     auto wrappedFront = applyStatefulShrinkTree(
         frontActionShrinkables, actionListMinSize,
-        initialObj, modelFactory, actionGenFactory);
+        initialFactory, modelFactory, actionGenFactory);
 
     struct RearShrinkables {
         Shrinkable<ActionList> wrapped;
@@ -787,8 +809,13 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     shrVec.reserve(2 + rearShrinkablesList.size());
     shrinksVec.reserve(2 + rearShrinkablesList.size());
 
-    shrVec.push_back(initialShr);
-    shrinksVec.push_back(initialShr.getShrinks());
+    // args[0] stores the factory, not the ObjectType value.
+    // runCandidate calls the factory to regenerate a fresh initial state per replay.
+    // No shrink tree for the initial state (the factory is deterministic; shrinking
+    // the action list dominates minimization for stateful properties).
+    auto factoryShr = make_shrinkable<Function<ObjectType()>>(initialFactory);
+    shrVec.push_back(factoryShr);
+    shrinksVec.push_back(factoryShr.getShrinks());  // empty — no initial-state shrinking
     shrVec.push_back(wrappedFront);
     shrinksVec.push_back(wrappedFront.getShrinks());
 

@@ -78,13 +78,18 @@ Shrinkable<vector<ShrinkableBase>> genActionShrinkables(
  * @param modelFactory  Factory returning a fresh ModelType from an ObjectType.
  *                      For rear threads in concurrency, pass a lambda returning the
  *                      pre-computed post-front model regardless of obj.
+ * @param initialFactory    Nullary factory producing a fresh initial ObjectType on each call.
+ *                          Using a factory instead of a stored value ensures that every
+ *                          shrink-candidate replay starts from a clean initial state even
+ *                          when ObjectType is not copy-constructible (e.g. shared_ptr<T>
+ *                          workaround where copies alias the same underlying object).
  * @param actionGenFactory  State-dependent action generator factory.
  */
 template <typename ObjectType, typename ModelType>
 Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
     Shrinkable<vector<ShrinkableBase>> actionShrinkables,
     size_t minSize,
-    const ObjectType& initial,
+    const Function<ObjectType()>& initialFactory,
     const Function<ModelType(const ObjectType&)>& modelFactory,
     const ActionGenFactory<ObjectType, ModelType>& actionGenFactory)
 {
@@ -100,15 +105,17 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
     // PrefixParams: state-aware bookmark-based shrinking for each non-last position.
     // Replays prefix [0,i) to reconstruct live state at position i, regenerates
     // the action from its stored bookmark, yields shrinks of that fresh tree.
+    // Each replay calls initialFactory() for a fresh initial state — this is the
+    // key fix for non-copyable ObjectType: no aliasing across replays.
     auto withPhase2b = withPhase2.concat(
-        [initial, modelFactory, actionGenFactory, minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
+        [initialFactory, modelFactory, actionGenFactory, minSize](ShrinkableBase& nodeShr) -> ShrinkableBase::StreamType {
             const auto& vec = nodeShr.getRef<vector<ShrinkableBase>>();
             if (vec.size() <= 1)
                 return ShrinkableBase::StreamType::empty();
 
             Stream result = Stream::empty();
             for (size_t i = 0; i + 1 < vec.size(); i++) {
-                ObjectType simObj = initial;
+                ObjectType simObj = initialFactory();  // fresh instance per slot replay
                 ModelType simModel = modelFactory(simObj);
                 bool replayFailed = false;
                 for (size_t j = 0; j < i && !replayFailed; j++) {
@@ -171,6 +178,29 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
             return Shrinkable<list<ActionType>>(
                 util::make_any<list<ActionType>>(util::move(resultPtr)));
         });
+}
+
+/**
+ * Backward-compatible overload: wraps a stored initial value in a factory.
+ *
+ * Used for the concurrent rear-thread path where the "initial" state is
+ * the post-front state (a specific, already-advanced ObjectType value).
+ * For copyable types this produces the same behaviour as before.
+ * For shared_ptr workarounds the alias issue in concurrent tests is a
+ * separate concern (tracked as HDBPROPTEST-12).
+ */
+template <typename ObjectType, typename ModelType>
+Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
+    Shrinkable<vector<ShrinkableBase>> actionShrinkables,
+    size_t minSize,
+    const ObjectType& initial,
+    const Function<ModelType(const ObjectType&)>& modelFactory,
+    const ActionGenFactory<ObjectType, ModelType>& actionGenFactory)
+{
+    return applyStatefulShrinkTree<ObjectType, ModelType>(
+        actionShrinkables, minSize,
+        [initial]() -> ObjectType { return initial; },
+        modelFactory, actionGenFactory);
 }
 
 } // namespace stateful
