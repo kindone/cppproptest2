@@ -187,7 +187,7 @@ Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(
  * the post-front state (a specific, already-advanced ObjectType value).
  * For copyable types this produces the same behaviour as before.
  * For shared_ptr workarounds the alias issue in concurrent tests is a
- * separate concern (tracked as HDBPROPTEST-12).
+ * separate concern.
  */
 template <typename ObjectType, typename ModelType>
 Shrinkable<list<Action<ObjectType, ModelType>>> applyStatefulShrinkTree(

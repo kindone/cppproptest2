@@ -754,7 +754,7 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     // replay.  This eliminates the shared_ptr aliasing problem: instead of
     // copying a shared_ptr (which aliases the same underlying object and causes
     // state to accumulate across replays), each replay calls the factory and
-    // gets a brand-new instance.  Fix for HDBPROPTEST-11.
+    // gets a brand-new instance.
     Random randBeforeInitial = rand;
     initialGen(rand);  // advance rand past initial-state generation (result not used)
 

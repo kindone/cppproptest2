@@ -564,7 +564,8 @@ TEST(stateful_function, prefix_params_effectiveness)
         });
 
     std::ostringstream out;
-    bool ok = prop.setNumRuns(50)
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(50)
                   .setActionListSize(3)
                   .setPostCheck([](int& v) { PROP_ASSERT(v <= FAIL_THRESHOLD); })
                   .setOutputStreams(out, out)
@@ -602,7 +603,7 @@ TEST(stateful_function, prefix_params_effectiveness)
 // are validated against already-mutated state instead of a fresh initial state,
 // so the shrinker reports spurious minimal counterexamples.
 //
-// Fix tracked as: HDBPROPTEST-11 (factory-based initial-state regeneration).
+// Fix: factory-based initial-state regeneration.
 // Idea: store Function<ObjectType()> closing over (initialGen + Random snapshot)
 // instead of ObjectType value.  Every replay calls the factory for a truly fresh
 // instance.  Requires compile-time constraint shift: copy-constructible → move-
@@ -675,7 +676,7 @@ TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
 }
 
 /**
- * HDBPROPTEST-11 fixed: factory-based regeneration produces correct minimal CE.
+ * Factory-based regeneration produces the correct minimal counterexample.
  *
  * The shrinker stores a Function<ObjectType()> factory in args[0] (capturing
  * initialGen + a Random snapshot) instead of the ObjectType value.  Every
@@ -686,7 +687,7 @@ TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
  * n_i ∈ [1,3] whose sum (6) exceeds THRESHOLD (5) from a clean counter.
  * Add(1) and Add(2) cannot appear because 1+3=4 and 2+3=5 both ≤ THRESHOLD.
  */
-TEST(stateful_function, non_copyable_correct_minimal_ce_after_hdbproptest11)
+TEST(stateful_function, non_copyable_correct_minimal_ce_after_factory_regeneration)
 {
     auto addGen2 = makeNonCopyableAddGen();
     auto prop = statefulProperty<CounterPtr>(
