@@ -335,7 +335,7 @@ prop.forAll(gen::interval(0, 100), gen::interval(0, 100));  // Override generato
 EXPECT_TRUE(prop.forAll().matrix({1, 2}, {3, 4}).example(5, 6));
 ```
 
-**See also:** [Testing a Property](#testing-a-property), [Configuring test runs](#configuring-test-runs)
+**See also:** [Property::forAll](#propertyforallgenerators), [Configuration](#configuration)
 
 ### `Property::example(...args)`
 
@@ -638,7 +638,7 @@ forAll([](int x, int y) {
 });
 ```
 
-### Stat assertion macros
+### Stat assertion macros { #prop_stat_assert_macros }
 
 Assert that the ratio of runs where an expression is true falls within bounds. Bounds are ratios in [0, 1]. Assertions are evaluated after the main loop.
 

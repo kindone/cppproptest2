@@ -715,7 +715,7 @@ forAll([](std::optional<int> maybeValue) {
 
 ---
 
-### `gen::shared_ptr<T>`
+### `gen::shared_ptr<T>` { #gensharedptrt }
 
 Generates random shared pointers to values of type `T`.
 

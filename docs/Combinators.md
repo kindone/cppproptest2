@@ -196,7 +196,7 @@ The `gen::*` functions are the underlying implementations for the utility method
 | [`gen::interval<T>`](#genintervalt), [`gen::natural<T>`](#gennaturalt), etc. | Numeric ranges | [Generators.md](Generators.md#utility-numeric-range-generators) |
 | [`gen::pair`](#genpairt1t2), [`gen::tuple`](#gentuplets) | Combine generators | — |
 | [`gen::oneOf<T>`](#genoneoft) | Select from multiple generators | — |
-| [`gen::construct<T,Args...>`](#genconstructt-args) | Generate via constructor | — |
+| [`gen::construct<T,Args...>`](#genconstructtargs) | Generate via constructor | — |
 | [`gen::filter<T>`](#genfiltert) | Filter by predicate | [`.filter()`](#filterfilterer) |
 | [`gen::noShrink`](#gennoshrink) | Same values, but with empty shrink stream | [`.noShrink()`](#noshrink) |
 | [`gen::transform<T,U>`](#gentransformtu) | Transform to another type | [`.map<U>()`](#mapumapper) |
@@ -444,7 +444,7 @@ Alias of `gen::oneOf<T>`.
 
 Generate objects of a class or struct type `T` by calling a matching constructor.
 
-#### `gen::construct<T, Args...>`
+#### `gen::construct<T, Args...>` { #genconstructtargs }
 
 Generates an object of type `T` by calling its constructor that matches the signature `(ARG1, ..., ARGN)`. Custom generators can be supplied for generating arguments. If fewer generators are provided than constructor arguments, the remaining arguments are generated using their default `Arbi` generators.
 
