@@ -11,7 +11,7 @@
 * Concurrency testing support for testing concurrent state changes
 
 
-You can get started with `cppproptest` on the [Documentation Page](https://kindone.github.io/cppproptest).
+You can get started with `cppproptest` on the [Documentation Page](https://kindone.github.io/cppproptest2).
 
 ## License
 
