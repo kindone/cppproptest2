@@ -772,10 +772,6 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
             return std::move(shr.getMutableRef());    // move value out of Shrinkable
         };
 
-    // Use the factory to get fresh initial objects: no shared aliasing.
-    ObjectType initialObj = initialFactory();
-    ModelType initialModel = modelFactory(initialObj);
-
     ObjectType frontObj = initialFactory();  // independent fresh object for front replay
     ModelType frontModel = modelFactory(frontObj);
     const size_t frontSize = rand.getRandomSize(actionListMinSize, actionListMaxSize + 1);

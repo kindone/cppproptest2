@@ -282,6 +282,40 @@ TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
     EXPECT_NE(stats->argsAsString.find("initial:"), string::npos);
 }
 
+TEST(stateful_function, shrink_setup_does_not_build_unused_initial_model)
+{
+    int initialCalls = 0;
+    int modelFactoryCalls = 0;
+
+    auto initGen = gen::lazy<shared_ptr<int>>([&initialCalls] {
+        ++initialCalls;
+        return util::make_shared<int>(0);
+    });
+    auto noopGen = gen::just(Action<shared_ptr<int>, int>("Noop", [](shared_ptr<int>&, int&) {}));
+    auto prop = statefulProperty<shared_ptr<int>, int>(
+        initGen,
+        Function<int(const shared_ptr<int>&)>([&modelFactoryCalls](const shared_ptr<int>& ptr) {
+            ++modelFactoryCalls;
+            return *ptr;
+        }),
+        noopGen);
+
+    stringstream out;
+    bool ok = prop.setSeed(0)
+                  .setNumRuns(1)
+                  .setActionListSize(0)
+                  .setPostCheck([](shared_ptr<int>&, int&) { PROP_ASSERT(false); })
+                  .setOutputStreams(out, out)
+                  .go();
+
+    EXPECT_FALSE(ok);
+    EXPECT_EQ(modelFactoryCalls, 2)
+        << "modelFactory should be called for the original run and front replay, "
+        << "not for an unused discarded initial state";
+    EXPECT_EQ(initialCalls, 4)
+        << "initial generator calls should be original run, RNG advance, front replay, and display";
+}
+
 /**
  * Verifies LastActionParams shrinking for state-dependent stateful tests.
  *
@@ -303,7 +337,7 @@ TEST(stateful_function, shrink_last_action_params)
     });
 
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(1)
                   .setNumRuns(20)
                   .setActionListMinSize(1)
@@ -367,7 +401,7 @@ TEST(stateful_function, shrink_prefix_params_non_last)
             return gen::just(SimpleAction<int>("Observe", [](int&) {}));
         });
 
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(1)
                   .setNumRuns(5)
                   .setActionListSize(2)
@@ -445,7 +479,7 @@ TEST(stateful_function, shrink_prefix_params_state_machine)
                 [](int&, ThreeStateModel&) {}));
         });
 
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(1)
                   .setNumRuns(5)
                   .setActionListSize(3)
@@ -487,7 +521,7 @@ TEST(stateful_function, shrink_prefix_params_single_guard)
     });
 
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(1)
                   .setNumRuns(20)
                   .setActionListSize(1)
@@ -563,7 +597,7 @@ TEST(stateful_function, prefix_params_effectiveness)
                 });
         });
 
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(0)
                   .setNumRuns(50)
                   .setActionListSize(3)
@@ -684,10 +718,10 @@ TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
     // copy the pointer (refcount bump), not the underlying NonCopyableCounter.
     auto addGen = makeNonCopyableAddGen();
     auto prop = statefulProperty<CounterPtr>(
-        gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+        gen::lazy<CounterPtr>([] { return util::make_shared<NonCopyableCounter>(0); }),
         addGen);
 
-    std::ostringstream out;
+    stringstream out;
     bool ok = prop.setSeed(0)
                   .setNumRuns(200)
                   .setActionListMinSize(2)
@@ -729,10 +763,10 @@ TEST(stateful_function, non_copyable_reported_counterexamples_replay_from_clean_
             ? makeNonCopyableAdd3ShrinkTo2Gen()
             : makeNonCopyableAddGen();
         auto prop = statefulProperty<CounterPtr>(
-            gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+            gen::lazy<CounterPtr>([] { return util::make_shared<NonCopyableCounter>(0); }),
             addGen);
 
-        std::ostringstream out;
+        stringstream out;
         vector<ActionList> acceptedActionLists;
         bool ok = prop.setNumRuns(subdomain.runs)
                       .setActionListMinSize(subdomain.minSize)
