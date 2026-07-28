@@ -224,6 +224,12 @@ public:
         return *this;
     }
 
+    StatefulProperty& setOnShrinkAccepted(Function<void(const vector<Any>&, const string&)> f)
+    {
+        onShrinkAccepted = util::move(f);
+        return *this;
+    }
+
     optional<ReproductionStats> getLastReproductionStats() const { return lastReproductionStats; }
 
     StatefulProperty& setOnStartup(Function<void()> _onStartup)
@@ -334,6 +340,7 @@ private:
     Function<void()> onCleanup;
     Function<void(ReproductionStats)> onReproductionStats;
     Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
+    Function<void(const vector<Any>&, const string&)> onShrinkAccepted;
     ostream* outputStream = &cout;
     ostream* errorStream = &cerr;
 
@@ -854,6 +861,16 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
         return {false, ""};
     };
 
+    auto notifyShrinkAccepted = [this](const vector<ShrinkableBase>& args, const string& failureMsg) {
+        if (!onShrinkAccepted)
+            return;
+        vector<Any> argsVec;
+        argsVec.reserve(args.size());
+        for (const auto& arg : args)
+            argsVec.push_back(arg.getAny());
+        onShrinkAccepted(argsVec, failureMsg);
+    };
+
     if (useRetry)
         assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
 
@@ -876,6 +893,7 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
                 *outputStream << endl;
                 if (!msg.empty())
                     *outputStream << "    by failed expectation: " << msg << endl;
+                notifyShrinkAccepted(shrVec, msg);
                 if (useRetry && kReassessOnEachSucessfulShrink)
                     assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
                 break;
@@ -916,6 +934,7 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
                 *outputStream << endl;
                 if (!failureMsg.empty())
                     *outputStream << "    by failed expectation: " << failureMsg << endl;
+                notifyShrinkAccepted(shrVec, failureMsg);
                 if (useRetry && kReassessOnEachSucessfulShrink)
                     assessFailureForRetry(shrVec, candidateTimeoutMs, assessmentIndex++);
             } else {

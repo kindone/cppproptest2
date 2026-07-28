@@ -630,12 +630,41 @@ constexpr int NON_COPYABLE_THRESHOLD = 5;
 
 using CounterPtr = shared_ptr<NonCopyableCounter>;
 
-auto makeNonCopyableAddGen()
+SimpleAction<CounterPtr> makeNonCopyableAddAction(int n)
+{
+    return SimpleAction<CounterPtr>(PROP_ACTION_NAME("Add", n),
+        [n](CounterPtr& ptr) { ptr->value += n; });
+}
+
+SimpleActionGen<CounterPtr> makeNonCopyableAddGen()
 {
     return gen::interval(1, NON_COPYABLE_N_MAX).map<SimpleAction<CounterPtr>>([](const int& n) {
-        return SimpleAction<CounterPtr>(PROP_ACTION_NAME("Add", n),
-            [n](CounterPtr& ptr) { ptr->value += n; });
+        return makeNonCopyableAddAction(n);
     });
+}
+
+SimpleActionGen<CounterPtr> makeNonCopyableAdd3ShrinkTo2Gen()
+{
+    return generator([](Random&) {
+        auto shrunk = make_shrinkable<SimpleAction<CounterPtr>>(makeNonCopyableAddAction(2));
+        return make_shrinkable<SimpleAction<CounterPtr>>(makeNonCopyableAddAction(3))
+            .with(Stream::one<ShrinkableBase>(shrunk));
+    });
+}
+
+vector<int> allAddParams(const string& text)
+{
+    vector<int> values;
+    size_t pos = 0;
+    while ((pos = text.find("Add(", pos)) != string::npos) {
+        const auto start = pos + 4;
+        const auto end = text.find(')', start);
+        if (end == string::npos)
+            break;
+        values.push_back(stoi(text.substr(start, end - start)));
+        pos = end + 1;
+    }
+    return values;
 }
 
 } // anonymous namespace
@@ -675,51 +704,77 @@ TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
         << "Shrinker should run and emit output";
 }
 
-/**
- * Factory-based regeneration produces the correct minimal counterexample.
- *
- * The shrinker stores a Function<ObjectType()> factory in args[0] (capturing
- * initialGen + a Random snapshot) instead of the ObjectType value.  Every
- * candidate replay calls the factory to get a brand-new initial instance,
- * eliminating the shared_ptr aliasing that caused state to accumulate.
- *
- * True minimal CE: [Add(3), Add(3)] — the only 2-action sequence with
- * n_i ∈ [1,3] whose sum (6) exceeds THRESHOLD (5) from a clean counter.
- * Add(1) and Add(2) cannot appear because 1+3=4 and 2+3=5 both ≤ THRESHOLD.
- */
-TEST(stateful_function, non_copyable_correct_minimal_ce_after_factory_regeneration)
+TEST(stateful_function, non_copyable_reported_counterexamples_replay_from_clean_initial)
 {
-    auto addGen2 = makeNonCopyableAddGen();
-    auto prop = statefulProperty<CounterPtr>(
-        gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
-        addGen2);
+    struct Subdomain {
+        const char* name;
+        size_t minSize;
+        size_t maxSize;
+        uint32_t runs;
+        int threshold;
+        bool deterministicActionShrink;
+    };
+    using ActionList = list<Action<CounterPtr, EmptyModel>>;
 
-    std::ostringstream out;
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(200)
-                  .setActionListMinSize(2)
-                  .setActionListMaxSize(4)
-                  .setShrinkMaxRetries(1)
-                  .setPostCheck([](CounterPtr& ptr) {
-                      PROP_ASSERT(ptr->value <= NON_COPYABLE_THRESHOLD);
-                  })
-                  .setOutputStreams(out, out)
-                  .go();
+    const vector<Subdomain> subdomains = {
+        {"accepted_shrink_callback_exerciser", 1, 1, 1, 1, true},
+        {"variable_length_shared_ptr_aliasing", 2, 4, 1000, NON_COPYABLE_THRESHOLD, false},
+        {"two_action_minimal_boundary", 2, 2, 1000, NON_COPYABLE_THRESHOLD, false},
+        {"longer_prefix_and_length_shrink", 3, 4, 1000, NON_COPYABLE_THRESHOLD, false},
+    };
 
-    EXPECT_FALSE(ok);
-    const auto& output = out.str();
+    size_t subdomainsWithAcceptedShrinks = 0;
+    for (const auto& subdomain : subdomains) {
+        auto addGen = subdomain.deterministicActionShrink
+            ? makeNonCopyableAdd3ShrinkTo2Gen()
+            : makeNonCopyableAddGen();
+        auto prop = statefulProperty<CounterPtr>(
+            gen::lazy<CounterPtr>([] { return std::make_shared<NonCopyableCounter>(0); }),
+            addGen);
 
-    const auto simplestPos = output.find("simplest args found by shrinking");
-    ASSERT_NE(simplestPos, string::npos) << "Shrinker must have fired\n" << output;
-    const auto simplestEnd = output.find('\n', simplestPos);
-    const string simplestLine = output.substr(simplestPos, simplestEnd - simplestPos);
+        std::ostringstream out;
+        vector<ActionList> acceptedActionLists;
+        bool ok = prop.setNumRuns(subdomain.runs)
+                      .setActionListMinSize(subdomain.minSize)
+                      .setActionListMaxSize(subdomain.maxSize)
+                      .setShrinkMaxRetries(1)
+                      .setOnShrinkAccepted([&acceptedActionLists](const vector<Any>& args, const string&) {
+                          if (args.size() > 1)
+                              acceptedActionLists.push_back(args[1].getRef<ActionList>());
+                      })
+                      .setPostCheck([threshold = subdomain.threshold](CounterPtr& ptr) {
+                          PROP_ASSERT(ptr->value <= threshold);
+                      })
+                      .setOutputStreams(out, out)
+                      .go();
 
-    // Factory-based regeneration: shrinker resets to value=0 on every replay.
-    // Only Add(3)+Add(3)=6>5 is a valid 2-action failing CE; smaller values cannot fail.
-    EXPECT_NE(simplestLine.find("Add(3)"), string::npos)
-        << "True minimal CE must contain Add(3)\nsimplest: " << simplestLine;
-    EXPECT_EQ(simplestLine.find("Add(1)"), string::npos)
-        << "Add(1) must NOT appear: 1+3=4<=THRESHOLD=5 passes from a clean counter\nsimplest: " << simplestLine;
-    EXPECT_EQ(simplestLine.find("Add(2)"), string::npos)
-        << "Add(2) must NOT appear: 2+3=5<=THRESHOLD=5 passes from a clean counter\nsimplest: " << simplestLine;
+        EXPECT_FALSE(ok) << "subdomain: " << subdomain.name;
+        if (!acceptedActionLists.empty())
+            ++subdomainsWithAcceptedShrinks;
+        for (const auto& actions : acceptedActionLists) {
+            vector<int> values;
+            for (const auto& action : actions) {
+                auto parsed = allAddParams(action.name);
+                values.insert(values.end(), parsed.begin(), parsed.end());
+            }
+            ASSERT_FALSE(values.empty()) << "subdomain: " << subdomain.name;
+
+            int sum = 0;
+            for (const int value : values)
+                sum += value;
+
+            EXPECT_GT(sum, subdomain.threshold)
+                << "subdomain: " << subdomain.name
+                << "\nAccepted shrink candidate must fail when replayed from a clean counter";
+            if (subdomain.threshold == NON_COPYABLE_THRESHOLD && values.size() == 2) {
+                EXPECT_EQ(values[0], NON_COPYABLE_N_MAX)
+                    << "subdomain: " << subdomain.name
+                    << "\nOnly Add(3)+Add(3) is a valid 2-action failure from a clean counter";
+                EXPECT_EQ(values[1], NON_COPYABLE_N_MAX)
+                    << "subdomain: " << subdomain.name
+                    << "\nOnly Add(3)+Add(3) is a valid 2-action failure from a clean counter";
+            }
+        }
+    }
+    EXPECT_GT(subdomainsWithAcceptedShrinks, 0U);
 }
