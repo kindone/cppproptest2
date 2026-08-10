@@ -4,6 +4,7 @@
 
 using namespace proptest;
 using namespace proptest::stateful;
+using namespace proptest::testprofile;
 
 struct VectorModel2
 {
@@ -50,7 +51,7 @@ TEST(stateful_function, basic)
     int startupCount = 0, cleanupCount = 0;
     prop.setOnStartup([&startupCount]() { ++startupCount; });
     prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
-    prop.setSeed(0).setNumRuns(100).go();
+    prop.setSeed(kStatefulReplaySeed).setNumRuns(kStatefulContractRuns).go();
     EXPECT_GT(startupCount, 0);
     EXPECT_EQ(startupCount, cleanupCount);
 }
@@ -100,7 +101,7 @@ TEST(stateful_function, basic_model)
     prop.setOnCleanup([&cleanupCount]() { ++cleanupCount; });
     prop.setPostCheck([&postCheckCount](T&, Model&) { ++postCheckCount; });
     auto startTime = steady_clock::now();
-    prop.setSeed(0).setNumRuns(1000000).setMaxDurationMs(maxDurationMs).go();
+    prop.setSeed(kStatefulReplaySeed).setNumRuns(kDurationGuardRuns).setMaxDurationMs(maxDurationMs).go();
     auto endTime = steady_clock::now();
 
     EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), maxDurationMs);
@@ -126,7 +127,7 @@ TEST(stateful_function, onActionStart_onActionEnd_callbacks)
     auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
     prop.setOnActionStart([&startCount](T&, EmptyModel&) { ++startCount; });
     prop.setOnActionEnd([&endCount](T&, EmptyModel&) { ++endCount; });
-    prop.setSeed(0).setNumRuns(10).go();
+    prop.setSeed(kStatefulReplaySeed).setNumRuns(kSmokeRuns).go();
 
     EXPECT_GT(startCount, 0);
     EXPECT_EQ(startCount, endCount);
@@ -149,7 +150,7 @@ TEST(stateful_function, onActionEnd_invariant_check)
     prop.setOnActionEnd([](T& vec, EmptyModel&) {
         PROP_ASSERT(vec.size() < 100000);  // Invariant: size is non-negative
     });
-    prop.setSeed(0).setNumRuns(100).go();
+    prop.setSeed(kStatefulReplaySeed).setNumRuns(kStatefulContractRuns).go();
 }
 
 TEST(stateful_function, action_list_size_configuration)
@@ -157,8 +158,8 @@ TEST(stateful_function, action_list_size_configuration)
     auto incAction = gen::just(SimpleAction<int>("Inc", [](int& v) { ++v; }));
     auto prop = statefulProperty<int>(gen::just(0), incAction);
 
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setActionListSize(3)
                   .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 3); })
                   .go();
@@ -176,8 +177,8 @@ TEST(stateful_function, state_dependent_simple_action_factory)
         }
         return gen::just(SimpleAction<T>("Pop", [](T& vec) { vec.pop_back(); }));
     });
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setActionListSize(2)
                   .setPostCheck([](T& vec) { PROP_ASSERT(vec.empty()); })
                   .go();
@@ -204,8 +205,8 @@ TEST(stateful_function, state_dependent_model_action_factory)
                 --mdl.size;
             }));
         });
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setActionListSize(2)
                   .setPostCheck([](T& vec, Model& mdl) {
                       PROP_ASSERT(vec.empty());
@@ -245,8 +246,8 @@ TEST(stateful_function, state_dependent_shrink_keeps_generated_prefix)
                 }));
         });
 
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(1)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kTinyRuns)
                   .setActionListSize(2)
                   .setShrinkMaxRetries(1)
                   .setOutputStreams(out, err)
@@ -268,8 +269,8 @@ TEST(stateful_function, shrink_output_uses_labeled_stateful_args)
     auto prop = statefulProperty<int>(gen::just(0), noopAction);
 
     optional<ReproductionStats> stats = nullopt;
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(1)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kTinyRuns)
                   .setActionListSize(0)
                   .setShrinkMaxRetries(1)
                   .setOnReproductionStats([&stats](ReproductionStats s) { stats = s; })
@@ -301,8 +302,8 @@ TEST(stateful_function, shrink_setup_does_not_build_unused_initial_model)
         noopGen);
 
     stringstream out;
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(1)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kTinyRuns)
                   .setActionListSize(0)
                   .setPostCheck([](shared_ptr<int>&, int&) { PROP_ASSERT(false); })
                   .setOutputStreams(out, out)
@@ -338,8 +339,8 @@ TEST(stateful_function, shrink_last_action_params)
 
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
     stringstream out;
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setActionListMinSize(1)
                   .setActionListMaxSize(3)
                   .setOutputStreams(out, out)
@@ -402,8 +403,8 @@ TEST(stateful_function, shrink_prefix_params_non_last)
         });
 
     stringstream out;
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(5)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulFocusedRuns)
                   .setActionListSize(2)
                   .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
                   .setOutputStreams(out, out)
@@ -480,8 +481,8 @@ TEST(stateful_function, shrink_prefix_params_state_machine)
         });
 
     stringstream out;
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(5)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulFocusedRuns)
                   .setActionListSize(3)
                   .setPostCheck([](int& v, ThreeStateModel&) { PROP_ASSERT(v < THRESHOLD); })
                   .setOutputStreams(out, out)
@@ -522,8 +523,8 @@ TEST(stateful_function, shrink_prefix_params_single_guard)
 
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
     stringstream out;
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setActionListSize(1)
                   .setOutputStreams(out, out)
                   .go();
@@ -598,8 +599,8 @@ TEST(stateful_function, prefix_params_effectiveness)
         });
 
     stringstream out;
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(50)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kFailureSearchRuns)
                   .setActionListSize(3)
                   .setPostCheck([](int& v) { PROP_ASSERT(v <= FAIL_THRESHOLD); })
                   .setOutputStreams(out, out)
@@ -722,8 +723,8 @@ TEST(stateful_function, non_copyable_shared_ptr_workaround_finds_failure)
         addGen);
 
     stringstream out;
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(200)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kStatefulFrontierRuns)
                   .setActionListMinSize(2)
                   .setActionListMaxSize(4)
                   .setPostCheck([](CounterPtr& ptr) {

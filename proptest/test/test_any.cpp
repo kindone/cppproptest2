@@ -4,8 +4,10 @@
 #include "proptest/std/string.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 struct NonCopyable {
     NonCopyable(int val) : value(val) {}
@@ -42,7 +44,7 @@ struct Copyable {
 /*
 TEST(AssumptionStdAny, int_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         util::any any = 1;
         ASSERT_EQ(any.type(), typeid(int));
@@ -52,7 +54,7 @@ TEST(AssumptionStdAny, int_performance)
 
 TEST(AssumptionStdAny, string_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         util::any any = string("hello");
         ASSERT_EQ(any.type(), typeid(string));
@@ -360,7 +362,7 @@ TEST(AnyHolder, noncopyable)
 
 TEST(AnyHolder, int_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         unique_ptr<AnyHolder> holder = util::make_unique<AnyVal<int>>(100);
         ASSERT_EQ(holder->type(), typeid(int));
@@ -370,7 +372,7 @@ TEST(AnyHolder, int_performance)
 
 TEST(AnyHolder, string_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         unique_ptr<AnyHolder> holder = util::make_unique<AnyRef<string>>("hello");
         ASSERT_EQ(holder->type(), typeid(string));
@@ -531,7 +533,7 @@ TEST(Any, noncopyable_via_make_any)
 
 TEST(Any, int_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         Any any = 1;
         ASSERT_EQ(any.type(), typeid(int));
@@ -541,7 +543,7 @@ TEST(Any, int_performance)
 
 TEST(Any, string_performance)
 {
-    for(int i = 0; i < 1000000; i++)
+    for(int i = 0; i < kAnyPerformanceRuns; i++)
     {
         Any any = string("hello");
         ASSERT_EQ(any.type(), typeid(string));

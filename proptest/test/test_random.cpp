@@ -1,11 +1,13 @@
 #include "proptest/Random.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 TEST(Random, basic)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kRandomReplaySeed;
     Random rand(seed);
     Random rand2(seed);
     // EXPECT_EQ(rand, rand2);
@@ -16,10 +18,10 @@ TEST(Random, basic)
 
 TEST(Random, bool)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kRandomReplaySeed;
     Random rand(seed);
     bool trueFound = false, falseFound = false;
-    for(size_t i = 0; i < 100; i++)
+    for(size_t i = 0; i < kFloatingDomainSamples; i++)
     {
         bool val = rand.getRandomBool();
         if(val)

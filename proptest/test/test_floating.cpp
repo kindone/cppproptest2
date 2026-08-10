@@ -5,6 +5,7 @@
 #include "proptest/Shrinkable.hpp"
 #include "proptest/util/function.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 #include "proptest/std/math.hpp"
 #include "proptest/std/limits.hpp"
 #include "proptest/std/exception.hpp"
@@ -13,6 +14,7 @@
 #include <cmath>
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 TEST(FloatingGenerator, float_default_finite_only)
 {
@@ -300,11 +302,11 @@ void checkShrinkTreeDomain(const Shrinkable<T>& shrinkable, Function<bool(const 
 
 TEST(FloatingGenerator, float_finite_only_shrinks_preserve_domain)
 {
-    Random rand(42);
+    Random rand(kCompatibilitySeed);
     Arbi<float> floatGen;  // Default: finite only
 
     // Generate multiple values and check that all shrinks are finite
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto shrinkable = floatGen(rand);
         float rootVal = shrinkable.getRef();
 
@@ -324,11 +326,11 @@ TEST(FloatingGenerator, float_finite_only_shrinks_preserve_domain)
 
 TEST(FloatingGenerator, double_finite_only_shrinks_preserve_domain)
 {
-    Random rand(42);
+    Random rand(kCompatibilitySeed);
     Arbi<double> doubleGen;  // Default: finite only
 
     // Generate multiple values and check that all shrinks are finite
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto shrinkable = doubleGen(rand);
         double rootVal = shrinkable.getRef();
 
@@ -351,11 +353,11 @@ TEST(FloatingGenerator, double_finite_only_shrinks_preserve_domain)
 
 TEST(FloatingGenerator, float_with_nan_shrinks_preserve_domain)
 {
-    Random rand(42);
+    Random rand(kCompatibilitySeed);
     Arbi<float> floatGen(0.1, 0.0, 0.0);  // 10% NaN, 90% finite
 
     // Generate multiple values and check domain preservation
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto shrinkable = floatGen(rand);
         float rootVal = shrinkable.getRef();
 
@@ -376,11 +378,11 @@ TEST(FloatingGenerator, float_with_nan_shrinks_preserve_domain)
 
 TEST(FloatingGenerator, float_with_inf_shrinks_preserve_domain)
 {
-    Random rand(42);
+    Random rand(kCompatibilitySeed);
     Arbi<float> floatGen(0.0, 0.1, 0.1);  // 10% +inf, 10% -inf, 80% finite
 
     // Generate multiple values and check domain preservation
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto shrinkable = floatGen(rand);
         float rootVal = shrinkable.getRef();
 

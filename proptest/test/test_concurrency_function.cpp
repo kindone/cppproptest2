@@ -1,5 +1,6 @@
 #include "proptest/statefultest.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 #include "proptest/generator/integral.hpp"
 #include "proptest/generator/vector.hpp"
 #include "proptest/util/bitmap.hpp"
@@ -8,6 +9,7 @@
 
 using namespace proptest;
 using namespace proptest::stateful;
+using namespace proptest::testprofile;
 
 using std::mutex;
 using std::lock_guard;
@@ -118,12 +120,12 @@ TEST(concurrency_function, shrink_with_retry_timeout_smoke)
 {
     auto noopGen = gen::just(SimpleAction<int>([](int&) {}));
     auto prop = statefulProperty<int>(gen::interval<int>(0, 100), noopGen);
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(1)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kTinyRuns)
                   .setMaxConcurrency(2)
-                  .setShrinkMaxRetries(2)
-                  .setShrinkTimeoutMs(200)
-                  .setShrinkRetryTimeoutMs(100)
+                  .setShrinkMaxRetries(kShrinkSmokeRetryLimit)
+                  .setShrinkTimeoutMs(kShrinkLongTimeoutMs)
+                  .setShrinkRetryTimeoutMs(kShrinkRetryTimeoutMs)
                   .setPostCheck([](int&) { PROP_ASSERT(false); })
                   .go();
     EXPECT_FALSE(ok);
@@ -131,7 +133,7 @@ TEST(concurrency_function, shrink_with_retry_timeout_smoke)
 
 TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
 {
-    constexpr uint64_t seed = 123;
+    constexpr uint64_t seed = kConcurrencySavedRngSeed;
     auto initialGen = gen::interval<int>(1000, 1000000);
     auto noopGen = gen::just(SimpleAction<int>("Noop", [](int&) {}));
     auto actionGen = noopGen.template map<Action<int, EmptyModel>>(
@@ -151,7 +153,7 @@ TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
     bool ok = prop.setSeed(seed)
-                  .setNumRuns(2)
+                  .setNumRuns(kSavedRngReplayRuns)
                   .setMaxConcurrency(1)
                   .setActionListSize(0)
                   .setPostCheck([secondInitial](int& value) {
@@ -172,8 +174,8 @@ TEST(concurrency_function, action_list_size_configuration)
     auto incAction = gen::just(SimpleAction<int>([](int& v) { ++v; }));
     auto prop = statefulProperty<int>(gen::just(0), incAction);
 
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setMaxConcurrency(1)
                   .setActionListSize(4)
                   .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 4); })
@@ -202,7 +204,7 @@ TEST(concurrency_function, shrink_thread_count_reduction_and_serial_fallback)
 
     auto prop = statefulProperty<int>(gen::just(0), incGen);
     prop.setMaxConcurrency(2)
-        .setNumRuns(1)
+        .setNumRuns(kTinyRuns)
         .setActionListMinSize(1)
         .setActionListMaxSize(3)
         // postCheck always fails so shrinking kicks in immediately
@@ -211,8 +213,8 @@ TEST(concurrency_function, shrink_thread_count_reduction_and_serial_fallback)
     // We just want to confirm the property runs without crashing when
     // thread-count changes during shrinking.  Run a passing property with 1 thread.
     auto propSingle = statefulProperty<int>(gen::just(0), incGen);
-    bool ok = propSingle.setSeed(42)
-                        .setNumRuns(10)
+    bool ok = propSingle.setSeed(kCompatibilitySeed)
+                        .setNumRuns(kSmokeRuns)
                         .setMaxConcurrency(1)
                         .setActionListSize(2)
                         .setPostCheck([](int& v) { PROP_ASSERT_EQ(v, 2); })
@@ -246,8 +248,8 @@ TEST(concurrency_function, shrink_prefix_length_first_for_action_lists)
     // 1 rear thread: equivalent to stateful.  Should fail quickly since every
     // action adds at least THRESHOLD.
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
-    bool failed = !prop.setSeed(1)
-                       .setNumRuns(50)
+    bool failed = !prop.setSeed(kStatefulFailureSeed)
+                       .setNumRuns(kFailureSearchRuns)
                        .setMaxConcurrency(1)
                        .setActionListMinSize(0)
                        .setActionListMaxSize(5)
@@ -280,8 +282,8 @@ TEST(concurrency_function, shrink_last_action_params)
     auto prop = statefulProperty<int>(gen::just(0), incrGen);
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setMaxConcurrency(1)
                   .setActionListMinSize(1)
                   .setActionListMaxSize(3)
@@ -326,7 +328,7 @@ TEST(concurrency_function, state_dependent_action_factory_without_model)
     };
 
     auto prop = statefulProperty<T>(gen::just(T{}), factory);
-    bool ok = prop.setSeed(0).setNumRuns(100).setMaxConcurrency(2).go();
+    bool ok = prop.setSeed(kStatefulReplaySeed).setNumRuns(kStatefulContractRuns).setMaxConcurrency(2).go();
     EXPECT_TRUE(ok);
 }
 
@@ -362,8 +364,8 @@ TEST(concurrency_function, state_dependent_action_factory_with_model)
     };
 
     auto prop = statefulProperty<T, Model>(gen::just(T{}), modelFactory, factory);
-    bool ok = prop.setSeed(0)
-                  .setNumRuns(50)
+    bool ok = prop.setSeed(kStatefulReplaySeed)
+                  .setNumRuns(kFailureSearchRuns)
                   .setMaxConcurrency(1)
                   .setPostCheck([](T& v, Model& m) {
                       PROP_ASSERT_EQ(static_cast<int>(v.size()), m.size);
@@ -395,8 +397,8 @@ TEST(concurrency_function, state_dependent_factory_shrink)
     auto prop = statefulProperty<T>(gen::just(0), factory);
     std::ostringstream out;
     auto* oldOut = cout.rdbuf(out.rdbuf());
-    bool ok = prop.setSeed(1)
-                  .setNumRuns(20)
+    bool ok = prop.setSeed(kStatefulFailureSeed)
+                  .setNumRuns(kStatefulShortRuns)
                   .setMaxConcurrency(1)
                   .setActionListMinSize(1)
                   .setActionListMaxSize(3)
@@ -454,8 +456,8 @@ TEST(concurrency_function, shrink_prefix_params_front_thread)
     auto* oldOut = cout.rdbuf(out.rdbuf());
     auto* oldErr = cerr.rdbuf(out.rdbuf());
     bool ok = statefulProperty<int>(gen::just(0), factory)
-        .setSeed(1)
-        .setNumRuns(5)
+        .setSeed(kStatefulFailureSeed)
+        .setNumRuns(kStatefulFocusedRuns)
         .setMaxConcurrency(1)
         .setActionListSize(2)
         .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
@@ -480,7 +482,7 @@ TEST(concurrency_function, shrink_prefix_params_front_thread)
  * PrefixParams — without crashing, and to confirm that the shrunken output is minimal.
  *
  * setMaxConcurrency(2): two rear workers are spawned.
- * setShrinkMaxRetries(5): retry tolerance for scheduler non-determinism.
+ * setShrinkMaxRetries(kShrinkConcurrencyRetryLimit): retry tolerance for scheduler non-determinism.
  *
  * Factory (state-independent):
  *   always → Inc(n) with n ∈ [THRESHOLD, 2·THRESHOLD]: obj += n
@@ -510,11 +512,11 @@ TEST(concurrency_function, shrink_prefix_params_rear_thread)
     auto* oldOut2 = cout.rdbuf(out.rdbuf());
     auto* oldErr2 = cerr.rdbuf(out.rdbuf());
     bool ok = statefulProperty<int>(gen::just(0), factory)
-        .setSeed(1)
-        .setNumRuns(10)
+        .setSeed(kStatefulFailureSeed)
+        .setNumRuns(kSmokeRuns)
         .setMaxConcurrency(2)
         .setActionListSize(1)
-        .setShrinkMaxRetries(5)
+        .setShrinkMaxRetries(kShrinkConcurrencyRetryLimit)
         .setPostCheck([](int& v) { PROP_ASSERT(v < THRESHOLD); })
         .go();
     cout.rdbuf(oldOut2);

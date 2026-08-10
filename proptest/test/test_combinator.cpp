@@ -6,12 +6,13 @@
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 
 TEST(Just, lvalue)
 {
     int a = 1339;
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::just<int>(a);
     auto result = gen(rand);
     EXPECT_EQ(result.getRef(), 1339);
@@ -19,7 +20,7 @@ TEST(Just, lvalue)
 
 TEST(Just, rvalue)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::just<int>(1339);
     auto result = gen(rand);
     EXPECT_EQ(result.getRef(), 1339);
@@ -27,7 +28,7 @@ TEST(Just, rvalue)
 
 TEST(Just, Any)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::just<Any>(Any(1339));
     auto result = gen(rand);
     EXPECT_EQ(result.getAny().getRef<int>(), 1339);
@@ -35,7 +36,7 @@ TEST(Just, Any)
 
 TEST(OneOf, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::oneOf<int>(gen::just<int>(1339), gen::just<int>(42));
     auto result = gen(rand);
     EXPECT_TRUE(result.getRef() == 1339 || result.getRef() == 42);
@@ -43,10 +44,10 @@ TEST(OneOf, basic)
 
 TEST(OneOf, weighted)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::unionOf<int>(gen::weightedGen(gen::just<int>(1339), 0.9), gen::weightedGen(gen::just<int>(42), 0.1));
     int num1339 = 0, num42 = 0;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < kStatisticalRuns; i++) {
         auto result = gen(rand);
         if(result.getRef() == 1339)
             num1339++;
@@ -59,11 +60,11 @@ TEST(OneOf, weighted)
 
 TEST(OneOf, weightedRawValue)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     // weightedGen(value, weight) — raw value, implicit just
     auto gen = gen::oneOf<int>(gen::weightedGen<int>(1339, 0.9), gen::weightedGen<int>(42, 0.1));
     int num1339 = 0, num42 = 0;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < kStatisticalRuns; i++) {
         auto result = gen(rand);
         if(result.getRef() == 1339)
             num1339++;
@@ -76,7 +77,7 @@ TEST(OneOf, weightedRawValue)
 
 TEST(OneOf, mixedValueWeightedGenGenerator)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     // All three styles in one oneOf: raw value, weightedGen(value, weight), weightedGen(generator, weight)
     auto gen = gen::oneOf<int>(
         1339,                                    // raw value (implicit just)
@@ -84,7 +85,7 @@ TEST(OneOf, mixedValueWeightedGenGenerator)
         gen::weightedGen(gen::interval(100, 200), 0.1)  // generator-style weightedGen
     );
     int num1339 = 0, num42 = 0, numInRange = 0;
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto result = gen(rand);
         int v = result.getRef();
         if(v == 1339)
@@ -102,11 +103,11 @@ TEST(OneOf, mixedValueWeightedGenGenerator)
 
 TEST(Weighted, unifiedElementOf)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     // gen::weighted(value, prob) works in elementOf
     auto elemGen = gen::elementOf<int>(gen::weighted<int>(2, 0.8), gen::weighted<int>(5, 0.15), 10);
     int num2 = 0, num5 = 0, num10 = 0;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < kStatisticalRuns; i++) {
         int v = elemGen(rand).getRef();
         if(v == 2) num2++;
         else if(v == 5) num5++;
@@ -119,7 +120,7 @@ TEST(Weighted, unifiedElementOf)
 
 TEST(ElementOf, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::elementOf<int>(1339, 42);
     auto result = gen(rand);
     EXPECT_TRUE(result.getRef() == 1339 || result.getRef() == 42);
@@ -127,10 +128,10 @@ TEST(ElementOf, basic)
 
 TEST(ElementOf, weighted)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::elementOf<int>(gen::weightedVal(1339, 0.9), gen::weightedVal(42, 0.1));
     int num1339 = 0, num42 = 0;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < kStatisticalRuns; i++) {
         auto result = gen(rand);
         if(result.getRef() == 1339)
             num1339++;
@@ -143,11 +144,11 @@ TEST(ElementOf, weighted)
 
 TEST(Filter, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::interval<int>(0, 100);
     auto filtered = gen::filter<int>(gen, [](int i) { return i % 2 == 0; });
 
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++)
     {
         auto result = filtered(rand);
         EXPECT_EQ(result.getRef() % 2, 0);
@@ -156,11 +157,11 @@ TEST(Filter, basic)
 
 TEST(Transform, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::interval<int>(0, 100);
     auto transformed = gen::transform<int, int>(gen, [](const int& i) { return i * 2; });
 
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++)
     {
         auto result = transformed(rand);
         EXPECT_EQ(result.getRef() % 2, 0);
@@ -169,11 +170,11 @@ TEST(Transform, basic)
 
 TEST(Transform, basic2)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::interval<int>(0, 10);
     auto transformed = gen::transform<int, string>(gen, [](const int& i) { return to_string(i); });
 
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++)
     {
         auto result = transformed(rand);
         if(result.getRef() == "8") {
@@ -184,11 +185,11 @@ TEST(Transform, basic2)
 
 TEST(FilterTransform, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::filter<int>(gen::interval<int>(0, 8), [](int i) { return i == 8; });
     auto transformed = gen::transform<int, string>(gen, [](const int& i) { return to_string(i); });
 
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++)
     {
         auto result = transformed(rand);
         EXPECT_EQ(result.getRef(), "8");
@@ -198,11 +199,11 @@ TEST(FilterTransform, basic)
 
 TEST(Derive, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::just<int>(8);
     auto derived = gen::derive<int, int>(gen, [](const int& i) { return gen::interval(0, i); });
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
     {
         // TODO validation
         auto result = derived(rand);
@@ -215,11 +216,11 @@ TEST(Derive, basic)
 
 TEST(Dependency, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::just<int>(8);
     auto derived = gen::dependency<int, int>(gen, [](const int& i) { return gen::interval(0, i); });
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
     {
         // TODO validation
         [[maybe_unused]] auto result = derived(rand);
@@ -231,10 +232,10 @@ TEST(Dependency, basic)
 
 TEST(Chain, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::chain(gen::interval<int>(0, 8), [](const int& i) -> Generator<int> { return gen::interval(0, i); });
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++)
     {
         // TODO validation
         [[maybe_unused]] auto result = gen(rand);
@@ -248,7 +249,7 @@ TEST(Chain, basic)
 
 TEST(PropTest, TestChain)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto nullableIntegers = gen::boolean().tupleWith<int>(+[](const bool& isNull) -> GenFunction<int> {
@@ -267,7 +268,7 @@ TEST(PropTest, TestChain)
             return gen::interval(-10, value);
     });
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         auto tupleShr = tupleGen(rand);
         cout << serializeShrinkable(tupleShr) << endl;
     }
@@ -275,10 +276,10 @@ TEST(PropTest, TestChain)
 
 TEST(Chain, chainTwice)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::chain(gen::interval<int>(0, 4), [](const int&) -> Generator<int> { return gen::interval(0, 4); });
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
     {
         [[maybe_unused]] auto result = gen(rand);
         // print result
@@ -287,7 +288,7 @@ TEST(Chain, chainTwice)
 
     auto gen2 = gen::chain(gen, [](const tuple<int, int>&) -> Generator<int> { return gen::interval(0, 4); });
 
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
     {
         [[maybe_unused]] auto result = gen2(rand);
         // print result
@@ -297,10 +298,10 @@ TEST(Chain, chainTwice)
 
 TEST(Intervals, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::intervals({Interval(0, 2), Interval(12, 22)});
 
-    for(int i = 0; i < 20; i++)
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++)
     {
         auto result = gen(rand);
         EXPECT_TRUE(result.getRef() >= 0 && result.getRef() <= 22);

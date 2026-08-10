@@ -4,10 +4,11 @@
 #include "proptest/test/testutil.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 TEST(GenIntegral, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::interval<int>(0, 10);
     auto val = gen(rand).getRef();
     EXPECT_TRUE(val >= numeric_limits<int>::min());
@@ -16,7 +17,7 @@ TEST(GenIntegral, basic)
 
 TEST(Generator, tuple)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto generator = gen::tuple(gen::interval<int>(0, 10), gen::interval<int>(-10, -1));
     auto val = generator(rand).getRef();
     EXPECT_TRUE(get<0>(val) >= 0);
@@ -27,9 +28,9 @@ TEST(Generator, tuple)
 
 TEST(Generator, performance_vector)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     gen::vector<int> arbi;
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < kStatisticalRuns; i++) {
         auto shr = arbi(rand);
         EXPECT_LE(shr.getRef().size(), gen::vector<int>::defaultMaxSize);
         EXPECT_GE(shr.getRef().size(), gen::vector<int>::defaultMinSize);
@@ -38,9 +39,9 @@ TEST(Generator, performance_vector)
 
 TEST(Generator, performance_int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto generator = gen::interval(0, 10);
-    for(int i = 0; i < 100000; i++) {
+    for(int i = 0; i < kGeneratorPerformanceRuns; i++) {
         auto shr = generator(rand);
         EXPECT_GE(shr.getRef(), 0);
         EXPECT_LE(shr.getRef(), 10);
@@ -50,7 +51,7 @@ TEST(Generator, performance_int)
 
 TEST(Generator, GenFunction)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     Generator<int> generator = gen::just<int>(1339);
     EXPECT_EQ(generator(rand).getRef(), 1339);
 
@@ -73,7 +74,7 @@ TEST(Generator, GenFunction)
 
 TEST(Generator, gen2gen)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     Generator<int> generator = gen::just<int>(1339);
     Function<GenFunction<int>(const int&)> gen2gen = [](const int& i) -> Generator<int> // without this signature, it will fail
     {
@@ -87,7 +88,7 @@ TEST(Generator, gen2gen)
 
 TEST(Generator, monadic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     Generator<int> generator = gen::interval<int>(0, 10);
     auto gen2 = generator.map<proptest::string>([](int n) { // value passing callable is acceptable
         return to_string(n);
@@ -103,7 +104,7 @@ TEST(Generator, monadic)
 
 TEST(AnyGenerator, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto gen = gen::interval<int>(-10, -1);
     AnyGenerator anyGen(gen);
     auto anyShr = anyGen(rand);
@@ -117,7 +118,7 @@ TEST(AnyGenerator, basic)
 
 TEST(AnyGenerator, arbitrary)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     AnyGenerator anyGen = gen::int32();
     [[maybe_unused]] auto anyShr = anyGen(rand);
     [[maybe_unused]] auto shr = anyGen.generate<int>(rand);
@@ -126,10 +127,10 @@ TEST(AnyGenerator, arbitrary)
 
 TEST(AnyGenerator, keep_options)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     AnyGenerator anyGen = gen::list<int>(1, 2);
 
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         [[maybe_unused]] auto shr = anyGen.generate<list<int>>(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -138,7 +139,7 @@ TEST(AnyGenerator, keep_options)
     }
 
     AnyGenerator anyGen2 = anyGen;
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         [[maybe_unused]] auto shr = anyGen2.generate<list<int>>(rand);
         EXPECT_GE(shr.getRef().size(), 1U);
         EXPECT_LE(shr.getRef().size(), 2U);

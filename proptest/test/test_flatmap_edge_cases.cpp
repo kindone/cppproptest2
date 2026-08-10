@@ -1,9 +1,20 @@
 #include "proptest/proptest.hpp"
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/std/string.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
+
+namespace {
+
+constexpr int64_t kFlatMapRootSearchSeed = kStatefulReplaySeed;
+constexpr int64_t kFlatMapReplaySeed = kCompatibilitySeed;
+constexpr int kFlatMapRootSearchAttempts = 512;
+constexpr int kFlatMapRegenerationSamples = 5;
+
+}  // namespace
 
 /**
  * Test cases to validate/invalidate potential issues with flatMap implementations.
@@ -34,8 +45,8 @@ TEST(FlatMapEdgeCases, flatmap_U_axis_reachable_at_root)
     bool uAxisShrinkAtRoot = false;
     int rootT = 0;
     int rootU = 0;
-    Random rand(0);
-    for (int attempt = 0; attempt < 512; ++attempt) {
+    Random rand(kFlatMapRootSearchSeed);
+    for (int attempt = 0; attempt < kFlatMapRootSearchAttempts; ++attempt) {
         Shrinkable<pair<int,int>> root = gen(rand);
         rootT = root.getRef().first;
         rootU = root.getRef().second;
@@ -70,8 +81,8 @@ TEST(FlatMapEdgeCases, nested_flatmap_determinism)
      * Issue: Inner and outer flatMap might share RNG state incorrectly.
      * Expected: Should be deterministic with same seed.
      */
-    Random rand1(42);
-    Random rand2(42);
+    Random rand1(kFlatMapReplaySeed);
+    Random rand2(kFlatMapReplaySeed);
 
     // Nested flatMap: int -> list -> list of strings
     auto gen = gen::interval(1, 3).flatMap<vector<int>>([](const int& n) {
@@ -97,7 +108,7 @@ TEST(FlatMapEdgeCases, nested_flatmap_independence)
      * Issue: Inner flatMap might use RNG state that depends on outer flatMap.
      * Expected: Each level should generate independently.
      */
-    Random rand(42);
+    Random rand(kFlatMapReplaySeed);
 
     vector<int> outer_values;
     vector<int> inner_values;
@@ -117,7 +128,7 @@ TEST(FlatMapEdgeCases, nested_flatmap_independence)
     auto gen = gen::interval(1, 5).flatMap<vector<int>>(track_outer).flatMap<int>(track_inner);
 
     // Generate multiple times
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         gen(rand);
     }
 
@@ -126,7 +137,7 @@ TEST(FlatMapEdgeCases, nested_flatmap_independence)
     EXPECT_GT(inner_values.size(), 0U) << "Should generate inner values";
 
     // The key test: if we generate with same seed, should get same sequences
-    Random rand2(42);
+    Random rand2(kFlatMapReplaySeed);
     vector<int> outer_values2;
     vector<int> inner_values2;
 
@@ -144,7 +155,7 @@ TEST(FlatMapEdgeCases, nested_flatmap_independence)
 
     auto gen2 = gen::interval(1, 5).flatMap<vector<int>>(track_outer2).flatMap<int>(track_inner2);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         gen2(rand2);
     }
 
@@ -162,8 +173,8 @@ TEST(FlatMapEdgeCases, multiple_regenerations)
      * Issue: If tree is regenerated multiple times, savedRand advances.
      * Expected: Should still be deterministic (if regenerated correctly).
      */
-    Random rand(42);
-    Random savedRand(42);
+    Random rand(kFlatMapReplaySeed);
+    Random savedRand(kFlatMapReplaySeed);
 
     auto gen = gen::interval(1, 5).flatMap<vector<int>>([](const int& n) {
         return gen::vector<int>(gen::interval(1, 10)).setSize(n, n);
@@ -171,7 +182,7 @@ TEST(FlatMapEdgeCases, multiple_regenerations)
 
     // Regenerate tree multiple times
     vector<Shrinkable<vector<int>>> trees;
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < kFlatMapRegenerationSamples; i++) {
         savedRand = rand;  // Reset to same state
         auto tree = gen(savedRand);
         trees.push_back(tree);
@@ -192,8 +203,8 @@ TEST(FlatMapEdgeCases, deeply_nested_flatmap)
      * Issue: State management might break with deep nesting.
      * Expected: Should work correctly at any depth.
      */
-    Random rand1(42);
-    Random rand2(42);
+    Random rand1(kFlatMapReplaySeed);
+    Random rand2(kFlatMapReplaySeed);
 
     // 3 levels of nesting
     auto gen = gen::interval(1, 3).flatMap<vector<int>>([](const int& n) {
@@ -224,7 +235,7 @@ TEST(FlatMapEdgeCases, flatmap_with_filter_chain)
      * Issue: Filter might interfere with flatMap's RNG state management.
      * Expected: Should work correctly.
      */
-    Random rand(42);
+    Random rand(kFlatMapReplaySeed);
 
     auto gen = gen::interval(1, 10).flatMap<vector<int>>([](const int& n) {
         return gen::vector<int>(gen::interval(1, 10)).setSize(n, n);
@@ -243,4 +254,3 @@ TEST(FlatMapEdgeCases, flatmap_with_filter_chain)
     }
     EXPECT_GT(root_sum, 10) << "Root should satisfy filter condition";
 }
-

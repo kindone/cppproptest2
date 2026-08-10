@@ -4,6 +4,7 @@
 #include "proptest/Random.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 // Example struct for demonstration
 struct Point {
@@ -17,18 +18,18 @@ struct Point {
 
 TEST(GenNamespace, BasicTypeGenerators)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test boolean generator
     auto boolGen = gen::boolean();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = boolGen(rand);
         EXPECT_TRUE(result.getRef() == true || result.getRef() == false);
     }
 
     // Test string generator
     auto stringGen = gen::string();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = stringGen(rand);
         EXPECT_LE(result.getRef().size(), gen::string::defaultMaxSize);
     }
@@ -50,11 +51,11 @@ TEST(GenNamespace, BasicTypeGenerators)
 
 TEST(GenNamespace, NumericRangeGenerators)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test interval generator
     auto intervalGen = gen::interval(1, 100);
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = intervalGen(rand);
         EXPECT_GE(result.getRef(), 1);
         EXPECT_LE(result.getRef(), 100);
@@ -62,7 +63,7 @@ TEST(GenNamespace, NumericRangeGenerators)
 
     // Test natural generator
     auto naturalGen = gen::natural(1000);
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = naturalGen(rand);
         EXPECT_GT(result.getRef(), 0);
         EXPECT_LE(result.getRef(), 1000);
@@ -70,7 +71,7 @@ TEST(GenNamespace, NumericRangeGenerators)
 
     // Test nonnegative generator
     auto nonNegGen = gen::nonNegative(500);
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = nonNegGen(rand);
         EXPECT_GE(result.getRef(), 0);
         EXPECT_LE(result.getRef(), 500);
@@ -110,32 +111,32 @@ TEST(GenNamespace, NumericRangesGenerators)
 
 TEST(GenNamespace, ContainerGenerators)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test vector generator
     auto vectorGen = gen::vector<int>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = vectorGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
     }
 
     // Test list generator
     auto listGen = gen::list<string>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = listGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
     }
 
     // Test set generator
     auto setGen = gen::set<int>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = setGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
     }
 
     // Test map generator
     auto mapGen = gen::map<string, int>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = mapGen(rand);
         EXPECT_LE(result.getRef().size(), 200); // Use default max size
     }
@@ -143,11 +144,11 @@ TEST(GenNamespace, ContainerGenerators)
 
 TEST(GenNamespace, StringGeneratorsWithCustomElements)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test uppercase string generator
     auto uppercaseGen = gen::string(gen::interval<char>('A', 'Z'));
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto result = uppercaseGen(rand);
         const auto& str = result.getRef();
         EXPECT_LE(str.size(), 200); // Use default max size
@@ -159,7 +160,7 @@ TEST(GenNamespace, StringGeneratorsWithCustomElements)
 
     // Test digit string generator
     auto digitGen = gen::string(gen::interval<char>('0', '9'));
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto result = digitGen(rand);
         const auto& str = result.getRef();
         EXPECT_LE(str.size(), 200); // Use default max size
@@ -172,18 +173,18 @@ TEST(GenNamespace, StringGeneratorsWithCustomElements)
 
 TEST(GenNamespace, Combinators)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test just combinator
     auto constantGen = gen::just(42);
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = constantGen(rand);
         EXPECT_EQ(result.getRef(), 42);
     }
 
     // Test elementOf combinator
     auto choiceGen = gen::elementOf<int>(1, 3, 5, 7, 11, 13, 17, 19);
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = choiceGen(rand);
         int val = result.getRef();
         EXPECT_TRUE(val == 1 || val == 3 || val == 5 || val == 7 || 
@@ -192,7 +193,7 @@ TEST(GenNamespace, Combinators)
 
     // Test oneOf combinator
     auto unionGen = gen::oneOf<int>(gen::interval(1, 10), gen::interval(100, 110));
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = unionGen(rand);
         int val = result.getRef();
         EXPECT_TRUE((val >= 1 && val <= 10) || (val >= 100 && val <= 110));
@@ -201,11 +202,11 @@ TEST(GenNamespace, Combinators)
 
 TEST(GenNamespace, ObjectConstruction)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test construct combinator
     auto pointGen = gen::construct<Point, int, int>(gen::interval(-10, 10), gen::interval(-10, 10));
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto result = pointGen(rand);
         const auto& point = result.getRef();
         EXPECT_GE(point.x, -10);
@@ -217,25 +218,25 @@ TEST(GenNamespace, ObjectConstruction)
 
 TEST(GenNamespace, FilteringAndTransformation)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test filter combinator
     auto evenGen = gen::filter<int>(gen::int32(), [](int n) { return n % 2 == 0; });
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = evenGen(rand);
         EXPECT_EQ(result.getRef() % 2, 0);
     }
 
     // Test suchThat combinator (alias for filter)
     auto positiveGen = gen::suchThat<int>(gen::int32(), [](int n) { return n > 0; });
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         auto result = positiveGen(rand);
         EXPECT_GT(result.getRef(), 0);
     }
 
     // Test transform combinator
     auto stringFromIntGen = gen::transform<int, string>(gen::int32(), [](int n) { return to_string(n); });
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto result = stringFromIntGen(rand);
         EXPECT_FALSE(result.getRef().empty());
     }
@@ -243,7 +244,7 @@ TEST(GenNamespace, FilteringAndTransformation)
 
 TEST(GenNamespace, Dependencies)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test dependency combinator
     auto sizeAndVectorGen = gen::dependency<int, vector<int>>(
@@ -251,7 +252,7 @@ TEST(GenNamespace, Dependencies)
         [](int size) { return gen::vector<int>().setSize(size); }
     );
 
-    for(int i = 0; i < 20; i++) {
+    for(int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto result = sizeAndVectorGen(rand);
         const auto& pair = result.getRef();
         EXPECT_GE(pair.first, 1);
@@ -262,11 +263,11 @@ TEST(GenNamespace, Dependencies)
 
 TEST(GenNamespace, ComplexNestedStructures)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test complex nested structure
     auto complexGen = gen::vector<map<string, vector<int>>>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result = complexGen(rand);
         const auto& vec = result.getRef();
         EXPECT_LE(vec.size(), 200); // Use default max size
@@ -291,14 +292,14 @@ TEST(GenNamespace, PropertyTestExample)
 
 TEST(GenNamespace, TemplateArgumentDeduction)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
 
     // Test that template argument deduction works
     auto intervalGen = gen::interval(1, 100);  // No explicit <int>
     auto naturalGen = gen::natural(1000);      // No explicit <int>
     auto nonNegGen = gen::nonNegative(500);    // No explicit <int>
 
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto result1 = intervalGen(rand);
         EXPECT_GE(result1.getRef(), 1);
         EXPECT_LE(result1.getRef(), 100);

@@ -7,6 +7,7 @@
 #include "proptest/std/chrono.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 struct NonCopyable
 {
@@ -183,7 +184,7 @@ TEST(Property, shrink_output_omits_simplest_line_when_no_shrink_happened)
 
 TEST(Property, seed_generator_has_empty_shrink_stream)
 {
-    Random rand(123);
+    Random rand(kPropertyConfigSeed);
     auto shr = gen::seed()(rand);
     EXPECT_TRUE(shr.getShrinks().isEmpty());
 }
@@ -270,8 +271,8 @@ TEST(Property, chainable_preserves_config)
     // Configuration (seed, numRuns, etc.) is preserved through chaining
     int forAllRuns = 0;
     auto p = property([&forAllRuns](int) -> bool { forAllRuns++; return true; });
-    p.setSeed(0).setNumRuns(3).forAll(gen::just(1)).forAll(gen::just(2));
-    EXPECT_EQ(forAllRuns, 6);  // 3 from forAll (1) + 3 from forAll (2)
+    p.setSeed(kStatefulReplaySeed).setNumRuns(kChainedForAllRuns).forAll(gen::just(1)).forAll(gen::just(2));
+    EXPECT_EQ(forAllRuns, 2 * kChainedForAllRuns);
 }
 
 TEST(Property, forAll)
@@ -382,7 +383,7 @@ TEST(Property, propertyBasic)
     });
 
     // chaining
-    prop.setSeed(0).forAll();
+    prop.setSeed(kStatefulReplaySeed).forAll();
     // with specific arguments
     prop.example(string("hello"), 10, string("world"));
     prop.forAll(gen::elementOf<string>("", string("a")), gen::just(10), gen::elementOf<string>(string(""), string("b")));
@@ -764,7 +765,7 @@ struct ShowDefault<NonEmptyConstructible>
 
 TEST(Property, TestCheckArbitraryWithConstructNonCopyable)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto vecGen = gen::vector<int>();
@@ -814,7 +815,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonEmptyConstructible)
 {
     static_assert(is_constructible_v<NonEmptyConstructible, const NonEmptyConstructible&>);
 
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto objGen2 = gen::just(9).map<NonEmptyConstructible>(
@@ -828,7 +829,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonEmptyConstructible)
         return c;
     };
 
-    for(int i = 0; i < 10;i ++)
+    for(int i = 0; i < static_cast<int>(kSmokeSamples);i ++)
         func(objGen2(rand).getAny().getRef<NonEmptyConstructible>());
 
     EXPECT_FOR_ALL(
@@ -841,7 +842,7 @@ TEST(Property, TestCheckArbitraryWithConstructNonEmptyConstructible)
 
 TEST(Property, TestCheckArbitraryWithConstruct)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto vecGen = gen::vector<int>();
@@ -859,7 +860,7 @@ TEST(Property, TestCheckArbitraryWithConstruct)
         EXPECT_LE(get<0>(tup), 10);
     };
 
-    for(int i = 0; i < 100;i ++)
+    for(int i = 0; i < static_cast<int>(kGeneratorContractSamples);i ++)
         func(tupleGen(rand).getAny().getRef<proptest::tuple<int, string, vector<int>>>());
 
     EXPECT_FOR_ALL(
@@ -947,10 +948,10 @@ TEST(Property, PropertyTimed)
         PROP_STAT(value > 0);
     });
     auto startTime = steady_clock::now();
-    prop.setMaxDurationMs(2000).setNumRuns(10000000).forAll();
+    prop.setMaxDurationMs(kDurationGuardTimeoutMs).setNumRuns(kExtremeDurationGuardRuns).forAll();
     auto endTime = steady_clock::now();
 
-    EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), 2000);
+    EXPECT_GE(duration_cast<util::milliseconds>(endTime - startTime).count(), kDurationGuardTimeoutMs);
 }
 
 TEST(Property, forAllConfigSeed)
@@ -959,8 +960,8 @@ TEST(Property, forAllConfigSeed)
     EXPECT_FOR_ALL([](int) {
         return true;
     }, {
-        .seed = 42,
-        .numRuns = 10
+        .seed = kCompatibilitySeed,
+        .numRuns = kSmokeRuns
     });
 }
 
@@ -973,9 +974,9 @@ TEST(Property, forAllWithConfigAll)
     EXPECT_FOR_ALL([](int) {
         return true;
     }, {
-        .seed = 123,
-        .numRuns = 5,
-        .maxDurationMs = 1000,
+        .seed = kPropertyConfigSeed,
+        .numRuns = kConfigAllRuns,
+        .maxDurationMs = kConfigAllTimeoutMs,
         .onStartup = [&]() { startupCalled = true; },
         .onCleanup = [&]() { cleanupCalled = true; }
     });
@@ -990,8 +991,8 @@ TEST(Property, forAllConfigWithGenerators)
     EXPECT_FOR_ALL([](int x) {
         return x >= 0;
     }, {
-        .seed = 0,
-        .numRuns = 100
+        .seed = kStatefulReplaySeed,
+        .numRuns = kContractRuns
     }, gen::interval(0, 100));
 }
 
@@ -1001,7 +1002,7 @@ TEST(Property, forAllPartialConfig)
     EXPECT_FOR_ALL([](int) {
         return true;
     }, {
-        .numRuns = 50
+        .numRuns = kMediumRuns
         // seed, maxDurationMs, etc. not set - should use defaults
     });
 }
@@ -1018,8 +1019,8 @@ TEST(Property, forAllConfigSeedReproducibility)
         PROP_STAT(x > 0);
         return true;
     }, {
-        .seed = 999,
-        .numRuns = 1
+        .seed = kPropertyConfigReplaySeed,
+        .numRuns = kTinyRuns
     });
 
     // Second run with same seed - should get same value
@@ -1027,8 +1028,8 @@ TEST(Property, forAllConfigSeedReproducibility)
         secondRun = x;
         return true;
     }, {
-        .seed = 999,
-        .numRuns = 1
+        .seed = kPropertyConfigReplaySeed,
+        .numRuns = kTinyRuns
     });
 
     EXPECT_EQ(firstRun, secondRun);
@@ -1042,8 +1043,8 @@ TEST(Property, propertySetConfigBasic)
     });
 
     prop.setConfig({
-        .seed = 42,
-        .numRuns = 10
+        .seed = kCompatibilitySeed,
+        .numRuns = kSmokeRuns
     }).forAll();
 }
 
@@ -1058,9 +1059,9 @@ TEST(Property, propertySetConfigAll)
     });
 
     prop.setConfig({
-        .seed = 123,
-        .numRuns = 5,
-        .maxDurationMs = 1000,
+        .seed = kPropertyConfigSeed,
+        .numRuns = kConfigAllRuns,
+        .maxDurationMs = kConfigAllTimeoutMs,
         .onStartup = [&]() { startupCalled = true; },
         .onCleanup = [&]() { cleanupCalled = true; }
     }).forAll();
@@ -1078,13 +1079,13 @@ TEST(Property, propertySetConfigChaining)
 
     // setConfig can be chained with forAll
     prop.setConfig({
-        .seed = 0,
-        .numRuns = 50
+        .seed = kStatefulReplaySeed,
+        .numRuns = kMediumRuns
     }).forAll();
 
     // Can also chain with example
     prop.setConfig({
-        .seed = 999
+        .seed = kPropertyConfigReplaySeed
     }).example(42);
 }
 
@@ -1096,7 +1097,7 @@ TEST(Property, propertySetConfigPartial)
     });
 
     prop.setConfig({
-        .numRuns = 25
+        .numRuns = kPartialConfigRuns
         // seed, maxDurationMs, etc. not set - should use defaults
     }).forAll();
 }
@@ -1112,8 +1113,8 @@ TEST(Property, propertySetConfig_vs_individualSetters)
         configRun = x;
         return true;
     }, {
-        .seed = 555,
-        .numRuns = 1
+        .seed = kPropertyReplaySeed,
+        .numRuns = kTinyRuns
     });
 
     // Using individual setters
@@ -1121,7 +1122,7 @@ TEST(Property, propertySetConfig_vs_individualSetters)
         individualRun = x;
         return true;
     });
-    prop.setSeed(555).setNumRuns(1).forAll();
+    prop.setSeed(kPropertyReplaySeed).setNumRuns(kTinyRuns).forAll();
 
     EXPECT_EQ(configRun, individualRun);
 }
@@ -1167,4 +1168,3 @@ TEST(Property, DISABLED_forAll_vs_EXPECT_FOR_ALL_stored_result)
     bool ok = forAll([](int x) { PROP_ASSERT(x <= 5); return true; }, gen::interval(0, 10));
     EXPECT_TRUE(ok);
 }
-

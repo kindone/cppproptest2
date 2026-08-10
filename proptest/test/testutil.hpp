@@ -1,6 +1,7 @@
 #pragma once
 
 #include "proptest/test/gtest.hpp"
+#include "proptest/test/test_profiles.hpp"
 #include "proptest/Shrinkable.hpp"
 #include "proptest/util/printing.hpp"
 #include "proptest/std/io.hpp"
@@ -106,7 +107,9 @@ void printExhaustive(const proptest::Shrinkable<T>& shrinkable, int level, propt
 }
 
 template <typename T>
-bool compareShrinkable(const proptest::Shrinkable<T>& lhs, const proptest::Shrinkable<T>& rhs, size_t maxElements = 1000)
+bool compareShrinkable(const proptest::Shrinkable<T>& lhs,
+                       const proptest::Shrinkable<T>& rhs,
+                       size_t maxElements = proptest::testprofile::kShrinkTraversalLimit)
 {
     if(lhs.getRef() != rhs.getRef())
         return false;

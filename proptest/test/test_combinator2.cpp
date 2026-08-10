@@ -5,6 +5,7 @@
 #include "proptest/util/printing.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 
 namespace proptest {
@@ -44,7 +45,7 @@ struct GenSmallInt : public proptest::GeneratorBase<int32_t>
 
 TEST(PropTest, TestTransform)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
     Random savedRand = rand;
 
@@ -54,15 +55,15 @@ TEST(PropTest, TestTransform)
         Generator<string> stringGen = gen::transform<int,string>(
             gen, +[](const int& value) { return "(" + to_string(value) + ")"; });
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
             auto shrinkable = stringGen(rand);
             cout << "string: " << shrinkable.getRef() << endl;
             int j = 0;
-            for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < 3; j++) {
+            for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < kIllustrativeSamples; j++) {
                 Shrinkable<string> shrinkable2 = itr.next();
                 cout << "  shrink: " << shrinkable2.getRef() << endl;
                 int k = 0;
-                for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < 3; k++) {
+                for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < kIllustrativeSamples; k++) {
                     cout << "    shrink: " << Shrinkable<string>(itr2.next()).getRef() << endl;
                 }
             }
@@ -75,7 +76,7 @@ TEST(PropTest, TestTransform)
                 return vec;
             });
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
             cout << "vector " << vectorGen(rand).getRef()[0] << endl;
         }
     }
@@ -83,15 +84,15 @@ TEST(PropTest, TestTransform)
     {
         auto stringGen = gen::int32().map<string>(+[](const int& value) { return "(" + to_string(value) + ")"; });
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
             auto shrinkable = stringGen(savedRand);
             cout << "string2: " << shrinkable.getRef() << endl;
             int j = 0;
-            for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < 3; j++) {
+            for (auto itr = shrinkable.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr.hasNext() && j < kIllustrativeSamples; j++) {
                 Shrinkable<string> shrinkable2 = itr.next();
                 cout << "  shrink2: " << shrinkable2.getRef() << endl;
                 int k = 0;
-                for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < 3; k++) {
+                for (auto itr2 = shrinkable2.getShrinks().template iterator<Shrinkable<string>::StreamElementType>(); itr2.hasNext() && k < kIllustrativeSamples; k++) {
                     cout << "    shrink2: " << Shrinkable<string>(itr2.next()).getRef() << endl;
                 }
             }
@@ -103,7 +104,7 @@ TEST(PropTest, TestTransform)
             return vec;
         });
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
             cout << "vector2 " << vectorGen(savedRand).getRef()[0] << endl;
         }
     }
@@ -111,24 +112,24 @@ TEST(PropTest, TestTransform)
 
 TEST(PropTest, TestTranform2)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
     static Generator<uint8_t> gen = gen::transform<uint8_t, uint8_t>(
         gen::uint8(), +[](const uint8_t& vbit) -> uint8_t { return (1 << 0) & vbit; });
 
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++)
         cout << gen(rand).getRef() << endl;
 }
 
 TEST(PropTest, noShrink_empty_shrink_stream)
 {
     // noShrink produces same values but with empty shrink stream (dimension not shrunk)
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
     auto noShrinkGen = gen::uint64().noShrink();
     auto noShrinkFree = gen::noShrink(gen::uint64());
 
-    for (int i = 0; i < 20; i++) {
+    for (int i = 0; i < static_cast<int>(kShortSamples); i++) {
         auto noShrinkShrinkable = noShrinkGen(rand);
         auto noShrinkFreeShrinkable = noShrinkFree(rand);
 
@@ -140,11 +141,11 @@ TEST(PropTest, noShrink_empty_shrink_stream)
 TEST(PropTest, noShrink_preserves_filter)
 {
     // combinator + noShrink still generates only values satisfying the combinator (e.g. even numbers)
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
     auto evenGen = gen::int32().filter([](const int& x) { return x % 2 == 0; }).noShrink();
 
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         int val = evenGen(rand).getRef();
         EXPECT_EQ(val % 2, 0) << "filter+noShrink should still produce even numbers only (got " << val << " at i=" << i << ")";
     }
@@ -153,19 +154,19 @@ TEST(PropTest, noShrink_preserves_filter)
 TEST(PropTest, oneOf_raw_values)
 {
     // oneOf accepts raw values (implicit gen::just)
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     // Raw values only
     auto rawOnlyGen = gen::oneOf<int>(1339, 42);
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         int val = rawOnlyGen(rand).getRef();
         EXPECT_TRUE(val == 1339 || val == 42) << "oneOf(1339, 42) should produce only 1339 or 42 (got " << val << ")";
     }
 
     // Mixed: raw values + generator
     auto mixedGen = gen::oneOf<int>(1339, gen::interval(0, 10), 42);
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
         int val = mixedGen(rand).getRef();
         EXPECT_TRUE(val == 1339 || val == 42 || (val >= 0 && val <= 10))
             << "oneOf(1339, interval(0,10), 42) should produce 1339, 42, or [0,10] (got " << val << ")";
@@ -184,15 +185,15 @@ TEST(PropTest, TestDependency)
             return vecGen;
         });
 
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto pair = pairGen(rand).getRef();
         cout << "(" << pair.first << ", " << pair.second << ")" << endl;
     }
     cout << "exhaustive: " << endl;
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto pairShr = pairGen(rand);
         // exhaustive(pairShr, 0);
     }
@@ -203,7 +204,7 @@ TEST(PropTest, TestDependency2)
     using Dimension = pair<int, uint16_t>;
     using IndexVector = vector<pair<uint16_t, bool>>;
     using RawData = pair<Dimension, IndexVector>;
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto numRowsGen = gen::interval<int>(1000, 1000);
@@ -224,7 +225,7 @@ TEST(PropTest, TestDependency2)
 
     cout << "raw." << endl;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         // cout << "rawGen: " << rawGen(rand).getRef() << " / raw " << i << endl;
         rawGen(rand).getRef();
         cout << "rawGen: " << i <<  endl;
@@ -241,7 +242,7 @@ TEST(PropTest, TestDependency2)
         });
     cout << "transformed." << endl;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         tableDataGen(rand).getRef();
     }
 
@@ -262,7 +263,7 @@ TEST(PropTest, TestDependency2)
             cout << "running: " << i++ << endl;
             return true;
         },
-        tableDataWithValueGen).setNumRuns(100).forAll();
+        tableDataWithValueGen).setNumRuns(kContractRuns).forAll();
 }
 
 TEST(PropTest, TestDependency3)
@@ -282,16 +283,16 @@ TEST(PropTest, TestDependency3)
             return gen::interval(10, 20);
     });
 
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto pairShr = nullableIntegers(rand);
         serializeShrinkable(pairShr);
         // exhaustive(pairShr, 0);
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto pairShr = gen(rand);
         serializeShrinkable(pairShr);
         // exhaustive(pairShr, 0);
@@ -300,7 +301,7 @@ TEST(PropTest, TestDependency3)
 
 TEST(PropTest, TestDependency4)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto intGen = gen::elementOf<int>(0, 1, 2, 3);
@@ -314,13 +315,13 @@ TEST(PropTest, TestDependency4)
 
     Random saveRand = rand;
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto shr = intStringGen(rand);
         serializeShrinkable(shr);
         //exhaustive(shr, 0);
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto shr = stringGen(saveRand);
         serializeShrinkable(shr);
         // exhaustive(shr, 0);
@@ -329,7 +330,7 @@ TEST(PropTest, TestDependency4)
 
 TEST(PropTest, TestChain2)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto tuple2Gen = gen::boolean().tupleWith<int>(+[](const bool& value) {
@@ -359,19 +360,19 @@ TEST(PropTest, TestChain2)
         }
     });
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto tupleShr = tuple2Gen(rand);
         serializeShrinkable(tupleShr);
         // exhaustive(tupleShr, 0);
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto tupleShr = tuple3Gen(rand);
         serializeShrinkable(tupleShr);
         // exhaustive(tupleShr, 0);
     }
 
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < kIllustrativeSamples; i++) {
         [[maybe_unused]] auto tupleShr = tuple3Gen2(rand);
         serializeShrinkable(tupleShr);
         //exhaustive(tupleShr, 0);
@@ -380,7 +381,7 @@ TEST(PropTest, TestChain2)
 
 TEST(PropTest, TestDerive)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto intGen = gen::elementOf<int>(2, 4, 6);
@@ -390,7 +391,7 @@ TEST(PropTest, TestDerive)
         return gen;
     });
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         [[maybe_unused]] auto shr = stringGen(rand);
         //exhaustive(shr, 0);
     }
@@ -398,7 +399,7 @@ TEST(PropTest, TestDerive)
 
 TEST(PropTest, TestDerive2)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto intGen = gen::elementOf<int>(2, 4, 6);
@@ -408,7 +409,7 @@ TEST(PropTest, TestDerive2)
         return gen;
     });
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         [[maybe_unused]] auto shr = stringGen(rand);
         serializeShrinkable(shr);
         //exhaustive(shr, 0);
@@ -417,7 +418,7 @@ TEST(PropTest, TestDerive2)
 
 TEST(PropTest, TestAccumulate)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto gen1 = gen::interval<int>(0, 1).map([](const int& num) { return list<int>{num}; });
@@ -434,7 +435,7 @@ TEST(PropTest, TestAccumulate)
         },
         2, 4);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         Shrinkable<list<int>> shr = gen(rand);
         serializeShrinkable<list<int>>(shr);
         //exhaustive(shr, 0);
@@ -443,7 +444,7 @@ TEST(PropTest, TestAccumulate)
 
 TEST(PropTest, TestAggregate)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto gen1 = gen::interval<int>(0, 1);
@@ -451,7 +452,7 @@ TEST(PropTest, TestAggregate)
     [[maybe_unused]] auto gen = gen::aggregate(
         gen1, [](int num) { return gen::interval(num, num + 2); }, 2, 4);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         Shrinkable<vector<int>> shr = gen(rand);
         serializeShrinkable<vector<int>>(shr);
         // exhaustive(shr, 0);
@@ -521,7 +522,7 @@ struct ShowDefault<Node>
 
 TEST(PropTest, TestRecursive)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     [[maybe_unused]] auto emptyBoxGen = gen::construct<Box>();
@@ -533,7 +534,7 @@ TEST(PropTest, TestRecursive)
 
 TEST(PropTest, TestRecursive2)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     auto intGen = gen::int32();
@@ -548,7 +549,7 @@ TEST(PropTest, TestRecursive2)
 
 TEST(PropTest, TestRecursive3)
 {
-    int64_t seed = getCurrentTime();
+    int64_t seed = kCompatibilitySeed;
     Random rand(seed);
 
     [[maybe_unused]] auto emptyBoxGen = gen::construct<Box>();

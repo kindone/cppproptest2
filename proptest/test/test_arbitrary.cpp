@@ -20,12 +20,13 @@
 #include "proptest/util/printing.hpp"
 
 using namespace proptest;
+using namespace proptest::testprofile;
 
 TEST(Arbitrary, bool)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<bool>();
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
         cout << arbi(rand).getRef() << endl;
     // TODO: validate
 }
@@ -33,10 +34,10 @@ TEST(Arbitrary, bool)
 /*
 TEST(Arbitrary, toGenerator)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<bool>();
     Generator<bool> gen = arbi;
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
         cout << gen(rand).getRef() << endl;
 
     // rvalue
@@ -46,10 +47,10 @@ TEST(Arbitrary, toGenerator)
 
 TEST(Arbitrary, toGenFunction)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<bool>();
     GenFunction<bool> gen = arbi;
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
         cout << gen(rand).getRef() << endl;
 
     // rvalue
@@ -58,10 +59,10 @@ TEST(Arbitrary, toGenFunction)
 
 TEST(Arbitrary, int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<int>();
     auto val = arbi(rand).getRef();
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
         cout << arbi(rand).getRef() << endl;
     EXPECT_TRUE(val >= numeric_limits<int>::min());
     EXPECT_TRUE(val <= numeric_limits<int>::max());
@@ -69,17 +70,17 @@ TEST(Arbitrary, int)
 
 TEST(Arbitrary, double)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<double>();
-    for(int i = 0; i < 5; i++)
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++)
         cout << arbi(rand).getRef() << endl;
 }
 
 TEST(Arbitrary, list_int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<list<int>>();
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -87,13 +88,13 @@ TEST(Arbitrary, list_int)
     }
 
     auto arbi2 = Arbi<list<int>>(Arbi<int>());
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi2(rand);
         EXPECT_LE(shr.getRef().size(), Arbi<list<int>>::defaultMaxSize);
     }
 
     auto arbi3 = Arbi<list<int>>(gen::interval<int>(0, 9));
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi3(rand);
         const auto& l = shr.getRef();
         EXPECT_LE(l.size(), Arbi<list<int>>::defaultMaxSize);
@@ -104,7 +105,7 @@ TEST(Arbitrary, list_int)
 
     // Config-based constructor
     auto arbi4 = Arbi<list<int>>({.elemGen = gen::interval<int>(0, 5), .minSize = 1, .maxSize = 4});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi4(rand);
         const auto& l = shr.getRef();
         EXPECT_GE(l.size(), 1u);
@@ -117,9 +118,9 @@ TEST(Arbitrary, list_int)
 
 TEST(Arbitrary, vector_int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<vector<int>>();
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -127,13 +128,13 @@ TEST(Arbitrary, vector_int)
     }
 
     auto arbi2 = Arbi<vector<int>>(Arbi<int>());
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi2(rand);
         EXPECT_LE(shr.getRef().size(), Arbi<vector<int>>::defaultMaxSize);
     }
 
     auto arbi3 = Arbi<vector<int>>(gen::interval<int>(0, 9));
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi3(rand);
         const auto& l = shr.getRef();
         EXPECT_LE(l.size(), Arbi<vector<int>>::defaultMaxSize);
@@ -144,14 +145,14 @@ TEST(Arbitrary, vector_int)
 
     // Config-based constructor (named parameters)
     auto arbi4 = Arbi<vector<int>>({.minSize = 5, .maxSize = 10});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi4(rand);
         const auto& v = shr.getRef();
         EXPECT_GE(v.size(), 5u);
         EXPECT_LE(v.size(), 10u);
     }
     auto arbi5 = Arbi<vector<int>>({.elemGen = gen::interval<int>(1, 100), .minSize = 2, .maxSize = 5});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi5(rand);
         const auto& v = shr.getRef();
         EXPECT_GE(v.size(), 2u);
@@ -164,9 +165,9 @@ TEST(Arbitrary, vector_int)
 
 TEST(Arbitrary, set_int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<set<int>>();
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -175,7 +176,7 @@ TEST(Arbitrary, set_int)
 
     // Config-based constructor
     auto arbi2 = Arbi<set<int>>({.minSize = 3, .maxSize = 8});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi2(rand);
         EXPECT_GE(shr.getRef().size(), 3u);
         EXPECT_LE(shr.getRef().size(), 8u);
@@ -184,9 +185,9 @@ TEST(Arbitrary, set_int)
 
 TEST(Arbitrary, map_int_int)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<map<int,int>>();
-    for(int i = 0; i < 2; i++) {
+    for(int i = 0; i < static_cast<int>(kMinimalSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -195,13 +196,13 @@ TEST(Arbitrary, map_int_int)
 
     // Config-based constructor
     auto arbi2 = Arbi<map<int,int>>({.minSize = 2, .maxSize = 6});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi2(rand);
         EXPECT_GE(shr.getRef().size(), 2u);
         EXPECT_LE(shr.getRef().size(), 6u);
     }
     auto arbi3 = Arbi<map<int,int>>({.keyGen = gen::interval<int>(0, 9), .valueGen = gen::interval<int>(1, 100), .minSize = 1, .maxSize = 4});
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
         auto shr = arbi3(rand);
         const auto& m = shr.getRef();
         EXPECT_GE(m.size(), 1u);
@@ -215,9 +216,9 @@ TEST(Arbitrary, map_int_int)
 
 TEST(Arbitrary, pair_int_string)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<pair<int,string>>(gen::interval(0,10), gen::interval(0,10).map<string>([](int n) { return to_string(n); }));
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -229,9 +230,9 @@ TEST(Arbitrary, pair_int_string)
 
 TEST(Arbitrary, tuple_int_string)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<tuple<int,string>>(gen::interval(0,10), gen::interval(0,10).map<string>([](int n) { return to_string(n); }));
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto shr = arbi(rand);
         show(cout, shr.getRef());
         cout << endl;
@@ -243,15 +244,15 @@ TEST(Arbitrary, tuple_int_string)
 
 TEST(Arbitrary, string_default)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<string>();
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto str = arbi(rand).getRef();
         EXPECT_LE(str.size(), Arbi<string>::defaultMaxSize);
     }
 
     auto arbi2 = Arbi<string>(Arbi<char>());
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto str = arbi2(rand).getRef();
         EXPECT_LE(str.size(), Arbi<string>::defaultMaxSize);
     }
@@ -259,9 +260,9 @@ TEST(Arbitrary, string_default)
 
 TEST(Arbitrary, string_customchars)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<string>(gen::interval<char>('0','9'));
-    for(int i = 0; i < 100; i++) {
+    for(int i = 0; i < static_cast<int>(kFloatingDomainSamples); i++) {
         auto str = arbi(rand).getRef();
         for(auto c : str) {
             EXPECT_TRUE(c >= '0' && c<= '9');
@@ -270,13 +271,13 @@ TEST(Arbitrary, string_customchars)
 
     // Config-based constructor
     auto arbi2 = Arbi<string>({.minSize = 5, .maxSize = 15});
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto str = arbi2(rand).getRef();
         EXPECT_GE(str.size(), 5u);
         EXPECT_LE(str.size(), 15u);
     }
     auto arbi3 = Arbi<string>({.elemGen = gen::interval<char>('A', 'Z'), .minSize = 2, .maxSize = 8});
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto str = arbi3(rand).getRef();
         EXPECT_GE(str.size(), 2u);
         EXPECT_LE(str.size(), 8u);
@@ -303,9 +304,9 @@ bool isStringValid(ARGS&&...args) {
 
 TYPED_TEST(StringLikeTest, Arbitrary)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<TypeParam>();
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto str = arbi(rand).getRef();
         EXPECT_LE(str.charsize(), Arbi<TypeParam>::defaultMaxSize);
 
@@ -319,9 +320,9 @@ TYPED_TEST(StringLikeTest, Arbitrary)
 
 TYPED_TEST(StringLikeTest, Arbitrary_customchars)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<TypeParam>(gen::interval<uint32_t>('0','9'));
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto str = arbi(rand).getRef();
         for(auto c : str) {
             if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
@@ -333,7 +334,7 @@ TYPED_TEST(StringLikeTest, Arbitrary_customchars)
     // Config-based constructor for UTF-8/CESU-8 strings
     if constexpr(is_same_v<TypeParam, UTF8String> || is_same_v<TypeParam, CESU8String>) {
         auto arbi2 = Arbi<TypeParam>({.minSize = 1, .maxSize = 5});
-        for(int i = 0; i < 5; i++) {
+        for(int i = 0; i < static_cast<int>(kFocusedSamples); i++) {
             auto str = arbi2(rand).getRef();
             EXPECT_GE(str.charsize(), 1u);
             EXPECT_LE(str.charsize(), 5u);
@@ -343,10 +344,10 @@ TYPED_TEST(StringLikeTest, Arbitrary_customchars)
 
 TEST(Arbitrary, basic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<int>();
     auto val = arbi(rand).getRef();
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++)
         cout << arbi(rand).getRef() << endl;
     EXPECT_TRUE(val >= numeric_limits<int>::min());
     EXPECT_TRUE(val <= numeric_limits<int>::max());
@@ -354,12 +355,12 @@ TEST(Arbitrary, basic)
 
 TEST(Arbitrary, monadic)
 {
-    Random rand(getCurrentTime());
+    Random rand(kCompatibilitySeed);
     auto arbi = Arbi<int>();
     auto gen = arbi.map<int>([](const int& val) { return val * 2; });
     auto gen2 = gen.filter([](const int& val) { return val > 0; });
 
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < static_cast<int>(kSmokeSamples); i++) {
         auto val = gen2(rand).getRef();
         cout << val << endl;
         EXPECT_TRUE(val % 2 == 0 && val > 0);

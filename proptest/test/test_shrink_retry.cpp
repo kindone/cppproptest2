@@ -19,6 +19,7 @@
 #include <thread>
 using namespace proptest;
 using namespace proptest::stateful;
+using namespace proptest::testprofile;
 
 
 // --- 1. Confirmation runs ---
@@ -38,7 +39,7 @@ TEST(ShrinkRetry, confirmation_runs)
             }
         });
         auto result =
-            prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).forAll(
+            prop.setSeed(seed).setNumRuns(kTinyRuns).setShrinkMaxRetries(kShrinkRetryLimit).setOutputStreams(innerOut, innerErr).forAll(
                 gen::interval(0, 100));
         PROP_ASSERT(!result);  // property must fail
         auto stats = result.getLastReproductionStats();
@@ -66,7 +67,7 @@ TEST(ShrinkRetry, shrink_with_retries)
             }
         });
         auto result =
-            prop.setSeed(seed).setNumRuns(1).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).forAll(
+            prop.setSeed(seed).setNumRuns(kTinyRuns).setShrinkMaxRetries(kShrinkRetryLimit).setOutputStreams(innerOut, innerErr).forAll(
                 gen::interval(0, 100));
         PROP_ASSERT(!result);
         PROP_ASSERT(lastArg == 0);  // shrunk to 0
@@ -96,7 +97,7 @@ TEST(ShrinkRetry, report_on_each_shrink)
                 PROP_ASSERT(false);
             }
         });
-        prop.setSeed(seed).setNumRuns(10).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr)
+        prop.setSeed(seed).setNumRuns(kSmokeRuns).setShrinkMaxRetries(kShrinkRetryLimit).setOutputStreams(innerOut, innerErr)
             .setOnReproductionStats([&statsCount, &stats](const ReproductionStats& _stats) {
                 statsCount++;
                 stats = _stats;
@@ -124,7 +125,7 @@ TEST(ShrinkRetry, shrink_max_timeout)
                 PROP_ASSERT(false);
             }
         });
-        auto result = prop.setSeed(seed).setNumRuns(200).setMaxDurationMs(10).setShrinkMaxRetries(100).setShrinkTimeoutMs(10).forAll(gen::interval(0, 20));
+        auto result = prop.setSeed(seed).setNumRuns(kShrinkSearchRuns).setMaxDurationMs(kShrinkShortTimeoutMs).setShrinkMaxRetries(kShrinkBroadRetryLimit).setShrinkTimeoutMs(kShrinkShortTimeoutMs).forAll(gen::interval(0, 20));
         PROP_ASSERT(!result);
         auto stats = result.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());  // need shrinkMaxRetries>0 for assessment
@@ -132,7 +133,7 @@ TEST(ShrinkRetry, shrink_max_timeout)
         PROP_STAT(stats->elapsedSec);
         PROP_STAT(stats->numReproduced);
         PROP_STAT(stats->totalRuns);
-    }, {.maxDurationMs = 500, .shrinkTimeoutMs = 500}, gen::seed(), gen::interval<size_t>(0, 10), gen::interval(1, 100)).example(Seed(1), 63, 16);
+    }, {.maxDurationMs = kShrinkAssessmentTimeoutMs, .shrinkTimeoutMs = kShrinkAssessmentTimeoutMs}, gen::seed(), gen::interval<size_t>(0, 10), gen::interval(1, 100)).example(Seed(1), 63, 16);
 }
 
 // ========== Stateful ShrinkRetry tests (mirror stateless approaches) ==========
@@ -157,7 +158,7 @@ TEST(ShrinkRetryStateful, confirmation_runs)
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
         bool result =
-            prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).go();
+            prop.setSeed(seed).setNumRuns(kStatefulShortRuns).setShrinkMaxRetries(kShrinkRetryLimit).setOutputStreams(innerOut, innerErr).go();
         PROP_ASSERT(!result);
         auto stats = prop.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
@@ -186,7 +187,7 @@ TEST(ShrinkRetryStateful, shrink_with_retries)
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
         bool result =
-            prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(10).setOutputStreams(innerOut, innerErr).go();
+            prop.setSeed(seed).setNumRuns(kStatefulShortRuns).setShrinkMaxRetries(kShrinkRetryLimit).setOutputStreams(innerOut, innerErr).go();
         if (!result) {
             auto stats = prop.getLastReproductionStats();
             PROP_ASSERT(stats.has_value());
@@ -219,8 +220,8 @@ TEST(ShrinkRetryStateful, report_on_each_shrink)
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
         bool result = prop.setSeed(seed)
-            .setNumRuns(20)
-            .setShrinkMaxRetries(10)
+            .setNumRuns(kStatefulShortRuns)
+            .setShrinkMaxRetries(kShrinkRetryLimit)
             .setOutputStreams(innerOut, innerErr)
             .setOnReproductionStats([&statsCount, &stats](const ReproductionStats& _stats) {
                 statsCount++;
@@ -254,7 +255,7 @@ TEST(ShrinkRetryStateful, config_propagation)
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        prop.setSeed(seed).setNumRuns(20).setShrinkMaxRetries(1).setOutputStreams(innerOut, innerErr).go();
+        prop.setSeed(seed).setNumRuns(kStatefulShortRuns).setShrinkMaxRetries(kShrinkShortRetryLimit).setOutputStreams(innerOut, innerErr).go();
     }, gen::seed());
 }
 
@@ -278,7 +279,7 @@ TEST(ShrinkRetryStateful, shrink_max_timeout)
         });
         auto actionGen = gen::oneOf<SimpleAction<T>>(pushBackGen, failWhenNonEmpty);
         auto prop = statefulProperty<T>(Arbi<T>(), actionGen);
-        bool result = prop.setSeed(seed).setNumRuns(200).setMaxDurationMs(10).setShrinkMaxRetries(20).setShrinkTimeoutMs(10).go();
+        bool result = prop.setSeed(seed).setNumRuns(kShrinkSearchRuns).setMaxDurationMs(kShrinkShortTimeoutMs).setShrinkMaxRetries(kShrinkStatefulRetryLimit).setShrinkTimeoutMs(kShrinkShortTimeoutMs).go();
         PROP_ASSERT(!result);
         auto stats = prop.getLastReproductionStats();
         PROP_ASSERT(stats.has_value());
@@ -287,5 +288,5 @@ TEST(ShrinkRetryStateful, shrink_max_timeout)
         PROP_STAT(stats->elapsedSec);
         PROP_STAT(stats->numReproduced);
         PROP_STAT(stats->totalRuns);
-    }, {.maxDurationMs = 500, .shrinkTimeoutMs = 500}, gen::seed(), gen::interval<size_t>(0, 10), gen::interval(1, 100));
+    }, {.maxDurationMs = kShrinkAssessmentTimeoutMs, .shrinkTimeoutMs = kShrinkAssessmentTimeoutMs}, gen::seed(), gen::interval<size_t>(0, 10), gen::interval(1, 100));
 }
