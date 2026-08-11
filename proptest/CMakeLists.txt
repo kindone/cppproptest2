@@ -61,6 +61,7 @@ SET(proptest_testsources
     test/test_any.cpp
     test/test_function.cpp
     test/test_anyfunction.cpp
+    test/test_dependent_generator_contracts.cpp
     test/test_tupleorvector.cpp
     test/test_stream.cpp
     test/test_shrinkable.cpp
@@ -76,7 +77,10 @@ SET(proptest_testsources
     test/test_combinator.cpp
     test/test_invoke.cpp
     test/test_property.cpp
+    test/test_property_api_composition.cpp
+    test/test_property_runner_reporting.cpp
     test/test_proptest.cpp
+    test/test_shrink_tree_contracts.cpp
     test/test_stateful_function.cpp
     test/test_concurrency_function.cpp
 )
@@ -147,4 +151,3 @@ TARGET_LINK_LIBRARIES(compile_proptest
         hdbbasement
         hdbbasis
 )
-

@@ -28,10 +28,10 @@ Out of scope for this refresh:
 
 | Area | Files | Current role |
 |---|---|---|
-| Generator API contracts | `test_gen.cpp`, `test_generator.cpp`, `test_arbitrary.cpp` | primitive, container, arbitrary, construction, and namespace-level generator behavior |
-| Combinator contracts | `test_combinator.cpp`, `test_combinator2.cpp`, `test_container_variants.cpp` | `just`, `oneOf`, `elementOf`, `filter`, transform, derive, chain, aggregate, accumulate, recursive, and container-variant behavior |
-| Boundary and shrink-domain coverage | `test_floating.cpp`, `test_flatmap_edge_cases.cpp`, `test_shrinker*.cpp`, `test_shrinkable.cpp` | float frontiers, flatMap replay/regeneration, exact shrink axes, and shrinkable composition |
-| Property API and reporting | `test_property.cpp`, `test_shrink_retry.cpp` | `.forAll`, `.example`, `.matrix`, assertion macros, config paths, replay seeds, duration guards, and shrink retry behavior |
+| Generator API contracts | `test_gen.cpp`, `test_generator.cpp`, `test_arbitrary.cpp`, `test_dependent_generator_contracts.cpp` | primitive, container, arbitrary, construction, replay, dependent-domain preservation, and namespace-level generator behavior |
+| Combinator contracts | `test_combinator.cpp`, `test_combinator2.cpp`, `test_container_variants.cpp`, `test_dependent_generator_contracts.cpp` | `just`, `oneOf`, `elementOf`, `filter`, transform, derive, chain, aggregate, accumulate, recursive, dependent combinators, and container-variant behavior |
+| Boundary and shrink-domain coverage | `test_floating.cpp`, `test_flatmap_edge_cases.cpp`, `test_shrink_tree_contracts.cpp`, `test_shrinker*.cpp`, `test_shrinkable.cpp` | float frontiers, flatMap replay/regeneration, structural shrink-tree invariants, exact shrink axes, and shrinkable composition |
+| Property API and reporting | `test_property.cpp`, `test_property_api_composition.cpp`, `test_property_runner_reporting.cpp`, `test_shrink_retry.cpp` | `.forAll`, `.example`, `.matrix`, assertion macros, chain composition, config paths, replay seeds, configured streams, statistical assertion reporting, duration guards, and shrink retry behavior |
 | Stateful and concurrency workflows | `test_stateful_function.cpp`, `test_concurrency_function.cpp` | model/object agreement, action generation, callback lifecycle, prefix/last-action shrinking, retry and concurrency traces |
 | Core utilities | `test_any*.cpp`, `test_function*.cpp`, `test_stream.cpp`, `test_tupleorvector.cpp`, `test_typelist.cpp`, `test_random.cpp`, `test_printing.cpp`, `test_invoke.cpp`, `test_lazy.cpp` | internal public-support contracts and compatibility surfaces |
 | Performance guardrails | `test_performance.cpp` plus performance-named cases in utility files | bounded construction, stream, shrinkable, generator, and type-erasure performance smoke |
@@ -52,6 +52,22 @@ Out of scope for this refresh:
   domain shape rather than an execution budget.
 - Left compile snippets as a separate track because their value is partly that
   they compile with minimal context.
+- Added `test_property_api_composition.cpp` as the first additive role-named
+  split from the historical `test_property.cpp` mix. It protects ordered
+  `.example()` / `.matrix()` / `.forAll()` composition, config precedence, and
+  chain short-circuiting without deleting the original coverage yet.
+- Added `test_dependent_generator_contracts.cpp` as an additive role-named
+  split for dependent generator behavior. It protects deterministic replay for
+  flatMap traces and validates shrink-tree preservation of dependent size and
+  filter contracts.
+- Added `test_property_runner_reporting.cpp` as a role-named split for runner
+  configuration and reporting. It protects config-driven replay, lifecycle
+  callbacks, configured output/error streams, example failure reports, and
+  statistical assertion failure reports.
+- Added `test_shrink_tree_contracts.cpp` as a role-named split for structural
+  shrink-tree behavior. It protects integral movement toward zero, filter
+  pruning, map traversal preservation, list-like size/uniqueness bounds, and
+  concat/andThen placement without depending on full serialized tree text.
 
 ## Role Taxonomy
 
@@ -131,8 +147,11 @@ Compared with the JS and Python refreshes:
 ## Verification From This Pass
 
 - `cmake --build build --target test_proptest -j2` passed.
-- `./build/test_proptest --gtest_brief=1` passed with 512 tests and 5 disabled
+- `./build/test_proptest --gtest_brief=1` passed with 527 tests and 5 disabled
   tests.
+- Focused portfolio verification passed for
+  `DependentGeneratorContracts.*:PropertyApiComposition.*:PropertyRunnerReporting.*`.
+- Focused shrink-tree verification passed for `ShrinkTreeContracts.*`.
 - Focused performance verification passed for
   `Performance.*:ShrinkerPerformance.*`.
 - `git diff --check` passed after the profile normalization.

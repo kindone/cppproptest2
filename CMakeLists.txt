@@ -133,6 +133,7 @@ SET(proptest_testsources
     proptest/test/test_function_traits.cpp
     proptest/test/test_any.cpp
     proptest/test/test_anyfunction.cpp
+    proptest/test/test_dependent_generator_contracts.cpp
     proptest/test/test_function.cpp
     proptest/test/test_gen.cpp
     proptest/test/test_tupleorvector.cpp
@@ -149,8 +150,11 @@ SET(proptest_testsources
     proptest/test/test_combinator2.cpp
     proptest/test/test_invoke.cpp
     proptest/test/test_property.cpp
+    proptest/test/test_property_api_composition.cpp
+    proptest/test/test_property_runner_reporting.cpp
     proptest/test/test_proptest.cpp
     proptest/test/test_shrink_retry.cpp
+    proptest/test/test_shrink_tree_contracts.cpp
     proptest/test/test_stateful_function.cpp
     proptest/test/test_concurrency_function.cpp
     proptest/test/test_performance.cpp
