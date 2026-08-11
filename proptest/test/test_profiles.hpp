@@ -5,13 +5,11 @@
 
 namespace proptest::testprofile {
 
+// Cross-suite replay fixtures. Keep component-local seeds in the test file
+// that explains the scenario they replay.
 constexpr int64_t kCompatibilitySeed = 42;
-constexpr int64_t kRandomReplaySeed = 424242;
 constexpr int64_t kStatefulReplaySeed = 0;
 constexpr int64_t kStatefulFailureSeed = 1;
-constexpr int64_t kConcurrencySavedRngSeed = 123;
-constexpr int64_t kPropertyConfigSeed = 123;
-constexpr int64_t kPropertyReplaySeed = 555;
 constexpr int64_t kPropertyConfigReplaySeed = 999;
 
 constexpr std::size_t kMinimalSamples = 2;
@@ -35,6 +33,7 @@ constexpr int kContractRuns = 100;
 constexpr int kStatefulContractRuns = 100;
 constexpr int kStatefulFrontierRuns = 200;
 constexpr int kFailureSearchRuns = 50;
+constexpr int kShrinkContractRuns = 5;
 constexpr int kStatisticalRuns = 1000;
 constexpr int kDurationGuardRuns = 1000000;
 constexpr int kExtremeDurationGuardRuns = 10000000;
@@ -45,7 +44,6 @@ constexpr int kTraversalPerformanceDepth = 100;
 constexpr int kChainedOperationDepth = 10;
 constexpr int kShrinkerPerformanceIterations = 1000;
 constexpr int kShrinkIntegralBenchmarkValue = 100000;
-constexpr int64_t kPerformanceReplaySeed = 1709963283213LL;
 constexpr std::size_t kLargeObjectElements = 1000;
 
 constexpr int kStatefulShortActions = 5;

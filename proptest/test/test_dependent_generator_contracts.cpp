@@ -19,6 +19,9 @@
  *   setSize(size, size).
  * - dependentSizeVectorGen() creates values like {3, [a, b, c]}; both roots and
  *   shrink candidates are required to keep the vector length equal to 3.
+ * - Generated Seed values are replay inputs for the dependent generator under
+ *   test; explicit Random construction is kept inside property bodies so replay
+ *   checks still run through property/example/forAll.
  * - collectShrinkViolations() walks a bounded breadth-first view of a shrink
  *   tree and returns every visited value that fails the supplied invariant.
  */
@@ -82,7 +85,7 @@ vector<T> collectShrinkViolations(Shrinkable<T> root, Predicate predicate)
     return violations;
 }
 
-vector<VectorWithGeneratedSize> collectDependentSizeVectorTrace(uint64_t seed, size_t sampleCount)
+vector<VectorWithGeneratedSize> collectDependentSizeVectorTrace(Seed seed, size_t sampleCount)
 {
     auto generator = dependentSizeVectorGen();
     Random rand(seed);
@@ -97,47 +100,57 @@ vector<VectorWithGeneratedSize> collectDependentSizeVectorTrace(uint64_t seed, s
 
 TEST(DependentGeneratorContracts, flatmap_replays_same_dependent_trace_for_same_seed)
 {
-    const auto first = collectDependentSizeVectorTrace(kCompatibilitySeed, kShortSamples);
-    const auto second = collectDependentSizeVectorTrace(kCompatibilitySeed, kShortSamples);
+    EXPECT_TRUE(property([](Seed seed) {
+        const auto first = collectDependentSizeVectorTrace(seed, kShortSamples);
+        const auto second = collectDependentSizeVectorTrace(seed, kShortSamples);
 
-    EXPECT_EQ(first, second);
-    for (const auto& value : first) {
-        EXPECT_TRUE(isValidDependentSizeVector(value));
-    }
+        PROP_ASSERT(first == second);
+        for (const auto& value : first) {
+            PROP_ASSERT(isValidDependentSizeVector(value));
+        }
+        return true;
+    }, gen::seed()).example(Seed(kCompatibilitySeed))
+      .setNumRuns(kContractRuns)
+      .forAll());
 }
 
 TEST(DependentGeneratorContracts, flatmap_shrinks_preserve_dependent_size_contract)
 {
-    auto generator = dependentSizeVectorGen();
-    Random rand(kCompatibilitySeed);
-
-    for (size_t i = 0; i < kFocusedSamples; ++i) {
+    EXPECT_TRUE(property([](Seed seed) {
+        auto generator = dependentSizeVectorGen();
+        Random rand(seed);
         const auto root = generator(rand);
         const auto violations = collectShrinkViolations(root, isValidDependentSizeVector);
-        EXPECT_TRUE(violations.empty()) << "flatMap shrink tree must preserve size-dependent vector contract";
-    }
+        PROP_ASSERT(violations.empty());
+        return true;
+    }, gen::seed()).example(Seed(kCompatibilitySeed))
+      .setNumRuns(kShrinkContractRuns)
+      .forAll());
 }
 
 TEST(DependentGeneratorContracts, filtered_flatmap_shrinks_preserve_filter_contract)
 {
-    auto generator = gen::interval(1, 10)
-        .flatMap<vector<int>>([](const int& size) {
-            auto values = gen::vector<int>(gen::interval(1, 10));
-            values.setSize(size, size);
-            return values;
-        })
-        .filter([](const vector<int>& values) {
-            return sum(values) > 10;
-        });
+    EXPECT_TRUE(property([](Seed seed) {
+        auto generator = gen::interval(1, 10)
+            .flatMap<vector<int>>([](const int& size) {
+                auto values = gen::vector<int>(gen::interval(1, 10));
+                values.setSize(size, size);
+                return values;
+            })
+            .filter([](const vector<int>& values) {
+                return sum(values) > 10;
+            });
 
-    Random rand(kCompatibilitySeed);
-    for (size_t i = 0; i < kFocusedSamples; ++i) {
+        Random rand(seed);
         const auto root = generator(rand);
-        ASSERT_GT(sum(root.getRef()), 10);
+        PROP_ASSERT_GT(sum(root.getRef()), 10);
 
         const auto violations = collectShrinkViolations(root, [](const vector<int>& values) {
             return sum(values) > 10;
         });
-        EXPECT_TRUE(violations.empty()) << "filter+flatMap shrink tree must preserve the accepted domain";
-    }
+        PROP_ASSERT(violations.empty());
+        return true;
+    }, gen::seed()).example(Seed(kCompatibilitySeed))
+      .setNumRuns(kContractRuns)
+      .forAll());
 }

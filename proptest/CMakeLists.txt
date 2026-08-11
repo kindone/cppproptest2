@@ -59,6 +59,7 @@ SET(proptest_testsources
     test/test_typelist.cpp
     test/test_function_traits.cpp
     test/test_any.cpp
+    test/test_accumulating_combinator_contracts.cpp
     test/test_function.cpp
     test/test_anyfunction.cpp
     test/test_dependent_generator_contracts.cpp
@@ -81,6 +82,7 @@ SET(proptest_testsources
     test/test_property_runner_reporting.cpp
     test/test_proptest.cpp
     test/test_shrink_tree_contracts.cpp
+    test/test_stateful_model_contracts.cpp
     test/test_stateful_function.cpp
     test/test_concurrency_function.cpp
 )

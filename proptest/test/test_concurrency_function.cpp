@@ -14,6 +14,10 @@ using namespace proptest::testprofile;
 using std::mutex;
 using std::lock_guard;
 
+namespace {
+constexpr uint64_t kSavedRngFailureReplaySeed = 123;
+}
+
 // extern mutex& getMutex();
 
 mutex& getMutex()
@@ -133,7 +137,7 @@ TEST(concurrency_function, shrink_with_retry_timeout_smoke)
 
 TEST(concurrency_function, shrink_uses_saved_rng_for_later_failure)
 {
-    constexpr uint64_t seed = kConcurrencySavedRngSeed;
+    constexpr uint64_t seed = kSavedRngFailureReplaySeed;
     auto initialGen = gen::interval<int>(1000, 1000000);
     auto noopGen = gen::just(SimpleAction<int>("Noop", [](int&) {}));
     auto actionGen = noopGen.template map<Action<int, EmptyModel>>(

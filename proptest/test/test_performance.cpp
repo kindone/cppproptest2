@@ -11,6 +11,10 @@
 using namespace proptest;
 using namespace proptest::testprofile;
 
+namespace {
+constexpr uint64_t kPerformanceReplaySeed = 1709963283213ULL;
+}
+
 TEST(Performance, StreamConstructor)
 {
     for(int i = 0; i < kStructuralPerformanceIterations; i++)

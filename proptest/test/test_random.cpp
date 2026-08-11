@@ -5,6 +5,10 @@
 using namespace proptest;
 using namespace proptest::testprofile;
 
+namespace {
+constexpr int64_t kRandomReplaySeed = 424242;
+}
+
 TEST(Random, basic)
 {
     int64_t seed = kRandomReplaySeed;

@@ -9,6 +9,11 @@
 using namespace proptest;
 using namespace proptest::testprofile;
 
+namespace {
+constexpr int64_t kPropertyConfigSmokeSeed = 123;
+constexpr int64_t kPropertySetterEquivalenceReplaySeed = 555;
+}
+
 struct NonCopyable
 {
     NonCopyable() = delete;
@@ -184,7 +189,7 @@ TEST(Property, shrink_output_omits_simplest_line_when_no_shrink_happened)
 
 TEST(Property, seed_generator_has_empty_shrink_stream)
 {
-    Random rand(kPropertyConfigSeed);
+    Random rand(kPropertyConfigSmokeSeed);
     auto shr = gen::seed()(rand);
     EXPECT_TRUE(shr.getShrinks().isEmpty());
 }
@@ -974,7 +979,7 @@ TEST(Property, forAllWithConfigAll)
     EXPECT_FOR_ALL([](int) {
         return true;
     }, {
-        .seed = kPropertyConfigSeed,
+        .seed = kPropertyConfigSmokeSeed,
         .numRuns = kConfigAllRuns,
         .maxDurationMs = kConfigAllTimeoutMs,
         .onStartup = [&]() { startupCalled = true; },
@@ -1059,7 +1064,7 @@ TEST(Property, propertySetConfigAll)
     });
 
     prop.setConfig({
-        .seed = kPropertyConfigSeed,
+        .seed = kPropertyConfigSmokeSeed,
         .numRuns = kConfigAllRuns,
         .maxDurationMs = kConfigAllTimeoutMs,
         .onStartup = [&]() { startupCalled = true; },
@@ -1113,7 +1118,7 @@ TEST(Property, propertySetConfig_vs_individualSetters)
         configRun = x;
         return true;
     }, {
-        .seed = kPropertyReplaySeed,
+        .seed = kPropertySetterEquivalenceReplaySeed,
         .numRuns = kTinyRuns
     });
 
@@ -1122,7 +1127,7 @@ TEST(Property, propertySetConfig_vs_individualSetters)
         individualRun = x;
         return true;
     });
-    prop.setSeed(kPropertyReplaySeed).setNumRuns(kTinyRuns).forAll();
+    prop.setSeed(kPropertySetterEquivalenceReplaySeed).setNumRuns(kTinyRuns).forAll();
 
     EXPECT_EQ(configRun, individualRun);
 }
