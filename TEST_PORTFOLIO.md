@@ -26,15 +26,30 @@ Out of scope for this refresh:
 
 ## Current Coverage Shape
 
+Runtime tests now use component directories:
+
+- `core/`: public support types and small utility surfaces.
+- `generator/`: primitive, structured, arbitrary, namespace, and frontier
+  generators.
+- `combinator/`: generator composition, dependent generation, aggregate, and
+  accumulate behavior.
+- `property/`: property object, runner API, reporting, examples, matrices, and
+  chain composition.
+- `shrinker/`: shrinkable, shrink trees, shrinkers, retry, and reproduction
+  behavior.
+- `stateful/`: stateful model/action workflows.
+- `concurrency/`: concurrent stateful workflows.
+- `performance/`: bounded performance guardrails.
+
 | Area | Files | Current role |
 |---|---|---|
-| Generator API contracts | `test_gen.cpp`, `test_generator.cpp`, `test_arbitrary.cpp`, `test_dependent_generator_contracts.cpp` | primitive, container, arbitrary, construction, replay, dependent-domain preservation, and namespace-level generator behavior |
-| Combinator contracts | `test_accumulating_combinator_contracts.cpp`, `test_combinator.cpp`, `test_combinator2.cpp`, `test_container_variants.cpp`, `test_dependent_generator_contracts.cpp` | `just`, `oneOf`, `elementOf`, `filter`, transform, derive, chain, aggregate, accumulate, recursive, dependent combinators, and container-variant behavior |
-| Boundary and shrink-domain coverage | `test_floating.cpp`, `test_flatmap_edge_cases.cpp`, `test_shrink_tree_contracts.cpp`, `test_shrinker*.cpp`, `test_shrinkable.cpp` | float frontiers, flatMap replay/regeneration, structural shrink-tree invariants, exact shrink axes, and shrinkable composition |
-| Property API and reporting | `test_property.cpp`, `test_property_api_composition.cpp`, `test_property_runner_reporting.cpp`, `test_shrink_retry.cpp` | `.forAll`, `.example`, `.matrix`, assertion macros, chain composition, config paths, replay seeds, configured streams, statistical assertion reporting, duration guards, and shrink retry behavior |
-| Stateful and concurrency workflows | `test_stateful_model_contracts.cpp`, `test_stateful_function.cpp`, `test_concurrency_function.cpp` | model/object agreement, action generation, callback lifecycle, prefix/last-action shrinking, retry and concurrency traces |
-| Core utilities | `test_any*.cpp`, `test_function*.cpp`, `test_stream.cpp`, `test_tupleorvector.cpp`, `test_typelist.cpp`, `test_random.cpp`, `test_printing.cpp`, `test_invoke.cpp`, `test_lazy.cpp` | internal public-support contracts and compatibility surfaces |
-| Performance guardrails | `test_performance.cpp` plus performance-named cases in utility files | bounded construction, stream, shrinkable, generator, and type-erasure performance smoke |
+| Generator API contracts | `generator/test_namespace_generators.cpp`, `generator/test_generator_object.cpp`, `generator/test_arbitrary.cpp`, `combinator/test_dependent_generator_contracts.cpp` | primitive, container, arbitrary, construction, replay, dependent-domain preservation, and namespace-level generator behavior |
+| Combinator contracts | `combinator/test_accumulating_combinator_contracts.cpp`, `combinator/test_selection_combinator_contracts.cpp`, `combinator/test_transformation_combinator_contracts.cpp`, `combinator/test_combinator_legacy.cpp`, `combinator/test_combinator_expanded.cpp`, `combinator/test_container_variants.cpp`, `combinator/test_dependent_generator_contracts.cpp` | `just`, `oneOf`, `elementOf`, `filter`, transform, derive, chain, aggregate, accumulate, recursive, dependent combinators, and container-variant behavior |
+| Boundary and shrink-domain coverage | `generator/test_floating.cpp`, `combinator/test_flatmap_edge_cases.cpp`, `shrinker/test_shrink_tree_contracts.cpp`, `shrinker/shrinker*_test.cpp`, `shrinker/test_shrinkable.cpp` | float frontiers, flatMap replay/regeneration, structural shrink-tree invariants, exact shrink axes, and shrinkable composition |
+| Property API and reporting | `property/test_property_legacy.cpp`, `property/test_property_api_composition.cpp`, `property/test_property_runner_reporting.cpp`, `shrinker/test_shrink_retry.cpp` | `.forAll`, `.example`, `.matrix`, assertion macros, chain composition, config paths, replay seeds, configured streams, statistical assertion reporting, duration guards, and shrink retry behavior |
+| Stateful and concurrency workflows | `stateful/test_stateful_model_contracts.cpp`, `stateful/test_stateful_function_legacy.cpp`, `concurrency/test_concurrency_function_legacy.cpp` | model/object agreement, action generation, callback lifecycle, prefix/last-action shrinking, retry and concurrency traces |
+| Core utilities | `core/*_test.cpp` | internal public-support contracts and compatibility surfaces |
+| Performance guardrails | `performance/test_performance.cpp` plus performance-named cases in utility files | bounded construction, stream, shrinkable, generator, and type-erasure performance smoke |
 | Compile/API snippets | `proptest/test/compile` and `proptest/test/compile_fail` | public syntax smoke and expected compile-failure contracts |
 
 ## Refresh Log
@@ -52,26 +67,26 @@ Out of scope for this refresh:
   domain shape rather than an execution budget.
 - Left compile snippets as a separate track because their value is partly that
   they compile with minimal context.
-- Added `test_property_api_composition.cpp` as the first additive role-named
-  split from the historical `test_property.cpp` mix. It protects ordered
+- Added `property/test_property_api_composition.cpp` as the first additive role-named
+  split from the historical `property/test_property_legacy.cpp` mix. It protects ordered
   `.example()` / `.matrix()` / `.forAll()` composition, config precedence, and
   chain short-circuiting without deleting the original coverage yet.
-- Added `test_dependent_generator_contracts.cpp` as an additive role-named
+- Added `combinator/test_dependent_generator_contracts.cpp` as an additive role-named
   split for dependent generator behavior. It protects deterministic replay for
   flatMap traces and validates shrink-tree preservation of dependent size and
   filter contracts.
-- Added `test_property_runner_reporting.cpp` as a role-named split for runner
+- Added `property/test_property_runner_reporting.cpp` as a role-named split for runner
   configuration and reporting. It protects config-driven replay, lifecycle
   callbacks, configured output/error streams, example failure reports, and
   statistical assertion failure reports.
-- Added `test_shrink_tree_contracts.cpp` as a role-named split for structural
+- Added `shrinker/test_shrink_tree_contracts.cpp` as a role-named split for structural
   shrink-tree behavior. It protects integral movement toward zero, filter
   pruning, map traversal preservation, list-like size/uniqueness bounds, and
   concat/andThen placement without depending on full serialized tree text.
 - Added `TEST_COVERAGE_MATRIX.md` as the repo-local harness for mapping
   supported capabilities to component families, behavioral contracts,
   component-focused properties, current coverage, and gaps.
-- Added `test_accumulating_combinator_contracts.cpp` as a role-named split for
+- Added `combinator/test_accumulating_combinator_contracts.cpp` as a role-named split for
   aggregate/accumulate behavior. It protects deterministic dependent witnesses
   and bounded shrink-domain preservation for aggregate vectors and accumulated
   lists.
@@ -83,13 +98,25 @@ Out of scope for this refresh:
   `accumulateImpl` hard-coded `flatMap<int>`, which made non-`int` accumulated
   values unsafe. The implementation now derives from the generated step count
   without naming a concrete result type.
-- Added `test_stateful_model_contracts.cpp` as a role-named split for passing
+- Added `stateful/test_stateful_model_contracts.cpp` as a role-named split for passing
   stateful model workflows. It protects object/model agreement across generated
   actions, state-dependent action selection from the current model, and balanced
   lifecycle/action callbacks for successful runs.
 - Reduced `test_profiles.hpp` to cross-suite seed fixtures. Seeds used by one
   component test now live beside that test, where the replay scenario can be
   named concretely.
+- Moved runtime tests into component directories. Files with `_legacy_test`
+  suffix still carry meaningful historical coverage, but their names now make
+  the remaining subsumption work explicit.
+- Added `combinator/test_selection_combinator_contracts.cpp` as a role-named
+  split for `oneOf`, `elementOf`, and weighted selection behavior. It protects
+  declared-domain membership and dominant-branch observability without pinning
+  exact distribution percentages.
+- Added `combinator/test_transformation_combinator_contracts.cpp` as a
+  role-named split for transform/map, filter/suchThat, derive/pairWith, and
+  chain/tupleWith behavior. It protects root generation and bounded
+  shrink-domain preservation for mapped, filtered, and dependent tuple/pair
+  domains.
 
 ## Role Taxonomy
 
@@ -166,12 +193,15 @@ Compared with the JS and Python refreshes:
 
 ## Intentional Deferrals
 
-- Existing C++ test files are not renamed or deleted in this pass. Their current
-  names still reflect historical organization, but renaming would be noisy and
-  should happen only after a focused compatibility/subsumption review.
+- Historical C++ test files have been moved into component directories. Files
+  with `_legacy_test` still need focused compatibility/subsumption review
+  before their contents are split, retired, or renamed further.
 - `proptest/test/compile` still uses local literal seeds in minimal snippets.
   Normalize them later only if the compile fixtures grow a small support header
   that does not hide the API surface under test.
+- The nested `proptest/CMakeLists.txt` still contains a pre-existing
+  `test/test_anyshrinkable.cpp` reference, but that file is not present in this
+  checkout. The active top-level build does not include that entry.
 - The existing build directory reports no CTest tests; direct execution of
   `build/test_proptest` remains the current verification source.
 - Performance tests are still smoke/guardrail tests, not calibrated benchmarks.
@@ -179,8 +209,10 @@ Compared with the JS and Python refreshes:
 ## Verification From This Pass
 
 - `cmake --build build --target test_proptest -j2` passed.
-- `./build/test_proptest --gtest_brief=1` passed with 534 tests and 5 disabled
+- `./build/test_proptest --gtest_brief=1` passed with 542 tests and 5 disabled
   tests.
+- The component-directory move passed a full rebuild and full test run with the
+  new source paths.
 - Focused portfolio verification passed for
   `AccumulatingCombinatorContracts.*:DependentGeneratorContracts.*:PropertyApiComposition.*:PropertyRunnerReporting.*:StatefulModelContracts.*`.
 - Focused shrink-tree verification passed for `ShrinkTreeContracts.*`.
@@ -188,4 +220,8 @@ Compared with the JS and Python refreshes:
   `Performance.*:ShrinkerPerformance.*`.
 - Focused seed-profile verification passed for
   `Random.*:Property.*:PropertyRunnerReporting.*:concurrency_function.shrink_uses_saved_rng_for_later_failure:Performance.ArbiBool:Performance.ArbiInt`.
+- Focused selection-combinator verification passed for
+  `SelectionCombinatorContracts.*`.
+- Focused transformation-combinator verification passed for
+  `TransformationCombinatorContracts.*`.
 - `git diff --check` passed after the profile normalization.

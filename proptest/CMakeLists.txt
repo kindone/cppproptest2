@@ -55,36 +55,43 @@ TARGET_LINK_LIBRARIES(proptest
 
 ### tests
 SET(proptest_testsources
-    test/test_lazy.cpp
-    test/test_typelist.cpp
-    test/test_function_traits.cpp
-    test/test_any.cpp
-    test/test_accumulating_combinator_contracts.cpp
-    test/test_function.cpp
-    test/test_anyfunction.cpp
-    test/test_dependent_generator_contracts.cpp
-    test/test_tupleorvector.cpp
-    test/test_stream.cpp
-    test/test_shrinkable.cpp
-    test/test_shrinker.cpp
-    test/test_shrinker2.cpp
+    test/core/test_lazy.cpp
+    test/core/test_typelist.cpp
+    test/core/test_function_traits.cpp
+    test/core/test_any.cpp
+    test/core/test_anyfunction.cpp
+    test/combinator/test_accumulating_combinator_contracts.cpp
+    test/combinator/test_dependent_generator_contracts.cpp
+    test/core/test_function.cpp
+    test/generator/test_namespace_generators.cpp
+    test/core/test_tupleorvector.cpp
+    test/core/test_stream.cpp
+    test/shrinker/test_shrinkable.cpp
+    test/shrinker/test_shrinker.cpp
+    test/shrinker/test_shrinker_container.cpp
     test/test_anyshrinkable.cpp
-    test/test_printing.cpp
-    test/test_random.cpp
-    test/test_arbitrary.cpp
-    test/test_generator.cpp
-    test/test_flatmap_edge_cases.cpp
-    test/test_floating.cpp
-    test/test_combinator.cpp
-    test/test_invoke.cpp
-    test/test_property.cpp
-    test/test_property_api_composition.cpp
-    test/test_property_runner_reporting.cpp
-    test/test_proptest.cpp
-    test/test_shrink_tree_contracts.cpp
-    test/test_stateful_model_contracts.cpp
-    test/test_stateful_function.cpp
-    test/test_concurrency_function.cpp
+    test/core/test_printing.cpp
+    test/core/test_random.cpp
+    test/generator/test_arbitrary.cpp
+    test/generator/test_generator_object.cpp
+    test/combinator/test_container_variants.cpp
+    test/combinator/test_flatmap_edge_cases.cpp
+    test/generator/test_floating.cpp
+    test/combinator/test_combinator_legacy.cpp
+    test/combinator/test_combinator_expanded.cpp
+    test/combinator/test_selection_combinator_contracts.cpp
+    test/combinator/test_transformation_combinator_contracts.cpp
+    test/core/test_invoke.cpp
+    test/property/test_property_legacy.cpp
+    test/property/test_property_api_composition.cpp
+    test/property/test_property_runner_reporting.cpp
+    test/core/test_proptest.cpp
+    test/shrinker/test_shrink_retry.cpp
+    test/shrinker/test_shrink_tree_contracts.cpp
+    test/stateful/test_stateful_model_contracts.cpp
+    test/stateful/test_stateful_function_legacy.cpp
+    test/concurrency/test_concurrency_function_legacy.cpp
+    test/performance/test_performance.cpp
 )
 
 
