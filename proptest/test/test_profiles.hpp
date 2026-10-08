@@ -12,13 +12,13 @@ constexpr int64_t kStatefulReplaySeed = 0;
 constexpr int64_t kStatefulFailureSeed = 1;
 constexpr int64_t kPropertyConfigReplaySeed = 999;
 
-constexpr std::size_t kMinimalSamples = 2;
-constexpr std::size_t kFocusedSamples = 5;
-constexpr std::size_t kSmokeSamples = 10;
-constexpr std::size_t kShortSamples = 20;
-constexpr std::size_t kGeneratorContractSamples = 50;
-constexpr std::size_t kFloatingDomainSamples = 100;
-constexpr std::size_t kShrinkTraversalLimit = 1000;
+constexpr size_t kMinimalSamples = 2;
+constexpr size_t kFocusedSamples = 5;
+constexpr size_t kSmokeSamples = 10;
+constexpr size_t kShortSamples = 20;
+constexpr size_t kGeneratorContractSamples = 50;
+constexpr size_t kFloatingDomainSamples = 100;
+constexpr size_t kShrinkTraversalLimit = 1000;
 
 constexpr int kTinyRuns = 1;
 constexpr int kSavedRngReplayRuns = 2;
@@ -44,7 +44,7 @@ constexpr int kTraversalPerformanceDepth = 100;
 constexpr int kChainedOperationDepth = 10;
 constexpr int kShrinkerPerformanceIterations = 1000;
 constexpr int kShrinkIntegralBenchmarkValue = 100000;
-constexpr std::size_t kLargeObjectElements = 1000;
+constexpr size_t kLargeObjectElements = 1000;
 
 constexpr int kStatefulShortActions = 5;
 constexpr int kStatefulContractActions = 20;

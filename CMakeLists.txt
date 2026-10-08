@@ -149,6 +149,7 @@ SET(proptest_testsources
     proptest/test/combinator/test_container_variants.cpp
     proptest/test/combinator/test_combinator_legacy.cpp
     proptest/test/combinator/test_combinator_expanded.cpp
+    proptest/test/combinator/test_recursive_combinator_contracts.cpp
     proptest/test/combinator/test_selection_combinator_contracts.cpp
     proptest/test/combinator/test_transformation_combinator_contracts.cpp
     proptest/test/core/test_invoke.cpp
@@ -160,6 +161,8 @@ SET(proptest_testsources
     proptest/test/shrinker/test_shrink_tree_contracts.cpp
     proptest/test/stateful/test_stateful_model_contracts.cpp
     proptest/test/stateful/test_stateful_function_legacy.cpp
+    proptest/test/concurrency/test_concurrency_execution_contracts.cpp
+    proptest/test/concurrency/test_concurrency_shrink_replay_contracts.cpp
     proptest/test/concurrency/test_concurrency_function_legacy.cpp
     proptest/test/performance/test_performance.cpp
     proptest/test/combinator/test_flatmap_edge_cases.cpp

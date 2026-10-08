@@ -87,6 +87,47 @@ bool isValidDependentTriple(const Chain<int, int, int>& value)
     return isValidDependentChain(Chain<int, int>(first, second)) && third >= second && third <= second + 2;
 }
 
+vector<pair<int, int>> collectPairWithTrace(Seed seed, size_t sampleCount)
+{
+    auto paired = gen::interval<int>(0, 5).pairWith<int>([](const int& value) {
+        return gen::interval<int>(value, value + 2);
+    });
+    Random rand(seed);
+    vector<pair<int, int>> trace;
+    for (size_t i = 0; i < sampleCount; ++i) {
+        trace.push_back(paired(rand).getRef());
+    }
+    return trace;
+}
+
+vector<pair<int, int>> collectChainTrace(Seed seed, size_t sampleCount)
+{
+    auto chained = gen::chain(gen::interval<int>(0, 5), [](const int& value) {
+        return gen::interval<int>(value, value + 2);
+    });
+    Random rand(seed);
+    vector<pair<int, int>> trace;
+    for (size_t i = 0; i < sampleCount; ++i) {
+        const auto value = chained(rand).getRef();
+        trace.push_back(util::make_pair(get<0>(value), get<1>(value)));
+    }
+    return trace;
+}
+
+vector<pair<int, int>> collectTupleWithTrace(Seed seed, size_t sampleCount)
+{
+    auto tupled = gen::interval<int>(0, 5).tupleWith<int>([](const int& value) {
+        return gen::interval<int>(value, value + 2);
+    });
+    Random rand(seed);
+    vector<pair<int, int>> trace;
+    for (size_t i = 0; i < sampleCount; ++i) {
+        const auto value = tupled(rand).getRef();
+        trace.push_back(util::make_pair(get<0>(value), get<1>(value)));
+    }
+    return trace;
+}
+
 }  // namespace
 
 TEST(TransformationCombinatorContracts, transform_and_map_roots_and_shrinks_stay_in_mapped_domain)
@@ -189,5 +230,34 @@ TEST(TransformationCombinatorContracts, chain_and_tuplewith_respect_prior_genera
         return true;
     }, gen::seed()).matrix({Seed(kCompatibilitySeed), Seed(kDependencyReplaySeed)})
                    .setNumRuns(kShrinkContractRuns)
+                   .forAll());
+}
+
+TEST(TransformationCombinatorContracts, dependent_pair_and_chain_combinators_replay_same_trace_for_same_seed)
+{
+    EXPECT_TRUE(property([](Seed seed) {
+        const auto firstPairTrace = collectPairWithTrace(seed, kShortSamples);
+        const auto secondPairTrace = collectPairWithTrace(seed, kShortSamples);
+        PROP_ASSERT(firstPairTrace == secondPairTrace);
+        for (const auto& value : firstPairTrace) {
+            PROP_ASSERT(isValidDependentPair(value));
+        }
+
+        const auto firstChainTrace = collectChainTrace(seed, kShortSamples);
+        const auto secondChainTrace = collectChainTrace(seed, kShortSamples);
+        PROP_ASSERT(firstChainTrace == secondChainTrace);
+        for (const auto& value : firstChainTrace) {
+            PROP_ASSERT(isValidDependentPair(value));
+        }
+
+        const auto firstTupleTrace = collectTupleWithTrace(seed, kShortSamples);
+        const auto secondTupleTrace = collectTupleWithTrace(seed, kShortSamples);
+        PROP_ASSERT(firstTupleTrace == secondTupleTrace);
+        for (const auto& value : firstTupleTrace) {
+            PROP_ASSERT(isValidDependentPair(value));
+        }
+        return true;
+    }, gen::seed()).matrix({Seed(kCompatibilitySeed), Seed(kDependencyReplaySeed)})
+                   .setNumRuns(kContractRuns)
                    .forAll());
 }

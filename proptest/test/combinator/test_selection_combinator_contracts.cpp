@@ -23,11 +23,10 @@
 #include "proptest/combinator/combinators.hpp"
 #include "proptest/gen.hpp"
 #include "proptest/generator/seed.hpp"
+#include "proptest/std/map.hpp"
+#include "proptest/std/set.hpp"
 #include "proptest/test/gtest.hpp"
 #include "proptest/test/test_profiles.hpp"
-
-#include <map>
-#include <set>
 
 using namespace proptest;
 using namespace proptest::testprofile;
@@ -67,7 +66,7 @@ TEST(SelectionCombinatorContracts, elementof_roots_stay_inside_declared_finite_s
 {
     EXPECT_TRUE(property([](Seed seed) {
         Random rand(seed.value);
-        const std::set<int> allowed = {2, 5, 10};
+        const set<int> allowed = {2, 5, 10};
         auto generator = gen::elementOf<int>(2, 5, 10);
 
         for (int i = 0; i < static_cast<int>(kGeneratorContractSamples); i++) {
@@ -87,7 +86,7 @@ TEST(SelectionCombinatorContracts, weighted_oneof_keeps_membership_and_exercises
             gen::weightedGen<int>(kRareSelection, 0.1),
             gen::weightedGen(gen::interval(kRangeLow, kRangeHigh), 0.1));
 
-        std::map<int, int> exactCounts;
+        map<int, int> exactCounts;
         int rangeCount = 0;
         for (int i = 0; i < kStatisticalRuns; i++) {
             const int value = generator(rand).getRef();
@@ -114,7 +113,7 @@ TEST(SelectionCombinatorContracts, weighted_elementof_keeps_membership_and_exerc
             gen::weighted<int>(5, 0.15),
             10);
 
-        std::map<int, int> counts;
+        map<int, int> counts;
         for (int i = 0; i < kStatisticalRuns; i++) {
             const int value = generator(rand).getRef();
             PROP_ASSERT(value == 2 || value == 5 || value == 10);

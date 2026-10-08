@@ -26,6 +26,8 @@
 #include "proptest/proptest.hpp"
 #include "proptest/shrinker/integral.hpp"
 #include "proptest/shrinker/shrinkers.hpp"
+#include "proptest/std/algorithm.hpp"
+#include "proptest/std/math.hpp"
 #include "proptest/test/gtest.hpp"
 #include "proptest/test/test_profiles.hpp"
 #include "proptest/test/testutil.hpp"
@@ -92,7 +94,7 @@ TEST(ShrinkTreeContracts, integral_shrinks_preserve_root_and_move_toward_zero)
         EXPECT_EQ(values.front(), root);
 
         for (int value : values) {
-            EXPECT_LE(std::abs(value), std::abs(root));
+            EXPECT_LE(util::abs(value), util::abs(root));
             if (root > 0) {
                 EXPECT_GE(value, 0);
             } else if (root < 0) {
@@ -161,5 +163,5 @@ TEST(ShrinkTreeContracts, concat_and_andthen_place_fallback_candidates_at_distin
 
     EXPECT_EQ(concatValues, vector<int>({0, 1, 3}));
     EXPECT_EQ(andThenValues, vector<int>({0, 1}));
-    EXPECT_NE(std::find(andThenFullValues.begin(), andThenFullValues.end(), 3), andThenFullValues.end());
+    EXPECT_NE(util::find(andThenFullValues.begin(), andThenFullValues.end(), 3), andThenFullValues.end());
 }

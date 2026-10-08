@@ -101,3 +101,64 @@ TEST(PropertyRunnerReporting, stat_assertion_failure_uses_configured_streams)
     EXPECT_NE(err.str().find("PROP_STAT_ASSERT_GE(value > 0"), string::npos);
     EXPECT_NE(out.str().find("value > 0"), string::npos);
 }
+
+TEST(PropertyRunnerReporting, set_config_and_individual_setters_replay_the_same_trace)
+{
+    vector<int> configTrace;
+    vector<int> setterTrace;
+
+    const bool configOk = forAll([&configTrace](int value) {
+        configTrace.push_back(value);
+        return true;
+    }, {
+        .seed = kPropertyConfigReplaySeed,
+        .numRuns = kConfigAllRuns
+    }, gen::interval(0, 100));
+
+    auto setterProp = property([&setterTrace](int value) {
+        setterTrace.push_back(value);
+        return true;
+    });
+    const bool setterOk = setterProp
+        .setSeed(kPropertyConfigReplaySeed)
+        .setNumRuns(kConfigAllRuns)
+        .forAll(gen::interval(0, 100));
+
+    ASSERT_TRUE(configOk);
+    ASSERT_TRUE(setterOk);
+    EXPECT_EQ(configTrace, setterTrace);
+}
+
+TEST(PropertyRunnerReporting, individual_stream_setters_route_success_and_failure_reports)
+{
+    stringstream successOut;
+    stringstream successErr;
+
+    auto success = property([](int) {
+        return true;
+    });
+
+    ASSERT_TRUE(success
+        .setOutputStream(successOut)
+        .setErrorStream(successErr)
+        .setNumRuns(kTinyRuns)
+        .forAll(gen::just(1)));
+    EXPECT_NE(successOut.str().find("OK, passed " + to_string(kTinyRuns) + " tests"), string::npos);
+    EXPECT_EQ(successErr.str(), "");
+
+    stringstream failureOut;
+    stringstream failureErr;
+    auto failure = property([](int value) {
+        PROP_ASSERT(value < 0);
+        return true;
+    });
+
+    EXPECT_FALSE(failure
+        .setOutputStream(failureOut)
+        .setErrorStream(failureErr)
+        .setNumRuns(kTinyRuns)
+        .forAll(gen::just(7)));
+    EXPECT_NE(failureErr.str().find("Falsifiable"), string::npos);
+    EXPECT_NE(failureErr.str().find("value < 0"), string::npos);
+    EXPECT_NE(failureOut.str().find("random seed:"), string::npos);
+}

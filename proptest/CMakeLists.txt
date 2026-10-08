@@ -79,6 +79,7 @@ SET(proptest_testsources
     test/generator/test_floating.cpp
     test/combinator/test_combinator_legacy.cpp
     test/combinator/test_combinator_expanded.cpp
+    test/combinator/test_recursive_combinator_contracts.cpp
     test/combinator/test_selection_combinator_contracts.cpp
     test/combinator/test_transformation_combinator_contracts.cpp
     test/core/test_invoke.cpp
@@ -90,6 +91,8 @@ SET(proptest_testsources
     test/shrinker/test_shrink_tree_contracts.cpp
     test/stateful/test_stateful_model_contracts.cpp
     test/stateful/test_stateful_function_legacy.cpp
+    test/concurrency/test_concurrency_execution_contracts.cpp
+    test/concurrency/test_concurrency_shrink_replay_contracts.cpp
     test/concurrency/test_concurrency_function_legacy.cpp
     test/performance/test_performance.cpp
 )

@@ -109,3 +109,32 @@ TEST(PropertyApiComposition, generated_failure_short_circuits_following_examples
     EXPECT_FALSE(ok);
     EXPECT_EQ(exampleRuns, 0);
 }
+
+TEST(PropertyApiComposition, execution_results_do_not_mutate_the_source_property)
+{
+    auto prop = property([](int value) {
+        return value > 0;
+    });
+
+    EXPECT_FALSE(prop.example(-6));
+    EXPECT_TRUE(prop.example(6));
+    EXPECT_FALSE(prop.example(0));
+}
+
+TEST(PropertyApiComposition, run_configuration_is_preserved_across_chained_generated_steps)
+{
+    int generatedRuns = 0;
+    auto prop = property([&generatedRuns](int) {
+        generatedRuns++;
+        return true;
+    });
+
+    const bool ok = prop
+        .setSeed(kStatefulReplaySeed)
+        .setNumRuns(kChainedForAllRuns)
+        .forAll(gen::just(1))
+        .forAll(gen::just(2));
+
+    ASSERT_TRUE(ok);
+    EXPECT_EQ(generatedRuns, 2 * kChainedForAllRuns);
+}

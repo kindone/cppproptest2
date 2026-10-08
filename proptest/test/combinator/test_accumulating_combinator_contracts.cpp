@@ -67,7 +67,7 @@ bool listAppendsStayWithin(const list<int>& values)
     }
 
     auto previous = values.begin();
-    for (auto current = std::next(previous); current != values.end(); ++current, ++previous) {
+    for (auto current = util::next(previous); current != values.end(); ++current, ++previous) {
         if (*current < *previous || *current > *previous + 1) {
             return false;
         }
