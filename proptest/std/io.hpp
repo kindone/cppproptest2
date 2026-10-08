@@ -9,6 +9,7 @@ using std::ios;
 using std::ostream;
 using std::setfill;
 using std::setw;
+using std::streambuf;
 using std::stringstream;
 using std::boolalpha;
 
