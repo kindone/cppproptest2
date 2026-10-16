@@ -144,7 +144,7 @@ TEST(AccumulatingCombinatorContracts, aggregate_has_deterministic_dependent_witn
 
         PROP_ASSERT_EQ(generator(rand).getRef(), vector<int>({1, 2, 3}));
         return true;
-    }, gen::seed()).example(Seed(kCompatibilitySeed)));
+    }, gen::seed()).setNumRuns(kContractRuns).forAll());
 }
 
 TEST(AccumulatingCombinatorContracts, accumulate_has_deterministic_dependent_witness)
@@ -168,7 +168,7 @@ TEST(AccumulatingCombinatorContracts, accumulate_has_deterministic_dependent_wit
 
         PROP_ASSERT(generator(rand).getRef() == list<int>({1, 2, 3}));
         return true;
-    }, gen::seed()).example(Seed(kCompatibilitySeed)));
+    }, gen::seed()).setNumRuns(kContractRuns).forAll());
 }
 
 TEST(AccumulatingCombinatorContracts, aggregate_roots_and_shrinks_preserve_dependent_step_contract)
