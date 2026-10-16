@@ -6,6 +6,7 @@
 #include "proptest/util/any.hpp"
 #include "proptest/util/function.hpp"
 #include "proptest/util/anyfunction.hpp"
+#include "proptest/std/pair.hpp"
 #include "proptest/std/vector.hpp"
 #include "proptest/Stream.hpp"
 #include "proptest/util/define.hpp"
@@ -194,6 +195,23 @@ EXTERN_DECLARE_FUNCTION(::proptest::ShrinkableBase(::proptest::Random&));
 
 #endif // PROPTEST_ENABLE_EXPLICIT_INSTANTIATION
 
+
+namespace proptest {
+
+// operator< on Shrinkable<pair<K,V>> compares by key only (for use in set<Shrinkable<pair<K,V>>> dedup in map generator)
+template <typename T, typename U>
+bool operator<(const Shrinkable<pair<T,U>>& lhs, const Shrinkable<pair<T,U>>& rhs)
+{
+    return lhs.getRef().first < rhs.getRef().first;
+}
+
+template <typename T>
+bool operator<(const Shrinkable<T>& lhs, const Shrinkable<T>& rhs)
+{
+    return lhs.getRef() < rhs.getRef();
+}
+
+} // namespace proptest
 
 // compare function
 namespace std {
