@@ -838,31 +838,49 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     auto sharedInitialFactory = initialFactory;
     auto sharedModelFactory = modelFactory;
 
+    // A failed replay must not expose partially reconstructed state.
     auto replayFrontOnFresh = [sharedInitialFactory, sharedModelFactory, frontActionsCapture](
                                   ) -> pair<ObjectType, ModelType> {
         ObjectType obj = sharedInitialFactory();
         ModelType model = sharedModelFactory(obj);
         Context frontCtx{ConcurrentTestDump::FRONT_THREAD_ID};
         for (const auto& action : *frontActionsCapture) {
-            try {
-                action(obj, model, frontCtx);
-            } catch (...) {
-                break;
-            }
+            action(obj, model, frontCtx);
         }
         return {util::move(obj), util::move(model)};
     };
 
+    auto fallbackWarned = util::make_shared<atomic_bool>(false);
+    ostream* errStream = errorStream;
+    auto warnFallbackOnce = [fallbackWarned, errStream]() {
+        bool expected = false;
+        if (fallbackWarned->compare_exchange_strong(expected, true)) {
+            *errStream << "warning: front replay threw during shrink reconstruction; "
+                       << "rear slot falling back to clean initial state "
+                       << "(shrink result may be non-minimal)" << endl;
+        }
+    };
+
     Function<ObjectType()> rearInitialFactory =
-        [replayFrontOnFresh]() -> ObjectType {
-            auto pair = replayFrontOnFresh();
-            return util::move(pair.first);
+        [replayFrontOnFresh, sharedInitialFactory, warnFallbackOnce]() -> ObjectType {
+            try {
+                return util::move(replayFrontOnFresh().first);
+            } catch (...) {
+                warnFallbackOnce();
+                return sharedInitialFactory();
+            }
         };
 
     Function<ModelType(const ObjectType&)> rearModelFactory =
-        [replayFrontOnFresh](const ObjectType&) -> ModelType {
-            auto pair = replayFrontOnFresh();
-            return util::move(pair.second);
+        [replayFrontOnFresh, sharedInitialFactory, sharedModelFactory, warnFallbackOnce](
+            const ObjectType&) -> ModelType {
+            try {
+                return util::move(replayFrontOnFresh().second);
+            } catch (...) {
+                warnFallbackOnce();
+                ObjectType tmp = sharedInitialFactory();
+                return sharedModelFactory(tmp);
+            }
         };
 
     for (uint32_t t = 0; t < maxConcurrency; t++) {
