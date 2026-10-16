@@ -275,6 +275,13 @@ public:
         return *this;
     }
 
+    // Invoked once when each rear thread exits, including after an exception.
+    StatefulProperty& setOnThreadExit(Function<void()> _onThreadExit)
+    {
+        onThreadExit = _onThreadExit;
+        return *this;
+    }
+
     StatefulProperty& setOutputStream(ostream& os)
     {
         outputStream = &os;
@@ -338,6 +345,7 @@ private:
     Function<void(ObjectType&, ModelType&)> onActionEnd;
     Function<void()> onStartup;
     Function<void()> onCleanup;
+    Function<void()> onThreadExit;
     Function<void(ReproductionStats)> onReproductionStats;
     Function<void(int, const vector<Any>&, const string&)> onFailureReproduction;
     Function<void(const vector<Any>&, const string&)> onShrinkAccepted;
@@ -408,6 +416,7 @@ struct StatefulRearRunner
                        atomic_bool& _thread_ready, atomic_bool& _sync_ready, ConcurrentTestDump& _dump,
                        Function<void(ObjectType&, ModelType&)> _onActionStart,
                        Function<void(ObjectType&, ModelType&)> _onActionEnd,
+                       Function<void()> _onThreadExit,
                        shared_ptr<exception_ptr> _firstException,
                        shared_ptr<mutex> _exceptionMutex)
         : num(_num),
@@ -419,6 +428,7 @@ struct StatefulRearRunner
           dump(_dump),
           onActionStart(_onActionStart),
           onActionEnd(_onActionEnd),
+          onThreadExit(_onThreadExit),
           firstException(_firstException),
           exceptionMutex(_exceptionMutex)
     {
@@ -445,6 +455,16 @@ struct StatefulRearRunner
             if (!*firstException)
                 *firstException = current_exception();
         }
+
+        if (onThreadExit) {
+            try {
+                onThreadExit();
+            } catch (...) {
+                lock_guard<mutex> guard(*exceptionMutex);
+                if (!*firstException)
+                    *firstException = current_exception();
+            }
+        }
     }
 
     int num;
@@ -456,6 +476,7 @@ struct StatefulRearRunner
     ConcurrentTestDump& dump;
     Function<void(ObjectType&, ModelType&)> onActionStart;
     Function<void(ObjectType&, ModelType&)> onActionEnd;
+    Function<void()> onThreadExit;
     shared_ptr<exception_ptr> firstException;
     shared_ptr<mutex> exceptionMutex;
 };
@@ -470,6 +491,8 @@ bool StatefulProperty<ObjectType, ModelType>::go()
     Random rand(effectiveSeed);
     Random savedRand(effectiveSeed);
     *outputStream << "random seed: " << effectiveSeed << endl;
+    // Capture non-throwing assertion failures from actions.
+    PropertyContext ctx;
     auto startedTime = steady_clock::now();
 
     uint32_t i = 0;
@@ -491,8 +514,17 @@ bool StatefulProperty<ObjectType, ModelType>::go()
                     savedRand = rand;
                     if (onStartup)
                         onStartup();
-                    if (invoke(rand) && onCleanup)
+                    bool invokeResult = invoke(rand);
+                    if (invokeResult && onCleanup)
                         onCleanup();
+                    if (ctx.hasFailures()) {
+                        stringstream failures = ctx.flushFailures();
+                        *errorStream << "Falsifiable, after " << (i + 1) << " tests: "
+                                     << failures.str();
+                        *errorStream << "    seed: " << effectiveSeed << endl;
+                        handleShrink(savedRand);
+                        return false;
+                    }
                 } catch (const Success&) {
                     pass = true;
                 } catch (const Discard&) {
@@ -593,7 +625,7 @@ bool StatefulProperty<ObjectType, ModelType>::invoke(Random& rand)
     for (uint32_t i = 0; i < maxConcurrency; i++) {
         rearRunners.emplace_back(StatefulRearRunner<ObjectType, ModelType>(
             static_cast<int>(i), obj, model, rearLists[i], *thread_ready[i], sync_ready, dump,
-            onActionStart, onActionEnd, firstException, exceptionMutex));
+            onActionStart, onActionEnd, onThreadExit, firstException, exceptionMutex));
     }
 
     for (uint32_t i = 0; i < maxConcurrency; i++)
@@ -630,6 +662,8 @@ void StatefulProperty<ObjectType, ModelType>::writeArgs(ostream& os, const vecto
 template <typename ObjectType, typename ModelType>
 pair<bool, string> StatefulProperty<ObjectType, ModelType>::runCandidate(const vector<ShrinkableBase>& args) const
 {
+    // Capture non-throwing assertion failures from this replay.
+    PropertyContext ctx;
     try {
         if (onStartup)
             onStartup();
@@ -675,7 +709,7 @@ pair<bool, string> StatefulProperty<ObjectType, ModelType>::runCandidate(const v
             for (int i = 0; i < effectiveThreads; i++) {
                 rearRunners.emplace_back(StatefulRearRunner<ObjectType, ModelType>(
                     i, obj, model, rearCopies[i], *thread_ready[i], sync_ready, dump,
-                    onActionStart, onActionEnd, firstException, exceptionMutex));
+                    onActionStart, onActionEnd, onThreadExit, firstException, exceptionMutex));
             }
             for (int i = 0; i < effectiveThreads; i++)
                 while (!*thread_ready[i]) {}
@@ -690,6 +724,8 @@ pair<bool, string> StatefulProperty<ObjectType, ModelType>::runCandidate(const v
             postCheck(obj, model);
         if (onCleanup)
             onCleanup();
+        if (ctx.hasFailures())
+            return {true, ctx.flushFailures(4).str()};
         return {false, ""};
     } catch (const AssertFailed& e) {
         return {true, string(e.what()) + " (" + e.filename + ":" + to_string(e.lineno) + ")"};
@@ -778,6 +814,16 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     auto frontActionShrinkables = genActionShrinkables(
         rand, frontObj, frontModel, actionGenFactory, frontSize);
 
+    // Preserve the front actions for rear-state reconstruction.
+    using PairType = pair<Random, ActionType>;
+    auto frontActionsCapture = util::make_shared<ActionList>();
+    {
+        const auto& frontVec = frontActionShrinkables.getRef();
+        for (const auto& shrBase : frontVec) {
+            frontActionsCapture->push_back(shrBase.getAny().template getRef<PairType>().second);
+        }
+    }
+
     auto wrappedFront = applyStatefulShrinkTree(
         frontActionShrinkables, actionListMinSize,
         initialFactory, modelFactory, actionGenFactory);
@@ -788,6 +834,37 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
     vector<RearShrinkables> rearShrinkablesList;
     rearShrinkablesList.reserve(maxConcurrency);
 
+    // Rebuild rear state from a fresh front replay to avoid aliasing.
+    auto sharedInitialFactory = initialFactory;
+    auto sharedModelFactory = modelFactory;
+
+    auto replayFrontOnFresh = [sharedInitialFactory, sharedModelFactory, frontActionsCapture](
+                                  ) -> pair<ObjectType, ModelType> {
+        ObjectType obj = sharedInitialFactory();
+        ModelType model = sharedModelFactory(obj);
+        Context frontCtx{ConcurrentTestDump::FRONT_THREAD_ID};
+        for (const auto& action : *frontActionsCapture) {
+            try {
+                action(obj, model, frontCtx);
+            } catch (...) {
+                break;
+            }
+        }
+        return {util::move(obj), util::move(model)};
+    };
+
+    Function<ObjectType()> rearInitialFactory =
+        [replayFrontOnFresh]() -> ObjectType {
+            auto pair = replayFrontOnFresh();
+            return util::move(pair.first);
+        };
+
+    Function<ModelType(const ObjectType&)> rearModelFactory =
+        [replayFrontOnFresh](const ObjectType&) -> ModelType {
+            auto pair = replayFrontOnFresh();
+            return util::move(pair.second);
+        };
+
     for (uint32_t t = 0; t < maxConcurrency; t++) {
         ObjectType rearObj = frontObj;
         ModelType rearModel = frontModel;
@@ -795,14 +872,9 @@ void StatefulProperty<ObjectType, ModelType>::handleShrink(Random& savedRand)
         auto rearActionShrinkables = genActionShrinkables(
             rand, rearObj, rearModel, actionGenFactory, rearSize);
 
-        ObjectType postFrontObjCapture = frontObj;
-        ModelType postFrontModelCapture = frontModel;
-        Function<ModelType(const ObjectType&)> rearModelFactory =
-            [postFrontModelCapture](const ObjectType&) { return postFrontModelCapture; };
-
         auto wrappedRear = applyStatefulShrinkTree(
             rearActionShrinkables, actionListMinSize,
-            postFrontObjCapture, rearModelFactory, actionGenFactory);
+            rearInitialFactory, rearModelFactory, actionGenFactory);
 
         rearShrinkablesList.push_back({util::move(wrappedRear)});
     }

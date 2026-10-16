@@ -65,7 +65,7 @@ void PropertyContext::fail(const char* filename, int lineno, string condition, c
 
 stringstream& PropertyContext::getLastStream()
 {
-    static stringstream defaultStr;
+    static thread_local stringstream defaultStr;
     if (failures.empty() || !lastStreamExists)
         return defaultStr;
 

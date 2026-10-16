@@ -206,3 +206,33 @@ TEST(ConcurrencyShrinkReplayContracts, rear_worker_shrink_pipeline_reports_minim
         << "rear-worker shrink pipeline should reach the minimal failing action value"
         << "\nactual output:\n" << capture.text();
 }
+
+TEST(ConcurrencyShrinkReplayContracts, expectation_failures_are_reported_and_shrunk)
+{
+    constexpr int kThreshold = 5;
+    auto actionGen = gen::interval(kThreshold, 2 * kThreshold).map<SimpleAction<int>>(
+        [](const int& value) {
+            return SimpleAction<int>(PROP_ACTION_NAME("ExpectBelow", value), [value](int& object) {
+                object += value;
+                PROP_EXPECT(object < kThreshold) << "object: " << object;
+            });
+        });
+
+    CapturedStreams capture;
+    const bool ok = statefulProperty<int>(gen::just(0), actionGen)
+        .setSeed(kStatefulFailureSeed)
+        .setNumRuns(1)
+        .setActionListSize(1)
+        .go();
+
+    EXPECT_FALSE(ok);
+    EXPECT_NE(capture.text().find("ExpectBelow(" + to_string(kThreshold) + ")"), string::npos)
+        << "expectation failure should shrink to the boundary"
+        << "\nactual output:\n" << capture.text();
+    EXPECT_NE(capture.text().find("object: 5"), string::npos)
+        << "expectation details should be preserved"
+        << "\nactual output:\n" << capture.text();
+    EXPECT_EQ(capture.text().find("context is not set"), string::npos)
+        << "stateful actions should have an active property context"
+        << "\nactual output:\n" << capture.text();
+}

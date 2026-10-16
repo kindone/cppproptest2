@@ -179,3 +179,77 @@ TEST(ConcurrencyExecutionContracts, action_callbacks_are_balanced_for_successful
     EXPECT_EQ(starts.load(), 1 + kTwoRearWorkers);
     EXPECT_EQ(ends.load(), starts.load());
 }
+
+TEST(ConcurrencyExecutionContracts, thread_exit_callback_runs_for_each_rear_worker)
+{
+    atomic<int> exits{0};
+    auto noop = gen::just(SimpleAction<int>("Noop", [](int&) {}));
+
+    const bool ok = statefulProperty<int>(gen::just(0), noop)
+        .setSeed(kStatefulReplaySeed)
+        .setNumRuns(1)
+        .setMaxConcurrency(kTwoRearWorkers)
+        .setActionListSize(1)
+        .setOnThreadExit([&exits]() { exits.fetch_add(1); })
+        .go();
+
+    EXPECT_TRUE(ok);
+    EXPECT_EQ(exits.load(), kTwoRearWorkers);
+}
+
+TEST(ConcurrencyExecutionContracts, thread_exit_callback_runs_after_action_exception)
+{
+    atomic<int> exits{0};
+    stringstream output;
+    auto factory = [](int& value, EmptyModel&) -> ActionGen<int, EmptyModel> {
+        if (value == 0) {
+            return gen::just(Action<int, EmptyModel>("Prepare", [](int& object, EmptyModel&) {
+                object = 1;
+            }));
+        }
+        return gen::just(Action<int, EmptyModel>("Throw", [](int&, EmptyModel&) {
+            throw runtime_error(__FILE__, __LINE__, "rear action failed");
+        }));
+    };
+
+    const bool ok = statefulProperty<int>(gen::just(0), factory)
+        .setSeed(kStatefulReplaySeed)
+        .setNumRuns(1)
+        .setMaxConcurrency(kTwoRearWorkers)
+        .setActionListSize(1)
+        .setOnThreadExit([&exits]() { exits.fetch_add(1); })
+        .setOutputStreams(output, output)
+        .go();
+
+    EXPECT_FALSE(ok);
+    EXPECT_GE(exits.load(), kTwoRearWorkers);
+}
+
+TEST(ConcurrencyExecutionContracts, property_context_stream_is_thread_local)
+{
+    atomic<int> phase{0};
+    string firstResult;
+    string secondResult;
+    PropertyContext firstContext;
+    PropertyContext secondContext;
+
+    thread first([&]() {
+        firstContext.getLastStream().str("");
+        firstContext.getLastStream() << "first";
+        phase.store(1);
+        while (phase.load() != 2) {}
+        firstResult = firstContext.getLastStream().str();
+    });
+    thread second([&]() {
+        while (phase.load() != 1) {}
+        secondContext.getLastStream().str("");
+        secondContext.getLastStream() << "second";
+        secondResult = secondContext.getLastStream().str();
+        phase.store(2);
+    });
+
+    first.join();
+    second.join();
+    EXPECT_EQ(firstResult, "first");
+    EXPECT_EQ(secondResult, "second");
+}
