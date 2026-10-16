@@ -91,42 +91,19 @@ ostream& errorOrEmpty(bool condition);
 #define PROP_ASSERT_TRUE(condition) PROP_ASSERT_VARGS(condition, {})
 #define PROP_ASSERT_FALSE(condition) PROP_ASSERT_VARGS(!condition, {})
 
-#define PROP_ASSERT_EQ(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a == __prop_b, #a " == " #b, __prop_a, " != ", __prop_b);                   \
+#define PROP_ASSERT_BINARY(a, b, comparison, displayCondition, sign)                                      \
+    do {                                                                                                     \
+        [](const auto& __prop_a, const auto& __prop_b) {                                                    \
+            PROP_ASSERT_STREAM(__prop_a comparison __prop_b, displayCondition, __prop_a, sign, __prop_b);  \
+        }((a), (b));                                                                                          \
     } while (false)
-#define PROP_ASSERT_NE(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a != __prop_b, #a " != " #b, __prop_a, " == ", __prop_b);                   \
-    } while (false)
-#define PROP_ASSERT_LT(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a < __prop_b, #a " < " #b, __prop_a, " >= ", __prop_b);                     \
-    } while (false)
-#define PROP_ASSERT_GT(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a > __prop_b, #a " > " #b, __prop_a, " <= ", __prop_b);                     \
-    } while (false)
-#define PROP_ASSERT_LE(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a <= __prop_b, #a " <= " #b, __prop_a, " > ", __prop_b);                    \
-    } while (false)
-#define PROP_ASSERT_GE(a, b)                                                                                \
-    do {                                                                                                   \
-        const auto& __prop_a = (a);                                                                         \
-        const auto& __prop_b = (b);                                                                         \
-        PROP_ASSERT_STREAM(__prop_a >= __prop_b, #a " >= " #b, __prop_a, " < ", __prop_b);                    \
-    } while (false)
+
+#define PROP_ASSERT_EQ(a, b) PROP_ASSERT_BINARY(a, b, ==, #a " == " #b, " != ")
+#define PROP_ASSERT_NE(a, b) PROP_ASSERT_BINARY(a, b, !=, #a " != " #b, " == ")
+#define PROP_ASSERT_LT(a, b) PROP_ASSERT_BINARY(a, b, <, #a " < " #b, " >= ")
+#define PROP_ASSERT_GT(a, b) PROP_ASSERT_BINARY(a, b, >, #a " > " #b, " <= ")
+#define PROP_ASSERT_LE(a, b) PROP_ASSERT_BINARY(a, b, <=, #a " <= " #b, " > ")
+#define PROP_ASSERT_GE(a, b) PROP_ASSERT_BINARY(a, b, >=, #a " >= " #b, " < ")
 
 #define PROP_ASSERT_STREQ(a, b, n)                                                                            \
     do {                                                                                                      \

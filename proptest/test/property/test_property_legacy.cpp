@@ -146,6 +146,14 @@ TEST(Property, prop_assert_macros_evaluate_arguments_once)
     EXPECT_EQ(n2Calls, 1);
 }
 
+TEST(Property, prop_assert_comparisons_keep_temporary_reference_operands_alive)
+{
+    Random rand(kCompatibilitySeed);
+    const auto generator = gen::just<vector<int>>(vector<int>{1, 2, 3});
+
+    PROP_ASSERT_EQ(generator(rand).getRef(), vector<int>({1, 2, 3}));
+}
+
 TEST(Property, prop_assert_failure_message_uses_original_expression)
 {
     int lhs = 1, rhs = 2;

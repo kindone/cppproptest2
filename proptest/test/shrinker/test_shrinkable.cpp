@@ -6,6 +6,11 @@
 
 using namespace proptest;
 
+TEST(Shrinkable, fundamental_values_are_returned_by_value)
+{
+    static_assert(is_same_v<decltype(declval<const Shrinkable<int>&>().getRef()), int>);
+}
+
 TEST(Shrinkable, basic)
 {
     Shrinkable<int> shr(100);
