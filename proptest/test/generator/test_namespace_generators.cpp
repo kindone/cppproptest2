@@ -44,7 +44,7 @@ TEST(GenNamespace, BasicTypeGenerators)
     EXPECT_FOR_ALL([]([[maybe_unused]] string name, [[maybe_unused]] UTF8String alphanumeric) {
         // Property test with strings
         for(char c : alphanumeric) {
-            EXPECT_TRUE(c >= 'A' && c <= 'Z' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9');
+            EXPECT_TRUE((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9'));
         }
     }, gen::string(), alphanumericGen);
 }
@@ -101,11 +101,11 @@ TEST(GenNamespace, NumericRangesGenerators)
     }, multiRangeIntGen);
 
     EXPECT_FOR_ALL([](uint64_t multiRange) {
-        if (!((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999))) {
+        const bool isInRange = multiRange <= 9 || (multiRange >= 100 && multiRange <= 999);
+        if (!isInRange) {
             cerr << "[FAIL uint64_t] multiRange=" << multiRange << endl;
         }
-        ASSERT_TRUE((multiRange >= 0 && multiRange <= 9) || (multiRange >= 100 && multiRange <= 999))
-            << "multiRange out of range: " << multiRange;
+        ASSERT_TRUE(isInRange) << "multiRange out of range: " << multiRange;
     }, multiRangeUintGen);
 }
 
